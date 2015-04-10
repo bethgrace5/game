@@ -5,7 +5,7 @@ Theme
     * Hard Drive
 * Weapon Description
     * ranged
-*Enemy Description
+* Enemy Description
     * enemies from all levels
 * Objective
     * utilize skills learned in past levels, survive.

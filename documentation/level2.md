@@ -1,13 +1,13 @@
 Level 2
 ==
 
-*Theme
-    *Ram
+* Theme
+    * Ram
 * Weapon Description
     * ranged
 * Enemy Description
     * enemies from level one
     * enemies that are harder, faster, and inflict more damage.
-*Objective
+* Objective
     * focus on combat
     * Boss Character Design

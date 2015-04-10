@@ -1,15 +1,15 @@
 Level 3
 ==
 
-*Theme
+* Theme
     * CPU
-Weapon Description
+* Weapon Description
     * ranged
-Enemy Description
+* Enemy Description
     * enemies from level one
     * enemies from level two
     * enemies that are more difficult, can span themselves, needs special weapon?
-Objective
+* Objective
     * focus on powerups
-Boss Character Design
+* Boss Character Design
     * spawns other enemies

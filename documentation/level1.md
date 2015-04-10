@@ -1,12 +1,11 @@
 Level 1
 ==
-
-*Theme
-    *Ram
-*Weapon Description
+* Theme
+    * Ram
+* Weapon Description
     * melee
-*Enemy Description
+* Enemy Description
     * small, weak, easy to kill with melee weapon
-*Objective
+* Objective
     * teach how to move
-*Boss Character Design
+* Boss Character Design
