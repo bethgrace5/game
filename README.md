@@ -1,10 +1,5 @@
 ## Fox Die Game
-==
-
-## cs335 final game project
-
 #### Software Engineering (cs335) Final Game Project, CSUB
-
 #### Collaborators
 * Bethany Armitage
 * Chad Danner
