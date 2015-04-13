@@ -1,5 +1,8 @@
 ## ignore gitignore
 .gitignore
 
+# ignore executable
+game
+
 # Vim swapfiles
 *.swp
