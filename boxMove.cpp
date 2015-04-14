@@ -35,7 +35,7 @@ struct Particle {
 struct Game {
     bool bubbler;
     Shape ground;
-    Shape box; Shape circle;
+    Shape sprite; Shape circle;
     Particle *particle;
     int n;
     Vec camera;
@@ -44,12 +44,12 @@ struct Game {
     Game(){
         particle = new Particle[MAX_PARTICLES];
         n = 0;
-        //Declare a box shape
-        box.width  = 50;
-        box.height = 50;
-        box.center.x = WINDOW_WIDTH/2;
-        box.center.y = 50;
-        box.center.z = 0;
+        //Declare a sprite shape
+        sprite.width  = 50;
+        sprite.height = 50;
+        sprite.center.x = WINDOW_WIDTH/2;
+        sprite.center.y = 50;
+        sprite.center.z = 0;
         camera.x = 0; camera.y = 0;
 
         //Circle
@@ -169,21 +169,24 @@ int check_keys(XEvent *e, Game *game){
         if (key == XK_Escape) return 1;
         if(key == XK_w){
             std::cout << "JUMP!! \n";
-            if (game->box.velocity.y == 0) {
-                game->box.velocity.y = 5;
+            if (game->sprite.velocity.y == 0) {
+                game->sprite.velocity.y = 5;
             }
         }
-        if(key == XK_a) game->box.velocity.x = -5;
-        if(key == XK_d) game->box.velocity.x = 5;
+        if(key == XK_a) {
+            game->sprite.velocity.x = -5;
+        }
+        if(key == XK_d) game->sprite.velocity.x = 5;
 
         if(key == XK_z) game->camera.x -= 10;
         if(key == XK_c) game->camera.x += 10;
 
         return 0;
     }
+    // control duration of jump to when key is held down
     if(e->type == KeyRelease){
-        if(key == XK_a) game->box.velocity.x = 0;
-        if(key == XK_d) game->box.velocity.x = 0;
+        if(key == XK_a) game->sprite.velocity.x = 0;
+        if(key == XK_d) game->sprite.velocity.x = 0;
     }
 
     return 0;
@@ -191,11 +194,11 @@ int check_keys(XEvent *e, Game *game){
 
 
 void movement(Game *game){
-    //Collision
-    float boxLeft  = game->box.center.x - game->box.width;
-    float boxRight = game->box.center.x + game->box.width;
-    float boxTop   = game->box.center.y + game->box.height;
-    float boxDown  = game->box.center.y - game->box.height;
+    // Detect Collision
+    float boxLeft  = game->sprite.center.x - game->sprite.width;
+    float boxRight = game->sprite.center.x + game->sprite.width;
+    float boxTop   = game->sprite.center.y + game->sprite.height;
+    float boxDown  = game->sprite.center.y - game->sprite.height;
 
     float groundLeft  = game->ground.center.x - game->ground.width;
     float groundRight = game->ground.center.x + game->ground.width;
@@ -211,17 +214,17 @@ void movement(Game *game){
             && boxLeft  <= groundRight
             && boxDown  <=  groundTop
             && boxTop   >=  groundDown){
-        if(game->box.velocity.y < 0) game->box.velocity.y = 0.0;
-        //if(game->box.velocity.y > 0 && boxTop > groundDown) game->box.velocity.y = -5.0;
+        if(game->sprite.velocity.y < 0) game->sprite.velocity.y = 0.0;
+        //if(game->sprite.velocity.y > 0 && boxTop > groundDown) game->sprite.velocity.y = -5.0;
     }
 
-    game->box.center.y += game->box.velocity.y;
-    game->box.center.x += game->box.velocity.x;
+    game->sprite.center.y += game->sprite.velocity.y;
+    game->sprite.center.x += game->sprite.velocity.x;
 
-    if(game->box.center.y - game->box.height/2 > 0){
-        if(collideY != 1) game->box.velocity.y -= GRAVITY;
+    if(game->sprite.center.y - game->sprite.height > 0){
+        if(collideY != 1) game->sprite.velocity.y -= GRAVITY;
     }
-    else game->box.velocity.y = 0;
+    else game->sprite.velocity.y = 0;
 
 }
 
@@ -230,11 +233,11 @@ void render(Game *game){
     glClear(GL_COLOR_BUFFER_BIT);
     //Draw shapes...
 
-    //draw box
+    //draw sprite
     Shape *s; glColor3ub(90,140,90);
 
     //Player Controller Box
-    s = &game->box;
+    s = &game->sprite;
     glPushMatrix();
     glTranslatef(s->center.x + game->camera.x, s->center.y, s->center.z);
     w = s->width;
@@ -246,7 +249,7 @@ void render(Game *game){
     glVertex2i( w,-h);
     glEnd(); glPopMatrix();
 
-    //Static Objects//
+    //Static Objects
     s = &game->ground;
     glPushMatrix();
     glTranslatef(s->center.x + game->camera.x , s->center.y, s->center.z);
