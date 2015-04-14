@@ -42,6 +42,7 @@ struct Game {
   Shape box; Shape circle;
   Particle *particle;
   int n;
+  Vec camera;
 
   ~Game(){ delete [] particle;}
   Game(){
@@ -50,16 +51,18 @@ struct Game {
     //Declare a box shape
     box.width  = 50;
     box.height = 50;
-    box.center.x = 170;
-    box.center.y = 150;
+    box.center.x = WINDOW_WIDTH/2;
+    box.center.y = 50;
     box.center.z = 0;
+
+    camera.x = 0; camera.y = 0;
   
     //Circle
     circle.radius = 100  ; circle.center.x = 650;
     circle.center.y = 150; circle.center.z = 0;
 
     //Object to land on
-    ground.width = 500    ; ground.height = 50;
+    ground.width = 20    ; ground.height = 50;
     ground.center.x = 450; ground.center.y = 200; ground.center.z = 0;
   }
 };
@@ -144,14 +147,10 @@ void init_opengl(void){
 
 #define rnd()(float)rand() /(float)(RAND_MAX)
 
-int hoseOn = 0; int still = 1; int xpast, ypast;
 void check_mouse(XEvent *e, Game *game){
   static int savex = 0, savey = 0;
   static int n = 0;
-  if (e->type == ButtonRelease) {
-    xpast = savex; ypast = savey;
-    still = 1; return;
-  }
+  if (e->type == ButtonRelease) { return;}
   if (e->type == ButtonPress) {
     if (e->xbutton.button==1) { //Left button was pressed
       int y = WINDOW_HEIGHT - e->xbutton.y;
@@ -169,34 +168,27 @@ void check_mouse(XEvent *e, Game *game){
   }
 }
 
-int keyChecker = 0;
 int check_keys(XEvent *e, Game *game){
   //Was there input from the keyboard?
   int key = XLookupKeysym(&e->xkey, 0);
   if (e->type == KeyPress) {
     //int key = XLookupKeysym(&e->xkey, 0);
-    if (key == XK_Escape) {
-      return 1;
-    }
+    if (key == XK_Escape) return 1;
     if(key == XK_w){
       std::cout << "JUMP!! \n";
       game->box.velocity.y = 10;
     }
-    if(key == XK_a){
-      game->box.velocity.x = -5; 
-    }
-    if(key == XK_d){
-      game->box.velocity.x = 5;
-    }
+    if(key == XK_a) game->box.velocity.x = -5; 
+    if(key == XK_d) game->box.velocity.x = 5;
+
+    if(key == XK_z) game->camera.x -= 10;
+    if(key == XK_c) game->camera.x += 10;
+   
     return 0;
   }
   if(e->type == KeyRelease){
-    if(key == XK_a){
-        game->box.velocity.x = 0;
-      }
-      if(key == XK_d){
-        game->box.velocity.x = 0;
-      }
+    if(key == XK_a) game->box.velocity.x = 0;
+    if(key == XK_d) game->box.velocity.x = 0;
   }
 
   return 0;
@@ -204,7 +196,6 @@ int check_keys(XEvent *e, Game *game){
 
 
 void movement(Game *game){
-
   //Collusion
   float boxLeft  = game->box.center.x - game->box.width;
   float boxRight = game->box.center.x + game->box.width;
@@ -228,33 +219,6 @@ void movement(Game *game){
     //if(game->box.velocity.y > 0 && boxTop > groundDown) game->box.velocity.y = -5.0;
   }
 
-  //if(boxDown  < groundTop)  game->box.velocity.y = 0.5;
-  //if(boxTop   > groundDown) game->box.velocity.y = -0.5;
-  //if(boxRight < groundLeft) collide = 1;
-  //if(boxLeft  > groundRight) collide = 1;
-  /*if (groundLeft > boxRight || groundRight < boxLeft ||
-       groundTop > boxDown   || groundDown < boxTop);
-  else std::cout << "COLLLIDE! \n";*/
-
-/*
-  float boxX = game->box.center.x;
-  float boxY = game->box.center.y; 
-  float groundX = game->ground.center.x;
-  float groundY = game->ground.center.y;
-  if(     boxX - game->box.width < groundX + game->ground.width
-      &&  boxX - game->box.width > groundX - game->ground.width
-      &&  game->box.velocity.x < 0){
-
-    game->box.velocity.x = 0; 
-  }
-  if(     boxX + game->box.width > groundX - game->ground.width
-      &&  boxX + game->box.width < groundX + game->ground.width
-      &&  game->box.velocity.x > 0)
-  {
-
-    game->box.velocity.x = 0; 
-  }*/
-
   game->box.center.y += game->box.velocity.y;
   game->box.center.x += game->box.velocity.x;
 
@@ -276,7 +240,7 @@ void render(Game *game){
   //Player Controler Box
   s = &game->box;
   glPushMatrix();
-  glTranslatef(s->center.x, s->center.y, s->center.z);
+  glTranslatef(s->center.x + game->camera.x, s->center.y, s->center.z);
   w = s->width; 
   h = s->height;
   glBegin(GL_QUADS);
@@ -289,7 +253,19 @@ void render(Game *game){
   //Static Objects// 
   s = &game->ground;
   glPushMatrix();
-  glTranslatef(s->center.x, s->center.y, s->center.z);
+  glTranslatef(s->center.x + game->camera.x , s->center.y, s->center.z);
+  w = s->width; 
+  h = s->height;
+  glBegin(GL_QUADS);
+  glVertex2i(-w,-h);
+  glVertex2i(-w, h);
+  glVertex2i( w, h);
+  glVertex2i( w,-h);
+  glEnd(); glPopMatrix(); 
+
+  //Non-Collusion Object
+  glPushMatrix();
+  glTranslatef(s->center.x + 600 + game->camera.x , s->center.y, s->center.z);
   w = s->width; 
   h = s->height;
   glBegin(GL_QUADS);
