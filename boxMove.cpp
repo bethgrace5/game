@@ -65,7 +65,7 @@ struct Ground {
     Ground(){
         //Declare a ground segment
         width  = 600;
-        height = 0;
+        height = 10;
         center.x = WINDOW_WIDTH/2;
         center.y = 0;
         center.z = 0;
@@ -202,20 +202,25 @@ int check_keys(XEvent *e, Sprite *sprite){
     if (e->type == KeyPress) {
         //int key = XLookupKeysym(&e->xkey, 0);
         if (key == XK_Escape) return 1;
-        if(key == XK_w){
+        if (key == XK_w){
             std::cout << "JUMP!! \n";
             std::cout << " velocity y: " << sprite->velocity.y;
             std::cout << " center y: " << sprite->center.y;
-            if (sprite->velocity.y == 0) {
+            // uncomment the following to disallow double jump.
+            // FIXME: when double jump is disallowed, somewhere
+            // velocity is -0.1, which disallows jump off any
+            // ground objects. 
+            //
+            //if (sprite->velocity.y == 0) {
                 sprite->velocity.y = 5;
-            }
+            //}
         }
-        if(key == XK_a) sprite->velocity.x = -5;
-        if(key == XK_d) sprite->velocity.x = 5;
-
-        if(key == XK_z) sprite->camera.x -= 10;
-        if(key == XK_c) sprite->camera.x += 10;
-        if(key == XK_m) {
+        if (key == XK_a) sprite->velocity.x = -5;
+        if (key == XK_d) sprite->velocity.x = 5;
+ 
+        if (key == XK_z) sprite->camera.x -= 10;
+        if (key == XK_c) sprite->camera.x += 10;
+        if (key == XK_m) {
             std::string position = getSpritePosition(sprite);
             std::cout << position + "\n";
         }
@@ -225,8 +230,8 @@ int check_keys(XEvent *e, Sprite *sprite){
     }
     // control duration of jump to when key is held down
     if(e->type == KeyRelease){
-        if(key == XK_a) sprite->velocity.x = 0;
-        if(key == XK_d) sprite->velocity.x = 0;
+        if (key == XK_a) sprite->velocity.x = 0;
+        if (key == XK_d) sprite->velocity.x = 0;
     }
 
     return 0;
@@ -254,7 +259,7 @@ void movement(Sprite *sprite, Ground *ground){
             && spriteLeft  <= groundRight
             && spriteDown  <=  groundTop
             && spriteTop   >=  groundDown){
-        if ( sprite->velocity.y < 0) sprite->velocity.y = 0.0;
+        if (sprite->velocity.y < 0) sprite->velocity.y = 0.0;
         //if(sprite->velocity.y > 0 && boxTop > groundDown) sprite->velocity.y = -5.0;
     }
 
