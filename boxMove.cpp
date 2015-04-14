@@ -8,7 +8,7 @@
 #include <X11/keysym.h>
 #include <GL/glx.h>
 
-#define WINDOW_WIDTH  800
+#define WINDOW_WIDTH  900
 #define WINDOW_HEIGHT 600
 #define MAX_PARTICLES 9001
 #define GRAVITY 0.1
@@ -70,6 +70,24 @@ void check_mouse(XEvent *e, Game *game);
 int  check_keys (XEvent *e, Game *game);
 void movement(Game *game);
 void render(Game *game);
+std::string getSpritePosition(Game *game);
+
+// for use in controlling screen movement.
+// the sprite should be 'left' at the beginning of the level,
+// 'mid' throughout the level, and 'right' at the end of the level.
+// retuns the position of the sprite as left, mid, or right.
+std::string getSpritePosition(Game *game) {
+    if (game->sprite.center.x >= 0 && game->sprite.center.x <= 300) {
+        return "left";
+    }
+    else if (game->sprite.center.x > 300 && game->sprite.center.x <= 600) {
+        return "mid";
+    }
+    else if (game->sprite.center.x > 600 && game->sprite.center.x <= 900) {
+        return "right";
+    }
+    return "off screen";
+}
 
 int main(void){
     int done=0; srand(time(NULL));
@@ -85,6 +103,7 @@ int main(void){
             done = check_keys(&e, &game);
         }
         movement(&game); render(&game);
+        getSpritePosition(&game);
         glXSwapBuffers(dpy, win);
     }
     cleanupXWindows(); return 0;
@@ -173,13 +192,16 @@ int check_keys(XEvent *e, Game *game){
                 game->sprite.velocity.y = 5;
             }
         }
-        if(key == XK_a) {
-            game->sprite.velocity.x = -5;
-        }
+        if(key == XK_a) game->sprite.velocity.x = -5;
         if(key == XK_d) game->sprite.velocity.x = 5;
 
         if(key == XK_z) game->camera.x -= 10;
         if(key == XK_c) game->camera.x += 10;
+        if(key == XK_m) {
+            std::string position = getSpritePosition(game);
+            std::cout << position + "\n";
+        }
+
 
         return 0;
     }
