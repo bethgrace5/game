@@ -7,6 +7,7 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
+#include "Ground.cpp"
 
 #define WINDOW_WIDTH  900
 #define WINDOW_HEIGHT 600
@@ -56,21 +57,6 @@ struct Sprite {
         //~Sprite(){}
     }
 };
-struct Ground {
-    Vec center;
-    int width;
-    int height;
-
-    //~Ground(){ delete [] ground;}
-    Ground(){
-        //Declare a ground segment
-        width  = 600;
-        height = 10;
-        center.x = WINDOW_WIDTH/2;
-        center.y = 0;
-        center.z = 0;
-    }
-};
 
 //Function prototypes
 void initXWindows(void);
@@ -109,7 +95,7 @@ int main(void){
     initXWindows(); init_opengl();
     //declare sprite object
     Sprite sprite;
-    Ground ground;
+    Ground ground_1 = new Ground( 600, 10, WINDOW_WIDTH/2, 0 );
 
     while(!done) { //Staring Animation
         while(XPending(dpy)) {
@@ -118,7 +104,7 @@ int main(void){
             check_mouse(&e, &sprite);
             done = check_keys(&e, &sprite);
         }
-        movement(&sprite, &ground); render(&sprite, &ground);
+        movement(&sprite, &ground_1); render(&sprite, &ground_1);
         getSpritePosition(&sprite);
         glXSwapBuffers(dpy, win);
     }
@@ -245,23 +231,23 @@ void movement(Sprite *sprite, Ground *ground){
     float spriteTop   = sprite->center.y + sprite->height;
     float spriteDown   = sprite->center.y - sprite->height;
 
-    float groundLeft  = ground->center.x - ground->width;
-    float groundRight = ground->center.x + ground->width;
-    float groundTop   = ground->center.y + ground->height;
-    float groundDown  = ground->center.y - ground->height;
+    //float groundLeft  = ground->getCenter().x - ground->getWidth();
+    //float groundRight = ground->getCenter().x + ground->getWidth();
+    //float groundTop   = ground->getCenter().y + ground->getWidth();
+    //float groundDown  = ground->getCenter().y - ground->getWidth();
     //int collideX = 0;
     int collideY = 0;
 
     //float dx = boxRight - boxLeft;
     //float dy = 0;
     //int collide = 0;
-    if (spriteRight >= groundLeft
-            && spriteLeft  <= groundRight
-            && spriteDown  <=  groundTop
-            && spriteTop   >=  groundDown){
-        if (sprite->velocity.y < 0) sprite->velocity.y = 0.0;
+    //if (spriteRight >= groundLeft
+            //&& spriteLeft  <= groundRight
+            //&& spriteDown  <=  groundTop
+            //&& spriteTop   >=  groundDown){
+        //if (sprite->velocity.y < 0) sprite->velocity.y = 0.0;
         //if(sprite->velocity.y > 0 && boxTop > groundDown) sprite->velocity.y = -5.0;
-    }
+    //}
 
     sprite->center.y += sprite->velocity.y;
     sprite->center.x += sprite->velocity.x;
@@ -296,9 +282,9 @@ void render(Sprite *sprite, Ground *ground){
 
     //Ground
     glPushMatrix();
-    glTranslatef(ground->center.x + sprite->camera.x , ground->center.y, sprite->center.z);
-    w = ground->width;
-    h = ground->height;
+    //glTranslatef(ground->getCenter().x + sprite->camera.x , ground->getCenter().y, sprite->center.z);
+    w = ground->getWidth();
+    h = ground->getHeight();
     glBegin(GL_QUADS);
     glVertex2i(-w,-h);
     glVertex2i(-w, h);
