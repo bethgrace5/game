@@ -64,10 +64,10 @@ struct Ground {
     //~Ground(){ delete [] ground;}
     Ground(){
         //Declare a ground segment
-        width  = 50;
-        height = 50;
+        width  = 600;
+        height = 0;
         center.x = WINDOW_WIDTH/2;
-        center.y = 50;
+        center.y = 0;
         center.z = 0;
     }
 };
