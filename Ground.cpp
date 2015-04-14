@@ -3,30 +3,31 @@
 #include <cstdlib>
 #include <ctime>
 #include <cstring>
-#include <cmath>
-#include <X11/Xlib.h>
-#include <X11/keysym.h>
-#include <GL/glx.h>
+#include <vector>
 
 #define WINDOW_WIDTH  900
 #define WINDOW_HEIGHT 600
 
 class Ground {
+    struct Vec {
+        float x, y, z;
+    };
 
     public:
         void setWidth(double w);
         double getWidth(void);
         void setHeight(double w);
         double getHeight(void);
+        double getCenterX(void);
+        double getCenterY(void);
         void setCenter(double x, double y);
-        //Vec getCenter(void);
-        //Ground( double w, double h, double x, double y);
+        Ground( double w, double h, double x, double y);
         //~Ground(){ delete [] ground;}
 
     private:
         int width;
         int height;
-        //std::vector<double>* center;
+        Vec center;
 
 };
 
@@ -41,9 +42,9 @@ Ground::Ground( double w, double h, double x, double y ) {
     //Declare a ground segment
     width  = w;
     height = h;
-    //center.x = x;
-    //center.y = y;
-    //center.z = 0;
+    center.x = x;
+    center.y = y;
+    center.z = 0;
 }
 
 void Ground::setWidth( double w ) {
@@ -61,10 +62,13 @@ double Ground::getHeight( void ) {
 }
 
 void Ground::setCenter( double x, double y ) {
-    //center.x = x;
-    //center.y = y;
-    //center.z = 0;
+    center.x = x;
+    center.y = y;
+    center.z = 0;
 }
-//std::vector<double>* Ground::getCenter( void ) {
-    //return center;
-//}
+double Ground::getCenterX( void ) {
+    return center.x;
+}
+double Ground::getCenterY( void ) {
+    return center.y;
+}

@@ -95,7 +95,7 @@ int main(void){
     initXWindows(); init_opengl();
     //declare sprite object
     Sprite sprite;
-    Ground ground_1 = new Ground( 600, 10, WINDOW_WIDTH/2, 0 );
+    Ground ground_1( 600, 10, WINDOW_WIDTH/2, 0 );
 
     while(!done) { //Staring Animation
         while(XPending(dpy)) {
@@ -282,7 +282,7 @@ void render(Sprite *sprite, Ground *ground){
 
     //Ground
     glPushMatrix();
-    //glTranslatef(ground->getCenter().x + sprite->camera.x , ground->getCenter().y, sprite->center.z);
+    glTranslatef(ground->getCenterX() + sprite->camera.x , ground->getCenterY(), sprite->center.z);
     w = ground->getWidth();
     h = ground->getHeight();
     glBegin(GL_QUADS);
