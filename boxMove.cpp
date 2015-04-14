@@ -8,6 +8,7 @@
 #include <X11/keysym.h>
 #include <GL/glx.h>
 #include "Ground.cpp"
+#include "Sprite.cpp"
 
 #define WINDOW_WIDTH  900
 #define WINDOW_HEIGHT 600
@@ -36,27 +37,27 @@ struct Particle {
     Shape s; Vec velocity;
 };
 
-struct Sprite {
-    Vec camera;
-    Vec velocity;
-    Vec center;
-    int width;
-    int height;
+//struct Sprite {
+    //Vec camera;
+    //Vec velocity;
+    //Vec center;
+    //int width;
+    //int height;
 
-    Sprite(){
+    //Sprite(){
         //Declare a sprite shape
-        width  = 50;
-        height = 50;
-        center.x = WINDOW_WIDTH/2;
-        center.y = 50;
-        center.z = 0;
+        //width  = 50;
+        //height = 50;
+        //center.x = WINDOW_WIDTH/2;
+        //center.y = 50;
+        //center.z = 0;
 
-        camera.x = 0; 
-        camera.y = 0;
+        //camera.x = 0; 
+        //camera.y = 0;
 
         //~Sprite(){}
-    }
-};
+    //}
+//};
 
 //Function prototypes
 void initXWindows(void);
@@ -74,13 +75,13 @@ void scrollWindow(Sprite *sprite);
 // 'mid' throughout the level, and 'right' at the end of the level.
 // retuns the position of the sprite as left, mid, or right.
 std::string getSpritePosition(Sprite *sprite) {
-    if (sprite->center.x >= 0 && sprite->center.x <= 300) {
+    if (sprite->getCenterX() >= 0 && sprite->getCenterX() <= 300) {
         return "left";
     }
-    else if (sprite->center.x > 300 && sprite->center.x <= 600) {
+    else if (sprite->getCenterX() > 300 && sprite->getCenterX() <= 600) {
         return "mid";
     }
-    else if (sprite->center.x > 600 && sprite->center.x <= 900) {
+    else if (sprite->getCenterX() > 600 && sprite->getCenterX() <= 900) {
         return "right";
     }
     return "off screen";
@@ -94,7 +95,7 @@ int main(void){
     int done=0; srand(time(NULL));
     initXWindows(); init_opengl();
     //declare sprite object
-    Sprite sprite;
+    Sprite sprite(50, 50, WINDOW_WIDTH/2, 50);
     Ground ground_1( 600, 10, WINDOW_WIDTH/2, 0 );
 
     while(!done) { //Staring Animation
@@ -190,22 +191,22 @@ int check_keys(XEvent *e, Sprite *sprite){
         if (key == XK_Escape) return 1;
         if (key == XK_w){
             std::cout << "JUMP!! \n";
-            std::cout << " velocity y: " << sprite->velocity.y;
-            std::cout << " center y: " << sprite->center.y;
+            std::cout << " velocity y: " << sprite->getVelocityY();
+            std::cout << " center y: " << sprite->getCenterY();
             // uncomment the following to disallow double jump.
             // FIXME: when double jump is disallowed, somewhere
             // velocity is -0.1, which disallows jump off any
             // ground objects. 
             //
-            //if (sprite->velocity.y == 0) {
-                sprite->velocity.y = 5;
+            //if (sprite->getVelocityY() == 0) {
+                sprite->setVelocityY(5);
             //}
         }
-        if (key == XK_a) sprite->velocity.x = -5;
-        if (key == XK_d) sprite->velocity.x = 5;
+        if (key == XK_a) sprite->setVelocityX(-5);
+        if (key == XK_d) sprite->setVelocityX(5);
  
-        if (key == XK_z) sprite->camera.x -= 10;
-        if (key == XK_c) sprite->camera.x += 10;
+        if (key == XK_z) sprite->setCameraX( sprite->getCameraX()-10 );
+        if (key == XK_c) sprite->setCameraX( sprite->getCameraX()+10 );
         if (key == XK_m) {
             std::string position = getSpritePosition(sprite);
             std::cout << position + "\n";
@@ -216,8 +217,8 @@ int check_keys(XEvent *e, Sprite *sprite){
     }
     // control duration of jump to when key is held down
     if(e->type == KeyRelease){
-        if (key == XK_a) sprite->velocity.x = 0;
-        if (key == XK_d) sprite->velocity.x = 0;
+        if (key == XK_a) sprite->setVelocityX(0);
+        if (key == XK_d) sprite->setVelocityX(0);
     }
 
     return 0;
@@ -226,10 +227,10 @@ int check_keys(XEvent *e, Sprite *sprite){
 
 void movement(Sprite *sprite, Ground *ground){
     // Detect Collision
-    float spriteLeft  = sprite->center.x - sprite->width;
-    float spriteRight = sprite->center.x + sprite->width;
-    float spriteTop   = sprite->center.y + sprite->height;
-    float spriteDown   = sprite->center.y - sprite->height;
+    float spriteLeft  = sprite->getCenterX() - sprite->getWidth();
+    float spriteRight = sprite->getCenterX() + sprite->getWidth();
+    float spriteTop   = sprite->getCenterY() + sprite->getHeight();
+    float spriteDown   = sprite->getCenterY() - sprite->getHeight();
 
     //float groundLeft  = ground->getCenter().x - ground->getWidth();
     //float groundRight = ground->getCenter().x + ground->getWidth();
@@ -248,17 +249,16 @@ void movement(Sprite *sprite, Ground *ground){
         //if (sprite->velocity.y < 0) sprite->velocity.y = 0.0;
         //if(sprite->velocity.y > 0 && boxTop > groundDown) sprite->velocity.y = -5.0;
     //}
+    
+    sprite->setCenter( (sprite->getCenterX() + sprite->getVelocityX()), (sprite->getCenterY() + sprite->getVelocityY()));
 
-    sprite->center.y += sprite->velocity.y;
-    sprite->center.x += sprite->velocity.x;
-
-    if (sprite->center.y - sprite->height > 0 ){
+    if ((sprite->getCenterY() - sprite->getHeight()) > 0 ){
 
         if (collideY != 1){
-            sprite->velocity.y -= GRAVITY;
+            sprite->setVelocityY( sprite->getVelocityY() - GRAVITY);
         }
     }
-    else sprite->velocity.y = 0;
+    else sprite->setVelocityY(0);
 
 }
 
@@ -270,9 +270,9 @@ void render(Sprite *sprite, Ground *ground){
 
     // Draw Sprite
     glPushMatrix();
-    glTranslatef(sprite->center.x + sprite->camera.x, sprite->center.y, sprite->center.z);
-    w = sprite->width;
-    h = sprite->height;
+    glTranslatef(sprite->getCenterX() + sprite->getCameraX(), sprite->getCenterY(), 0);
+    w = sprite->getWidth();
+    h = sprite->getHeight();
     glBegin(GL_QUADS);
     glVertex2i(-w,-h);
     glVertex2i(-w, h);
@@ -282,7 +282,7 @@ void render(Sprite *sprite, Ground *ground){
 
     //Ground
     glPushMatrix();
-    glTranslatef(ground->getCenterX() + sprite->camera.x , ground->getCenterY(), sprite->center.z);
+    glTranslatef(ground->getCenterX() + sprite->getCameraX() , ground->getCenterY(), 0);
     w = ground->getWidth();
     h = ground->getHeight();
     glBegin(GL_QUADS);
