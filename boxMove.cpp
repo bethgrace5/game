@@ -1,7 +1,4 @@
-//cs335 Spring 2015 Lab-1
-//This program demonstrates the use of OpenGL and XWindows
-//Assignment is to modify this program.
-//You will follow along with your instructor.
+//cs335 Spring 2015 final project
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
@@ -176,7 +173,9 @@ int check_keys(XEvent *e, Game *game){
     if (key == XK_Escape) return 1;
     if(key == XK_w){
       std::cout << "JUMP!! \n";
-      game->box.velocity.y = 10;
+      if (game->box.velocity.y == 0) {
+          game->box.velocity.y = 5;
+      }
     }
     if(key == XK_a) game->box.velocity.x = -5; 
     if(key == XK_d) game->box.velocity.x = 5;
@@ -196,7 +195,7 @@ int check_keys(XEvent *e, Game *game){
 
 
 void movement(Game *game){
-  //Collusion
+  //Collision
   float boxLeft  = game->box.center.x - game->box.width;
   float boxRight = game->box.center.x + game->box.width;
   float boxTop   = game->box.center.y + game->box.height;
