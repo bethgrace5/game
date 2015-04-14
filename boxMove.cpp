@@ -280,6 +280,8 @@ void render(Sprite *sprite, Ground *ground){
     glVertex2i( w,-h);
     glEnd(); glPopMatrix();
 
+    glColor3ub(0,140,90);
+
     //Ground
     glPushMatrix();
     glTranslatef(ground->getCenterX() + sprite->getCameraX() , ground->getCenterY(), 0);

@@ -1,4 +1,5 @@
 // Class Sprite
+// can be used to create AI sprites as well
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
@@ -34,6 +35,7 @@ class Sprite {
         void setVelocityX(double x);
         void setVelocityY(double y);
         Sprite( double w, double h, double x, double y);
+        // TODO: create destructor
         //~Sprite(){ delete [] ground;}
 
     private:
@@ -42,41 +44,27 @@ class Sprite {
         Vec camera;
         Vec velocity;
         Vec center;
-
 };
 
 Sprite::Sprite( double w, double h, double x, double y ) {
-        //Declare a sprite shape
-        //width  = 50;
-        //height = 50;
-        //center.x = WINDOW_WIDTH/2;
-        //center.y = 50;
-        //center.z = 0;
-        //camera.x = 0; 
-        //camera.y = 0;
-
-    //Declare a ground segment
     width  = w;
     height = h;
     center.x = x;
     center.y = y;
     center.z = 0;
 }
-
 void Sprite::setWidth( double w ) {
     width = w;
 }
 double Sprite::getWidth( void ) {
     return width;
 }
-
 void Sprite::setHeight( double h ) {
     height = h;
 }
 double Sprite::getHeight( void ) {
     return height;
 }
-
 void Sprite::setCenter( double x, double y ) {
     center.x = x;
     center.y = y;
