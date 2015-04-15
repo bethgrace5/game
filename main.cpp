@@ -184,9 +184,9 @@ int check_keys(XEvent *e, Sprite *sprite){
         if (key == XK_a) {
             sprite->setVelocityX(-5);
             if (getSpritePosition(sprite) == "left") {
-                scrollRight = 1;
+                // uncomment to scroll both directions
+                // scrollRight = 1;
             }
-            //scrollWindow(&sprite, "right");
         }
         if (key == XK_d) {
             sprite->setVelocityX(5);
