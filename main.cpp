@@ -15,9 +15,6 @@
 #define MAX_PARTICLES 9001
 #define GRAVITY 0.1
 #define rnd()(float)rand() /(float)(RAND_MAX)
-//TODO: get current window space showing to use
-// getSpritePosition to scroll the screen, define position of sprite by
-// the position of the window.
 
 //X Windows variables
 Display *dpy; Window win; GLXContext glc;
@@ -37,28 +34,6 @@ struct Particle {
     Shape s; Vec velocity;
 };
 
-//struct Sprite {
-    //Vec camera;
-    //Vec velocity;
-    //Vec center;
-    //int width;
-    //int height;
-
-    //Sprite(){
-        //Declare a sprite shape
-        //width  = 50;
-        //height = 50;
-        //center.x = WINDOW_WIDTH/2;
-        //center.y = 50;
-        //center.z = 0;
-
-        //camera.x = 0; 
-        //camera.y = 0;
-
-        //~Sprite(){}
-    //}
-//};
-
 //Function prototypes
 void initXWindows(void);
 void init_opengl(void);
@@ -70,26 +45,6 @@ void render(Sprite *sprite, Ground *ground);
 std::string getSpritePosition(Sprite *sprite);
 void scrollWindow(Sprite *sprite);
 
-// for use in controlling screen movement.
-// the sprite should be 'left' at the beginning of the level,
-// 'mid' throughout the level, and 'right' at the end of the level.
-// retuns the position of the sprite as left, mid, or right.
-std::string getSpritePosition(Sprite *sprite) {
-    if (sprite->getCenterX() >= 0 && sprite->getCenterX() <= 300) {
-        return "left";
-    }
-    else if (sprite->getCenterX() > 300 && sprite->getCenterX() <= 600) {
-        return "mid";
-    }
-    else if (sprite->getCenterX() > 600 && sprite->getCenterX() <= 900) {
-        return "right";
-    }
-    return "off screen";
-}
-
-void scrollWindow(Sprite *sprite) {
-    // use getSpritePosition to keep sprite within middle of the screen
-}
 
 int main(void){
     int done=0; srand(time(NULL));
@@ -307,4 +262,27 @@ void render(Sprite *sprite, Ground *ground){
     glVertex2i( w,-h);
     glEnd(); glPopMatrix();
     */
+    // for use in controlling screen movement.
+    // the sprite should be 'left' at the beginning of the level,
+    // 'mid' throughout the level, and 'right' at the end of the level.
+    // retuns the position of the sprite as left, mid, or right.
+}
+std::string getSpritePosition(Sprite *sprite) {
+    if (sprite->getCenterX() >= 0 && sprite->getCenterX() <= 300) {
+        return "left";
+    }
+    else if (sprite->getCenterX() > 300 && sprite->getCenterX() <= 600) {
+        return "mid";
+    }
+    else if (sprite->getCenterX() > 600 && sprite->getCenterX() <= 900) {
+        return "right";
+    }
+    return "off screen";
+}
+
+void scrollWindow(Sprite *sprite) {
+    //TODO: get current window space showing to use
+    // getSpritePosition to scroll the screen, define position of sprite by
+    // the position of the window.
+    // use getSpritePosition to keep sprite within middle of the screen
 }
