@@ -44,8 +44,12 @@ void render(Sprite *sprite, Ground *ground);
 std::string getSpritePosition(Sprite *sprite);
 void scrollWindow(Sprite *sprite);
 
+int scrollRight = 0;
+int scrollLeft = 0;
 
 int main(void){
+    std::string currentPosition;
+    std::string previousPosition;
     int done=0;
     srand(time(NULL));
     initXWindows(); init_opengl();
@@ -60,9 +64,28 @@ int main(void){
             check_mouse(&e, &sprite);
             done = check_keys(&e, &sprite);
         }
+        currentPosition = getSpritePosition(&sprite);
         movement(&sprite, &ground_1);
         render(&sprite, &ground_1);
-        getSpritePosition(&sprite);
+        scrollWindow(&sprite);
+
+        // game just started, character is in the left segment.
+        /*
+        if (currentPosition == "left") {
+        }
+        else if (currentPosition == "right" && previousPosition != "right") {
+            previousPosition = "right";
+            std::cout<<"changed position to right";
+            scrollWindow(&sprite, "right");
+        }
+        else {
+            previousPosition = currentPosition;
+
+        }
+        //currentPosition = getSpritePosition(&sprite);
+        */
+
+
         glXSwapBuffers(dpy, win);
     }
     cleanupXWindows(); return 0;
@@ -158,10 +181,20 @@ int check_keys(XEvent *e, Sprite *sprite){
                 sprite->setVelocityY(5);
             //}
         }
-        if (key == XK_a) sprite->setVelocityX(-5);
-        if (key == XK_d) sprite->setVelocityX(5);
+        if (key == XK_a) {
+            sprite->setVelocityX(-5);
+            sprite->setCameraX( sprite->getCameraX()+10 );
+            scrollRight = 1;
+            //scrollWindow(&sprite, "right");
+        }
+        if (key == XK_d) {
+            sprite->setVelocityX(5);
+            scrollLeft = 1;
+        }
  
-        if (key == XK_z) sprite->setCameraX( sprite->getCameraX()-10 );
+        if (key == XK_z) {
+            sprite->setCameraX( sprite->getCameraX()-10 );
+        }
         if (key == XK_c) sprite->setCameraX( sprite->getCameraX()+10 );
         if (key == XK_m) {
             std::string position = getSpritePosition(sprite);
@@ -173,8 +206,16 @@ int check_keys(XEvent *e, Sprite *sprite){
     }
     // control duration of jump to when key is held down
     if(e->type == KeyRelease){
-        if (key == XK_a) sprite->setVelocityX(0);
-        if (key == XK_d) sprite->setVelocityX(0);
+        if (key == XK_a) {
+            sprite->setVelocityX(0);
+            sprite->setCameraX( sprite->getCameraX()+10 );
+            scrollRight = 0;
+            ///scrollWindow(&sprite, "right");
+        }
+        if (key == XK_d) {
+            sprite->setVelocityX(0);
+            scrollLeft = 0;
+        }
     }
 
     return 0;
@@ -282,8 +323,12 @@ std::string getSpritePosition(Sprite *sprite) {
 }
 
 void scrollWindow(Sprite *sprite) {
-    //TODO: get current window space showing to use
-    // getSpritePosition to scroll the screen, define position of sprite by
-    // the position of the window.
-    // use getSpritePosition to keep sprite within middle of the screen
+
+    if (scrollRight) {
+        sprite->setCameraX( sprite->getCameraX()+4 );
+    }
+    if (scrollLeft) {
+        sprite->setCameraX( sprite->getCameraX()-4 );
+    }
+
 }
