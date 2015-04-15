@@ -4,7 +4,7 @@ Basic Git Usage/Tips
 * Basic branching
     * `git branch` will list all the branches you have on your machine
     * `git checkout [branch-name]` will allow you to switch to that branch, from there, any changes commited will be on that branch.
-    * **Important:** double check that you are on the correct branch before making changes
+    * **Important:** double check that you are on the correct branch before making changes, there's ways to fix it if you accidentally work on the wrong branch though.
     * `git push origin [branch-name]` will publish changes you've made to github, the changes will still be associated with that branch.
     * **Iportant:** commit working states often, and push changes cautiously.
 
