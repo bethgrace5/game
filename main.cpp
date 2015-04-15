@@ -1,5 +1,4 @@
-//cs335 Spring 2015 final project
-#include <iostream>
+//cs335 Spring 2015 final project #include <iostream>
 #include <cstdlib>
 #include <ctime>
 #include <cstring>
@@ -60,7 +59,8 @@ int main(void){
             check_mouse(&e, &sprite);
             done = check_keys(&e, &sprite);
         }
-        movement(&sprite, &ground_1); render(&sprite, &ground_1);
+        movement(&sprite, &ground_1);
+        render(&sprite, &ground_1);
         getSpritePosition(&sprite);
         glXSwapBuffers(dpy, win);
     }
