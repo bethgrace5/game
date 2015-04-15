@@ -1,15 +1,3 @@
-//////
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 //cs335 Spring 2015 final project #include <iostream> #include <cstdlib>
 #include <ctime>
 #include <cstring>
