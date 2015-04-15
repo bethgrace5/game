@@ -46,11 +46,12 @@ void scrollWindow(Sprite *sprite);
 
 
 int main(void){
-    int done=0; srand(time(NULL));
+    int done=0;
+    srand(time(NULL));
     initXWindows(); init_opengl();
     //declare sprite object
-    Sprite sprite(50, 50, WINDOW_WIDTH/2, 50);
-    Ground ground_1( 600, 10, WINDOW_WIDTH/2, 0 );
+    Sprite sprite(50, 50, WINDOW_WIDTH/6, 700);
+    Ground ground_1( 300, 10, WINDOW_WIDTH/2, 0 );
 
     while(!done) { //Staring Animation
         while(XPending(dpy)) {
