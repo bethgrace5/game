@@ -183,13 +183,16 @@ int check_keys(XEvent *e, Sprite *sprite){
         }
         if (key == XK_a) {
             sprite->setVelocityX(-5);
-            sprite->setCameraX( sprite->getCameraX()+10 );
-            scrollRight = 1;
+            if (getSpritePosition(sprite) == "left") {
+                scrollRight = 1;
+            }
             //scrollWindow(&sprite, "right");
         }
         if (key == XK_d) {
             sprite->setVelocityX(5);
-            scrollLeft = 1;
+            if (getSpritePosition(sprite) == "right") {
+                scrollLeft = 1;
+            }
         }
  
         if (key == XK_z) {
@@ -208,9 +211,7 @@ int check_keys(XEvent *e, Sprite *sprite){
     if(e->type == KeyRelease){
         if (key == XK_a) {
             sprite->setVelocityX(0);
-            sprite->setCameraX( sprite->getCameraX()+10 );
             scrollRight = 0;
-            ///scrollWindow(&sprite, "right");
         }
         if (key == XK_d) {
             sprite->setVelocityX(0);
