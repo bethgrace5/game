@@ -1,5 +1,4 @@
-//cs335 Spring 2015 final project #include <iostream>
-#include <cstdlib>
+//cs335 Spring 2015 final project #include <iostream> #include <cstdlib>
 #include <ctime>
 #include <cstring>
 #include <cmath>
@@ -165,27 +164,22 @@ void check_mouse(XEvent *e, Sprite *sprite){
 int check_keys(XEvent *e, Sprite *sprite){
     //Was there input from the keyboard?
     int key = XLookupKeysym(&e->xkey, 0);
+    int didJump = 0;
     if (e->type == KeyPress) {
-        //int key = XLookupKeysym(&e->xkey, 0);
         if (key == XK_Escape) return 1;
         if (key == XK_w){
             std::cout << "JUMP!! \n";
             std::cout << " velocity y: " << sprite->getVelocityY();
             std::cout << " center y: " << sprite->getCenterY();
-            // uncomment the following to disallow double jump.
-            // FIXME: when double jump is disallowed, somewhere
-            // velocity is -0.1, which disallows jump off any
-            // ground objects. 
-            //
-            //if (sprite->getVelocityY() == 0) {
-                sprite->setVelocityY(5);
-            //}
+            // TODO: disallow jumping while already in the air.
+            didJump = 1;
+            sprite->setVelocityY(5);
         }
         if (key == XK_a) {
             sprite->setVelocityX(-5);
             if (getSpritePosition(sprite) == "left") {
                 // uncomment to scroll both directions
-                // scrollRight = 1;
+                 scrollRight = 1;
             }
         }
         if (key == XK_d) {
@@ -207,7 +201,6 @@ int check_keys(XEvent *e, Sprite *sprite){
 
         return 0;
     }
-    // control duration of jump to when key is held down
     if(e->type == KeyRelease){
         if (key == XK_a) {
             sprite->setVelocityX(0);
