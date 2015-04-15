@@ -25,8 +25,9 @@ To pull branch off github that is not on your machine
 * then, `git pull` might work depending upon your settings, but `git pull origin [this-branch-name]` will always work.
 * (if the branch does not exist on your machine) `git pull origin [this-branch-name]`
 
-Making sure your branch will integrate with development: It's a good idea to do this every so often.
+Making sure your branch will integrate with development 
 --
+* **It's a good idea to do this every so often**
 * Make sure you have your branch clean (there are no changes hanging around that you haven't commited yet)
 * checkout development: `git checkout development`
 * get updates that may have been publushed to development: `git pull origin development`
