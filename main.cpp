@@ -236,7 +236,6 @@ void movement(Sprite *sprite, Ground *ground){
     //float dx = boxRight - boxLeft;
     //float dy = 0;
     //int collide = 0;
-    //
     if (spriteRight >= groundLeft
             && spriteLeft  <= groundRight
             && spriteDown  <=  groundTop
@@ -249,11 +248,11 @@ void movement(Sprite *sprite, Ground *ground){
                   !(spriteTop <= groundDown)){
                     sprite->setVelocityY(-0.51); 
           }
-          if(!(sprite->getOldCenterX() + sprite->getWidth() < groundLeft) &&
-                  !(spriteRight >= groundLeft)){
-                    std::cout << "did it work?\n";
-                    sprite->setVelocityX(0); 
+          if(!(sprite->getOldCenterX() + sprite->getWidth() > groundLeft) &&
+                  !(spriteRight <= groundLeft)){
+                    sprite->setVelocityX(-0.51); 
           }
+          //if(!(sprite->getOldCenterX() - sprite->getWidth() < ground))
     }
     else sprite->setOldCenter();
  

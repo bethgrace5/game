@@ -40,6 +40,8 @@ class Sprite {
         double getOldCenterY(void);
         void  setOldCenter(void);
 
+
+
         Sprite( double w, double h, double x, double y);
         // TODO: create destructor
         //~Sprite(){ delete [] ground;}
