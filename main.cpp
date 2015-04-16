@@ -2,16 +2,18 @@
 #include <ctime>
 #include <cstring>
 #include <cmath>
+#include <stdio.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
 #include "Ground.cpp"
 #include "Sprite.cpp"
 
-#define WINDOW_WIDTH  900
+
+#define WINDOW_WIDTH  1000
 #define WINDOW_HEIGHT 600
-#define MAX_PARTICLES 9001
-#define GRAVITY 0.1
+#define MAX_PARTICLES 2000
+#define GRAVITY 0.2
 #define rnd()(float)rand() /(float)(RAND_MAX)
 
 //X Windows variables
@@ -166,16 +168,18 @@ void check_mouse(XEvent *e, Sprite *sprite){
 int check_keys(XEvent *e, Sprite *sprite){
     //Was there input from the keyboard?
     int key = XLookupKeysym(&e->xkey, 0);
-    int didJump = 0;
     if (e->type == KeyPress) {
         if (key == XK_Escape) return 1;
-        if (key == XK_w){
+        if (key == XK_w && didJump<2){
             std::cout << "JUMP!! \n";
+            std::cout << " velocity x: " << sprite->getVelocityX();
             std::cout << " velocity y: " << sprite->getVelocityY();
+            std::cout << " center x: " << sprite->getCenterX();
             std::cout << " center y: " << sprite->getCenterY();
             // TODO: disallow jumping while already in the air.
-            didJump = 1;
-            sprite->setVelocityY(5);
+            didJump++;
+			wantToJump=1;	
+//            sprite->setVelocityY(5);
         }
         if (key == XK_a) {
             sprite->setVelocityX(-5);
@@ -233,10 +237,6 @@ void movement(Sprite *sprite, Ground *ground){
     //int collideX = 0;
     int collideY = 0;
 
-    //float dx = boxRight - boxLeft;
-    //float dy = 0;
-    //int collide = 0;
-    //
     if (spriteRight >= groundLeft
             && spriteLeft  <= groundRight
             && spriteDown  <=  groundTop
