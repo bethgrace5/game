@@ -19,6 +19,12 @@
 //X Windows variables
 Display *dpy; Window win; GLXContext glc;
 
+//hero sprite globals
+int didJump = 2;
+int collideX = 0;
+int collideY = 0;
+int wantToJump = 0;
+
 //Structures
 struct Vec {
     float x, y, z;
