@@ -5,9 +5,6 @@
 #include <cstring>
 #include <vector>
 
-#define WINDOW_WIDTH  900
-#define WINDOW_HEIGHT 600
-
 class Ground {
     struct Vec {
         float x, y, z;

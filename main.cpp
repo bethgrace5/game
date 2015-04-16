@@ -2,16 +2,18 @@
 #include <ctime>
 #include <cstring>
 #include <cmath>
+#include <stdio.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
 #include "Ground.cpp"
 #include "Sprite.cpp"
 
-#define WINDOW_WIDTH  900
+
+#define WINDOW_WIDTH  1000
 #define WINDOW_HEIGHT 600
-#define MAX_PARTICLES 9001
-#define GRAVITY 0.1
+#define MAX_PARTICLES 2000
+#define GRAVITY 0.2
 #define rnd()(float)rand() /(float)(RAND_MAX)
 
 //X Windows variables
@@ -43,6 +45,13 @@ void render(Sprite *sprite, Ground *ground);
 std::string getSpritePosition(Sprite *sprite);
 void scrollWindow(Sprite *sprite);
 
+//hero sprite globals
+int didJump = 2;
+int collideX = 0;
+int collideY = 0;
+int wantToJump = 0;
+
+//window globals
 int scrollRight = 0;
 int scrollLeft = 0;
 
@@ -53,7 +62,7 @@ int main(void){
     srand(time(NULL));
     initXWindows(); init_opengl();
     //declare sprite object
-    Sprite sprite(50, 50, WINDOW_WIDTH/6, 700);
+    Sprite sprite(50, 50, WINDOW_WIDTH/6, 500);
     Ground ground_1( 300, 10, WINDOW_WIDTH/2, 0 );
 
     while(!done) { //Staring Animation
@@ -164,16 +173,18 @@ void check_mouse(XEvent *e, Sprite *sprite){
 int check_keys(XEvent *e, Sprite *sprite){
     //Was there input from the keyboard?
     int key = XLookupKeysym(&e->xkey, 0);
-    int didJump = 0;
     if (e->type == KeyPress) {
         if (key == XK_Escape) return 1;
-        if (key == XK_w){
+        if (key == XK_w && didJump<2){
             std::cout << "JUMP!! \n";
+            std::cout << " velocity x: " << sprite->getVelocityX();
             std::cout << " velocity y: " << sprite->getVelocityY();
+            std::cout << " center x: " << sprite->getCenterX();
             std::cout << " center y: " << sprite->getCenterY();
             // TODO: disallow jumping while already in the air.
-            didJump = 1;
-            sprite->setVelocityY(5);
+            didJump++;
+			wantToJump=1;	
+//            sprite->setVelocityY(5);
         }
         if (key == XK_a) {
             sprite->setVelocityX(-5);
@@ -218,38 +229,70 @@ int check_keys(XEvent *e, Sprite *sprite){
 
 void movement(Sprite *sprite, Ground *ground){
     // Detect Collision
-    float spriteLeft  = sprite->getCenterX() - sprite->getWidth();
-    float spriteRight = sprite->getCenterX() + sprite->getWidth();
-    float spriteTop   = sprite->getCenterY() + sprite->getHeight();
-    float spriteDown   = sprite->getCenterY() - sprite->getHeight();
+	float spriteCenterX = sprite->getCenterX();
+	float spriteCenterY = sprite->getCenterY();
+	float spriteVelocityX = sprite->getVelocityX();
+	float spriteVelocityY = sprite->getVelocityY();
+	float spriteWidth = sprite->getWidth();
+	float spriteHeight = sprite->getHeight();
+    float spriteLeft  = spriteCenterX - spriteWidth;
+    float spriteRight = spriteCenterX + spriteWidth;
+    float spriteTop   = spriteCenterY + spriteHeight;
+    float spriteDown  = spriteCenterY - spriteHeight;
 
-    //float groundLeft  = ground->getCenter().x - ground->getWidth();
-    //float groundRight = ground->getCenter().x + ground->getWidth();
-    //float groundTop   = ground->getCenter().y + ground->getWidth();
-    //float groundDown  = ground->getCenter().y - ground->getWidth();
-    //int collideX = 0;
-    int collideY = 0;
+	float groundCenterX = ground->getCenterX();
+	float groundCenterY = ground->getCenterY();
+    float groundLeft  = groundCenterX - ground->getWidth();
+    float groundRight = groundCenterX + ground->getWidth();
+    float groundTop   = groundCenterY + ground->getWidth();
+    float groundDown  = groundCenterY - ground->getWidth();
 
     //float dx = boxRight - boxLeft;
     //float dy = 0;
     //int collide = 0;
-    //if (spriteRight >= groundLeft
-            //&& spriteLeft  <= groundRight
-            //&& spriteDown  <=  groundTop
-            //&& spriteTop   >=  groundDown){
-        //if (sprite->velocity.y < 0) sprite->velocity.y = 0.0;
-        //if(sprite->velocity.y > 0 && boxTop > groundDown) sprite->velocity.y = -5.0;
-    //}
+    if (spriteRight >= groundLeft
+    	&& spriteLeft  <= groundRight
+        && spriteDown  <=  groundTop
+        && spriteDown   >=  groundDown){
+		collideY = 1;
+		printf("collideY : sprite (L %1.1f, R %1.1f, T %1.1f, D %1.1f) ground (L %1.1f, R %1.1f, T %1.1f, D %1.1f) \n", spriteLeft, spriteRight, spriteTop, spriteDown, groundLeft, groundRight, groundTop, groundDown);
+	}
+
+/*
+    if (spriteRight >= groundLeft
+    	&& spriteLeft  <= groundRight
+        && spriteTop  <=  groundTop
+        && spriteTop   >=  groundDown){
+		spriteVelocityY *= -2.0;
+	}     
+*/
     
-    sprite->setCenter( (sprite->getCenterX() + sprite->getVelocityX()), (sprite->getCenterY() + sprite->getVelocityY()));
+ //    if ((spriteCenterY - sprite->getHeight()) > 0 ){
 
-    if ((sprite->getCenterY() - sprite->getHeight()) > 0 ){
+	if (collideY != 1){
+		if (collideX != 1){
+			sprite->setVelocityY(spriteVelocityY - GRAVITY);
+	        sprite->setCenter( 
+				spriteCenterX + spriteVelocityX , 
+				spriteCenterY + spriteVelocityY 
+			);
+		}
+		else{ // collision with X
 
-        if (collideY != 1){
-            sprite->setVelocityY( sprite->getVelocityY() - GRAVITY);
-        }
-    }
-    else sprite->setVelocityY(0);
+		}
+	}
+    else{ // collision with Y (floor only)
+		sprite->setCenter( spriteCenterX , groundTop + .1 + ((spriteTop-spriteDown)/2) );
+		sprite->setVelocityY(0);
+		didJump = 0;
+		collideY = 0;
+	}
+	if (wantToJump){
+		sprite->setCenter(spriteCenterX, spriteCenterY - spriteVelocityY);
+    	sprite->setVelocityY(5);
+		wantToJump = 0;
+	}
+
 
 }
 

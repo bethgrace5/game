@@ -6,9 +6,6 @@
 #include <cstring>
 #include <vector>
 
-#define WINDOW_WIDTH  900
-#define WINDOW_HEIGHT 600
-
 class Sprite {
     struct Vec {
         float x, y, z;
@@ -52,6 +49,8 @@ Sprite::Sprite( double w, double h, double x, double y ) {
     center.x = x;
     center.y = y;
     center.z = 0;
+	velocity.x = 0;
+	velocity.y = 0;
 }
 void Sprite::setWidth( double w ) {
     width = w;
