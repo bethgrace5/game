@@ -43,6 +43,8 @@ void render(Sprite *sprite, Ground *ground);
 std::string getSpritePosition(Sprite *sprite);
 void scrollWindow(Sprite *sprite);
 
+bool collidedFromTop(Sprite *sprite, Ground *ground);
+
 int scrollRight = 0;
 int scrollLeft = 0;
 
@@ -54,7 +56,7 @@ int main(void){
     initXWindows(); init_opengl();
     //declare sprite object
     Sprite sprite(50, 50, WINDOW_WIDTH/6, 700);
-    Ground ground_1( 300, 10, WINDOW_WIDTH/2, 0 );
+    Ground ground_1( 300, 50, WINDOW_WIDTH/2, 200 );
 
     while(!done) { //Staring Animation
         while(XPending(dpy)) {
@@ -218,33 +220,46 @@ int check_keys(XEvent *e, Sprite *sprite){
 
 void movement(Sprite *sprite, Ground *ground){
     // Detect Collision
-    float spriteLeft  = sprite->getCenterX() - sprite->getWidth();
-    float spriteRight = sprite->getCenterX() + sprite->getWidth();
-    float spriteTop   = sprite->getCenterY() + sprite->getHeight();
+    float spriteLeft  = sprite->getCenterX()  - sprite->getWidth();
+    float spriteRight = sprite->getCenterX()  + sprite->getWidth();
+    float spriteTop   = sprite->getCenterY()  + sprite->getHeight();
     float spriteDown   = sprite->getCenterY() - sprite->getHeight();
 
-    //float groundLeft  = ground->getCenter().x - ground->getWidth();
-    //float groundRight = ground->getCenter().x + ground->getWidth();
-    //float groundTop   = ground->getCenter().y + ground->getWidth();
-    //float groundDown  = ground->getCenter().y - ground->getWidth();
+    float groundLeft  = ground->getCenterX() - ground->getWidth();
+    float groundRight = ground->getCenterX() + ground->getWidth();
+    float groundTop   = ground->getCenterY() + ground->getHeight();
+    float groundDown  = ground->getCenterY() - ground->getHeight();
+    //These values needs to go to the structure for easier developing.
     //int collideX = 0;
     int collideY = 0;
 
     //float dx = boxRight - boxLeft;
     //float dy = 0;
     //int collide = 0;
-    //if (spriteRight >= groundLeft
-            //&& spriteLeft  <= groundRight
-            //&& spriteDown  <=  groundTop
-            //&& spriteTop   >=  groundDown){
-        //if (sprite->velocity.y < 0) sprite->velocity.y = 0.0;
-        //if(sprite->velocity.y > 0 && boxTop > groundDown) sprite->velocity.y = -5.0;
-    //}
-    
+    //
+    if (spriteRight >= groundLeft
+            && spriteLeft  <= groundRight
+            && spriteDown  <=  groundTop
+            && spriteTop   >=  groundDown){
+          if(!(sprite->getOldCenterY() - sprite->getHeight() < groundTop) &&
+             !(spriteDown >= groundTop) && (sprite->getVelocityY() < 0)){
+            sprite->setVelocityY(0);
+          }
+          if(!(sprite->getOldCenterY() + sprite->getHeight() > groundDown) &&
+                  !(spriteTop <= groundDown)){
+                    sprite->setVelocityY(-0.51); 
+          }
+          if(!(sprite->getOldCenterX() + sprite->getWidth() < groundLeft) &&
+                  !(spriteRight >= groundLeft)){
+                    std::cout << "did it work?\n";
+                    sprite->setVelocityX(0); 
+          }
+    }
+    else sprite->setOldCenter();
+ 
     sprite->setCenter( (sprite->getCenterX() + sprite->getVelocityX()), (sprite->getCenterY() + sprite->getVelocityY()));
 
     if ((sprite->getCenterY() - sprite->getHeight()) > 0 ){
-
         if (collideY != 1){
             sprite->setVelocityY( sprite->getVelocityY() - GRAVITY);
         }
@@ -252,6 +267,21 @@ void movement(Sprite *sprite, Ground *ground){
     else sprite->setVelocityY(0);
 
 }
+/*
+bool collidedFromTop(void){
+    float spriteLeft  = sprite->getCenterX()  - sprite->getWidth();
+    float spriteRight = sprite->getCenterX()  + sprite->getWidth();
+    float spriteTop   = sprite->getCenterY()  + sprite->getHeight();
+    float spriteDown   = sprite->getCenterY() - sprite->getHeight();
+
+    float groundLeft  = ground->getCenterX() - ground->getWidth();
+    float groundRight = ground->getCenterX() + ground->getWidth();
+    float groundTop   = ground->getCenterY() + ground->getHeight();
+    float groundDown  = ground->getCenterY() - ground->getHeight();
+ 
+    //return oldBoxBottom < otherObj.Top && // was not colliding
+     //      boxBottom >= otherObj.Top;
+}*/
 
 void render(Sprite *sprite, Ground *ground){
     float w, h;
