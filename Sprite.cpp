@@ -31,6 +31,12 @@ class Sprite {
 
         void setVelocityX(double x);
         void setVelocityY(double y);
+
+        //Added
+        double getOldCenterX(void);
+        double getOldCenterY(void);
+        void  setOldCenter(void);
+
         Sprite( double w, double h, double x, double y);
         // TODO: create destructor
         //~Sprite(){ delete [] ground;}
@@ -41,6 +47,7 @@ class Sprite {
         Vec camera;
         Vec velocity;
         Vec center;
+        Vec oldCenter;
 };
 
 Sprite::Sprite( double w, double h, double x, double y ) {
@@ -98,4 +105,17 @@ void Sprite::setCameraX( double x ) {
 }
 void Sprite::setCameraY( double y ) {
     camera.y = y;
+}
+
+//Added
+double Sprite::getOldCenterX(void){
+  return oldCenter.x;
+}
+double Sprite::getOldCenterY(void){
+  return oldCenter.y;
+}
+void Sprite::setOldCenter(void){
+  oldCenter.x = center.x;
+  oldCenter.y = center.y;
+  oldCenter.z = 0;
 }
