@@ -32,13 +32,20 @@ class Sprite {
         void setVelocityX(double x);
         void setVelocityY(double y);
 
-        //Added
         double getOldCenterX(void);
         double getOldCenterY(void);
         void  setOldCenter(void);
 
+        double getTop(void);
+        double getRight(void);
+        double getBottom(void);
+        double getLeft(void);
 
-
+        double getOldTop(void);
+        double getOldRight(void);
+        double getOldBottom(void);
+        double getOldLeft(void);
+ 
         Sprite( double w, double h, double x, double y);
         // TODO: create destructor
         //~Sprite(){ delete [] ground;}
@@ -109,7 +116,7 @@ void Sprite::setCameraY( double y ) {
     camera.y = y;
 }
 
-//Added
+
 double Sprite::getOldCenterX(void){
   return oldCenter.x;
 }
@@ -121,3 +128,31 @@ void Sprite::setOldCenter(void){
   oldCenter.y = center.y;
   oldCenter.z = 0;
 }
+
+double Sprite::getTop(){
+  return center.y + height;
+}
+double Sprite::getBottom(){
+  return center.y - height;
+}
+double Sprite::getRight(){
+  return center.x + width;
+}
+double Sprite::getLeft(){
+  return center.x - width;
+}
+
+double Sprite::getOldTop(){
+  return oldCenter.y + height;
+}
+double Sprite::getOldBottom(){
+  return oldCenter.y - height;
+}
+double Sprite::getOldRight(){
+  return oldCenter.x + width;
+}
+double Sprite::getOldLeft(){
+  return oldCenter.x - width;
+}
+
+

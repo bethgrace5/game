@@ -20,6 +20,11 @@ class Ground {
         void setCenter(double x, double y);
         Ground( double w, double h, double x, double y);
         //~Ground(){ delete [] ground;}
+        //
+        double getTop(void);
+        double getRight(void);
+        double getBottom(void);
+        double getLeft(void);
 
     private:
         int width;
@@ -58,3 +63,17 @@ double Ground::getCenterX( void ) {
 double Ground::getCenterY( void ) {
     return center.y;
 }
+
+double Ground::getTop(){
+  return center.y + height;
+}
+double Ground::getBottom(){
+  return center.y - height;
+}
+double Ground::getRight(){
+  return center.x + width;
+}
+double Ground::getLeft(){
+  return center.x - width;
+}
+
