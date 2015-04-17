@@ -1,5 +1,4 @@
-//cs335 Spring 2015 final project #include <iostream> #include <cstdlib>
-#include <ctime>
+//cs335 Spring 2015 final project #include <iostream> #include <cstdlib> #include <ctime>
 #include <cstring>
 #include <cmath>
 #include <X11/Xlib.h>
