@@ -23,14 +23,14 @@ void init_opengl(void);
 void cleanupXWindows(void);
 void check_mouse(XEvent *e, Sprite *sprite);
 int  check_keys (XEvent *e, Sprite *sprite);
-void movement(Sprite *sprite, Ground *ground);
-void render(Sprite *sprite, Ground *ground);
+void movement(Sprite *sprite, Sprite *ground);
+void render(Sprite *sprite, Sprite *ground);
 std::string getSpritePosition(Sprite *sprite);
 void scrollWindow(Sprite *sprite);
 
-bool collidedFromTop(Sprite *sprite, Ground *ground);
-void groundCollide(Sprite *sprite, Ground *ground);
-bool detectGroundCollide(Sprite *sprite, Ground *ground);
+bool collidedFromTop(Sprite *sprite, Sprite *ground);
+void groundCollide(Sprite *sprite, Sprite *ground);
+bool detectGroundCollide(Sprite *sprite, Sprite *ground);
 
 
 int scrollRight = 0;
@@ -44,7 +44,7 @@ int main(void){
   initXWindows(); init_opengl();
   //declare sprite object
   Sprite sprite(50, 50, WINDOW_WIDTH/6, 700);
-  Ground ground_1( 300, 50, WINDOW_WIDTH/2, 200 );
+  Sprite ground_1( 300, 50, WINDOW_WIDTH/2, 200 );
 
   while(!done) { //Staring Animation
     while(XPending(dpy)) {
@@ -205,7 +205,7 @@ int check_keys(XEvent *e, Sprite *sprite){
   return 0;
 }
 
-bool detectGroundCollide(Sprite *sprite, Ground *ground){
+bool detectGroundCollide(Sprite *sprite, Sprite *ground){
   return (  sprite->getRight()  >= ground->getLeft() && 
       sprite->getLeft()   <= ground->getRight() &&
       sprite->getBottom() <= ground->getTop()  &&
@@ -213,7 +213,7 @@ bool detectGroundCollide(Sprite *sprite, Ground *ground){
       );
 }
 
-void groundCollide(Sprite *sprite, Ground *ground){
+void groundCollide(Sprite *sprite, Sprite *ground){
   if(detectGroundCollide(sprite, ground)){
     if(!(sprite->getOldBottom() < ground->getTop()) &&
         !(sprite->getBottom() >= ground->getTop()) && (sprite->getVelocityY() < 0)){
@@ -235,7 +235,7 @@ void groundCollide(Sprite *sprite, Ground *ground){
   else sprite->setOldCenter();
 }
 
-void movement(Sprite *sprite, Ground *ground){
+void movement(Sprite *sprite, Sprite *ground){
   // Detect Collision
   groundCollide(sprite, ground); 
 
@@ -246,7 +246,7 @@ void movement(Sprite *sprite, Ground *ground){
   else sprite->setVelocityY(0);
 }
 
-void render(Sprite *sprite, Ground *ground){
+void render(Sprite *sprite, Sprite *ground){
   float w, h;
   glClear(GL_COLOR_BUFFER_BIT);
 
