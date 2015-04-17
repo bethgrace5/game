@@ -1,4 +1,4 @@
-## Fox Die Game
+## Game Title
 #### Software Engineering (cs335) Final Game Project, CSUB
 #### Collaborators
 * Bethany Armitage
