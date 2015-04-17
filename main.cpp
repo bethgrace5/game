@@ -25,7 +25,7 @@ void check_mouse(XEvent *e, Object *sprite);
 int  check_keys (XEvent *e, Object *sprite);
 void movement(Object *sprite, Object*ground);
 void render(Object *sprite, Object *ground);
-std::string getSpritePosition(Object *sprite);
+std::string getObjectPosition(Object *sprite);
 void scrollWindow(Object *sprite);
 
 bool collidedFromTop(Object *sprite, Object *ground);
@@ -52,7 +52,7 @@ int main(void){
       check_mouse(&e, &sprite);
       done = check_keys(&e, &sprite);
     }
-    currentPosition = getSpritePosition(&sprite);
+    currentPosition = getObjectPosition(&sprite);
     movement(&sprite, &ground_1);
     render(&sprite, &ground_1);
     scrollWindow(&sprite);
@@ -70,10 +70,8 @@ int main(void){
        previousPosition = currentPosition;
 
        }
-    //currentPosition = getSpritePosition(&sprite);
+    //currentPosition = getObjectPosition(&sprite);
     */
-
-
     glXSwapBuffers(dpy, win);
   }
   cleanupXWindows(); return 0;
@@ -166,14 +164,14 @@ int check_keys(XEvent *e, Object*sprite){
     }
     if (key == XK_a) {
       sprite->setVelocityX(-5);
-      if (getSpritePosition(sprite) == "left") {
+      if (getObjectPosition(sprite) == "left") {
         // uncomment to scroll both directions
         scrollRight = 1;
       }
     }
     if (key == XK_d) {
       sprite->setVelocityX(5);
-      if (getSpritePosition(sprite) == "right") {
+      if (getObjectPosition(sprite) == "right") {
         scrollLeft = 1;
       }
     }
@@ -183,7 +181,7 @@ int check_keys(XEvent *e, Object*sprite){
     }
     if (key == XK_c) sprite->setCameraX( sprite->getCameraX()+10 );
     if (key == XK_m) {
-      std::string position = getSpritePosition(sprite);
+      std::string position = getObjectPosition(sprite);
       std::cout << position + "\n";
     }
 
@@ -295,7 +293,7 @@ void render(Object *sprite, Object *ground){
   // 'mid' throughout the level, and 'right' at the end of the level.
   // retuns the position of the sprite as left, mid, or right.
 }
-std::string getSpritePosition(Object *sprite) {
+std::string getObjectPosition(Object *sprite) {
   if (sprite->getCenterX() >= 0 && sprite->getCenterX() <= 300) {
     return "left";
   }
