@@ -17,21 +17,6 @@
 //X Windows variables
 Display *dpy; Window win; GLXContext glc;
 
-//Structures
-struct Vec {
-    float x, y, z;
-};
-
-struct Shape {
-    float width, height;
-    float radius;
-    Vec center, velocity;
-};
-
-struct Particle {
-    Shape s; Vec velocity;
-};
-
 //Function prototypes
 void initXWindows(void);
 void init_opengl(void);
@@ -69,24 +54,6 @@ int main(void){
         movement(&sprite, &ground_1);
         render(&sprite, &ground_1);
         scrollWindow(&sprite);
-
-        // game just started, character is in the left segment.
-        /*
-        if (currentPosition == "left") {
-        }
-        else if (currentPosition == "right" && previousPosition != "right") {
-            previousPosition = "right";
-            std::cout<<"changed position to right";
-            scrollWindow(&sprite, "right");
-        }
-        else {
-            previousPosition = currentPosition;
-
-        }
-        //currentPosition = getSpritePosition(&sprite);
-        */
-
-
         glXSwapBuffers(dpy, win);
     }
     cleanupXWindows(); return 0;
@@ -233,9 +200,6 @@ void movement(Sprite *sprite, Ground *ground){
     //int collideX = 0;
     int collideY = 0;
 
-    //float dx = boxRight - boxLeft;
-    //float dy = 0;
-    //int collide = 0;
     if (spriteRight >= groundLeft
             && spriteLeft  <= groundRight
             && spriteDown  <=  groundTop
