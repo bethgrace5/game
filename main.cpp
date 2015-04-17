@@ -252,6 +252,10 @@ void movement(Sprite *sprite, Ground *ground){
                   !(spriteRight <= groundLeft)){
                     sprite->setVelocityX(-0.51); 
           }
+          if(!(sprite->getOldCenterX() - sprite->getWidth() < groundRight) &&
+                  !(spriteLeft >= groundRight)){
+                    sprite->setVelocityX(0.51); 
+          }
           //if(!(sprite->getOldCenterX() - sprite->getWidth() < ground))
     }
     else sprite->setOldCenter();
@@ -346,7 +350,6 @@ std::string getSpritePosition(Sprite *sprite) {
 }
 
 void scrollWindow(Sprite *sprite) {
-
     if (scrollRight) {
         sprite->setCameraX( sprite->getCameraX()+4 );
     }
