@@ -6,7 +6,7 @@
 #include <X11/keysym.h>
 #include <GL/glx.h>
 #include "Ground.cpp"
-#include "Sprite.cpp"
+#include "Object.cpp"
 
 #define WINDOW_WIDTH  900
 #define WINDOW_HEIGHT 600
@@ -21,17 +21,16 @@ Display *dpy; Window win; GLXContext glc;
 void initXWindows(void);
 void init_opengl(void);
 void cleanupXWindows(void);
-void check_mouse(XEvent *e, Sprite *sprite);
-int  check_keys (XEvent *e, Sprite *sprite);
-void movement(Sprite *sprite, Sprite *ground);
-void render(Sprite *sprite, Sprite *ground);
-std::string getSpritePosition(Sprite *sprite);
-void scrollWindow(Sprite *sprite);
+void check_mouse(XEvent *e, Object *sprite);
+int  check_keys (XEvent *e, Object *sprite);
+void movement(Object *sprite, Object*ground);
+void render(Object *sprite, Object *ground);
+std::string getSpritePosition(Object *sprite);
+void scrollWindow(Object *sprite);
 
-bool collidedFromTop(Sprite *sprite, Sprite *ground);
-void groundCollide(Sprite *sprite, Sprite *ground);
-bool detectGroundCollide(Sprite *sprite, Sprite *ground);
-
+bool collidedFromTop(Object *sprite, Object *ground);
+void groundCollide(Object *sprite, Object *ground);
+bool detectGroundCollide(Object *sprite, Object *ground);
 
 int scrollRight = 0;
 int scrollLeft = 0;
@@ -43,8 +42,8 @@ int main(void){
   srand(time(NULL));
   initXWindows(); init_opengl();
   //declare sprite object
-  Sprite sprite(50, 50, WINDOW_WIDTH/6, 700);
-  Sprite ground_1( 300, 50, WINDOW_WIDTH/2, 200 );
+  Object sprite(50, 50, WINDOW_WIDTH/6, 700);
+  Object ground_1( 300, 50, WINDOW_WIDTH/2, 200 );
 
   while(!done) { //Staring Animation
     while(XPending(dpy)) {
@@ -130,7 +129,7 @@ void init_opengl(void){
 }
 
 
-void check_mouse(XEvent *e, Sprite *sprite){
+void check_mouse(XEvent *e, Object *sprite){
   static int savex = 0, savey = 0;
   //static int n = 0;
   if (e->type == ButtonRelease) { return;}
@@ -151,7 +150,7 @@ void check_mouse(XEvent *e, Sprite *sprite){
   }
 }
 
-int check_keys(XEvent *e, Sprite *sprite){
+int check_keys(XEvent *e, Object*sprite){
   //Was there input from the keyboard?
   int key = XLookupKeysym(&e->xkey, 0);
   int didJump = 0;
@@ -205,7 +204,7 @@ int check_keys(XEvent *e, Sprite *sprite){
   return 0;
 }
 
-bool detectGroundCollide(Sprite *sprite, Sprite *ground){
+bool detectGroundCollide(Object *sprite, Object *ground){
   return (  sprite->getRight()  >= ground->getLeft() && 
       sprite->getLeft()   <= ground->getRight() &&
       sprite->getBottom() <= ground->getTop()  &&
@@ -213,7 +212,7 @@ bool detectGroundCollide(Sprite *sprite, Sprite *ground){
       );
 }
 
-void groundCollide(Sprite *sprite, Sprite *ground){
+void groundCollide(Object *sprite, Object *ground){
   if(detectGroundCollide(sprite, ground)){
     if(!(sprite->getOldBottom() < ground->getTop()) &&
         !(sprite->getBottom() >= ground->getTop()) && (sprite->getVelocityY() < 0)){
@@ -235,7 +234,7 @@ void groundCollide(Sprite *sprite, Sprite *ground){
   else sprite->setOldCenter();
 }
 
-void movement(Sprite *sprite, Sprite *ground){
+void movement(Object *sprite, Object *ground){
   // Detect Collision
   groundCollide(sprite, ground); 
 
@@ -246,11 +245,11 @@ void movement(Sprite *sprite, Sprite *ground){
   else sprite->setVelocityY(0);
 }
 
-void render(Sprite *sprite, Sprite *ground){
+void render(Object *sprite, Object *ground){
   float w, h;
   glClear(GL_COLOR_BUFFER_BIT);
 
-  glColor3ub(90,140,90);
+  glColor3ub(255,140,90);
 
   // Draw Sprite
   glPushMatrix();
@@ -264,7 +263,7 @@ void render(Sprite *sprite, Sprite *ground){
   glVertex2i( w,-h);
   glEnd(); glPopMatrix();
 
-  glColor3ub(0,140,90);
+  glColor3ub(0,140,255);
 
   //Ground
   glPushMatrix();
@@ -296,7 +295,7 @@ void render(Sprite *sprite, Sprite *ground){
   // 'mid' throughout the level, and 'right' at the end of the level.
   // retuns the position of the sprite as left, mid, or right.
 }
-std::string getSpritePosition(Sprite *sprite) {
+std::string getSpritePosition(Object *sprite) {
   if (sprite->getCenterX() >= 0 && sprite->getCenterX() <= 300) {
     return "left";
   }
@@ -309,7 +308,7 @@ std::string getSpritePosition(Sprite *sprite) {
   return "off screen";
 }
 
-void scrollWindow(Sprite *sprite) {
+void scrollWindow(Object *sprite) {
   if (scrollRight) {
     sprite->setCameraX( sprite->getCameraX()+4 );
   }
