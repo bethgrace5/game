@@ -20,7 +20,7 @@
 Display *dpy; Window win; GLXContext glc;
 
 //hero sprite globals
-int didJump = 2;
+int didJump = 1;
 int collideX = 0;
 int collideY = 0;
 int wantToJump = 0;
@@ -64,7 +64,7 @@ int main(void){
     initXWindows(); init_opengl();
     //declare sprite object
     Sprite sprite(50, 50, WINDOW_WIDTH/6, 700);
-    Ground ground_1( 300, 50, WINDOW_WIDTH/2, 200 );
+    Ground ground_1( 400, 50, WINDOW_WIDTH/2, 200 );
 
     while(!done) { //Staring Animation
         while(XPending(dpy)) {
@@ -177,15 +177,17 @@ int check_keys(XEvent *e, Sprite *sprite){
     if (e->type == KeyPress) {
         if (key == XK_Escape) return 1;
         if (key == XK_w && didJump<2){
+            /*
             std::cout << "JUMP!! \n";
             std::cout << " velocity x: " << sprite->getVelocityX();
             std::cout << " velocity y: " << sprite->getVelocityY();
             std::cout << " center x: " << sprite->getCenterX();
             std::cout << " center y: " << sprite->getCenterY();
+            */
             // TODO: disallow jumping while already in the air.
             didJump++;
-			wantToJump=1;	
-//            sprite->setVelocityY(5);
+			wantToJump=1;
+            sprite->setVelocityY(5);
         }
         if (key == XK_a) {
             sprite->setVelocityX(-5);
@@ -255,11 +257,15 @@ void movement(Sprite *sprite, Ground *ground){
                   !(spriteTop <= groundDown)){
                     sprite->setVelocityY(-0.51); 
           }
-          if(!(sprite->getOldCenterX() + sprite->getWidth() < groundLeft) &&
-                  !(spriteRight >= groundLeft)){
-                    std::cout << "did it work?\n";
-                    sprite->setVelocityX(0); 
+          if(!(sprite->getOldCenterX() + sprite->getWidth() > groundLeft) &&
+                  !(spriteRight <= groundLeft)){
+                    sprite->setVelocityX(-0.51); 
           }
+          if(!(sprite->getOldCenterX() - sprite->getWidth() < groundRight) &&
+                  !(spriteLeft >= groundRight)){
+                    sprite->setVelocityX(0.51); 
+          }
+          //if(!(sprite->getOldCenterX() - sprite->getWidth() < ground))
     }
     else sprite->setOldCenter();
  
@@ -353,7 +359,6 @@ std::string getSpritePosition(Sprite *sprite) {
 }
 
 void scrollWindow(Sprite *sprite) {
-
     if (scrollRight) {
         sprite->setCameraX( sprite->getCameraX()+4 );
     }
