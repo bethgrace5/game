@@ -5,7 +5,6 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
-#include "Ground.cpp"
 #include "Object.cpp"
 
 #define WINDOW_WIDTH  900
