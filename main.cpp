@@ -64,7 +64,7 @@ int main(void){
     initXWindows(); init_opengl();
     //declare sprite object
     Sprite sprite(50, 50, WINDOW_WIDTH/6, 700);
-    Ground ground_1( 400, 50, WINDOW_WIDTH/2, 200 );
+    Ground ground_1( 400, 50, WINDOW_WIDTH/2, 10 );
 
     while(!done) { //Staring Animation
         while(XPending(dpy)) {
@@ -185,7 +185,7 @@ int check_keys(XEvent *e, Sprite *sprite){
             std::cout << " center y: " << sprite->getCenterY();
             */
             // TODO: disallow jumping while already in the air.
-            didJump++;
+            //didJump++;
 			wantToJump=1;
             sprite->setVelocityY(5);
         }
