@@ -32,6 +32,8 @@ bool collidedFromTop(Sprite *sprite, Ground *ground);
 void groundCollide(Sprite *sprite, Ground *ground);
 bool detectGroundCollide(Sprite *sprite, Ground *ground);
 
+//Test2 Chad
+
 
 int scrollRight = 0;
 int scrollLeft = 0;
