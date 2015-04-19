@@ -263,6 +263,17 @@ void moveWindow(Object *sprite) {
     double spriteWinPos = sprite->getCenterX();
     double interval = sprite->getWindowInterval();
 
+    //move window forward
+    if (spriteWinPos > windowCenter + interval) {
+        sprite->scrollWindow(5);
+        sprite->setCameraX( sprite->getCameraX()-5 );
+    }
+    //move window backward
+    else if (spriteWinPos < windowCenter - interval) {
+        sprite->scrollWindow(-5);
+        sprite->setCameraX( sprite->getCameraX()+5 );
+    }
+
     // the game has just started and the sprite is not yet in
     // the center of the screen.
     if(spriteWinPos < windowCenter - interval - 5) {
@@ -273,16 +284,5 @@ void moveWindow(Object *sprite) {
     // TODO: update parameter to reflect the actual size of level.
     else if(spriteWinPos > 5000) {
         return;
-    }
-
-    //move window forward
-    if (spriteWinPos > windowCenter + interval) {
-        sprite->scrollWindow(5);
-        sprite->setCameraX( sprite->getCameraX()-5 );
-    }
-    //move window backward
-    else if (spriteWinPos < windowCenter - interval) {
-        sprite->scrollWindow(-5);
-        sprite->setCameraX( sprite->getCameraX()+5 );
     }
 }
