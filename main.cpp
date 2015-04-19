@@ -23,8 +23,8 @@ void check_mouse(XEvent *e, Object *sprite);
 int  check_keys (XEvent *e, Object *sprite);
 void movement(Object *sprite, Object*ground);
 void render(Object *sprite, Object *ground);
-std::string getObjectPosition(Object *sprite);
-void scrollWindow(Object *sprite);
+//std::string getObjectPosition(Object *sprite);
+void moveWindow(Object *sprite);
 
 bool collidedFromTop(Object *sprite, Object *ground);
 void groundCollide(Object *sprite, Object *ground);
@@ -34,7 +34,6 @@ int scrollRight = 0;
 int scrollLeft = 0;
 
 int main(void){
-  std::string currentPosition;
   std::string previousPosition;
   int done=0;
   srand(time(NULL));
@@ -50,26 +49,9 @@ int main(void){
       check_mouse(&e, &sprite);
       done = check_keys(&e, &sprite);
     }
-    currentPosition = getObjectPosition(&sprite);
     movement(&sprite, &ground_1);
     render(&sprite, &ground_1);
-    scrollWindow(&sprite);
-
-    // game just started, character is in the left segment.
-    /*
-       if (currentPosition == "left") {
-       }
-       else if (currentPosition == "right" && previousPosition != "right") {
-       previousPosition = "right";
-       std::cout<<"changed position to right";
-       scrollWindow(&sprite, "right");
-       }
-       else {
-       previousPosition = currentPosition;
-
-       }
-    //currentPosition = getObjectPosition(&sprite);
-    */
+    moveWindow(&sprite);
     glXSwapBuffers(dpy, win);
   }
   cleanupXWindows(); return 0;
@@ -162,25 +144,24 @@ int check_keys(XEvent *e, Object*sprite){
     }
     if (key == XK_a) {
       sprite->setVelocityX(-5);
-      if (getObjectPosition(sprite) == "left") {
+      //if (getObjectPosition(sprite) == "left") {
         // uncomment to scroll both directions
         scrollRight = 1;
       }
-    }
+    //}
     if (key == XK_d) {
       sprite->setVelocityX(5);
-      if (getObjectPosition(sprite) == "right") {
+      //if (getObjectPosition(sprite) == "right") {
         scrollLeft = 1;
       }
-    }
+    //}
 
     if (key == XK_z) {
       sprite->setCameraX( sprite->getCameraX()-10 );
     }
     if (key == XK_c) sprite->setCameraX( sprite->getCameraX()+10 );
     if (key == XK_m) {
-      std::string position = getObjectPosition(sprite);
-      std::cout << position + "\n";
+      //std::string position = getObjectPosition(sprite);
     }
 
 
@@ -291,25 +272,31 @@ void render(Object *sprite, Object *ground){
   // 'mid' throughout the level, and 'right' at the end of the level.
   // retuns the position of the sprite as left, mid, or right.
 }
-std::string getObjectPosition(Object *sprite) {
-  if (sprite->getCenterX() >= 0 && sprite->getCenterX() <= 300) {
-    return "left";
-  }
-  else if (sprite->getCenterX() > 300 && sprite->getCenterX() <= 600) {
-    return "mid";
-  }
-  else if (sprite->getCenterX() > 600 && sprite->getCenterX() <= 900) {
-    return "right";
-  }
-  return "off screen";
-}
+void moveWindow(Object *sprite) {
+    double windowCenter = sprite->getWindowCenter();
+    double spriteWinPos = sprite->getCenterX();
+    double interval = sprite->getWindowInterval();
 
-void scrollWindow(Object *sprite) {
-  if (scrollRight) {
-    sprite->setCameraX( sprite->getCameraX()+4 );
-  }
-  if (scrollLeft) {
-    sprite->setCameraX( sprite->getCameraX()-4 );
-  }
+    // the game has just started and the sprite is not yet in
+    // the center of the screen.
+    if(spriteWinPos < windowCenter - interval - 5) {
+        return;
+    }
+    // the sprite has reached the end of the level, and scrolling will
+    // stop for boss battle.
+    // TODO: update parameter to reflect the actual size of level.
+    else if(spriteWinPos > 5000) {
+        return;
+    }
 
+    //move window forward
+    if (spriteWinPos > windowCenter + interval) {
+        sprite->scrollWindow(5);
+        sprite->setCameraX( sprite->getCameraX()-5 );
+    }
+    //move window backward
+    else if (spriteWinPos < windowCenter - interval) {
+        sprite->scrollWindow(-5);
+        sprite->setCameraX( sprite->getCameraX()+5 );
+    }
 }

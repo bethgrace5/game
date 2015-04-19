@@ -46,6 +46,11 @@ class Object{
         double getOldBottom(void);
         double getOldLeft(void);
  
+        // used to update boundaries for window scrolling
+        double getWindowCenter();
+        void scrollWindow(double amount);
+        double getWindowInterval();
+
         Object( double w, double h, double x, double y);
         // TODO: create destructor
         //~Object(){ delete [] ground;}
@@ -53,6 +58,10 @@ class Object{
     private:
         int width;
         int height;
+        int windowCenter;
+        // interval is distance the sprite is allowed to move away
+        // from windowCenter
+        int interval;
         Vec camera;
         Vec velocity;
         Vec center;
@@ -67,6 +76,8 @@ Object::Object( double w, double h, double x, double y ) {
     center.z = 0;
 	velocity.x = 0;
 	velocity.y = 0;
+    windowCenter = 300;
+    interval = 50;
 }
 void Object::setWidth( double w ) {
     width = w;
@@ -156,3 +167,13 @@ double Object::getOldLeft(){
 }
 
 
+// screen boundaries for scrolling
+double Object::getWindowCenter(){
+  return windowCenter;
+}
+void Object::scrollWindow(double amount){
+  windowCenter += amount;
+}
+double Object::getWindowInterval() {
+    return interval;
+}
