@@ -23,15 +23,11 @@ void check_mouse(XEvent *e, Object *sprite);
 int  check_keys (XEvent *e, Object *sprite);
 void movement(Object *sprite, Object*ground);
 void render(Object *sprite, Object *ground);
-//std::string getObjectPosition(Object *sprite);
 void moveWindow(Object *sprite);
 
 bool collidedFromTop(Object *sprite, Object *ground);
 void groundCollide(Object *sprite, Object *ground);
 bool detectGroundCollide(Object *sprite, Object *ground);
-
-int scrollRight = 0;
-int scrollLeft = 0;
 
 int main(void){
   std::string previousPosition;
@@ -144,37 +140,27 @@ int check_keys(XEvent *e, Object*sprite){
     }
     if (key == XK_a) {
       sprite->setVelocityX(-5);
-      //if (getObjectPosition(sprite) == "left") {
-        // uncomment to scroll both directions
-        scrollRight = 1;
-      }
-    //}
+    }
     if (key == XK_d) {
       sprite->setVelocityX(5);
-      //if (getObjectPosition(sprite) == "right") {
-        scrollLeft = 1;
-      }
-    //}
+    }
 
+    // move the camera for debugging
     if (key == XK_z) {
       sprite->setCameraX( sprite->getCameraX()-10 );
     }
-    if (key == XK_c) sprite->setCameraX( sprite->getCameraX()+10 );
-    if (key == XK_m) {
-      //std::string position = getObjectPosition(sprite);
+    if (key == XK_c) {
+      sprite->setCameraX( sprite->getCameraX()+10 );
     }
-
 
     return 0;
   }
   if(e->type == KeyRelease){
     if (key == XK_a) {
       sprite->setVelocityX(0);
-      scrollRight = 0;
     }
     if (key == XK_d) {
       sprite->setVelocityX(0);
-      scrollLeft = 0;
     }
   }
 
