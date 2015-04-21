@@ -1,19 +1,40 @@
 //cs335 Spring 2015 final project #include <iostream> #include <cstdlib> #include <ctime>
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <unistd.h>
 #include <cstring>
 #include <cmath>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
 #include "Object.cpp"
+#include "ppm.h"
 
 #define WINDOW_WIDTH  900
 #define WINDOW_HEIGHT 600
-#define MAX_PARTICLES 9001
+#define MAX_PARTICLES 9000
 #define GRAVITY 0.1
 #define rnd()(float)rand() /(float)(RAND_MAX)
+#define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 
+#define MAX_BACKGROUND_BITS 1000
 #define HERO_START_X 250
 #define HERO_START_Y 700
+
+extern "C" {
+    #include "fonts.h"
+}
+
+typedef double Vec[3];
+
+struct bgBit {
+    Vec pos;
+    Vec lastpos;
+    Vec vel;
+    struct bgBit *next;
+    struct bgBit *prev;
+};
 
 //X Windows variables
 Display *dpy; Window win; GLXContext glc;
@@ -21,6 +42,13 @@ Display *dpy; Window win; GLXContext glc;
 //Hero Globals
 int didJump=0;
 int lives=3;
+
+//Game Globals
+bgBit *bitHead = NULL;
+int bg;
+int roomX=0;
+int roomY=0;
+int fail=0;
 
 //Function prototypes
 void initXWindows(void);
@@ -31,6 +59,8 @@ int  check_keys (XEvent *e, Object *sprite);
 void movement(Object *sprite, Object*ground);
 void render(Object *sprite, Object *ground);
 void moveWindow(Object *sprite);
+void renderBackground(void);
+void cleanup_background(void);
 
 bool collidedFromTop(Object *sprite, Object *ground);
 void groundCollide(Object *sprite, Object *ground);
@@ -43,7 +73,7 @@ int main(void){
   initXWindows(); init_opengl();
   //declare sprite object
   Object sprite(50, 50, HERO_START_X, HERO_START_Y);
-  Object ground_1( 300, 20, WINDOW_WIDTH/2, 200 );
+  Object ground_1( 300, 5, WINDOW_WIDTH/2, 200 );
 
   while(!done) { //Staring Animation
     while(XPending(dpy)) {
@@ -65,6 +95,7 @@ void set_title(void){ //Set the window title bar.
 }
 
 void cleanupXWindows(void) { //do not change
+  cleanup_background();
   XDestroyWindow(dpy, win); XCloseDisplay(dpy);
 }
 
@@ -107,6 +138,8 @@ void init_opengl(void){
   glOrtho(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT, -1, 1);
   //Set the screen background color
   glClearColor(0.1, 0.1, 0.1, 1.0);
+  glEnable(GL_TEXTURE_2D);
+  initialize_fonts();
 }
 
 
@@ -217,6 +250,7 @@ void movement(Object *sprite, Object *ground){
   if (sprite->getCenterY() < 0){
       sprite->setCenter(HERO_START_X, HERO_START_Y);
       lives--;
+      fail=100;
       sprite->setVelocityX(0);
   }
 }
@@ -224,6 +258,8 @@ void movement(Object *sprite, Object *ground){
 void render(Object *sprite, Object *ground){
   float w, h;
   glClear(GL_COLOR_BUFFER_BIT);
+  // Draw Background Falling Bits
+  renderBackground();
 
   glColor3ub(255,140,90);
 
@@ -238,7 +274,6 @@ void render(Object *sprite, Object *ground){
   glVertex2i( w, h);
   glVertex2i( w,-h);
   glEnd(); glPopMatrix();
-
   glColor3ub(0,140,255);
 
   //Ground
@@ -270,6 +305,19 @@ void render(Object *sprite, Object *ground){
   // the sprite should be 'left' at the beginning of the level,
   // 'mid' throughout the level, and 'right' at the end of the level.
   // retuns the position of the sprite as left, mid, or right.
+  //
+
+  Rect r0, r1;
+  r0.bot = WINDOW_HEIGHT - 32;
+  r0.left = r0.center = 32;
+  ggprint12(&r0, 16, 0x0033aaff, "Lives");
+  r1.bot = WINDOW_HEIGHT/2;
+  r1.left = r1.center = WINDOW_WIDTH/2;
+  if (fail>0){
+    ggprint16(&r1, fail/2, 0x00ff0000, "FAIL");
+    fail--;
+  }
+  
 }
 void moveWindow(Object *sprite) {
     double windowCenter = sprite->getWindowCenter();
@@ -280,11 +328,13 @@ void moveWindow(Object *sprite) {
     if (spriteWinPos > windowCenter + interval) {
         sprite->scrollWindow(5);
         sprite->setCameraX( sprite->getCameraX()-5 );
+        roomX+=5;
     }
     //move window backward
     else if (spriteWinPos < windowCenter - interval) {
         sprite->scrollWindow(-5);
         sprite->setCameraX( sprite->getCameraX()+5 );
+        roomX-=5;
     }
 
     // the game has just started and the sprite is not yet in
@@ -298,4 +348,80 @@ void moveWindow(Object *sprite) {
     else if(spriteWinPos > 5000) {
         return;
     }
+}
+void renderBackground(){
+    if (bg < MAX_BACKGROUND_BITS){
+        // Create bit
+        bgBit *bit = new bgBit;
+        if (bit == NULL){
+            exit(EXIT_FAILURE);
+        }
+        bit->pos[0] = (rnd() * ((float)WINDOW_WIDTH+2000)) + roomX - 1000;
+        bit->pos[1] = rnd() * 100.0f + (float)WINDOW_HEIGHT;
+        bit->pos[2] = 0.85 + (rnd() * 0.3);
+        bit->vel[0] = 0.0f;
+        bit->vel[1] = -0.8f;
+        bit->next = bitHead;
+        if (bitHead != NULL)
+            bitHead->prev = bit;
+        bitHead = bit;
+        bg++;
+    }
+    // Reset pointer to beginning to render all bits
+    bgBit *bit = bitHead;
+    while (bit){
+        VecCopy(bit->pos, bit->lastpos);
+        if (bit->pos[1] > 150){
+            bit->pos[1] += bit->vel[1];
+            
+        }
+        else{
+            bgBit *savebit = bit->next;
+            if (bit->prev == NULL){
+                if (bit->next == NULL){
+                    bitHead = NULL;
+                } else {
+                    bit->next->prev = NULL;
+                    bitHead = bit->next;
+                }
+            } else {
+                if (bit->next == NULL){
+                    bit->prev->next = NULL;
+                } else {
+                    bit->prev->next = bit->next;
+                    bit->next->prev = bit->prev;
+                }
+            }
+            delete bit;
+            bit = savebit;
+            bg--;
+            continue;
+        }
+        glPushMatrix();
+        glTranslated(bit->pos[0]-(roomX*bit->pos[2]), bit->pos[1], bit->pos[2]);
+        glColor3ub(
+                (bit->pos[1]-100)/(WINDOW_HEIGHT/255),
+                (bit->pos[1]-100)/(WINDOW_HEIGHT/255),
+                (bit->pos[1]-100)/(WINDOW_HEIGHT/255)
+        );
+        glLineWidth(1);
+        glBegin(GL_LINES);
+        glVertex2f(0.0f, 0.0f);
+        glVertex2f(0.0f, 10.0f);
+        glEnd();
+        glPopMatrix();
+        bit = bit->next;
+    }
+    glLineWidth(1);
+    std::cout << roomX << std::endl;
+}
+
+void cleanup_background(void){
+    bgBit *s;
+    while (bitHead) {
+        s = bitHead->next;
+        delete bitHead;
+        bitHead = s;
+    }
+    bitHead = NULL;
 }
