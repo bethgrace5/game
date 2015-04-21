@@ -12,7 +12,7 @@
 #define GRAVITY 0.1
 #define rnd()(float)rand() /(float)(RAND_MAX)
 
-#define HERO_START_X 150
+#define HERO_START_X 250
 #define HERO_START_Y 700
 
 //X Windows variables
@@ -20,7 +20,6 @@ Display *dpy; Window win; GLXContext glc;
 
 //Hero Globals
 int didJump=0;
-int respawn=0;
 int lives=3;
 
 //Function prototypes
@@ -147,10 +146,10 @@ int check_keys(XEvent *e, Object*sprite){
           sprite->setVelocityY(5);
       }
     }
-    if (key == XK_a) {
+    if (key == XK_a && !didJump) {
       sprite->setVelocityX(-5);
     }
-    if (key == XK_d) {
+    if (key == XK_d && !didJump) {
       sprite->setVelocityX(5);
     }
 
@@ -217,6 +216,7 @@ void movement(Object *sprite, Object *ground){
   if (sprite->getCenterY() < 0){
       sprite->setCenter(HERO_START_X, HERO_START_Y);
       lives--;
+      sprite->setVelocityX(0);
   }
 }
 
