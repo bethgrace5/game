@@ -32,9 +32,8 @@ void movement(Object *sprite, Object*ground);
 void render(Object *sprite, Object *ground);
 void moveWindow(Object *sprite);
 
-bool collidedFromTop(Object *sprite, Object *ground);
 void groundCollide(Object *sprite, Object *ground);
-bool detectGroundCollide(Object *sprite, Object *ground);
+bool detectCollide(Object *sprite, Object *ground);
 
 int main(void){
   std::string previousPosition;
@@ -175,7 +174,9 @@ int check_keys(XEvent *e, Object*sprite){
   return 0;
 }
 
-bool detectGroundCollide(Object *sprite, Object *ground){
+bool detectCollide(Object *sprite, Object *ground){
+  //Gets (Moving Object, Static Object)
+  //Reture True if Moving Object Collides with Static Object
   return (  sprite->getRight()  >= ground->getLeft() && 
       sprite->getLeft()   <= ground->getRight() &&
       sprite->getBottom() <= ground->getTop()  &&
@@ -184,21 +185,28 @@ bool detectGroundCollide(Object *sprite, Object *ground){
 }
 
 void groundCollide(Object *sprite, Object *ground){
-  if(detectGroundCollide(sprite, ground)){
+  //(Moving Object, Static Object)
+  //Detects Which boundaries the Moving Object is around the Static Object
+  //top,down,left,right
+  if(detectCollide(sprite, ground)){
+    //If moving object is on top of the static object
     if(!(sprite->getOldBottom() < ground->getTop()) &&
         !(sprite->getBottom() >= ground->getTop()) && (sprite->getVelocityY() < 0)){
           sprite->setVelocityY(0);
           sprite->setCenter(sprite->getCenterX(), ground->getTop()+sprite->getHeight());
           didJump=0;
     }
+    //If moving object is at the bottom of static object
     if(!(sprite->getOldTop() > ground->getBottom()) &&
         !(sprite->getTop()   <= ground->getBottom())){
           sprite->setVelocityY(-0.51); 
     }
+    //If moving object is at the left side of static object
     if(!(sprite->getOldRight() > ground->getLeft() ) &&
         !(sprite->getRight() <= ground->getLeft())){
           sprite->setVelocityX(-0.51); 
     }
+    //If moving object is at the right side of static object
     if(!(sprite->getOldLeft() < ground->getRight() ) &&
         !(sprite->getLeft() >= ground->getRight())){
       sprite->setVelocityX(0.51); 
