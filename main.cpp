@@ -12,8 +12,16 @@
 #define GRAVITY 0.1
 #define rnd()(float)rand() /(float)(RAND_MAX)
 
+#define HERO_START_X 150
+#define HERO_START_Y 700
+
 //X Windows variables
 Display *dpy; Window win; GLXContext glc;
+
+//Hero Globals
+int didJump=0;
+int respawn=0;
+int lives=3;
 
 //Function prototypes
 void initXWindows(void);
@@ -35,7 +43,7 @@ int main(void){
   srand(time(NULL));
   initXWindows(); init_opengl();
   //declare sprite object
-  Object sprite(50, 50, WINDOW_WIDTH/6, 700);
+  Object sprite(50, 50, HERO_START_X, HERO_START_Y);
   Object ground_1( 300, 50, WINDOW_WIDTH/2, 200 );
 
   while(!done) { //Staring Animation
@@ -127,7 +135,6 @@ void check_mouse(XEvent *e, Object *sprite){
 int check_keys(XEvent *e, Object*sprite){
   //Was there input from the keyboard?
   int key = XLookupKeysym(&e->xkey, 0);
-  int didJump = 0;
   if (e->type == KeyPress) {
     if (key == XK_Escape) return 1;
     if (key == XK_w){
@@ -135,8 +142,10 @@ int check_keys(XEvent *e, Object*sprite){
       std::cout << " velocity y: " << sprite->getVelocityY();
       std::cout << " center y: " << sprite->getCenterY();
       // TODO: disallow jumping while already in the air.
-      didJump = 1;
-      sprite->setVelocityY(5);
+      if (didJump < 2 && sprite->getVelocityY() > -0.5){
+          didJump++;
+          sprite->setVelocityY(5);
+      }
     }
     if (key == XK_a) {
       sprite->setVelocityX(-5);
@@ -180,6 +189,7 @@ void groundCollide(Object *sprite, Object *ground){
     if(!(sprite->getOldBottom() < ground->getTop()) &&
         !(sprite->getBottom() >= ground->getTop()) && (sprite->getVelocityY() < 0)){
           sprite->setVelocityY(0);
+          didJump=0;
     }
     if(!(sprite->getOldTop() > ground->getBottom()) &&
         !(sprite->getTop()   <= ground->getBottom())){
@@ -200,12 +210,14 @@ void groundCollide(Object *sprite, Object *ground){
 void movement(Object *sprite, Object *ground){
   // Detect Collision
   groundCollide(sprite, ground); 
-
+  // Apply Velocity, Add Gravity
   sprite->setCenter( (sprite->getCenterX() + sprite->getVelocityX()), (sprite->getCenterY() + sprite->getVelocityY()));
-  if ((sprite->getCenterY() - sprite->getHeight()) > 0 ){
-    sprite->setVelocityY( sprite->getVelocityY() - GRAVITY);
+  sprite->setVelocityY( sprite->getVelocityY() - GRAVITY);
+  // Check for Death
+  if (sprite->getCenterY() < 0){
+      sprite->setCenter(HERO_START_X, HERO_START_Y);
+      lives--;
   }
-  else sprite->setVelocityY(0);
 }
 
 void render(Object *sprite, Object *ground){
