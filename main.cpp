@@ -43,7 +43,7 @@ int main(void){
   initXWindows(); init_opengl();
   //declare sprite object
   Object sprite(50, 50, HERO_START_X, HERO_START_Y);
-  Object ground_1( 300, 50, WINDOW_WIDTH/2, 200 );
+  Object ground_1( 300, 20, WINDOW_WIDTH/2, 200 );
 
   while(!done) { //Staring Animation
     while(XPending(dpy)) {
@@ -146,10 +146,10 @@ int check_keys(XEvent *e, Object*sprite){
           sprite->setVelocityY(5);
       }
     }
-    if (key == XK_a && !didJump) {
+    if (key == XK_a) {
       sprite->setVelocityX(-5);
     }
-    if (key == XK_d && !didJump) {
+    if (key == XK_d) {
       sprite->setVelocityX(5);
     }
 
@@ -188,6 +188,7 @@ void groundCollide(Object *sprite, Object *ground){
     if(!(sprite->getOldBottom() < ground->getTop()) &&
         !(sprite->getBottom() >= ground->getTop()) && (sprite->getVelocityY() < 0)){
           sprite->setVelocityY(0);
+          sprite->setCenter(sprite->getCenterX(), ground->getTop()+sprite->getHeight());
           didJump=0;
     }
     if(!(sprite->getOldTop() > ground->getBottom()) &&
