@@ -1,5 +1,6 @@
 //cs335 Spring 2015 final project #include <iostream> #include <cstdlib> #include <ctime>
 #include <iostream>
+#include <iomanip>
 #include <cstdlib>
 #include <ctime>
 #include <unistd.h>
@@ -365,10 +366,11 @@ void renderBackground(){
             exit(EXIT_FAILURE);
         }
         bit->pos[0] = (rnd() * ((float)WINDOW_WIDTH+2000)) + roomX - 1000;
-        bit->pos[1] = rnd() * 100.0f + (float)WINDOW_HEIGHT;
-        bit->pos[2] = 0.85 + (rnd() * 0.3);
+        bit->pos[1] = rnd() * 100.0f + (float)WINDOW_HEIGHT + roomY;
+        bit->pos[2] = 0.8 + (rnd() * 0.4);
         bit->vel[0] = 0.0f;
         bit->vel[1] = -0.8f;
+        bit->vel[2] = (rnd());
         bit->next = bitHead;
         if (bitHead != NULL)
             bitHead->prev = bit;
@@ -405,19 +407,35 @@ void renderBackground(){
             bg--;
             continue;
         }
-        glPushMatrix();
+        /*glPushMatrix();
         glTranslated(bit->pos[0]-(roomX*bit->pos[2]), bit->pos[1], bit->pos[2]);
         glColor3ub(
-                (bit->pos[1]-100)/(WINDOW_HEIGHT/255),
-                (bit->pos[1]-100)/(WINDOW_HEIGHT/255),
-                (bit->pos[1]-100)/(WINDOW_HEIGHT/255)
+                (bit->pos[1]-100)/(WINDOW_HEIGHT/255)*(bit->pos[2]),
+                (bit->pos[1]-100)/(WINDOW_HEIGHT/255)*(bit->pos[2]),
+                (bit->pos[1]-100)/(WINDOW_HEIGHT/255)*(bit->pos[2])
         );
         glLineWidth(1);
         glBegin(GL_LINES);
         glVertex2f(0.0f, 0.0f);
         glVertex2f(0.0f, 10.0f);
+
         glEnd();
         glPopMatrix();
+        */Rect r0;
+        r0.bot = bit->pos[1];
+        r0.left = r0.center = (bit->pos[0]-(roomX*bit->pos[2]));
+        //ggprint12(&r0, 16, 0x0033aaff, "1");
+        //ggprint12(&r0, 16, (int)(rnd()*-16777215), "1");
+        int i = (bit->pos[1]-100)/(WINDOW_HEIGHT/255), j = bit->pos[2];
+        if (j>=1){
+            ggprint12(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
+        } else if (j>0.9) {
+            ggprint10(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
+        } else {
+            ggprint08(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
+        }
+        //glEnd();
+        //glPopMatrix();
         bit = bit->next;
     }
     glLineWidth(1);
