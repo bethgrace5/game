@@ -76,6 +76,10 @@ Object::Object( double w, double h, double x, double y ) {
     center.z = 0;
 	velocity.x = 0;
 	velocity.y = 0;
+	velocity.z = 0;
+	camera.x = 0;
+	camera.y = 0;
+	camera.z = 0;
     windowCenter = 300;
     interval = 50;
 }
