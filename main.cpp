@@ -61,12 +61,10 @@ timeval seqStart, seqEnd;
 //Game Globals
 bgBit *bitHead = NULL;
 int bg;
-int roomX=0;
-int roomY=0;
+int roomX=WINDOW_WIDTH/2;
+int roomY=WINDOW_HEIGHT/2;
 int fail=0;
 int interval=100;
-int scrollWindowX=WINDOW_WIDTH/2;
-int scrollWindowY=WINDOW_HEIGHT/2;
 
 //Images and Textures
 Ppmimage *heroImage=NULL;
@@ -368,8 +366,6 @@ void render(Object *sprite, Object *ground){
   // Draw Background Falling Bits
   renderBackground();
 
-  glColor3ub(255,140,90);
-
   // Draw Hero Sprite
   glPushMatrix();
   glTranslatef(
@@ -448,73 +444,30 @@ void render(Object *sprite, Object *ground){
   
 }
 void moveWindow(Object *sprite) {
-<<<<<<< HEAD
     double spriteWinPosX = sprite->getCenterX();
     double spriteWinPosY = sprite->getCenterY();
 
     //move window forward
-    if (spriteWinPosX > scrollWindowX + interval) {
-        scrollWindowX+=5;
-=======
-    double windowCenterX = sprite->getWindowCenterX();
-    double windowCenterY = sprite->getWindowCenterY();
-    double spriteWinPosX = sprite->getCenterX();
-    double spriteWinPosY = sprite->getCenterY();
-    double interval = sprite->getWindowInterval();
-
-    //move window forward
-    if (spriteWinPosX > windowCenterX + interval) {
-        sprite->scrollHorizontal(5);
->>>>>>> 012bf37183c4fe9ce47174f07895c77f8c2e661a
+    if (spriteWinPosX > roomX + interval) {
         sprite->setCameraX( sprite->getCameraX()-5 );
         roomX+=5;
     }
     //move window backward
-<<<<<<< HEAD
-    else if (spriteWinPosX < scrollWindowX - interval) {
-        scrollWindowX-=5;
-=======
-    else if (spriteWinPosX < windowCenterX - interval) {
-        sprite->scrollHorizontal(-5);
->>>>>>> 012bf37183c4fe9ce47174f07895c77f8c2e661a
+    else if (spriteWinPosX < roomX - interval) {
         sprite->setCameraX( sprite->getCameraX()+5 );
         roomX-=5;
     }
     //move window up
-<<<<<<< HEAD
-    if (spriteWinPosY > scrollWindowY + interval) {
-        scrollWindowY+=5;
+    if (spriteWinPosY > roomY + interval) {
         sprite->setCameraY( sprite->getCameraY()-5 );
         roomY+=5;
     }
     //move window down
-    else if (spriteWinPosY < scrollWindowY - interval) {
-        scrollWindowY-=5;
+    else if (spriteWinPosY < roomY - interval) {
         sprite->setCameraY( sprite->getCameraY()+5 );
         roomY-=5;
-=======
-    if (spriteWinPosY < windowCenterY + 100) {
-        //sprite->scrollVertical(5);
-        //sprite->setCameraY( sprite->getCameraX()-5 );
-    }
-    //move window down
-    if (spriteWinPosY > windowCenterY + 100) {
-        //sprite->scrollVertical(-5);
-        //sprite->setCameraY( sprite->getCameraX()+5 );
->>>>>>> 012bf37183c4fe9ce47174f07895c77f8c2e661a
     }
 
-    // the game has just started and the sprite is not yet in
-    // the center of the screen.
-<<<<<<< HEAD
-    if(spriteWinPosX < scrollWindowX - interval - 5) {
-=======
-    if(spriteWinPosX < windowCenterX - interval - 5) {
->>>>>>> 012bf37183c4fe9ce47174f07895c77f8c2e661a
-        return;
-    }
-    // the sprite has reached the end of the level, and scrolling will
-    // stop for boss battle.
     // TODO: update parameter to reflect the actual size of level.
     else if(spriteWinPosX > 5000) {
         return;
@@ -527,8 +480,10 @@ void renderBackground(){
         if (bit == NULL){
             exit(EXIT_FAILURE);
         }
-        bit->pos[0] = (rnd() * ((float)WINDOW_WIDTH+2000)) + roomX - 1000;
-        bit->pos[1] = rnd() * 100.0f + (float)WINDOW_HEIGHT + roomY;
+        bit->pos[0] = (rnd() * ((float)WINDOW_WIDTH+2000)) +
+                      (roomX-(WINDOW_WIDTH/2)) - 1000;
+        bit->pos[1] = rnd() * 100.0f + (float)WINDOW_HEIGHT + 
+                      (roomY-(WINDOW_HEIGHT/2));
         bit->pos[2] = 0.8 + (rnd() * 0.4);
         bit->vel[0] = 0.0f;
         bit->vel[1] = -0.8f;
@@ -569,27 +524,9 @@ void renderBackground(){
             bg--;
             continue;
         }
-        /*glPushMatrix();
-        glTranslated(bit->pos[0]-(roomX*bit->pos[2]), bit->pos[1], bit->pos[2]);
-        glColor3ub(
-                (bit->pos[1]-100)/(WINDOW_HEIGHT/255)*(bit->pos[2]),
-                (bit->pos[1]-100)/(WINDOW_HEIGHT/255)*(bit->pos[2]),
-                (bit->pos[1]-100)/(WINDOW_HEIGHT/255)*(bit->pos[2])
-        );
-        glLineWidth(1);
-        glBegin(GL_LINES);
-        glVertex2f(0.0f, 0.0f);
-        glVertex2f(0.0f, 10.0f);
-
-        glEnd();
-        glPopMatrix();
-        */
-        // font printing
         Rect r0;
         r0.bot = bit->pos[1];
-        r0.left = r0.center = (bit->pos[0]-(roomX*bit->pos[2]));
-        ggprint12(&r0, 16, 0x0033aaff, "1");
-        ggprint12(&r0, 16, (int)(rnd()*-16777215), "1");
+        r0.left = r0.center = (bit->pos[0]-((roomX-(WINDOW_WIDTH/2))*bit->pos[2]));
         int i = (bit->pos[1]-100)/(WINDOW_HEIGHT/255), j = bit->pos[2];
         if (j>=1){
             ggprint12(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
@@ -598,8 +535,6 @@ void renderBackground(){
         } else {
             ggprint08(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
         }
-        //glEnd();
-        //glPopMatrix();
         bit = bit->next;
     }
     glLineWidth(1);

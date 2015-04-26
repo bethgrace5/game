@@ -44,6 +44,9 @@ class Object{
         double getOldBottom(void);
         double getOldLeft(void);
 
+        void setIndex(int ind);
+        int getIndex();
+
         // used to update boundaries for window scrolling
         double getWindowCenterX();
         double getWindowCenterY();
@@ -61,6 +64,7 @@ class Object{
         // interval is distance the sprite is allowed to move away
         // from windowCenter
         int interval;
+        int index;
         Vec camera;
         Vec velocity;
         Vec center;
