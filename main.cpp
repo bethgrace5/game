@@ -9,7 +9,7 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
-#include "Object.cpp"
+#include "Object.h"
 #include "ppm.h"
 
 #define WINDOW_WIDTH  900
