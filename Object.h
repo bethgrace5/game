@@ -1,5 +1,6 @@
 #ifndef OBJECT_H
 #define OBJECT_H
+
 // Class Object
 // can be used to create AI sprites as well
 
@@ -44,8 +45,10 @@ class Object{
         double getOldLeft(void);
 
         // used to update boundaries for window scrolling
-        double getWindowCenter();
-        void scrollWindow(double amount);
+        double getWindowCenterX();
+        double getWindowCenterY();
+        void scrollHorizontal(double amount);
+        void scrollVertical(double amount);
         double getWindowInterval();
 
         Object( double w, double h, double x, double y);
@@ -55,7 +58,6 @@ class Object{
     private:
         int width;
         int height;
-        int windowCenter;
         // interval is distance the sprite is allowed to move away
         // from windowCenter
         int interval;
@@ -63,6 +65,7 @@ class Object{
         Vec velocity;
         Vec center;
         Vec oldCenter;
+        Vec windowCenter;
 };
 
 #endif

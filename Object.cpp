@@ -19,7 +19,9 @@ Object::Object( double w, double h, double x, double y ) {
 	camera.x = 0;
 	camera.y = 0;
 	camera.z = 0;
-    windowCenter = 300;
+    windowCenter.x = 300;
+    windowCenter.y = 300;
+    windowCenter.z = 0;
     interval = 50;
 }
 void Object::setWidth( double w ) {
@@ -111,11 +113,17 @@ double Object::getOldLeft(){
 
 
 // screen boundaries for scrolling
-double Object::getWindowCenter(){
-  return windowCenter;
+double Object::getWindowCenterX(){
+  return windowCenter.x;
 }
-void Object::scrollWindow(double amount){
-  windowCenter += amount;
+double Object::getWindowCenterY(){
+  return windowCenter.y;
+}
+void Object::scrollHorizontal(double amount){
+  windowCenter.x += amount;
+}
+void Object::scrollVertical(double amount){
+  windowCenter.y += amount;
 }
 double Object::getWindowInterval() {
     return interval;

@@ -9,7 +9,7 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
-#include "Object.h"
+#include "Object.cpp"
 #include "ppm.h"
 
 #define WINDOW_WIDTH  900
@@ -330,32 +330,44 @@ void render(Object *sprite, Object *ground){
   
 }
 void moveWindow(Object *sprite) {
-    double windowCenter = sprite->getWindowCenter();
-    double spriteWinPos = sprite->getCenterX();
+    double windowCenterX = sprite->getWindowCenterX();
+    double windowCenterY = sprite->getWindowCenterY();
+    double spriteWinPosX = sprite->getCenterX();
+    double spriteWinPosY = sprite->getCenterY();
     double interval = sprite->getWindowInterval();
 
     //move window forward
-    if (spriteWinPos > windowCenter + interval) {
-        sprite->scrollWindow(5);
+    if (spriteWinPosX > windowCenterX + interval) {
+        sprite->scrollHorizontal(5);
         sprite->setCameraX( sprite->getCameraX()-5 );
         roomX+=5;
     }
     //move window backward
-    else if (spriteWinPos < windowCenter - interval) {
-        sprite->scrollWindow(-5);
+    else if (spriteWinPosX < windowCenterX - interval) {
+        sprite->scrollHorizontal(-5);
         sprite->setCameraX( sprite->getCameraX()+5 );
         roomX-=5;
+    }
+    //move window up
+    if (spriteWinPosY < windowCenterY + 100) {
+        //sprite->scrollVertical(5);
+        //sprite->setCameraY( sprite->getCameraX()-5 );
+    }
+    //move window down
+    if (spriteWinPosY > windowCenterY + 100) {
+        //sprite->scrollVertical(-5);
+        //sprite->setCameraY( sprite->getCameraX()+5 );
     }
 
     // the game has just started and the sprite is not yet in
     // the center of the screen.
-    if(spriteWinPos < windowCenter - interval - 5) {
+    if(spriteWinPosX < windowCenterX - interval - 5) {
         return;
     }
     // the sprite has reached the end of the level, and scrolling will
     // stop for boss battle.
     // TODO: update parameter to reflect the actual size of level.
-    else if(spriteWinPos > 5000) {
+    else if(spriteWinPosX > 5000) {
         return;
     }
 }
