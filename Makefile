@@ -1,6 +1,6 @@
 # cs335 game
 CFLAGS	= -I ./include
-LIB	=# ./libggfonts.so
+LIB	= ./libggfonts.so
 
 all: game
 
