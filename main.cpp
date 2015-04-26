@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <sys/time.h>
 #include <unistd.h>
-#include <cstring>
+#include <string>
 #include <cmath>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
@@ -21,8 +21,8 @@
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 
 #define MAX_BACKGROUND_BITS 1000
-#define HERO_START_X 250
-#define HERO_START_Y 700
+#define HERO_START_X 330
+#define HERO_START_Y 420
 
 extern "C" {
     #include "fonts.h"
@@ -64,7 +64,7 @@ int bg;
 int roomX=WINDOW_WIDTH/2;
 int roomY=WINDOW_HEIGHT/2;
 int fail=0;
-int interval=100;
+int interval=120;
 
 //Images and Textures
 Ppmimage *heroImage=NULL;
@@ -98,7 +98,7 @@ int main(void){
   sprite.setBottom(-44);
   sprite.setLeft(-26);
   sprite.setRight(26);
-  Object ground_1( 500, 5, 500, 200 );
+  Object ground_1( 500, 10, 500, 100 );
 
   while(!done) { //Staring Animation
     while(XPending(dpy)) {
@@ -110,7 +110,7 @@ int main(void){
     movement(&sprite, &ground_1);
     render(&sprite, &ground_1);
     gettimeofday(&end, NULL);
-    if (diff_ms(end, start) > 800)
+    if (diff_ms(end, start) > 1200)
         moveWindow(&sprite);
     glXSwapBuffers(dpy, win);
   }
@@ -191,7 +191,7 @@ void init_opengl(void){
   glDisable(GL_FOG);
   glDisable(GL_CULL_FACE);
   //Set the screen background color
-  glClearColor(0.1, 0.1, 0.1, 1.0);
+  glClearColor(0.0, 0.0, 0.0, 1.0);
   glEnable(GL_TEXTURE_2D);
   initialize_fonts();
   //Load images into ppm structure.
@@ -287,7 +287,6 @@ void groundCollide(Object *sprite, Object *ground){
   //Detects Which boundaries the Moving Object is around the Static Object
   //top,down,left,right
   if(detectCollide(sprite, ground)){
-      cout << "collision" << endl;
     //If moving object is on top of the static object
     if(!(sprite->getOldBottom() < ground->getTop()) &&
         !(sprite->getBottom() >= ground->getTop()) && (sprite->getVelocityY() < 0)){
@@ -343,8 +342,6 @@ void movement(Object *sprite, Object *ground){
           }
           gettimeofday(&seqEnd, NULL);
           if ((diff_ms(seqEnd, seqStart)) > 80){
-              cout << (diff_ms(seqEnd, seqStart)) << " -> Index: "
-                  << ((sprite->getIndex()+1)%6) << endl;
               sprite->setIndex(((sprite->getIndex()+1)%6));
               gettimeofday(&seqStart, NULL);
           }
@@ -420,16 +417,16 @@ void render(Object *sprite, Object *ground){
   glColor4ub(255,255,255,255);
   glBegin(GL_QUADS);
   tl_sz = 0.076923077;
-  if (sprite->getVelocityX() >= 0.0){
-    glTexCoord2f(sprite->getIndex()*tl_sz, 1.0f); glVertex2i(-w,-w);
-    glTexCoord2f(sprite->getIndex()*tl_sz, 0.0f); glVertex2i(-w,w);
-    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 0.0f); glVertex2i(w,w);
-    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 1.0f); glVertex2i(w,-w);
-  } else if (sprite->getVelocityX() < 0.0){
+  if ((sprite->getVelocityX() < 0.0) or (sprite->getOldCenterX()>sprite->getCenterX())){
     glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 1.0f); glVertex2i(-w,-w);
     glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 0.0f); glVertex2i(-w,w);
     glTexCoord2f((sprite->getIndex()*tl_sz), 0.0f); glVertex2i(w,w);
     glTexCoord2f((sprite->getIndex()*tl_sz), 1.0f); glVertex2i(w,-w);
+  } else {
+    glTexCoord2f(sprite->getIndex()*tl_sz, 1.0f); glVertex2i(-w,-w);
+    glTexCoord2f(sprite->getIndex()*tl_sz, 0.0f); glVertex2i(-w,w);
+    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 0.0f); glVertex2i(w,w);
+    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 1.0f); glVertex2i(w,-w);
   }
   glEnd(); glPopMatrix();
   glDisable(GL_ALPHA_TEST);
@@ -438,7 +435,7 @@ void render(Object *sprite, Object *ground){
   Rect r0, r1;
   r0.bot = WINDOW_HEIGHT - 32;
   r0.left = r0.center = 32;
-  ggprint12(&r0, 16, 0x0033aaff, "Lives");
+  ggprint12(&r0, 16, 0x0033aaff, "Lives ");
   r1.bot = WINDOW_HEIGHT/2;
   r1.left = r1.center = WINDOW_WIDTH/2;
   if (fail>0){
@@ -467,7 +464,7 @@ void moveWindow(Object *sprite) {
         roomY+=5;
     }
     //move window down
-    else if (spriteWinPosY < roomY - interval) {
+    else if ((spriteWinPosY < roomY - interval) && roomY>(WINDOW_HEIGHT/2)) {
         sprite->setCameraY( sprite->getCameraY()+5 );
         roomY-=5;
     }
@@ -484,7 +481,7 @@ void renderBackground(){
         if (bit == NULL){
             exit(EXIT_FAILURE);
         }
-        bit->pos[0] = (rnd() * ((float)WINDOW_WIDTH+2000)) +
+        bit->pos[0] = (rnd() * ((float)WINDOW_WIDTH+3000)) +
                       (roomX-(WINDOW_WIDTH/2)) - 1000;
         bit->pos[1] = rnd() * 100.0f + (float)WINDOW_HEIGHT + 
                       (roomY-(WINDOW_HEIGHT/2));
@@ -502,7 +499,7 @@ void renderBackground(){
     bgBit *bit = bitHead;
     while (bit){
         VecCopy(bit->pos, bit->lastpos);
-        if (bit->pos[1] > 150){
+        if (bit->pos[1] > 0){
             bit->pos[1] += bit->vel[1];
             
         }
@@ -531,7 +528,14 @@ void renderBackground(){
         Rect r0;
         r0.bot = bit->pos[1];
         r0.left = r0.center = (bit->pos[0]-((roomX-(WINDOW_WIDTH/2))*bit->pos[2]));
-        int i = (bit->pos[1]-100)/(WINDOW_HEIGHT/255), j = bit->pos[2];
+        int i, j = bit->pos[2];
+        if (bit->pos[1]>(WINDOW_HEIGHT*0.7)){
+            i=255;
+        } else {
+            i = (bit->pos[1]-10)/(WINDOW_HEIGHT/255);
+            if (i<1)
+                i=0;
+        }
         if (j>=1){
             ggprint12(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
         } else if (j>0.9) {
