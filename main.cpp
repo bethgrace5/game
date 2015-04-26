@@ -1,8 +1,9 @@
 //cs335 Spring 2015 final project #include <iostream> #include <cstdlib> #include <ctime>
 #include <iostream>
 #include <iomanip>
+#include <cstdio>
 #include <cstdlib>
-#include <ctime>
+#include <sys/time.h>
 #include <unistd.h>
 #include <cstring>
 #include <cmath>
@@ -27,6 +28,8 @@ extern "C" {
     #include "fonts.h"
 }
 
+using namespace std;
+
 typedef double Vec[3];
 
 struct bgBit {
@@ -37,12 +40,23 @@ struct bgBit {
     struct bgBit *prev;
 };
 
+int diff_ms(timeval t1, timeval t2)
+{
+    return (((t1.tv_sec - t2.tv_sec) * 1000000) + 
+           (t1.tv_usec - t2.tv_usec))/1000;
+}
+
 //X Windows variables
 Display *dpy; Window win; GLXContext glc;
 
 //Hero Globals
 int didJump=0;
 int lives=3;
+int isWalking=0;
+int isFalling=0;
+int isDying=0;
+int isJumping=0;
+timeval seqStart, seqEnd;
 
 //Game Globals
 bgBit *bitHead = NULL;
@@ -50,6 +64,13 @@ int bg;
 int roomX=0;
 int roomY=0;
 int fail=0;
+int interval=100;
+int scrollWindowX=WINDOW_WIDTH/2;
+int scrollWindowY=WINDOW_HEIGHT/2;
+
+//Images and Textures
+Ppmimage *heroImage=NULL;
+GLuint heroTexture;
 
 //Function prototypes
 void initXWindows(void);
@@ -67,12 +88,14 @@ void groundCollide(Object *sprite, Object *ground);
 bool detectCollide(Object *sprite, Object *ground);
 
 int main(void){
-  std::string previousPosition;
+  string previousPosition;
+  timeval end, start;
+  gettimeofday(&start, NULL);
   int done=0;
   srand(time(NULL));
   initXWindows(); init_opengl();
   //declare sprite object
-  Object sprite(50, 50, HERO_START_X, HERO_START_Y);
+  Object sprite(46, 48, HERO_START_X, HERO_START_Y);
   Object ground_1( 300, 5, WINDOW_WIDTH/2, 200 );
 
   while(!done) { //Staring Animation
@@ -84,7 +107,9 @@ int main(void){
     }
     movement(&sprite, &ground_1);
     render(&sprite, &ground_1);
-    moveWindow(&sprite);
+    gettimeofday(&end, NULL);
+    if (diff_ms(end, start) > 800)
+        moveWindow(&sprite);
     glXSwapBuffers(dpy, win);
   }
   cleanupXWindows(); return 0;
@@ -104,14 +129,14 @@ void initXWindows(void) { //do not change
   int w=WINDOW_WIDTH, h=WINDOW_HEIGHT;
   dpy = XOpenDisplay(NULL);
   if (dpy == NULL) {
-    std::cout << "\n\tcannot connect to X server\n" << std::endl;
+    cout << "\n\tcannot connect to X server\n" << endl;
     //hose(&sprite);
     exit(EXIT_FAILURE);
   }
   Window root = DefaultRootWindow(dpy);
   XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
   if(vi == NULL) {
-    std::cout << "\n\tno appropriate visual found\n" << std::endl;
+    cout << "\n\tno appropriate visual found\n" << endl;
     exit(EXIT_FAILURE);
   }
   Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
@@ -128,6 +153,29 @@ void initXWindows(void) { //do not change
   glXMakeCurrent(dpy, win, glc);
 }
 
+unsigned char *buildAlphaData(Ppmimage *img){
+    //add 4th component to RGB stream...
+    int a,b,c;
+    unsigned char *newdata, *ptr;
+    unsigned char *data = (unsigned char *)img->data;
+    //newdata = (unsigned char *)malloc(img->width * img->height * 4);
+    newdata = new unsigned char[img->width * img->height * 4];
+    ptr = newdata;
+    for (int i=0; i<img->width * img->height * 3; i+=3) {
+        a = *(data+0);
+        b = *(data+1);
+        c = *(data+2);
+        *(ptr+0) = a;
+        *(ptr+1) = b;
+        *(ptr+2) = c;
+        //get the alpha value
+        *(ptr+3) = (a|b|c);
+        ptr += 4;
+        data += 3;
+    }
+    return newdata;
+}
+
 void init_opengl(void){
   //OpenGL initialization
   glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -136,12 +184,29 @@ void init_opengl(void){
   glMatrixMode(GL_MODELVIEW); glLoadIdentity();
   //Set 2D mode (no perspective)
   glOrtho(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT, -1, 1);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_FOG);
+  glDisable(GL_CULL_FACE);
   //Set the screen background color
   glClearColor(0.1, 0.1, 0.1, 1.0);
   glEnable(GL_TEXTURE_2D);
   initialize_fonts();
+  //Load images into ppm structure.
+  heroImage = ppm6GetImage("./images/hero.ppm");
+  //Create texture elements
+  glGenTextures(1, &heroTexture);
+  int w = heroImage->width;
+  int h = heroImage->height;
+  glBindTexture(GL_TEXTURE_2D, heroTexture);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+  //must build a new set of data...
+  unsigned char *silhouetteData = buildAlphaData(heroImage);   
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+                        GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+  delete [] silhouetteData;
 }
-
 
 void check_mouse(XEvent *e, Object *sprite){
   static int savex = 0, savey = 0;
@@ -170,10 +235,7 @@ int check_keys(XEvent *e, Object*sprite){
   if (e->type == KeyPress) {
     if (key == XK_Escape) return 1;
     if (key == XK_w){
-      std::cout << "JUMP!! \n";
-      std::cout << " velocity y: " << sprite->getVelocityY();
-      std::cout << " center y: " << sprite->getCenterY();
-      // TODO: disallow jumping while already in the air.
+        //Jump
       if (didJump < 2 && sprite->getVelocityY() > -0.5){
           didJump++;
           sprite->setVelocityY(5);
@@ -211,10 +273,10 @@ int check_keys(XEvent *e, Object*sprite){
 bool detectCollide(Object *sprite, Object *ground){
   //Gets (Moving Object, Static Object)
   //Reture True if Moving Object Collides with Static Object
-  return (  sprite->getRight()  >= ground->getLeft() && 
-      sprite->getLeft()   <= ground->getRight() &&
-      sprite->getBottom() <= ground->getTop()  &&
-      sprite->getTop()    >= ground->getBottom() 
+  return (  sprite->getRight()  > ground->getLeft() && 
+      sprite->getLeft()   < ground->getRight() &&
+      sprite->getBottom() < ground->getTop()  &&
+      sprite->getTop()    > ground->getBottom() 
       );
 }
 
@@ -254,7 +316,42 @@ void movement(Object *sprite, Object *ground){
   groundCollide(sprite, ground); 
   // Apply Velocity, Add Gravity
   sprite->setCenter( (sprite->getCenterX() + sprite->getVelocityX()), (sprite->getCenterY() + sprite->getVelocityY()));
-  sprite->setVelocityY( sprite->getVelocityY() - GRAVITY);
+  // Cycle through index sequences
+  if (sprite->getVelocityY() < -1){
+      isFalling=1;
+      isJumping=isWalking=0;
+      if (didJump<1)
+          sprite->setIndex(7);
+  } else if (sprite->getVelocityY() > 1) {
+      isJumping=1;
+      isWalking=isFalling=0;
+      if (didJump>1)
+          sprite->setIndex(0);
+      else
+          sprite->setIndex(1);
+  } else {
+      isFalling=0;
+      if (sprite->getVelocityX() < -1 or 
+          sprite->getVelocityX() > 1){
+          if (!isWalking){
+              isWalking=1;
+              sprite->setIndex(0);
+              gettimeofday(&seqStart, NULL);
+          }
+          gettimeofday(&seqEnd, NULL);
+          if ((diff_ms(seqEnd, seqStart)) > 80){
+              cout << (diff_ms(seqEnd, seqStart)) << " -> Index: "
+                  << ((sprite->getIndex()+1)%6) << endl;
+              sprite->setIndex(((sprite->getIndex()+1)%6));
+              gettimeofday(&seqStart, NULL);
+          }
+          isFalling=isJumping=0;
+      } else {
+          isWalking=0;
+          if (!isJumping)
+            sprite->setIndex(6);
+      }
+  }
   // Check for Death
   if (sprite->getCenterY() < 0){
       sprite->setCenter(HERO_START_X, HERO_START_Y);
@@ -262,32 +359,53 @@ void movement(Object *sprite, Object *ground){
       fail=100;
       sprite->setVelocityX(0);
   }
+  sprite->setVelocityY( sprite->getVelocityY() - GRAVITY);
 }
 
 void render(Object *sprite, Object *ground){
-  float w, h;
+  float w, h, tl_sz;
   glClear(GL_COLOR_BUFFER_BIT);
   // Draw Background Falling Bits
   renderBackground();
 
   glColor3ub(255,140,90);
 
-  // Draw Sprite
+  // Draw Hero Sprite
   glPushMatrix();
-  glTranslatef(sprite->getCenterX() + sprite->getCameraX(), sprite->getCenterY(), 0);
+  glTranslatef(
+          sprite->getCenterX() + sprite->getCameraX(),
+          sprite->getCenterY() + sprite->getCameraY(),
+          0);
   w = sprite->getWidth();
   h = sprite->getHeight();
+  glBindTexture(GL_TEXTURE_2D, heroTexture);
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_LESS, 1.0f);
+  glColor4ub(255,255,255,255);
   glBegin(GL_QUADS);
-  glVertex2i(-w,-h);
-  glVertex2i(-w, h);
-  glVertex2i( w, h);
-  glVertex2i( w,-h);
+  tl_sz = 0.076923077;
+  if (sprite->getVelocityX() >= 0.0){
+    glTexCoord2f(sprite->getIndex()*tl_sz, 1.0f); glVertex2i(-w,-w);
+    glTexCoord2f(sprite->getIndex()*tl_sz, 0.0f); glVertex2i(-w,w);
+    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 0.0f); glVertex2i(w,w);
+    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 1.0f); glVertex2i(w,-w);
+  } else if (sprite->getVelocityX() < 0.0){
+    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 1.0f); glVertex2i(-w,-w);
+    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 0.0f); glVertex2i(-w,w);
+    glTexCoord2f((sprite->getIndex()*tl_sz), 0.0f); glVertex2i(w,w);
+    glTexCoord2f((sprite->getIndex()*tl_sz), 1.0f); glVertex2i(w,-w);
+  }
   glEnd(); glPopMatrix();
+  glDisable(GL_ALPHA_TEST);
+
   glColor3ub(0,140,255);
 
   //Ground
   glPushMatrix();
-  glTranslatef(ground->getCenterX() + sprite->getCameraX() , ground->getCenterY(), 0);
+  glTranslatef(
+          ground->getCenterX() + sprite->getCameraX(),
+          ground->getCenterY() + sprite->getCameraY(), 
+          0);
   w = ground->getWidth();
   h = ground->getHeight();
   glBegin(GL_QUADS);
@@ -329,32 +447,43 @@ void render(Object *sprite, Object *ground){
   
 }
 void moveWindow(Object *sprite) {
-    double windowCenter = sprite->getWindowCenter();
-    double spriteWinPos = sprite->getCenterX();
-    double interval = sprite->getWindowInterval();
+    double spriteWinPosX = sprite->getCenterX();
+    double spriteWinPosY = sprite->getCenterY();
 
     //move window forward
-    if (spriteWinPos > windowCenter + interval) {
-        sprite->scrollWindow(5);
+    if (spriteWinPosX > scrollWindowX + interval) {
+        scrollWindowX+=5;
         sprite->setCameraX( sprite->getCameraX()-5 );
         roomX+=5;
     }
     //move window backward
-    else if (spriteWinPos < windowCenter - interval) {
-        sprite->scrollWindow(-5);
+    else if (spriteWinPosX < scrollWindowX - interval) {
+        scrollWindowX-=5;
         sprite->setCameraX( sprite->getCameraX()+5 );
         roomX-=5;
+    }
+    //move window up
+    if (spriteWinPosY > scrollWindowY + interval) {
+        scrollWindowY+=5;
+        sprite->setCameraY( sprite->getCameraY()-5 );
+        roomY+=5;
+    }
+    //move window down
+    else if (spriteWinPosY < scrollWindowY - interval) {
+        scrollWindowY-=5;
+        sprite->setCameraY( sprite->getCameraY()+5 );
+        roomY-=5;
     }
 
     // the game has just started and the sprite is not yet in
     // the center of the screen.
-    if(spriteWinPos < windowCenter - interval - 5) {
+    if(spriteWinPosX < scrollWindowX - interval - 5) {
         return;
     }
     // the sprite has reached the end of the level, and scrolling will
     // stop for boss battle.
     // TODO: update parameter to reflect the actual size of level.
-    else if(spriteWinPos > 5000) {
+    else if(spriteWinPosX > 5000) {
         return;
     }
 }
@@ -439,7 +568,6 @@ void renderBackground(){
         bit = bit->next;
     }
     glLineWidth(1);
-    std::cout << roomX << std::endl;
 }
 
 void cleanup_background(void){
