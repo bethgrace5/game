@@ -60,7 +60,8 @@ timeval seqStart, seqEnd;
 
 //Game Globals
 bgBit *bitHead = NULL;
-int bg;
+Object *grounds[32] = {NULL};
+int bg, gr;
 int roomX=WINDOW_WIDTH/2;
 int roomY=WINDOW_HEIGHT/2;
 int fail=0;
@@ -76,8 +77,8 @@ void init_opengl(void);
 void cleanupXWindows(void);
 void check_mouse(XEvent *e, Object *sprite);
 int  check_keys (XEvent *e, Object *sprite);
-void movement(Object *sprite, Object*ground);
-void render(Object *sprite, Object *ground);
+void movement(Object *sprite);
+void render(Object *sprite);
 void moveWindow(Object *sprite);
 void renderBackground(void);
 void cleanup_background(void);
@@ -98,8 +99,15 @@ int main(void){
   sprite.setBottom(-44);
   sprite.setLeft(-26);
   sprite.setRight(26);
-  Object ground_1( 500, 10, 500, 100 );
-
+  Object ground_0( 400, 10, 400, 80 );
+	Object ground_1(200, 10, 900, 260);
+	Object ground_2(150, 10, 200, 400);
+	Object ground_3(250, 10, 1450, 100);
+	grounds[0] = &ground_0;
+	grounds[1] = &ground_1;
+	grounds[2] = &ground_2;
+	grounds[3] = &ground_3;
+	gr=4;
   while(!done) { //Staring Animation
     while(XPending(dpy)) {
       //Player User Interfaces
@@ -107,8 +115,8 @@ int main(void){
       check_mouse(&e, &sprite);
       done = check_keys(&e, &sprite);
     }
-    movement(&sprite, &ground_1);
-    render(&sprite, &ground_1);
+    movement(&sprite);
+    render(&sprite);
     gettimeofday(&end, NULL);
     if (diff_ms(end, start) > 1200)
         moveWindow(&sprite);
@@ -287,35 +295,46 @@ void groundCollide(Object *sprite, Object *ground){
   //Detects Which boundaries the Moving Object is around the Static Object
   //top,down,left,right
   if(detectCollide(sprite, ground)){
+	cout << "collision with " << ground << endl;
+	cout << "if (!" << sprite->getOldBottom() << " < " << ground->getTop() << ") && (!" << sprite->getBottom() << " >= " << ground->getTop() << ")" << endl;
     //If moving object is on top of the static object
     if(!(sprite->getOldBottom() < ground->getTop()) &&
         !(sprite->getBottom() >= ground->getTop()) && (sprite->getVelocityY() < 0)){
           sprite->setVelocityY(0);
           sprite->setCenter(sprite->getCenterX(), ground->getTop()+(sprite->getCenterY()-sprite->getBottom()));
           didJump=0;
+	cout << "VelocityY=0" << endl;
     }
     //If moving object is at the bottom of static object
     if(!(sprite->getOldTop() > ground->getBottom()) &&
         !(sprite->getTop()   <= ground->getBottom())){
           sprite->setVelocityY(-0.51); 
+	cout << "VelocityY=-0.51" << endl;
     }
     //If moving object is at the left side of static object
     if(!(sprite->getOldRight() > ground->getLeft() ) &&
         !(sprite->getRight() <= ground->getLeft())){
           sprite->setVelocityX(-0.51); 
+	cout << "VelocityX=-0.51" << endl;
     }
     //If moving object is at the right side of static object
     if(!(sprite->getOldLeft() < ground->getRight() ) &&
         !(sprite->getLeft() >= ground->getRight())){
       sprite->setVelocityX(0.51); 
+	cout << "VelocityX=0.51" << endl;
     }
-  }
-  else sprite->setOldCenter();
+  }	
+  //else sprite->setOldCenter();
 }
 
-void movement(Object *sprite, Object *ground){
-  // Detect Collision
-  groundCollide(sprite, ground); 
+void movement(Object *sprite){
+	Object *ground;
+	for (int i=0; i<gr; i++){
+	  ground = grounds[i];
+	  // Detect Collision
+	  groundCollide(sprite, ground); 
+	}
+	sprite->setOldCenter();
   // Apply Velocity, Add Gravity
   sprite->setCenter( (sprite->getCenterX() + sprite->getVelocityX()), (sprite->getCenterY() + sprite->getVelocityY()));
   // Cycle through index sequences
@@ -362,13 +381,16 @@ void movement(Object *sprite, Object *ground){
   sprite->setVelocityY( sprite->getVelocityY() - GRAVITY);
 }
 
-void render(Object *sprite, Object *ground){
+void render(Object *sprite){
   float w, h, tl_sz;
   glClear(GL_COLOR_BUFFER_BIT);
   // Draw Background Falling Bits
   renderBackground();
 
   glColor3ub(65,155,225);
+	Object *ground;
+	for (int i=0;i<gr;i++){
+	ground = grounds[i];
   //Ground
   glPushMatrix();
   glTranslatef(
@@ -383,7 +405,7 @@ void render(Object *sprite, Object *ground){
   glVertex2i( w, h);
   glVertex2i( w,-h);
   glEnd(); glPopMatrix();
-
+}
   //Non-Collision Object
   /*
      glPushMatrix();
