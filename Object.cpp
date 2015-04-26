@@ -5,6 +5,7 @@
 #include <ctime>
 #include <cstring>
 #include <vector>
+<<<<<<< HEAD
 
 class Object{
     struct Vec {
@@ -64,6 +65,9 @@ class Object{
         Vec center;
         Vec oldCenter;
 };
+=======
+#include "Object.h"
+>>>>>>> 012bf37183c4fe9ce47174f07895c77f8c2e661a
 
 Object::Object( double w, double h, double x, double y ) {
     width  = w;
@@ -77,7 +81,14 @@ Object::Object( double w, double h, double x, double y ) {
 	camera.x = 0;
 	camera.y = 0;
 	camera.z = 0;
+<<<<<<< HEAD
     index = 0;
+=======
+    windowCenter.x = 300;
+    windowCenter.y = 300;
+    windowCenter.z = 0;
+    interval = 50;
+>>>>>>> 012bf37183c4fe9ce47174f07895c77f8c2e661a
 }
 void Object::setWidth( double w ) {
     width = w;
@@ -166,8 +177,24 @@ double Object::getOldLeft(){
   return oldCenter.x - width;
 }
 
+<<<<<<< HEAD
 void Object::setIndex(int ind){
   index = ind;
+=======
+
+// screen boundaries for scrolling
+double Object::getWindowCenterX(){
+  return windowCenter.x;
+}
+double Object::getWindowCenterY(){
+  return windowCenter.y;
+}
+void Object::scrollHorizontal(double amount){
+  windowCenter.x += amount;
+}
+void Object::scrollVertical(double amount){
+  windowCenter.y += amount;
+>>>>>>> 012bf37183c4fe9ce47174f07895c77f8c2e661a
 }
 int Object::getIndex() {
     return index;

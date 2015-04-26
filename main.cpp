@@ -434,6 +434,7 @@ void render(Object *sprite, Object *ground){
   // retuns the position of the sprite as left, mid, or right.
   //
 
+  // font printing
   Rect r0, r1;
   r0.bot = WINDOW_HEIGHT - 32;
   r0.left = r0.center = 32;
@@ -447,22 +448,40 @@ void render(Object *sprite, Object *ground){
   
 }
 void moveWindow(Object *sprite) {
+<<<<<<< HEAD
     double spriteWinPosX = sprite->getCenterX();
     double spriteWinPosY = sprite->getCenterY();
 
     //move window forward
     if (spriteWinPosX > scrollWindowX + interval) {
         scrollWindowX+=5;
+=======
+    double windowCenterX = sprite->getWindowCenterX();
+    double windowCenterY = sprite->getWindowCenterY();
+    double spriteWinPosX = sprite->getCenterX();
+    double spriteWinPosY = sprite->getCenterY();
+    double interval = sprite->getWindowInterval();
+
+    //move window forward
+    if (spriteWinPosX > windowCenterX + interval) {
+        sprite->scrollHorizontal(5);
+>>>>>>> 012bf37183c4fe9ce47174f07895c77f8c2e661a
         sprite->setCameraX( sprite->getCameraX()-5 );
         roomX+=5;
     }
     //move window backward
+<<<<<<< HEAD
     else if (spriteWinPosX < scrollWindowX - interval) {
         scrollWindowX-=5;
+=======
+    else if (spriteWinPosX < windowCenterX - interval) {
+        sprite->scrollHorizontal(-5);
+>>>>>>> 012bf37183c4fe9ce47174f07895c77f8c2e661a
         sprite->setCameraX( sprite->getCameraX()+5 );
         roomX-=5;
     }
     //move window up
+<<<<<<< HEAD
     if (spriteWinPosY > scrollWindowY + interval) {
         scrollWindowY+=5;
         sprite->setCameraY( sprite->getCameraY()-5 );
@@ -473,11 +492,25 @@ void moveWindow(Object *sprite) {
         scrollWindowY-=5;
         sprite->setCameraY( sprite->getCameraY()+5 );
         roomY-=5;
+=======
+    if (spriteWinPosY < windowCenterY + 100) {
+        //sprite->scrollVertical(5);
+        //sprite->setCameraY( sprite->getCameraX()-5 );
+    }
+    //move window down
+    if (spriteWinPosY > windowCenterY + 100) {
+        //sprite->scrollVertical(-5);
+        //sprite->setCameraY( sprite->getCameraX()+5 );
+>>>>>>> 012bf37183c4fe9ce47174f07895c77f8c2e661a
     }
 
     // the game has just started and the sprite is not yet in
     // the center of the screen.
+<<<<<<< HEAD
     if(spriteWinPosX < scrollWindowX - interval - 5) {
+=======
+    if(spriteWinPosX < windowCenterX - interval - 5) {
+>>>>>>> 012bf37183c4fe9ce47174f07895c77f8c2e661a
         return;
     }
     // the sprite has reached the end of the level, and scrolling will
@@ -550,11 +583,13 @@ void renderBackground(){
 
         glEnd();
         glPopMatrix();
-        */Rect r0;
+        */
+        // font printing
+        Rect r0;
         r0.bot = bit->pos[1];
         r0.left = r0.center = (bit->pos[0]-(roomX*bit->pos[2]));
-        //ggprint12(&r0, 16, 0x0033aaff, "1");
-        //ggprint12(&r0, 16, (int)(rnd()*-16777215), "1");
+        ggprint12(&r0, 16, 0x0033aaff, "1");
+        ggprint12(&r0, 16, (int)(rnd()*-16777215), "1");
         int i = (bit->pos[1]-100)/(WINDOW_HEIGHT/255), j = bit->pos[2];
         if (j>=1){
             ggprint12(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
