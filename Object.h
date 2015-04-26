@@ -34,6 +34,10 @@ class Object{
         double getOldCenterY(void);
         void  setOldCenter(void);
 
+        void setTop(double t);
+        void setRight(double r);
+        void setLeft(double l);
+        void setBottom(double b);
         double getTop(void);
         double getRight(void);
         double getBottom(void);
@@ -61,6 +65,7 @@ class Object{
     private:
         int width;
         int height;
+        int top, bottom, left, right;
         // interval is distance the sprite is allowed to move away
         // from windowCenter
         int interval;

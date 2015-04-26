@@ -17,6 +17,10 @@ Object::Object( double w, double h, double x, double y ) {
     windowCenter.y = 300;
     windowCenter.z = 0;
     interval = 50;
+    left=w*-1;
+    bottom=h*-1;
+    right=w;
+    top=h;
 }
 void Object::setWidth( double w ) {
     width = w;
@@ -79,30 +83,42 @@ void Object::setOldCenter(void){
   oldCenter.z = 0;
 }
 
+void Object::setTop( double t ) {
+    top = t;
+}
+void Object::setRight( double r ) {
+    right = r;
+}
+void Object::setLeft( double l ) {
+    left = l;
+}
+void Object::setBottom( double b ) {
+    bottom = b;
+}
 double Object::getTop(){
-  return center.y + height;
+  return center.y + top;
 }
 double Object::getBottom(){
-  return center.y - height;
+  return center.y + bottom;
 }
 double Object::getRight(){
-  return center.x + width;
+  return center.x + right;
 }
 double Object::getLeft(){
-  return center.x - width;
+  return center.x + left;
 }
 
 double Object::getOldTop(){
-  return oldCenter.y + height;
+  return oldCenter.y + top;
 }
 double Object::getOldBottom(){
-  return oldCenter.y - height;
+  return oldCenter.y + bottom;
 }
 double Object::getOldRight(){
-  return oldCenter.x + width;
+  return oldCenter.x + right;
 }
 double Object::getOldLeft(){
-  return oldCenter.x - width;
+  return oldCenter.x + left;
 }
 
 void Object::setIndex(int ind){

@@ -94,7 +94,11 @@ int main(void){
   initXWindows(); init_opengl();
   //declare sprite object
   Object sprite(46, 48, HERO_START_X, HERO_START_Y);
-  Object ground_1( 300, 5, WINDOW_WIDTH/2, 200 );
+  sprite.setTop(44);
+  sprite.setBottom(-44);
+  sprite.setLeft(-26);
+  sprite.setRight(26);
+  Object ground_1( 500, 5, 500, 200 );
 
   while(!done) { //Staring Animation
     while(XPending(dpy)) {
@@ -283,11 +287,12 @@ void groundCollide(Object *sprite, Object *ground){
   //Detects Which boundaries the Moving Object is around the Static Object
   //top,down,left,right
   if(detectCollide(sprite, ground)){
+      cout << "collision" << endl;
     //If moving object is on top of the static object
     if(!(sprite->getOldBottom() < ground->getTop()) &&
         !(sprite->getBottom() >= ground->getTop()) && (sprite->getVelocityY() < 0)){
           sprite->setVelocityY(0);
-          sprite->setCenter(sprite->getCenterX(), ground->getTop()+sprite->getHeight());
+          sprite->setCenter(sprite->getCenterX(), ground->getTop()+(sprite->getCenterY()-sprite->getBottom()));
           didJump=0;
     }
     //If moving object is at the bottom of static object
@@ -366,36 +371,7 @@ void render(Object *sprite, Object *ground){
   // Draw Background Falling Bits
   renderBackground();
 
-  // Draw Hero Sprite
-  glPushMatrix();
-  glTranslatef(
-          sprite->getCenterX() + sprite->getCameraX(),
-          sprite->getCenterY() + sprite->getCameraY(),
-          0);
-  w = sprite->getWidth();
-  h = sprite->getHeight();
-  glBindTexture(GL_TEXTURE_2D, heroTexture);
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_LESS, 1.0f);
-  glColor4ub(255,255,255,255);
-  glBegin(GL_QUADS);
-  tl_sz = 0.076923077;
-  if (sprite->getVelocityX() >= 0.0){
-    glTexCoord2f(sprite->getIndex()*tl_sz, 1.0f); glVertex2i(-w,-w);
-    glTexCoord2f(sprite->getIndex()*tl_sz, 0.0f); glVertex2i(-w,w);
-    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 0.0f); glVertex2i(w,w);
-    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 1.0f); glVertex2i(w,-w);
-  } else if (sprite->getVelocityX() < 0.0){
-    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 1.0f); glVertex2i(-w,-w);
-    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 0.0f); glVertex2i(-w,w);
-    glTexCoord2f((sprite->getIndex()*tl_sz), 0.0f); glVertex2i(w,w);
-    glTexCoord2f((sprite->getIndex()*tl_sz), 1.0f); glVertex2i(w,-w);
-  }
-  glEnd(); glPopMatrix();
-  glDisable(GL_ALPHA_TEST);
-
-  glColor3ub(0,140,255);
-
+  glColor3ub(65,155,225);
   //Ground
   glPushMatrix();
   glTranslatef(
@@ -428,7 +404,35 @@ void render(Object *sprite, Object *ground){
   // the sprite should be 'left' at the beginning of the level,
   // 'mid' throughout the level, and 'right' at the end of the level.
   // retuns the position of the sprite as left, mid, or right.
-  //
+  
+  
+  // Draw Hero Sprite
+  glPushMatrix();
+  glTranslatef(
+          sprite->getCenterX() + sprite->getCameraX(),
+          sprite->getCenterY() + sprite->getCameraY(),
+          0);
+  w = sprite->getWidth();
+  h = sprite->getHeight();
+  glBindTexture(GL_TEXTURE_2D, heroTexture);
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_LESS, 1.0f);
+  glColor4ub(255,255,255,255);
+  glBegin(GL_QUADS);
+  tl_sz = 0.076923077;
+  if (sprite->getVelocityX() >= 0.0){
+    glTexCoord2f(sprite->getIndex()*tl_sz, 1.0f); glVertex2i(-w,-w);
+    glTexCoord2f(sprite->getIndex()*tl_sz, 0.0f); glVertex2i(-w,w);
+    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 0.0f); glVertex2i(w,w);
+    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 1.0f); glVertex2i(w,-w);
+  } else if (sprite->getVelocityX() < 0.0){
+    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 1.0f); glVertex2i(-w,-w);
+    glTexCoord2f((sprite->getIndex()*tl_sz)+tl_sz, 0.0f); glVertex2i(-w,w);
+    glTexCoord2f((sprite->getIndex()*tl_sz), 0.0f); glVertex2i(w,w);
+    glTexCoord2f((sprite->getIndex()*tl_sz), 1.0f); glVertex2i(w,-w);
+  }
+  glEnd(); glPopMatrix();
+  glDisable(GL_ALPHA_TEST);
 
   // font printing
   Rect r0, r1;
