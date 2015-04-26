@@ -101,7 +101,7 @@ int main(void){
   sprite.setRight(26);
   Object ground_0( 400, 10, 400, 80 );
 	Object ground_1(200, 10, 900, 260);
-	Object ground_2(150, 10, 200, 400);
+	Object ground_2(150, 10, 1200, 400);
 	Object ground_3(250, 10, 1450, 100);
 	grounds[0] = &ground_0;
 	grounds[1] = &ground_1;
