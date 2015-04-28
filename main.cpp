@@ -107,10 +107,10 @@ int main(void){
     Object ground_3(150, 10, 1200, 360);
     Object ground_4(250, 10, 1450, 80);
     Object ground_5(450, 10, 2500, 80);
-    Object ground_6(350, 10, 2500, 720);
-    Object ground_7(250, 10, 2800, 840);
+    Object ground_6(350, 10, 2500, 360);
+    Object ground_7(250, 10, 2800, 480);
     Object ground_8(450, 10, 3500, 80);
-    Object ground_9(450, 10, 4000, 80);
+    Object ground_9(450, 10, 4000, 200);
     Object ground_10(450, 10, 4500, 80);
     Object ground_11(450, 10, 5500, 80);
     Object ground_12(450, 10, 6500, 80);
