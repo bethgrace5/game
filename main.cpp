@@ -40,6 +40,21 @@ struct bgBit {
     struct bgBit *prev;
 };
 
+struct Bullet {
+        Vec pos;
+        Vec vel;
+        float color[3];
+        struct timespec time;
+        struct Bullet *prev;
+        struct Bullet *next;
+        Bullet() {
+                prev = NULL;
+                next = NULL;
+        }
+};
+
+
+
 int diff_ms(timeval t1, timeval t2)
 {
     return (((t1.tv_sec - t2.tv_sec) * 1000000) + 
@@ -115,7 +130,8 @@ int main(void){
     Object ground_11(450, 10, 5500, 80);
     Object ground_12(450, 10, 6500, 80);
     Object ground_13(450, 10, 7500, 80);
-    Object ground_14(450, 10, 8500, 80);
+    Object ground_14(450, 10, 8500, 80); 
+    
     grounds[0] = &ground_0;
     grounds[1] = &ground_1;
     grounds[2] = &ground_2;
@@ -131,7 +147,8 @@ int main(void){
     grounds[12] = &ground_12;
     grounds[13] = &ground_13;
     grounds[14] = &ground_14;
-    gr=14;
+
+    gr=15;
     while(!done) { //Staring Animation
         while(XPending(dpy)) {
             //Player User Interfaces
