@@ -337,7 +337,7 @@ void groundCollide(Object *sprite, Object *ground){
             sprite->setCenter(sprite->getCenterX(), 
                     g_top+(sprite->getCenterY()-s_bottom)
                     );
-            didJump=0;
+            isFalling=isJumping=didJump=0;
         }
         //If moving object is at the bottom of static object
         if(!(sprite->getOldTop() > g_bottom) &&
@@ -363,7 +363,7 @@ void groundCollide(Object *sprite, Object *ground){
                     sprite->getCenterY()
                     );
         }
-    }	
+    }
 }
 
 void movement(Object *sprite){
@@ -377,33 +377,33 @@ void movement(Object *sprite){
     // Apply Velocity, Add Gravity
     sprite->setCenter( (sprite->getCenterX() + sprite->getVelocityX()), (sprite->getCenterY() + sprite->getVelocityY()));
     // Cycle through index sequences
-    if (sprite->getVelocityY() < -1){
+    if (sprite->getVelocityY() < -1){ // Falling
         isFalling=1;
         isJumping=isWalking=0;
         if (didJump<1)
             sprite->setIndex(7);
-    } else if (sprite->getVelocityY() > 1) {
+    } else if (sprite->getVelocityY() > 1) { // Jumping
         isJumping=1;
         isWalking=isFalling=0;
         if (didJump>1)
             sprite->setIndex(0);
         else
             sprite->setIndex(1);
-    } else {
-        isFalling=0;
+    } else { // Walking
+        cout << "W: " << isWalking << ", J: " << isJumping << ", F: " << isFalling << endl;
         if (sprite->getVelocityX() < -1 or 
                 sprite->getVelocityX() > 1){
-            if (!isWalking){
+            if (!isWalking && !isJumping && !isFalling){
                 isWalking=1;
                 sprite->setIndex(0);
                 gettimeofday(&seqStart, NULL);
             }
             gettimeofday(&seqEnd, NULL);
-            if ((diff_ms(seqEnd, seqStart)) > 80){
+            if (isWalking && ((diff_ms(seqEnd, seqStart)) > 80)){
                 sprite->setIndex(((sprite->getIndex()+1)%6));
                 gettimeofday(&seqStart, NULL);
+                isFalling=isJumping=0;
             }
-            isFalling=isJumping=0;
         } else {
             isWalking=0;
             if (!isJumping)
