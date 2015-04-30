@@ -163,7 +163,6 @@ int main(void){
     enemies_length=2;
 
 
->>>>>>> a6ba33af7702cb6a5adcd674148c746b352b296b
     while(!done) { //Staring Animation
         while(XPending(dpy)) {
             //Player User Interfaces
@@ -511,8 +510,8 @@ void render(Object *hero){
         //Ground
         glPushMatrix();
         glTranslatef(
-                enemy->getCenterX() + hero->getCameraX(),
-                enemy->getCenterY() + hero->getCameraY(),
+                enemy->getCenterX() - x,
+                enemy->getCenterY() - y,
                 0);
         w = enemy->getWidth();
         h = enemy->getHeight();
