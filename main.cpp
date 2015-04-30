@@ -77,7 +77,8 @@ timeval seqStart, seqEnd;
 //Game Globals
 bgBit *bitHead = NULL;
 Object *grounds[32] = {NULL};
-int bg, gr;
+Object *enemies[32] = {NULL};
+int bg, grounds_length, enemies_length;
 int roomX=WINDOW_WIDTH/2;
 int roomY=WINDOW_HEIGHT/2;
 int fail=0;
@@ -117,12 +118,6 @@ int main(void){
     hero.setLeft(-26);
     hero.setRight(26);
 
-    //declare Enemy
-    Object enemy(46, 48, HERO_START_X + 50, HERO_START_Y + 50);
-    //enemy.setTop(44);
-    //enemy.setBottom(-44);
-    //enemy.setLeft(-26);
-    //enemy.setRight(26);
 
     Object ground_0(10, 1000, -10, 600);
     Object ground_1(400, 10, 400, 80);
@@ -139,7 +134,7 @@ int main(void){
     Object ground_12(450, 10, 6500, 80);
     Object ground_13(450, 10, 7500, 80);
     Object ground_14(450, 10, 8500, 80); 
-    
+
     grounds[0] = &ground_0;
     grounds[1] = &ground_1;
     grounds[2] = &ground_2;
@@ -155,8 +150,21 @@ int main(void){
     grounds[12] = &ground_12;
     grounds[13] = &ground_13;
     grounds[14] = &ground_14;
-    grounds[15] = &enemy;
-    gr=16;
+    grounds_length=15;
+
+
+    int enemy_h = 48;
+    int enemy_w = 20;
+
+    //declare Enemy
+    Object enemy_0(enemy_w, enemy_h, ground_2.getCenterX() + ground_2.getHeight(), ground_2.getCenterY()+ground_2.getWidth());
+    //enemy.setTop(44);
+    //enemy.setBottom(-44);
+    //enemy.setLeft(-26);
+    //enemy.setRight(26);
+    enemies[0] = &enemy_0;
+    enemies_length=1;
+
 
     while(!done) { //Staring Animation
         while(XPending(dpy)) {
@@ -394,7 +402,7 @@ void groundCollide(Object *hero, Object *ground){
 
 void movement(Object *hero){
     Object *ground;
-    for (int i=0; i<gr; i++){
+    for (int i=0; i<grounds_length; i++){
         ground = grounds[i];
         // Detect Collision
         groundCollide(hero, ground);
@@ -448,6 +456,7 @@ void movement(Object *hero){
     hero->setVelocityY( hero->getVelocityY() - GRAVITY);
 }
 
+
 void render(Object *hero){
     float w, h, tl_sz;
     glClear(GL_COLOR_BUFFER_BIT);
@@ -455,8 +464,9 @@ void render(Object *hero){
     renderBackground();
 
     glColor3ub(65,155,225);
+    // render grounds
     Object *ground;
-    for (int i=0;i<gr;i++){
+    for (int i=0;i<grounds_length;i++){
         ground = grounds[i];
         //Ground
         glPushMatrix();
@@ -466,6 +476,26 @@ void render(Object *hero){
                 0);
         w = ground->getWidth();
         h = ground->getHeight();
+        glBegin(GL_QUADS);
+        glVertex2i(-w,-h);
+        glVertex2i(-w, h);
+        glVertex2i( w, h);
+        glVertex2i( w,-h);
+        glEnd(); glPopMatrix();
+    }
+    // render enemies
+    glColor3ub(100,0,0);
+    Object *enemy;
+    for (int i=0;i<enemies_length;i++){
+        enemy = enemies[i];
+        //Ground
+        glPushMatrix();
+        glTranslatef(
+                enemy->getCenterX() + hero->getCameraX(),
+                enemy->getCenterY() + hero->getCameraY(),
+                0);
+        w = enemy->getWidth();
+        h = enemy->getHeight();
         glBegin(GL_QUADS);
         glVertex2i(-w,-h);
         glVertex2i(-w, h);
