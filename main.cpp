@@ -100,6 +100,7 @@ void render(Object *hero);
 void moveWindow(Object *hero);
 void renderBackground(void);
 void cleanup_background(void);
+Object createAI( int w, int h, Object *ground);
 
 void groundCollide(Object *hero, Object *ground);
 bool detectCollide(Object *hero, Object *ground);
@@ -152,18 +153,13 @@ int main(void){
     grounds[14] = &ground_14;
     grounds_length=15;
 
+    //setup enemies
+    Object enemy_0 = createAI(20, 48, &ground_2);
+    Object enemy_1 = createAI(20, 48, &ground_3);
 
-    int enemy_h = 48;
-    int enemy_w = 20;
-
-    //declare Enemy
-    Object enemy_0(enemy_w, enemy_h, ground_2.getCenterX() + ground_2.getHeight(), ground_2.getCenterY()+ground_2.getWidth());
-    //enemy.setTop(44);
-    //enemy.setBottom(-44);
-    //enemy.setLeft(-26);
-    //enemy.setRight(26);
     enemies[0] = &enemy_0;
-    enemies_length=1;
+    enemies[1] = &enemy_1;
+    enemies_length=2;
 
 
     while(!done) { //Staring Animation
@@ -684,3 +680,11 @@ void cleanup_background(void){
     }
     bitHead = NULL;
 }
+
+Object createAI( int w, int h, Object *ground) {
+    Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
+    //cout << glGetIntegerv(GL_VIEWPORT);
+    return newEnemy;
+
+}
+
