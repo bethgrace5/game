@@ -103,11 +103,11 @@ int main(void){
     hero.setRight(26);
 
     //declare Enemy
-    Object enemy(46, 48, HERO_START_X, HERO_START_Y);
-    hero.setTop(44);
-    hero.setBottom(-44);
-    hero.setLeft(-26);
-    hero.setRight(26);
+    Object enemy(46, 48, HERO_START_X + 50, HERO_START_Y + 50);
+    //enemy.setTop(44);
+    //enemy.setBottom(-44);
+    //enemy.setLeft(-26);
+    //enemy.setRight(26);
 
     Object ground_0(10, 1000, -10, 600);
     Object ground_1(400, 10, 400, 80);
@@ -139,7 +139,8 @@ int main(void){
     grounds[12] = &ground_12;
     grounds[13] = &ground_13;
     grounds[14] = &ground_14;
-    gr=14;
+    grounds[15] = &enemy;
+    gr=16;
     while(!done) { //Staring Animation
         while(XPending(dpy)) {
             //Player User Interfaces
