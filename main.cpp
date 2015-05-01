@@ -572,7 +572,7 @@ glEnd(); glPopMatrix();
 glDisable(GL_ALPHA_TEST);
 
 //drawFont(25);
-writeWords("IT WORKS", 400, 150);
+writeWords("YAY", 300, 150);
 
 // font printing
 Rect r0, r1;
@@ -583,6 +583,7 @@ r1.bot = WINDOW_HEIGHT/2;
 r1.left = r1.center = WINDOW_WIDTH/2;
 if (fail>0){
   //ggprint16(&r1, fail/2, 0x00ff0000, "FAIL");
+  writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
   fail--;
 }
 
@@ -685,11 +686,14 @@ void renderBackground(){
         i=0;
     }
     if (j>=1){
-      //ggprint12(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
+      //ggprint12(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") ); 
+      writeWords("COOL", bit->pos[0], bit->pos[1]); 
     } else if (j>0.9) {
       //ggprint10(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
+      writeWords("ULTIMATE", bit->pos[0], bit->pos[1]); 
     } else {
-      //ggprint08(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
+      //ggprint08(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") )
+      writeWords("ELEPHANTS", bit->pos[0], bit->pos[1]); 
     }
     bit = bit->next;
   }

@@ -75,7 +75,9 @@ unsigned char *buildAlphaData2(Ppmimage *img){
 //=====================================================================
 void drawFont(int atSet){
   int atX = atSet, atY = 0;
-  if(atSet < 7);//nothing happen at Set is good
+  //This is use to set the Y and X to the right places of each letter
+  //  -- Since there are 7 letters in each row. Make sure to reset 
+  if(atSet < 7);//nothing happen at this set
   else if(atSet < 14){ atX = atSet - 7 ; atY = 1;}
   else if(atSet < 21){ atX = atSet - 14; atY = 2;}
   else if(atSet < 28){ atX = atSet - 21; atY = 3;}
@@ -111,7 +113,8 @@ void drawFont(int atSet){
 //This Functions Gets A single letter base on the letter its given 
 //it wiill call writeFont(letter) with the corresponding letter.
 void getFont(char letter){
-  switch(letter){
+  //putchar(toupper(letter));
+  switch(toupper(letter)){
     case 'A': drawFont(0); break;
     case 'B': drawFont(1); break;
     case 'C': drawFont(2); break;
@@ -145,7 +148,6 @@ void getFont(char letter){
 //This Functions will get each letter of the words then calls getFont(letter)
 //so.. this reads in every letter of the word. Each letter will have space
 //between...
-//not finish yet
 void writeWords(std::string words, float x, float y){
 
   int size = words.size(); 
@@ -159,7 +161,6 @@ void writeWords(std::string words, float x, float y){
   for(int i = 0; i < size; i++){
     glTranslatef(20, 0, 0);
     getFont(cWords[i]);
- //   getFont(std::words.charAt(0));
   }//Note Need To Add Spacing Between Each Letter
   glPopMatrix();
 
