@@ -19,8 +19,6 @@ IntroState IntroState::m_IntroState;
 
 
 void IntroState::Init() {
-    //gettimeofday(&start, NULL);
-
     //OpenGL initialization
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     //Initialize matrices
@@ -59,7 +57,6 @@ void IntroState::HandleEvents(GameEngine* game) {
 
         if(XPending(game->dpy)) {
             while(!done) {
-                cout << "xpending";
                 //Player User Interfaces
                 XEvent e; XNextEvent(game->dpy, &e);
                 check_mouse(&e);
@@ -74,6 +71,7 @@ void IntroState::Update(GameEngine* game) {
 }
 
 void IntroState::Draw(GameEngine* game) {
+    // set color to black
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glTranslatef(0.0f, 0.0f, -5.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

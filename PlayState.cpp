@@ -30,10 +30,10 @@
 #define rnd()(float)rand() /(float)(RAND_MAX)
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 using namespace std;
-//XEvent *e; 
 
 PlayState PlayState::m_PlayState;
 typedef double Vec[3];
+
 // background bits
 struct bgBit {
     Vec pos;
@@ -65,7 +65,6 @@ int isJumping=0;
 double s_right, s_left, s_top, s_bottom;
 timeval seqStart, seqEnd;
 
-
 //Images and Textures
 Ppmimage *heroImage=NULL;
 GLuint heroTexture;
@@ -75,11 +74,8 @@ timeval end, start;
 
 void PlayState::Init() {
     gettimeofday(&start, NULL);
-    //int done=0;
     srand(time(NULL));
 
-    // declare all ground objects
-    // declare all sprite objects
     //declare hero object
     hero.setTop(44);
     hero.setBottom(-44);
@@ -128,7 +124,6 @@ void PlayState::Init() {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
             GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
     delete [] silhouetteData;
-//}
 }
 
 void PlayState::Cleanup() {
@@ -140,9 +135,7 @@ void PlayState::Cleanup() {
         bitHead = s;
     }
     bitHead = NULL;
-
 }
-
 
 void PlayState::Pause() {
 }
@@ -154,7 +147,6 @@ void PlayState::HandleEvents(GameEngine* game) {
     int done = 0;
         if(XPending(game->dpy)) {
             while(!done) {
-                cout << "xpending";
                 //Player User Interfaces
                 XEvent e; XNextEvent(game->dpy, &e);
                 check_mouse(&e);
@@ -171,7 +163,6 @@ int PlayState::check_mouse(XEvent *e) {
     if (e->type == ButtonRelease) { return 0;}
     if (e->type == ButtonPress) {
         if (e->xbutton.button==1) { //Left button was pressed
-            //int y = WINDOW_HEIGHT - e->xbutton.y;
             return 0;
         }
         if (e->xbutton.button==3) { //Right button was pressed
@@ -202,7 +193,7 @@ int PlayState::check_keys(XEvent *e, Object *hero, GameEngine *game){
         }
         if ((key == XK_a || key == XK_Left) && !isDying) {
             hero->setVelocityX(-5);
-            cout << "hit a in Play State\n"<<endl;
+            cout << "hit a in Play State\n";
         }
         if ((key == XK_d || key == XK_Right) && !isDying) {
             hero->setVelocityX(5);
@@ -215,9 +206,6 @@ int PlayState::check_keys(XEvent *e, Object *hero, GameEngine *game){
         }
         if (key == XK_i) {
             game->ChangeState( IntroState::Instance() );
-            //game->ChangeState( PlayState::Instance() );
-            //game->ChangeState();
-            //game->Quit();
         }
 
     }
@@ -231,41 +219,33 @@ int PlayState::check_keys(XEvent *e, Object *hero, GameEngine *game){
     }
 
     return 1;
-//}
 }
 
 void PlayState::Update(GameEngine* game) {
-    //int done = 0;
-    //while(!done) { //Staring Animation
-            //done = check_keys(&e, &hero);
-        //}
+    // check object movement, move window
         movement(&hero);
-        //render(&hero);
-        //gettimeofday(&end, NULL);
-        //if (diff_ms(end, start) > 1200)
-            //moveWindow(&hero);
-
 }
 
 void PlayState::Draw(GameEngine* game) {
+    // color background
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    //glTranslatef(150, 150, 0);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glColor3f(20, 30, 40);
 
-    glTranslatef(0.0f, 0.0f, -5.0f);
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glColor3f(0.0f, 0.0f, 0.0f);
-
-    glBegin(GL_QUADS);
-    glVertex2i(-10,-10);
-    glVertex2i(-10, 10);
-    glVertex2i( 10, 10);
-    glVertex2i( 10,-10);
-    glEnd();
+    // draw rectangle
+    //glPushMatrix();
+    //glBegin(GL_QUADS);
+    //glVertex2i(-50,-50);
+    //glVertex2i(-10, 50);
+    //glVertex2i( 50, 50);
+    //glVertex2i( 50,-10);
+    //glEnd();
+    //glPopMatrix();
 
     //render background
     //render objects
 //void render(Object *hero){
-    /*
     float w, h, tl_sz, x, y;
     x = roomX - (WINDOW_WIDTH/2);
     y = roomY - (WINDOW_HEIGHT/2);
@@ -312,7 +292,6 @@ void PlayState::Draw(GameEngine* game) {
         glEnd(); glPopMatrix();
     }
     //Non-Collision Object
-    */
     /*
        glPushMatrix();
        glTranslatef(s->center.x + 600 + hero->camera.x , s->center.y, s->center.z);
@@ -331,7 +310,6 @@ void PlayState::Draw(GameEngine* game) {
     // retuns the position of the hero as left, mid, or right.
 
 
-/*
     // Draw Hero Sprite
     glPushMatrix();
     glTranslatef( hero.getCenterX() - x, hero.getCenterY() - y, 0);
@@ -444,7 +422,6 @@ void PlayState::Draw(GameEngine* game) {
         bit = bit->next;
     }
     glLineWidth(1);
-    */
 //}
 }
 
@@ -633,8 +610,6 @@ void PlayState::moveWindow(Object *hero) {
             i=-5;
         roomY+=i;
     }
-
-    // TODO: update parameter to reflect the actual size of level.
     else if(heroWinPosX > 5000) {
         return;
     }

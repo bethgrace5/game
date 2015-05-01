@@ -26,17 +26,16 @@ int main ( int argc, char *argv[] )
 	// initialize the engine
 	game.Init(&game);
 
-	// load the intro
+	// set initial state
 	game.ChangeState( PlayState::Instance() );
-
 	// main loop
 	while ( game.Running() ) {
-		game.Draw();
         // handle events is check keys and mouse
 		game.HandleEvents();
         // update is things that need to keep running
         // playstate: movement, gettimeofday glxswapbuffers
 		game.Update();
+        game.Draw();
 
 	}
 
