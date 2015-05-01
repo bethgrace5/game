@@ -31,7 +31,7 @@ public:
     unsigned char *buildAlphaData(Ppmimage *img);
     int diff_ms(timeval t1, timeval t2);
     int check_mouse(XEvent *e);
-    int check_keys(XEvent *e, Object *hero);
+    int check_keys(XEvent *e, Object *hero, GameEngine* game);
 
 	static PlayState* Instance() {
 	    return &m_PlayState;

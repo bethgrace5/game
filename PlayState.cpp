@@ -89,47 +89,18 @@ void PlayState::Init() {
     hero.setLeft(-26);
     hero.setRight(26);
 
-
     Object ground_0(10, 1000, -10, 600);
-    Object ground_1(400, 10, 400, 80);
-    Object ground_2(200, 10, 900, 200);
-    Object ground_3(150, 10, 1200, 360);
-    Object ground_4(250, 10, 1450, 80);
-    Object ground_5(450, 10, 2500, 80);
-    Object ground_6(350, 10, 2500, 360);
-    Object ground_7(250, 10, 2800, 480);
-    Object ground_8(450, 10, 3500, 80);
-    Object ground_9(450, 10, 4000, 200);
-    Object ground_10(450, 10, 4500, 80);
-    Object ground_11(450, 10, 5500, 80);
-    Object ground_12(450, 10, 6500, 80);
-    Object ground_13(450, 10, 7500, 80);
-    Object ground_14(450, 10, 8500, 80); 
 
     grounds[0] = &ground_0;
-    grounds[1] = &ground_1;
-    grounds[2] = &ground_2;
-    grounds[3] = &ground_3;
-    grounds[4] = &ground_4;
-    grounds[5] = &ground_5;
-    grounds[6] = &ground_6;
-    grounds[7] = &ground_7;
-    grounds[8] = &ground_8;
-    grounds[9] = &ground_9;
-    grounds[10] = &ground_10;
-    grounds[11] = &ground_11;
-    grounds[12] = &ground_12;
-    grounds[13] = &ground_13;
-    grounds[14] = &ground_14;
-    grounds_length=15;
+    grounds_length=1;
 
     //setup enemies
-    Object enemy_0 = createAI(20, 48, &ground_2);
-    Object enemy_1 = createAI(20, 48, &ground_3);
+    //Object enemy_0 = createAI(20, 48, &ground_2);
+    //Object enemy_1 = createAI(20, 48, &ground_3);
 
-    enemies[0] = &enemy_0;
-    enemies[1] = &enemy_1;
-    enemies_length=2;
+    //enemies[0] = &enemy_0;
+    //enemies[1] = &enemy_1;
+    enemies_length=0;
 
     //OpenGL initialization
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -188,13 +159,9 @@ void PlayState::Init() {
             InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
     glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
     glXMakeCurrent(dpy, win, glc);
-//}
 
-//void set_title(void){ //Set the window title bar.
+    // set window title
     XMapWindow(dpy, win); XStoreName(dpy, win, "Box Movement");
-
-//}
-
 }
 
 void PlayState::Cleanup() {
@@ -219,11 +186,18 @@ void PlayState::Resume() {
 }
 
 void PlayState::HandleEvents(GameEngine* game) {
+    int done = 0;
+        if(XPending(dpy)) {
+            while(!done) {
+                cout << "xpending";
+                //Player User Interfaces
+                XEvent e; XNextEvent(dpy, &e);
+                check_mouse(&e);
+                done = check_keys(&e, &hero, game);
+            }
+        glXSwapBuffers(dpy, win);
+    }
 }
-
-    //while(XPending(dpy)) {
-        //XNextEvent(dpy, e);
-    //}
 
 int PlayState::check_mouse(XEvent *e) {
 
@@ -245,11 +219,11 @@ int PlayState::check_mouse(XEvent *e) {
         savex = e->xbutton.x; //xpast = savex;
         savey = e->xbutton.y; //ypast = savey;
     }
-    return 0;
+    return 1;
 }
 
     //check_keys
-int PlayState::check_keys(XEvent *e, Object *hero){
+int PlayState::check_keys(XEvent *e, Object *hero, GameEngine *game){
     //Was there input from the keyboard?
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
@@ -271,6 +245,9 @@ int PlayState::check_keys(XEvent *e, Object *hero){
         if (key == XK_space) {
             life-=1000;
         }
+        if (key == XK_q) {
+            game->Quit();
+        }
 
     }
     if(e->type == KeyRelease){
@@ -282,31 +259,26 @@ int PlayState::check_keys(XEvent *e, Object *hero){
         }
     }
 
-    return 0;
+    return 1;
 //}
 }
 
 void PlayState::Update(GameEngine* game) {
-    int done = 0;
-    while(!done) { //Staring Animation
-        while(XPending(dpy)) {
-            //Player User Interfaces
-            XEvent e; XNextEvent(dpy, &e);
-
-            check_mouse(&e);
-            done = check_keys(&e, &hero);
-        }
+    //int done = 0;
+    //while(!done) { //Staring Animation
+            //done = check_keys(&e, &hero);
+        //}
         movement(&hero);
         //render(&hero);
-        gettimeofday(&end, NULL);
-        if (diff_ms(end, start) > 1200)
-            moveWindow(&hero);
-        glXSwapBuffers(dpy, win);
-    }
+        //gettimeofday(&end, NULL);
+        //if (diff_ms(end, start) > 1200)
+            //moveWindow(&hero);
 
 }
 
 void PlayState::Draw(GameEngine* game) {
+
+
     //render background
     //render objects
 //void render(Object *hero){
@@ -414,7 +386,6 @@ void PlayState::Draw(GameEngine* game) {
 //}
 // render background
 //void renderBackground(){
-    /*
     if (bg < MAX_BACKGROUND_BITS){
         // Create bit
         bgBit *bit = new bgBit;
@@ -487,7 +458,6 @@ void PlayState::Draw(GameEngine* game) {
         bit = bit->next;
     }
     glLineWidth(1);
-    */
 //}
 }
 
