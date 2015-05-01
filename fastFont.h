@@ -82,6 +82,8 @@ void drawFont(int atSet){
   else if(atSet < 21){ atX = atSet - 14; atY = 2;}
   else if(atSet < 28){ atX = atSet - 21; atY = 3;}
   else if(atSet < 35){ atX = atSet - 28; atY = 4;}
+  else if(atSet < 42){ atX = atSet - 35; atY = 5;}
+  else if(atSet < 49){ atX = atSet - 42; atY = 6;}
 
   int testX = 2, testY = 1;
 
@@ -141,6 +143,22 @@ void getFont(char letter){
     case 'X': drawFont(23); break;
     case 'Y': drawFont(24); break;
     case 'Z': drawFont(25); break;
+    case '!': drawFont(26); break;
+    case '?': drawFont(27); break;
+    case '1': drawFont(28); break;
+    case '2': drawFont(29); break;
+    case '3': drawFont(30); break;
+    case '4': drawFont(31); break;
+    case '5': drawFont(32); break;
+    case '6': drawFont(33); break;
+    case '7': drawFont(34); break;
+    case '8': drawFont(35); break;
+    case '9': drawFont(36); break;
+    case '0': drawFont(37); break;
+    case '+': drawFont(38); break;
+    case '-': drawFont(39); break;
+    case 'x': drawFont(40); break;
+    case '/': drawFont(41); break; 
     default: break;
   }
 }

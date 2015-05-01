@@ -687,13 +687,13 @@ void renderBackground(){
     }
     if (j>=1){
       //ggprint12(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") ); 
-      writeWords("COOL", bit->pos[0], bit->pos[1]); 
+      writeWords("1", bit->pos[0], bit->pos[1]); 
     } else if (j>0.9) {
       //ggprint10(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
-      writeWords("ULTIMATE", bit->pos[0], bit->pos[1]); 
+      writeWords("0", bit->pos[0], bit->pos[1]); 
     } else {
       //ggprint08(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") )
-      writeWords("ELEPHANTS", bit->pos[0], bit->pos[1]); 
+      writeWords("!", bit->pos[0], bit->pos[1]); 
     }
     bit = bit->next;
   }
