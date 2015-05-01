@@ -24,9 +24,9 @@
 //  Global Access
 //=====================================================================
 unsigned char *buildAlphaData2(Ppmimage *img);
-float fontXdistance = 0.142857;
-float fontYdistance = 0.166666;;
-
+float clipX = 0.142857;//7 in a row
+float clipY = 0.166666;//6 in a Collumn
+//7 letters in a row, and a total of 6 rows
 Ppmimage *alphabetImage = NULL;
 GLuint alphabetTexture;
 
@@ -73,9 +73,18 @@ unsigned char *buildAlphaData2(Ppmimage *img){
 //=====================================================================
 //  Core Functions
 //=====================================================================
-void drawWords(){
+void drawFont(int atSet){
+  int atX = atSet, atY = 0;
+  if(atSet < 7);//nothing happen at Set is good
+  else if(atSet < 14){ atX = atSet - 7 ; atY = 1;}
+  else if(atSet < 21){ atX = atSet - 14; atY = 2;}
+  else if(atSet < 28){ atX = atSet - 21; atY = 3;}
+  else if(atSet < 35){ atX = atSet - 28; atY = 4;}
+
+  int testX = 2, testY = 1;
+
   glPushMatrix();
-  glTranslatef(500, 300, 0);
+  //glTranslatef(500, 300, 0);
   glBindTexture(GL_TEXTURE_2D, alphabetTexture);
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_LESS, 1.0f);
@@ -83,20 +92,17 @@ void drawWords(){
   glBegin(GL_QUADS);
   float w = alphabetWidth/32;
   float h = alphabetHeight/32;
-  float clipX = fontXdistance;
-  float clipY = fontYdistance;
 
-  glTexCoord2f(0*clipX        , (0*clipY)+clipY); glVertex2i(-w,-h);
-  glTexCoord2f(0*clipX        , 0*clipY)        ; glVertex2i(-w,h);
-  glTexCoord2f((0*clipX)+clipX, 0*clipY)        ; glVertex2i(w,h);
-  glTexCoord2f((0*clipX)+clipX, (0*clipY)+clipY); glVertex2i(w,-h);
+  glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
+  glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
+  glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
+  glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
 /*
   glTexCoord2f(0*clipX, 1.0f)        ; glVertex2i(-w,-h);
   glTexCoord2f(0*clipX, 0.0f)        ; glVertex2i(-w,h);
   glTexCoord2f((0*clipX)+clipX, 0.0f); glVertex2i(w,h);
   glTexCoord2f((0*clipX)+clipX, 1.0f); glVertex2i(w,-h);
 */
-
   glEnd(); glPopMatrix();
 
   glDisable(GL_ALPHA_TEST);
@@ -106,9 +112,32 @@ void drawWords(){
 //it wiill call writeFont(letter) with the corresponding letter.
 void getFont(char letter){
   switch(letter){
-    case 'T': break;
-    case 'P': break;
-              //case 'P': writeFont(letterP); break;
+    case 'A': drawFont(0); break;
+    case 'B': drawFont(1); break;
+    case 'C': drawFont(2); break;
+    case 'D': drawFont(3); break;
+    case 'E': drawFont(4); break;
+    case 'F': drawFont(5); break;
+    case 'G': drawFont(6); break;
+    case 'H': drawFont(7); break;
+    case 'I': drawFont(8); break;
+    case 'J': drawFont(9); break;
+    case 'K': drawFont(10); break;
+    case 'L': drawFont(11); break;
+    case 'M': drawFont(12); break;
+    case 'N': drawFont(13); break;
+    case 'O': drawFont(14); break;
+    case 'P': drawFont(15); break;
+    case 'Q': drawFont(16); break;
+    case 'R': drawFont(17); break;
+    case 'S': drawFont(18); break;
+    case 'T': drawFont(19); break;
+    case 'U': drawFont(20); break;
+    case 'V': drawFont(21); break;
+    case 'W': drawFont(22); break;
+    case 'X': drawFont(23); break;
+    case 'Y': drawFont(24); break;
+    case 'Z': drawFont(25); break;
     default: break;
   }
 }
@@ -117,11 +146,23 @@ void getFont(char letter){
 //so.. this reads in every letter of the word. Each letter will have space
 //between...
 //not finish yet
-void getWords(std::string words){
+void writeWords(std::string words, float x, float y){
+
   int size = words.size(); 
+  char cWords[size];
+  strcpy(cWords, words.c_str());
+  glPushMatrix();
+
+  glTranslatef(x, y, 0);
+  //glTranslatef(500, 300, 0);
+
   for(int i = 0; i < size; i++){
-    //getFont(words.charAt(0));
+    glTranslatef(20, 0, 0);
+    getFont(cWords[i]);
+ //   getFont(std::words.charAt(0));
   }//Note Need To Add Spacing Between Each Letter
+  glPopMatrix();
+
 }
 
 #endif

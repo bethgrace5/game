@@ -571,7 +571,8 @@ if ((hero->getVelocityX() < 0.0) or (hero->getOldCenterX()>hero->getCenterX())){
 glEnd(); glPopMatrix();
 glDisable(GL_ALPHA_TEST);
 
-drawWords();
+//drawFont(25);
+writeWords("IT WORKS", 400, 150);
 
 // font printing
 Rect r0, r1;
