@@ -233,27 +233,21 @@ void PlayState::Draw(GameEngine* game) {
     //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(20, 30, 40);
 
-    // draw rectangle
-    //glPushMatrix();
-    //glBegin(GL_QUADS);
-    //glVertex2i(-50,-50);
-    //glVertex2i(-10, 50);
-    //glVertex2i( 50, 50);
-    //glVertex2i( 50,-10);
-    //glEnd();
-    //glPopMatrix();
-
-    //render background
-    //render objects
-//void render(Object *hero){
-    float w, h, tl_sz, x, y;
-    x = roomX - (WINDOW_WIDTH/2);
-    y = roomY - (WINDOW_HEIGHT/2);
+    float x = roomX - (WINDOW_WIDTH/2);
+    float y = roomY - (WINDOW_HEIGHT/2);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glColor3ub(65,155,225);
-    // render grounds
+    drawGround(x, y);
+    drawFonts();
+    drawEnemy(x, y);
+    drawHero(x, y);
+    drawBackground();
+}
+
+void PlayState::drawGround(int x, int y){
+    float w, h;
     Object *ground;
+    glColor3ub(65,155,225);
     for (int i=0;i<grounds_length;i++){
         ground = grounds[i];
         //Ground
@@ -271,7 +265,9 @@ void PlayState::Draw(GameEngine* game) {
         glVertex2i( w,-h);
         glEnd(); glPopMatrix();
     }
-    // render enemies
+}
+void PlayState::drawEnemy(int x, int y) {
+    float w, h;
     glColor3ub(100,0,0);
     Object *enemy;
     for (int i=0;i<enemies_length;i++){
@@ -291,36 +287,21 @@ void PlayState::Draw(GameEngine* game) {
         glVertex2i( w,-h);
         glEnd(); glPopMatrix();
     }
-    //Non-Collision Object
-    /*
-       glPushMatrix();
-       glTranslatef(s->center.x + 600 + hero->camera.x , s->center.y, s->center.z);
-       w = s->width;
-       h = s->height;
-       glBegin(GL_QUADS);
-       glVertex2i(-w,-h);
-       glVertex2i(-w, h);
-       glVertex2i( w, h);
-       glVertex2i( w,-h);
-       glEnd(); glPopMatrix();
-       */
-    // for use in controlling screen movement.
-    // the hero should be 'left' at the beginning of the level,
-    // 'mid' throughout the level, and 'right' at the end of the level.
-    // retuns the position of the hero as left, mid, or right.
 
+}
 
+void PlayState::drawHero(int x, int y) {
     // Draw Hero Sprite
     glPushMatrix();
     glTranslatef( hero.getCenterX() - x, hero.getCenterY() - y, 0);
-    w = hero.getWidth();
-    h = hero.getHeight();
+    float w = hero.getWidth();
+    //float h = hero.getHeight();
     glBindTexture(GL_TEXTURE_2D, heroTexture);
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_LESS, 1.0f);
     glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
-    tl_sz = 0.076923077;
+    float tl_sz = 0.076923077;
     if ((hero.getVelocityX() < 0.0) or (hero.getOldCenterX()>hero.getCenterX())){
         glTexCoord2f((hero.getIndex()*tl_sz)+tl_sz, 1.0f); glVertex2i(-w,-w);
         glTexCoord2f((hero.getIndex()*tl_sz)+tl_sz, 0.0f); glVertex2i(-w,w);
@@ -334,7 +315,9 @@ void PlayState::Draw(GameEngine* game) {
     }
     glEnd(); glPopMatrix();
     glDisable(GL_ALPHA_TEST);
+}
 
+void PlayState::drawFonts() {
     // font printing
     Rect r0, r1;
     r0.bot = WINDOW_HEIGHT - 32;
@@ -346,10 +329,10 @@ void PlayState::Draw(GameEngine* game) {
         ggprint16(&r1, fail/2, 0x00ff0000, "FAIL");
         fail--;
     }
+}
 
-//}
+void PlayState::drawBackground() {
 // render background
-//void renderBackground(){
     if (bg < MAX_BACKGROUND_BITS){
         // Create bit
         bgBit *bit = new bgBit;
@@ -422,7 +405,6 @@ void PlayState::Draw(GameEngine* game) {
         bit = bit->next;
     }
     glLineWidth(1);
-//}
 }
 
 // time difference in milliseconds
@@ -431,60 +413,60 @@ int PlayState::diff_ms(timeval t1, timeval t2) {
             (t1.tv_usec - t2.tv_usec))/1000;
 }
 
-bool PlayState::detectCollide(Object *hero, Object *ground){
+bool PlayState::detectCollide(Object *obj1, Object *obj2){
     //Gets (Moving Object, Static Object)
     //Reture True if Moving Object Collides with Static Object
-    return (  hero->getRight()  > ground->getLeft() &&
-            hero->getLeft()   < ground->getRight() &&
-            hero->getBottom() < ground->getTop()  &&
-            hero->getTop()    > ground->getBottom()
-           );
+    return (  obj1->getRight()  > obj2->getLeft() &&
+                obj1->getLeft()   < obj2->getRight() &&
+                obj1->getBottom() < obj2->getTop()  &&
+                obj1->getTop()    > obj2->getBottom()
+               );
 }
 
-void PlayState::groundCollide(Object *hero, Object *ground){
+void PlayState::groundCollide(Object *obj, Object *ground){
     //(Moving Object, Static Object)
     //Detects Which boundaries the Moving Object is around the Static Object
     //top,down,left,right
-    if(detectCollide(hero, ground)){
-        s_right=hero->getRight();
-        s_left=hero->getLeft();
-        s_top=hero->getTop();
-        s_bottom=hero->getBottom();
+    if(detectCollide(obj, ground)){
+        s_right=obj->getRight();
+        s_left=obj->getLeft();
+        s_top=obj->getTop();
+        s_bottom=obj->getBottom();
         g_right=ground->getRight();
         g_bottom=ground->getBottom();
         g_top=ground->getTop();
         g_left=ground->getLeft();
         //If moving object is on top of the static object
-        if(!(hero->getOldBottom() < g_top) &&
-                !(s_bottom >= g_top) && (hero->getVelocityY() < 0)){
-            hero->setVelocityY(0);
-            hero->setCenter(hero->getCenterX(),
-                    g_top+(hero->getCenterY()-s_bottom)
+        if(!(obj->getOldBottom() < g_top) &&
+                !(s_bottom >= g_top) && (obj->getVelocityY() < 0)){
+            obj->setVelocityY(0);
+            obj->setCenter(obj->getCenterX(),
+                    g_top+(obj->getCenterY()-s_bottom)
                     );
             isFalling=isJumping=didJump=0;
         }
         //If moving object is at the bottom of static object
-        if(!(hero->getOldTop() > g_bottom) &&
+        if(!(obj->getOldTop() > g_bottom) &&
                 !(s_top <= g_bottom)){
-            hero->setVelocityY(-0.51);
-            hero->setCenter(hero->getCenterX(),
-                    g_bottom-(s_top-hero->getCenterY())
+            obj->setVelocityY(-0.51);
+            obj->setCenter(obj->getCenterX(),
+                    g_bottom-(s_top-obj->getCenterY())
                     );
         }
         //If moving object is at the l-eft side of static object
-        if(!(hero->getOldRight() > g_left ) &&
+        if(!(obj->getOldRight() > g_left ) &&
                 !(s_right <= g_left)){
-            hero->setVelocityX(-0.51);
-            hero->setCenter(g_left-(s_right-hero->getCenterX()),
-                    hero->getCenterY()
+            obj->setVelocityX(-0.51);
+            obj->setCenter(g_left-(s_right-obj->getCenterX()),
+                    obj->getCenterY()
                     );
         }
         //If moving object is at the right side of static object
-        if(!(hero->getOldLeft() < g_right ) &&
+        if(!(obj->getOldLeft() < g_right ) &&
                 !(s_left >= g_right)){
-            hero->setVelocityX(0.51);
-            hero->setCenter(g_right+(hero->getCenterX()-s_left),
-                    hero->getCenterY()
+            obj->setVelocityX(0.51);
+            obj->setCenter(g_right+(obj->getCenterX()-s_left),
+                    obj->getCenterY()
                     );
         }
     }

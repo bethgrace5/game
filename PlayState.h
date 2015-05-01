@@ -32,6 +32,11 @@ public:
     int diff_ms(timeval t1, timeval t2);
     int check_mouse(XEvent *e);
     int check_keys(XEvent *e, Object *hero, GameEngine* game);
+    void drawGround(int x, int y);
+    void drawEnemy(int x, int y);
+    void drawHero(int x, int y);
+    void drawBackground();
+    void drawFonts();
 
 	static PlayState* Instance() {
 	    return &m_PlayState;
