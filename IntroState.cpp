@@ -111,6 +111,9 @@ int IntroState::check_keys(XEvent *e, GameEngine *game){
         }
         if (key == XK_space) {
         }
+        if (key == XK_a) {
+            cout << "pressed a in intro state\n";
+        }
         if (key == XK_q) {
             game->Quit();
         }

@@ -202,7 +202,7 @@ int PlayState::check_keys(XEvent *e, Object *hero, GameEngine *game){
         }
         if ((key == XK_a || key == XK_Left) && !isDying) {
             hero->setVelocityX(-5);
-            cout << "hit a"<<endl;
+            cout << "hit a in Play State\n"<<endl;
         }
         if ((key == XK_d || key == XK_Right) && !isDying) {
             hero->setVelocityX(5);
