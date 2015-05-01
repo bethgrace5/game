@@ -7,8 +7,43 @@
 #define WINDOW_HEIGHT 600
 using namespace std;
 
+    //X Windows variables
+    Display *dpy;
+    Window win;
+    GLXContext glc;
+
 
 void GameEngine::Init() {
+
+    //setup Xwindows
+    GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
+    w=WINDOW_WIDTH, h=WINDOW_HEIGHT;
+    dpy = XOpenDisplay(NULL);
+    if (dpy == NULL) {
+        cout << "\n\tcannot connect to X server\n" << endl;
+        //hose(&hero);
+        exit(EXIT_FAILURE);
+    }
+    Window root = DefaultRootWindow(dpy);
+    XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
+    if(vi == NULL) {
+        cout << "\n\tno appropriate visual found\n" << endl;
+        exit(EXIT_FAILURE);
+    }
+    Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
+    XSetWindowAttributes swa;
+    swa.colormap = cmap;
+    swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
+        ButtonPress | ButtonReleaseMask |
+        PointerMotionMask |
+        StructureNotifyMask | SubstructureNotifyMask;
+    win = XCreateWindow(dpy, root, 0, 0, w, h, 0, vi->depth,
+            InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
+    glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
+    glXMakeCurrent(dpy, win, glc);
+
+    // set window title
+    XMapWindow(dpy, win); XStoreName(dpy, win, "Play State");
 // initXWindows
 //void initXWindows(void) { //do not change
 
@@ -23,6 +58,8 @@ void GameEngine::Cleanup() {
 	}
 
     //clean up x windows
+    //clean xwindows
+    XDestroyWindow(dpy, win); XCloseDisplay(dpy);
 //void cleanupXWindows(void) { //do not change
 //}
 }

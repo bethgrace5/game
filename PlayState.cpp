@@ -29,10 +29,6 @@
 #define rnd()(float)rand() /(float)(RAND_MAX)
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 using namespace std;
-//X Windows variables
-Display *dpy;
-Window win;
-GLXContext glc;
 //XEvent *e; 
 
 PlayState PlayState::m_PlayState;
@@ -132,36 +128,6 @@ void PlayState::Init() {
             GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
     delete [] silhouetteData;
 //}
-
-    //setup Xwindows
-    GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-    w=WINDOW_WIDTH, h=WINDOW_HEIGHT;
-    dpy = XOpenDisplay(NULL);
-    if (dpy == NULL) {
-        cout << "\n\tcannot connect to X server\n" << endl;
-        //hose(&hero);
-        exit(EXIT_FAILURE);
-    }
-    Window root = DefaultRootWindow(dpy);
-    XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
-    if(vi == NULL) {
-        cout << "\n\tno appropriate visual found\n" << endl;
-        exit(EXIT_FAILURE);
-    }
-    Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
-    XSetWindowAttributes swa;
-    swa.colormap = cmap;
-    swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
-        ButtonPress | ButtonReleaseMask |
-        PointerMotionMask |
-        StructureNotifyMask | SubstructureNotifyMask;
-    win = XCreateWindow(dpy, root, 0, 0, w, h, 0, vi->depth,
-            InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
-    glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
-    glXMakeCurrent(dpy, win, glc);
-
-    // set window title
-    XMapWindow(dpy, win); XStoreName(dpy, win, "Box Movement");
 }
 
 void PlayState::Cleanup() {
@@ -174,8 +140,6 @@ void PlayState::Cleanup() {
     }
     bitHead = NULL;
 
-    //clean xwindows
-    XDestroyWindow(dpy, win); XCloseDisplay(dpy);
 }
 
 
@@ -187,15 +151,15 @@ void PlayState::Resume() {
 
 void PlayState::HandleEvents(GameEngine* game) {
     int done = 0;
-        if(XPending(dpy)) {
+        if(XPending(game->dpy)) {
             while(!done) {
                 cout << "xpending";
                 //Player User Interfaces
-                XEvent e; XNextEvent(dpy, &e);
+                XEvent e; XNextEvent(game->dpy, &e);
                 check_mouse(&e);
                 done = check_keys(&e, &hero, game);
             }
-        glXSwapBuffers(dpy, win);
+        glXSwapBuffers(game->dpy, game->win);
     }
 }
 
@@ -247,6 +211,11 @@ int PlayState::check_keys(XEvent *e, Object *hero, GameEngine *game){
         }
         if (key == XK_q) {
             game->Quit();
+        }
+        if (key == XK_i) {
+            game->ChangeState( PlayState::Instance() );
+            //game->ChangeState();
+            //game->Quit();
         }
 
     }

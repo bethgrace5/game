@@ -15,6 +15,8 @@ public:
 	void HandleEvents(GameEngine* game);
 	void Update(GameEngine* game);
 	void Draw(GameEngine* game);
+    int check_mouse(XEvent *e);
+    int check_keys(XEvent *e, GameEngine *game);
 
 	static IntroState* Instance() {
 		return &m_IntroState;

@@ -11,6 +11,12 @@ class GameEngine
 {
 public:
 
+    //X Windows variables
+    Display *dpy;
+    Window win;
+    GLXContext glc;
+    //XEvent *e; 
+
 	void Init();
 	void Cleanup();
 
