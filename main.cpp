@@ -163,7 +163,6 @@ int main(void){
     enemies_length=2;
 
 
->>>>>>> a6ba33af7702cb6a5adcd674148c746b352b296b
     while(!done) { //Staring Animation
         while(XPending(dpy)) {
             //Player User Interfaces
