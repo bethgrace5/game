@@ -13,15 +13,13 @@
 #include "Object.cpp"
 #include "ppm.h"
 
-#define WINDOW_WIDTH  1000
-//900
-#define WINDOW_HEIGHT 700
-//600
+#define WINDOW_WIDTH 900
+#define WINDOW_HEIGHT 600
 #define WINDOW_HALF_WIDTH  WINDOW_WIDTH/2
 #define WINDOW_HALF_HEIGHT WINDOW_HEIGHT/2
 #define LEVEL_WIDTH 10000
 #define MAX_HEIGHT 1000
-#define GRAVITY 0.1
+#define GRAVITY 0.2
 #define rnd()(float)rand() /(float)(RAND_MAX)
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 
@@ -57,8 +55,6 @@ struct Bullet {
                 next = NULL;
         }
 };
-
-
 
 int diff_ms(timeval t1, timeval t2)
 {
@@ -185,7 +181,6 @@ int main(void){
         }
         if (level>0){
             movement(&hero);
-            cout << roomY + WINDOW_HALF_HEIGHT << endl;
             render(&hero);
             moveWindow(&hero);
         }
@@ -320,14 +315,14 @@ int check_keys(XEvent *e, Object*hero){
             //Jump
             if (didJump < 2 && hero->getVelocityY() > -0.5){
                 didJump++;
-                hero->setVelocityY(5);
+                hero->setVelocityY(8);
             }
         }
         if ((key == XK_a || key == XK_Left) && !isDying) {
-            hero->setVelocityX(-5);
+            hero->setVelocityX(-6);
         }
         if ((key == XK_d || key == XK_Right) && !isDying) {
-            hero->setVelocityX(5);
+            hero->setVelocityX(6);
         }
         if (key == XK_space) {
             life-=1000;
@@ -508,7 +503,6 @@ void render(Object *hero){
     for (i=0;i<grounds_length;i++){
         ground = grounds[i];
         if (inWindow(*ground)){
-            cout << ground << "is in window" << endl;
             //Ground
             glPushMatrix();
             glTranslatef(
@@ -613,11 +607,11 @@ void moveWindow(Object *hero) {
 
     //move window forward
     if ((heroWinPosX > roomX + interval) && ((roomX+WINDOW_HALF_WIDTH)<LEVEL_WIDTH)) {
-        roomX+=5;
+        roomX+=6;
     }
     //move window backward (fast move if hero is far away)
     else if ((heroWinPosX < roomX - interval) && roomX>WINDOW_HALF_WIDTH) {
-        roomX-=5;
+        roomX-=6;
             if (heroWinPosX < (roomX - interval - 400)){
                 roomX-=20;
             }
@@ -627,13 +621,13 @@ void moveWindow(Object *hero) {
     }
     //move window up
     if (heroWinPosY > roomY + interval) {
-        roomY+=5;
+        roomY+=6;
     }
     //move window down
-    else if ((heroWinPosY < roomY - interval) && roomY>(WINDOW_HEIGHT/2)) {
+    else if ((heroWinPosY < roomY - interval) && roomY>(WINDOW_HALF_HEIGHT)) {
         i = hero->getVelocityY();
-        if (i>-5)
-            i=-5;
+        if (i>-6)
+            i=-6;
         roomY+=i;
     }
 
@@ -643,7 +637,25 @@ void moveWindow(Object *hero) {
     }
 }
 void renderBackground(){
-    cout << bg << endl;
+    if (bg < 1){
+        for (i=0;i<=(MAX_BACKGROUND_BITS/3);i++){
+            bgBit *bit = new bgBit;
+            if (bit == NULL){
+                exit(EXIT_FAILURE);
+            }
+            bit->pos[0] = (rnd() * (LEVEL_WIDTH));
+            bit->pos[1] = (rnd() * (float)MAX_HEIGHT);
+            bit->pos[2] = 0.8 + (rnd() * 0.4);
+            bit->vel[0] = 0.0f;
+            bit->vel[1] = -0.8f;
+            bit->vel[2] = (rnd());
+            bit->next = bitHead;
+            if (bitHead != NULL)
+                bitHead->prev = bit;
+            bitHead = bit;
+            bg++;
+        }
+    }
     if (bg < MAX_BACKGROUND_BITS){
         // Create bit
         //for (i=0;i<=1;i++){
@@ -700,13 +712,15 @@ void renderBackground(){
             r0.bot = (bit->pos[1]-((roomY-(WINDOW_HALF_HEIGHT))*bit->pos[2]));
             r0.left = r0.center = j;
             j = bit->pos[2];
-            if (bit->pos[1]>(WINDOW_HEIGHT*0.7)){
-                i=255;
-            } else {
-                i = (bit->pos[1]-10)/(WINDOW_HEIGHT/255);
-                if (i<1)
+            //if (bit->pos[1]>(WINDOW_HEIGHT*0.7)){
+              //  i=255;
+            //} else {
+                i = (bit->pos[1])/(WINDOW_HEIGHT/255);
+                if (i<0)
                   i=0;
-            }
+                if (i>255)
+                    i=255;
+            //}
             i=(i*65536+256*i+i);
             if (j>=1){
                 ggprint12(&r0, 16, i, (bit->vel[2]>0.5?"1":"0") );
