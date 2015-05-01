@@ -510,8 +510,8 @@ void render(Object *hero){
         //Ground
         glPushMatrix();
         glTranslatef(
-                enemy->getCenterX() + hero->getCameraX(),
-                enemy->getCenterY() + hero->getCameraY(),
+                enemy->getCenterX() - x,
+                enemy->getCenterY() - y,
                 0);
         w = enemy->getWidth();
         h = enemy->getHeight();
