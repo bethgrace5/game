@@ -17,7 +17,7 @@ public:
     GLXContext glc;
     //XEvent *e; 
 
-	void Init();
+	void Init(GameEngine *game);
 	void Cleanup();
 
 	void ChangeState(GameState* state);

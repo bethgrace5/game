@@ -14,6 +14,7 @@
 #include "GameState.h"
 #include "GameEngine.h"
 #include "PlayState.h"
+#include "IntroState.h"
 #include "fonts.h"
 #include "Object.h"
 //#include "menustate.h"
@@ -213,7 +214,8 @@ int PlayState::check_keys(XEvent *e, Object *hero, GameEngine *game){
             game->Quit();
         }
         if (key == XK_i) {
-            game->ChangeState( PlayState::Instance() );
+            game->ChangeState( IntroState::Instance() );
+            //game->ChangeState( PlayState::Instance() );
             //game->ChangeState();
             //game->Quit();
         }

@@ -24,7 +24,7 @@ int main ( int argc, char *argv[] )
 	GameEngine game;
 
 	// initialize the engine
-	game.Init();
+	game.Init(&game);
 
 	// load the intro
 	game.ChangeState( PlayState::Instance() );

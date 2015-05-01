@@ -1,4 +1,10 @@
 #include <stdio.h>
+#include <iostream>
+#include <unistd.h>
+#include <cstdlib>
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
+#include <GL/glx.h>
 
 #include "GameEngine.h"
 #include "GameState.h"
@@ -8,16 +14,16 @@
 using namespace std;
 
     //X Windows variables
-    Display *dpy;
-    Window win;
-    GLXContext glc;
+    //Display *dpy;
+    //Window win;
+    //GLXContext glc;
 
 
-void GameEngine::Init() {
+void GameEngine::Init(GameEngine *game) {
 
     //setup Xwindows
     GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-    w=WINDOW_WIDTH, h=WINDOW_HEIGHT;
+    int w=WINDOW_WIDTH, h=WINDOW_HEIGHT;
     dpy = XOpenDisplay(NULL);
     if (dpy == NULL) {
         cout << "\n\tcannot connect to X server\n" << endl;

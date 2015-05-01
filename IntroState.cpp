@@ -9,16 +9,13 @@
 #include "GameEngine.h"
 #include "GameState.h"
 #include "IntroState.h"
+#include "PlayState.h"
 
 #define WINDOW_WIDTH  900
 #define WINDOW_HEIGHT 600
 using namespace std;
 
 IntroState IntroState::m_IntroState;
-//X Windows variables
-Display *dpy;
-Window win;
-GLXContext glc;
 
 
 void IntroState::Init() {
@@ -58,18 +55,17 @@ void IntroState::Resume() {
 }
 
 void IntroState::HandleEvents(GameEngine* game) {
-    dpy =game->dpy;
-    dpy =game->win;
     int done = 0;
-        if(XPending(dpy)) {
+
+        if(XPending(game->dpy)) {
             while(!done) {
                 cout << "xpending";
                 //Player User Interfaces
-                XEvent e; XNextEvent(dpy, &e);
+                XEvent e; XNextEvent(game->dpy, &e);
                 check_mouse(&e);
                 done = check_keys(&e, game);
             }
-        glXSwapBuffers(dpy, win);
+        glXSwapBuffers(game->dpy, game->win);
     }
     //game->ChangeState( PlayState::Instance() );
 }
@@ -117,6 +113,9 @@ int IntroState::check_keys(XEvent *e, GameEngine *game){
         }
         if (key == XK_q) {
             game->Quit();
+        }
+        if (key == XK_i) {
+            game->ChangeState( PlayState::Instance() );
         }
     }
     if(e->type == KeyRelease){
