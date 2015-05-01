@@ -277,11 +277,24 @@ void PlayState::Update(GameEngine* game) {
 }
 
 void PlayState::Draw(GameEngine* game) {
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
+    glTranslatef(0.0f, 0.0f, -5.0f);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glColor3f(0.0f, 0.0f, 0.0f);
+
+    glBegin(GL_QUADS);
+    glVertex2i(-10,-10);
+    glVertex2i(-10, 10);
+    glVertex2i( 10, 10);
+    glVertex2i( 10,-10);
+    glEnd();
 
     //render background
     //render objects
 //void render(Object *hero){
+    /*
     float w, h, tl_sz, x, y;
     x = roomX - (WINDOW_WIDTH/2);
     y = roomY - (WINDOW_HEIGHT/2);
@@ -328,6 +341,7 @@ void PlayState::Draw(GameEngine* game) {
         glEnd(); glPopMatrix();
     }
     //Non-Collision Object
+    */
     /*
        glPushMatrix();
        glTranslatef(s->center.x + 600 + hero->camera.x , s->center.y, s->center.z);
@@ -346,6 +360,7 @@ void PlayState::Draw(GameEngine* game) {
     // retuns the position of the hero as left, mid, or right.
 
 
+/*
     // Draw Hero Sprite
     glPushMatrix();
     glTranslatef( hero.getCenterX() - x, hero.getCenterY() - y, 0);
@@ -458,6 +473,7 @@ void PlayState::Draw(GameEngine* game) {
         bit = bit->next;
     }
     glLineWidth(1);
+    */
 //}
 }
 
