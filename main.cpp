@@ -32,6 +32,7 @@ using namespace std;
 
 typedef double Vec[3];
 
+// background bits
 struct bgBit {
     Vec pos;
     Vec lastpos;
@@ -40,21 +41,7 @@ struct bgBit {
     struct bgBit *prev;
 };
 
-struct Bullet {
-        Vec pos;
-        Vec vel;
-        float color[3];
-        struct timespec time;
-        struct Bullet *prev;
-        struct Bullet *next;
-        Bullet() {
-                prev = NULL;
-                next = NULL;
-        }
-};
-
-
-
+// time difference in milliseconds
 int diff_ms(timeval t1, timeval t2)
 {
     return (((t1.tv_sec - t2.tv_sec) * 1000000) +
