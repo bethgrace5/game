@@ -30,8 +30,10 @@
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 using namespace std;
 //X Windows variables
-Display *dpy; Window win; GLXContext glc;
-XEvent *e; 
+Display *dpy;
+Window win;
+GLXContext glc;
+//XEvent *e; 
 
 PlayState PlayState::m_PlayState;
 typedef double Vec[3];
@@ -190,6 +192,7 @@ void PlayState::Init() {
 
 //void set_title(void){ //Set the window title bar.
     XMapWindow(dpy, win); XStoreName(dpy, win, "Box Movement");
+
 //}
 
 }
@@ -216,21 +219,24 @@ void PlayState::Resume() {
 }
 
 void PlayState::HandleEvents(GameEngine* game) {
+}
 
-    while(XPending(dpy)) {
-        XNextEvent(dpy, e);
-    }
+    //while(XPending(dpy)) {
+        //XNextEvent(dpy, e);
+    //}
+
+int PlayState::check_mouse(XEvent *e) {
 
     static int savex = 0, savey = 0;
     //static int n = 0;
-    if (e->type == ButtonRelease) { return;}
+    if (e->type == ButtonRelease) { return 0;}
     if (e->type == ButtonPress) {
         if (e->xbutton.button==1) { //Left button was pressed
             //int y = WINDOW_HEIGHT - e->xbutton.y;
-            return;
+            return 0;
         }
         if (e->xbutton.button==3) { //Right button was pressed
-            return;
+            return 0;
         }
     }
 
@@ -239,26 +245,28 @@ void PlayState::HandleEvents(GameEngine* game) {
         savex = e->xbutton.x; //xpast = savex;
         savey = e->xbutton.y; //ypast = savey;
     }
-//}
+    return 0;
+}
 
     //check_keys
-//int check_keys(XEvent *e, Object*hero){
+int PlayState::check_keys(XEvent *e, Object *hero){
     //Was there input from the keyboard?
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
         if (key == XK_Escape) exit(0);
         if ((key == XK_w || key == XK_Up) && !isDying){
             //Jump
-            if (didJump < 2 && hero.getVelocityY() > -0.5){
+            if (didJump < 2 && hero->getVelocityY() > -0.5){
                 didJump++;
-                hero.setVelocityY(5);
+                hero->setVelocityY(5);
             }
         }
         if ((key == XK_a || key == XK_Left) && !isDying) {
-            hero.setVelocityX(-5);
+            hero->setVelocityX(-5);
+            cout << "hit a"<<endl;
         }
         if ((key == XK_d || key == XK_Right) && !isDying) {
-            hero.setVelocityX(5);
+            hero->setVelocityX(5);
         }
         if (key == XK_space) {
             life-=1000;
@@ -267,34 +275,34 @@ void PlayState::HandleEvents(GameEngine* game) {
     }
     if(e->type == KeyRelease){
         if (key == XK_a || key == XK_Left) {
-            hero.setVelocityX(0);
+            hero->setVelocityX(0);
         }
         if (key == XK_d || key == XK_Right) {
-            hero.setVelocityX(0);
+            hero->setVelocityX(0);
         }
     }
 
-    //return 0;
+    return 0;
 //}
 }
 
 void PlayState::Update(GameEngine* game) {
-    //int done = 0;
-    //while(!done) { //Staring Animation
-        //while(XPending(dpy)) {
+    int done = 0;
+    while(!done) { //Staring Animation
+        while(XPending(dpy)) {
             //Player User Interfaces
-            //XEvent e; XNextEvent(dpy, &e);
+            XEvent e; XNextEvent(dpy, &e);
 
-            //check_mouse(&e, &hero);
-            //done = check_keys(&e, &hero);
-        //}
+            check_mouse(&e);
+            done = check_keys(&e, &hero);
+        }
         movement(&hero);
         //render(&hero);
         gettimeofday(&end, NULL);
         if (diff_ms(end, start) > 1200)
             moveWindow(&hero);
         glXSwapBuffers(dpy, win);
-    //}
+    }
 
 }
 
@@ -406,6 +414,7 @@ void PlayState::Draw(GameEngine* game) {
 //}
 // render background
 //void renderBackground(){
+    /*
     if (bg < MAX_BACKGROUND_BITS){
         // Create bit
         bgBit *bit = new bgBit;
@@ -478,6 +487,7 @@ void PlayState::Draw(GameEngine* game) {
         bit = bit->next;
     }
     glLineWidth(1);
+    */
 //}
 }
 

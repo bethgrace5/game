@@ -32,7 +32,7 @@ int main ( int argc, char *argv[] )
 	// main loop
 	while ( game.Running() ) {
         // handle events is check keys and mouse
-		//game.HandleEvents();
+		game.HandleEvents();
         // update is things that need to keep running
         // playstate: movement, gettimeofday glxswapbuffers
 		game.Update();

@@ -1,6 +1,8 @@
 #ifndef PLAYSTATE_H
 #define PLAYSTATE_H
 
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
 #include <sys/time.h>
 #include "GameState.h"
 #include "ppm.h"
@@ -28,6 +30,8 @@ public:
     void movement(Object *hero);
     unsigned char *buildAlphaData(Ppmimage *img);
     int diff_ms(timeval t1, timeval t2);
+    int check_mouse(XEvent *e);
+    int check_keys(XEvent *e, Object *hero);
 
 	static PlayState* Instance() {
 	    return &m_PlayState;
