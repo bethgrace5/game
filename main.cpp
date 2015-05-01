@@ -13,14 +13,17 @@
 #include "Object.cpp"
 #include "ppm.h"
 
-#define WINDOW_WIDTH  900
+#define WINDOW_WIDTH 900
 #define WINDOW_HEIGHT 600
-#define MAX_PARTICLES 9000
-#define GRAVITY 0.1
+#define WINDOW_HALF_WIDTH  WINDOW_WIDTH/2
+#define WINDOW_HALF_HEIGHT WINDOW_HEIGHT/2
+#define LEVEL_WIDTH 10000
+#define MAX_HEIGHT 1000
+#define GRAVITY 0.2
 #define rnd()(float)rand() /(float)(RAND_MAX)
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 
-#define MAX_BACKGROUND_BITS 1000
+#define MAX_BACKGROUND_BITS 6000
 #define HERO_START_X 150
 #define HERO_START_Y 350
 
@@ -42,6 +45,19 @@ struct bgBit {
 };
 
 // time difference in milliseconds
+struct Bullet {
+        Vec pos;
+        Vec vel;
+        float color[3];
+        struct timespec time;
+        struct Bullet *prev;
+        struct Bullet *next;
+        Bullet() {
+                prev = NULL;
+                next = NULL;
+        }
+};
+
 int diff_ms(timeval t1, timeval t2)
 {
     return (((t1.tv_sec - t2.tv_sec) * 1000000) +
@@ -59,19 +75,20 @@ int isWalking=0;
 int isFalling=0;
 int isDying=0;
 int isJumping=0;
-double s_right, s_left, s_top, s_bottom;
+double h_right, h_left, h_top, h_bottom;
 timeval seqStart, seqEnd;
 
 //Game Globals
 bgBit *bitHead = NULL;
 Object *grounds[32] = {NULL};
 Object *enemies[32] = {NULL};
-int bg, grounds_length, enemies_length,  i;
-int roomX=WINDOW_WIDTH/2;
-int roomY=WINDOW_HEIGHT/2;
+int bg, grounds_length, enemies_length,  i, j, level=0;
+int roomX=WINDOW_HALF_WIDTH;
+int roomY=WINDOW_HALF_HEIGHT;
 int fail=0;
 int interval=120;
 double g_left, g_right, g_top, g_bottom;
+int quit=0;
 
 //Images and Textures
 Ppmimage *heroImage=NULL;
@@ -81,10 +98,11 @@ GLuint heroTexture;
 void initXWindows(void);
 void init_opengl(void);
 void cleanupXWindows(void);
-void check_mouse(XEvent *e, Object *hero);
+void check_mouse(XEvent *e);
 int  check_keys (XEvent *e, Object *hero);
 void movement(Object *hero);
 void render(Object *hero);
+void renderMenu();
 void moveWindow(Object *hero);
 void renderBackground(void);
 void cleanup_background(void);
@@ -93,15 +111,20 @@ Object createAI( int w, int h, Object *ground);
 void groundCollide(Object *hero, Object *ground);
 bool detectCollide(Object *hero, Object *ground);
 
+bool inWindow(Object &obj){
+    return ((obj.getLeft() < (roomX+(WINDOW_HALF_WIDTH)) and
+             obj.getLeft() > (roomX-(WINDOW_HALF_WIDTH))) or 
+            (obj.getRight() > (roomX-(WINDOW_HALF_WIDTH)) and
+             obj.getRight() < (roomX+(WINDOW_HALF_WIDTH))));
+}
+
 int main(void){
-    string previousPosition;
-    timeval end, start;
-    gettimeofday(&start, NULL);
-    int done=0;
-    srand(time(NULL));
+    //string previousPosition;
+    //srand(time(NULL));
     initXWindows(); init_opengl();
+
     //declare hero object
-    Object hero(46, 48, HERO_START_X + 50, HERO_START_Y + 50);
+    Object hero(46, 48, HERO_START_X, HERO_START_Y);
     hero.setTop(44);
     hero.setBottom(-44);
     hero.setLeft(-26);
@@ -113,16 +136,16 @@ int main(void){
     Object ground_2(200, 10, 900, 200);
     Object ground_3(150, 10, 1200, 360);
     Object ground_4(250, 10, 1450, 80);
-    Object ground_5(450, 10, 2500, 80);
+    Object ground_5(440, 10, 2500, 80);
     Object ground_6(350, 10, 2500, 360);
     Object ground_7(250, 10, 2800, 480);
-    Object ground_8(450, 10, 3500, 80);
-    Object ground_9(450, 10, 4000, 200);
-    Object ground_10(450, 10, 4500, 80);
-    Object ground_11(450, 10, 5500, 80);
-    Object ground_12(450, 10, 6500, 80);
-    Object ground_13(450, 10, 7500, 80);
-    Object ground_14(450, 10, 8500, 80); 
+    Object ground_8(440, 10, 3500, 80);
+    Object ground_9(440, 10, 4000, 200);
+    Object ground_10(440, 10, 4500, 80);
+    Object ground_11(440, 10, 5500, 80);
+    Object ground_12(440, 10, 6500, 80);
+    Object ground_13(440, 10, 7500, 80);
+    Object ground_14(440, 10, 8500, 80); 
 
     grounds[0] = &ground_0;
     grounds[1] = &ground_1;
@@ -149,19 +172,23 @@ int main(void){
     enemies[1] = &enemy_1;
     enemies_length=2;
 
+    level=1;
 
-    while(!done) { //Staring Animation
+    while(!quit) { //Staring Animation
         while(XPending(dpy)) {
             //Player User Interfaces
             XEvent e; XNextEvent(dpy, &e);
-            check_mouse(&e, &hero);
-            done = check_keys(&e, &hero);
+            check_mouse(&e);
+            quit = check_keys(&e, &hero);
         }
-        movement(&hero);
-        render(&hero);
-        gettimeofday(&end, NULL);
-        if (diff_ms(end, start) > 1200)
+        if (level>0){
+            movement(&hero);
+            render(&hero);
             moveWindow(&hero);
+        }
+        else{
+            renderMenu();
+        }
         glXSwapBuffers(dpy, win);
     }
     cleanupXWindows(); return 0;
@@ -260,7 +287,7 @@ void init_opengl(void){
     delete [] silhouetteData;
 }
 
-void check_mouse(XEvent *e, Object *hero){
+void check_mouse(XEvent *e){
     static int savex = 0, savey = 0;
     //static int n = 0;
     if (e->type == ButtonRelease) { return;}
@@ -290,14 +317,14 @@ int check_keys(XEvent *e, Object*hero){
             //Jump
             if (didJump < 2 && hero->getVelocityY() > -0.5){
                 didJump++;
-                hero->setVelocityY(5);
+                hero->setVelocityY(8);
             }
         }
         if ((key == XK_a || key == XK_Left) && !isDying) {
-            hero->setVelocityX(-5);
+            hero->setVelocityX(-6);
         }
         if ((key == XK_d || key == XK_Right) && !isDying) {
-            hero->setVelocityX(5);
+            hero->setVelocityX(6);
         }
         if (key == XK_space) {
             life-=1000;
@@ -332,44 +359,44 @@ void groundCollide(Object *hero, Object *ground){
     //Detects Which boundaries the Moving Object is around the Static Object
     //top,down,left,right
     if(detectCollide(hero, ground)){
-        s_right=hero->getRight();
-        s_left=hero->getLeft();
-        s_top=hero->getTop();
-        s_bottom=hero->getBottom();
+        h_right=hero->getRight();
+        h_left=hero->getLeft();
+        h_top=hero->getTop();
+        h_bottom=hero->getBottom();
         g_right=ground->getRight();
         g_bottom=ground->getBottom();
         g_top=ground->getTop();
         g_left=ground->getLeft();
         //If moving object is on top of the static object
         if(!(hero->getOldBottom() < g_top) &&
-                !(s_bottom >= g_top) && (hero->getVelocityY() < 0)){
+                !(h_bottom >= g_top) && (hero->getVelocityY() < 0)){
             hero->setVelocityY(0);
             hero->setCenter(hero->getCenterX(),
-                    g_top+(hero->getCenterY()-s_bottom)
+                    g_top+(hero->getCenterY()-h_bottom)
                     );
             isFalling=isJumping=didJump=0;
         }
         //If moving object is at the bottom of static object
         if(!(hero->getOldTop() > g_bottom) &&
-                !(s_top <= g_bottom)){
+                !(h_top <= g_bottom)){
             hero->setVelocityY(-0.51);
             hero->setCenter(hero->getCenterX(),
-                    g_bottom-(s_top-hero->getCenterY())
+                    g_bottom-(h_top-hero->getCenterY())
                     );
         }
         //If moving object is at the l-eft side of static object
         if(!(hero->getOldRight() > g_left ) &&
-                !(s_right <= g_left)){
+                !(h_right <= g_left)){
             hero->setVelocityX(-0.51);
-            hero->setCenter(g_left-(s_right-hero->getCenterX()),
+            hero->setCenter(g_left-(h_right-hero->getCenterX()),
                     hero->getCenterY()
                     );
         }
         //If moving object is at the right side of static object
         if(!(hero->getOldLeft() < g_right ) &&
-                !(s_left >= g_right)){
+                !(h_left >= g_right)){
             hero->setVelocityX(0.51);
-            hero->setCenter(g_right+(hero->getCenterX()-s_left),
+            hero->setCenter(g_right+(hero->getCenterX()-h_left),
                     hero->getCenterY()
                     );
         }
@@ -460,11 +487,14 @@ void movement(Object *hero){
     hero->setVelocityY( hero->getVelocityY() - GRAVITY);
 }
 
+void renderMenu(){
+
+}
 
 void render(Object *hero){
     float w, h, tl_sz, x, y;
-    x = roomX - (WINDOW_WIDTH/2);
-    y = roomY - (WINDOW_HEIGHT/2);
+    x = roomX - WINDOW_HALF_WIDTH;
+    y = roomY - WINDOW_HALF_HEIGHT;
     glClear(GL_COLOR_BUFFER_BIT);
     // Draw Background Falling Bits
     renderBackground();
@@ -474,40 +504,44 @@ void render(Object *hero){
     Object *ground;
     for (i=0;i<grounds_length;i++){
         ground = grounds[i];
-        //Ground
-        glPushMatrix();
-        glTranslatef(
-                ground->getCenterX() - x,
-                ground->getCenterY() - y,
-                0);
-        w = ground->getWidth();
-        h = ground->getHeight();
-        glBegin(GL_QUADS);
-        glVertex2i(-w,-h);
-        glVertex2i(-w, h);
-        glVertex2i( w, h);
-        glVertex2i( w,-h);
-        glEnd(); glPopMatrix();
+        if (inWindow(*ground)){
+            //Ground
+            glPushMatrix();
+            glTranslatef(
+                    ground->getCenterX() - x,
+                    ground->getCenterY() - y,
+                    0);
+            w = ground->getWidth();
+            h = ground->getHeight();
+            glBegin(GL_QUADS);
+            glVertex2i(-w,-h);
+            glVertex2i(-w, h);
+            glVertex2i( w, h);
+            glVertex2i( w,-h);
+            glEnd(); glPopMatrix();
+        }
     }
     // render enemies
     glColor3ub(100,0,0);
     Object *enemy;
     for (int i=0;i<enemies_length;i++){
         enemy = enemies[i];
-        //Ground
-        glPushMatrix();
-        glTranslatef(
-                enemy->getCenterX() - x,
-                enemy->getCenterY() - y,
-                0);
-        w = enemy->getWidth();
-        h = enemy->getHeight();
-        glBegin(GL_QUADS);
-        glVertex2i(-w,-h);
-        glVertex2i(-w, h);
-        glVertex2i( w, h);
-        glVertex2i( w,-h);
-        glEnd(); glPopMatrix();
+        if (inWindow(*enemy)){
+            //Enemy
+            glPushMatrix();
+            glTranslatef(
+                    enemy->getCenterX() - x,
+                    enemy->getCenterY() - y,
+                    0);
+            w = enemy->getWidth();
+            h = enemy->getHeight();
+            glBegin(GL_QUADS);
+            glVertex2i(-w,-h);
+            glVertex2i(-w, h);
+            glVertex2i( w, h);
+            glVertex2i( w,-h);
+            glEnd(); glPopMatrix();
+        }
     }
     //Non-Collision Object
     /*
@@ -561,8 +595,8 @@ void render(Object *hero){
     r0.bot = WINDOW_HEIGHT - 32;
     r0.left = r0.center = 32;
     ggprint12(&r0, 16, 0x0033aaff, "Lives ");
-    r1.bot = WINDOW_HEIGHT/2;
-    r1.left = r1.center = WINDOW_WIDTH/2;
+    r1.bot = WINDOW_HALF_HEIGHT;
+    r1.left = r1.center = WINDOW_HALF_WIDTH;
     if (fail>0){
         ggprint16(&r1, fail/2, 0x00ff0000, "FAIL");
         fail--;
@@ -574,12 +608,12 @@ void moveWindow(Object *hero) {
     double heroWinPosY = hero->getCenterY();
 
     //move window forward
-    if (heroWinPosX > roomX + interval) {
-        roomX+=5;
+    if ((heroWinPosX > roomX + interval) && ((roomX+WINDOW_HALF_WIDTH)<LEVEL_WIDTH)) {
+        roomX+=6;
     }
     //move window backward (fast move if hero is far away)
-    else if ((heroWinPosX < roomX - interval) && roomX>(WINDOW_WIDTH/2)) {
-        roomX-=5;
+    else if ((heroWinPosX < roomX - interval) && roomX>WINDOW_HALF_WIDTH) {
+        roomX-=6;
             if (heroWinPosX < (roomX - interval - 400)){
                 roomX-=20;
             }
@@ -589,13 +623,13 @@ void moveWindow(Object *hero) {
     }
     //move window up
     if (heroWinPosY > roomY + interval) {
-        roomY+=5;
+        roomY+=6;
     }
     //move window down
-    else if ((heroWinPosY < roomY - interval) && roomY>(WINDOW_HEIGHT/2)) {
+    else if ((heroWinPosY < roomY - interval) && roomY>(WINDOW_HALF_HEIGHT)) {
         i = hero->getVelocityY();
-        if (i>-5)
-            i=-5;
+        if (i>-6)
+            i=-6;
         roomY+=i;
     }
 
@@ -605,25 +639,44 @@ void moveWindow(Object *hero) {
     }
 }
 void renderBackground(){
+    if (bg < 1){
+        for (i=0;i<=(MAX_BACKGROUND_BITS/3);i++){
+            bgBit *bit = new bgBit;
+            if (bit == NULL){
+                exit(EXIT_FAILURE);
+            }
+            bit->pos[0] = (rnd() * (LEVEL_WIDTH));
+            bit->pos[1] = (rnd() * (float)MAX_HEIGHT);
+            bit->pos[2] = 0.8 + (rnd() * 0.4);
+            bit->vel[0] = 0.0f;
+            bit->vel[1] = -0.8f;
+            bit->vel[2] = (rnd());
+            bit->next = bitHead;
+            if (bitHead != NULL)
+                bitHead->prev = bit;
+            bitHead = bit;
+            bg++;
+        }
+    }
     if (bg < MAX_BACKGROUND_BITS){
         // Create bit
-        bgBit *bit = new bgBit;
-        if (bit == NULL){
-            exit(EXIT_FAILURE);
-        }
-        bit->pos[0] = (rnd() * ((float)WINDOW_WIDTH+3000)) +
-            (roomX-(WINDOW_WIDTH/2)) - 1000;
-        bit->pos[1] = rnd() * 100.0f + (float)WINDOW_HEIGHT +
-            (roomY-(WINDOW_HEIGHT/2));
-        bit->pos[2] = 0.8 + (rnd() * 0.4);
-        bit->vel[0] = 0.0f;
-        bit->vel[1] = -0.8f;
-        bit->vel[2] = (rnd());
-        bit->next = bitHead;
-        if (bitHead != NULL)
-            bitHead->prev = bit;
-        bitHead = bit;
-        bg++;
+        //for (i=0;i<=1;i++){
+            bgBit *bit = new bgBit;
+            if (bit == NULL){
+                exit(EXIT_FAILURE);
+            }
+            bit->pos[0] = (rnd() * (LEVEL_WIDTH));
+            bit->pos[1] = (rnd() * 100) + (float)MAX_HEIGHT;
+            bit->pos[2] = 0.8 + (rnd() * 0.4);
+            bit->vel[0] = 0.0f;
+            bit->vel[1] = -0.8f;
+            bit->vel[2] = (rnd());
+            bit->next = bitHead;
+            if (bitHead != NULL)
+                bitHead->prev = bit;
+            bitHead = bit;
+            bg++;
+        //}
     }
     // Reset pointer to beginning to render all bits
     bgBit *bit = bitHead;
@@ -655,23 +708,29 @@ void renderBackground(){
             bg--;
             continue;
         }
-        Rect r0;
-        r0.bot = bit->pos[1];
-        r0.left = r0.center = (bit->pos[0]-((roomX-(WINDOW_WIDTH/2))*bit->pos[2]));
-        int j = bit->pos[2];
-        if (bit->pos[1]>(WINDOW_HEIGHT*0.7)){
-            i=255;
-        } else {
-            i = (bit->pos[1]-10)/(WINDOW_HEIGHT/255);
-            if (i<1)
-                i=0;
-        }
-        if (j>=1){
-            ggprint12(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
-        } else if (j>0.9) {
-            ggprint10(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
-        } else {
-            ggprint08(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
+        j = (bit->pos[0]-((roomX-(WINDOW_HALF_WIDTH))*bit->pos[2]));
+        if ((j+100>(0)) && (j-100<(WINDOW_WIDTH))){
+            Rect r0;
+            r0.bot = (bit->pos[1]-((roomY-(WINDOW_HALF_HEIGHT))*bit->pos[2]));
+            r0.left = r0.center = j;
+            j = bit->pos[2];
+            //if (bit->pos[1]>(WINDOW_HEIGHT*0.7)){
+              //  i=255;
+            //} else {
+                i = (bit->pos[1])/(WINDOW_HEIGHT/255);
+                if (i<0)
+                  i=0;
+                if (i>255)
+                    i=255;
+            //}
+            i=(i*65536+256*i+i);
+            if (j>=1){
+                ggprint12(&r0, 16, i, (bit->vel[2]>0.5?"1":"0") );
+            } else if (j>0.9) {
+                ggprint10(&r0, 16, i, (bit->vel[2]>0.5?"1":"0") );
+            } else {
+                ggprint08(&r0, 16, i, (bit->vel[2]>0.5?"1":"0") );
+            }
         }
         bit = bit->next;
     }
