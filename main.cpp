@@ -39,7 +39,7 @@ struct bgBit {
     struct bgBit *next;
     struct bgBit *prev;
 };
-
+/*
 struct Bullet {
     Vec pos;
     Vec vel;
@@ -61,7 +61,7 @@ struct Game {
 	bhead = NULL;
 	nbullets = 0;
     }
-};
+};*/
 
 
 
@@ -89,6 +89,8 @@ timeval seqStart, seqEnd;
 bgBit *bitHead = NULL;
 Object *grounds[32] = {NULL};
 Object *enemies[32] = {NULL};
+Object *bullets[32] = {NULL};
+int bullets_length = 1;
 int bg, grounds_length, enemies_length,  i;
 int roomX=WINDOW_WIDTH/2;
 int roomY=WINDOW_HEIGHT/2;
@@ -111,7 +113,8 @@ void render(Object *hero);
 void moveWindow(Object *hero);
 void renderBackground(void);
 void cleanup_background(void);
-void physics(Game *game);
+//void physics(Game *game);
+void makeBullet(Object *sprite);
 Object createAI( int w, int h, Object *ground);
 
 void groundCollide(Object *hero, Object *ground);
@@ -125,7 +128,7 @@ int main(void)
     int done=0;
     srand(time(NULL));
     initXWindows(); init_opengl();
-    Game game;
+    //Game game;
 
     //declare hero object
     Object hero(46, 48, HERO_START_X + 50, HERO_START_Y + 50);
@@ -133,7 +136,6 @@ int main(void)
     hero.setBottom(-44);
     hero.setLeft(-26);
     hero.setRight(26);
-
 
     Object ground_0(10, 1000, -10, 600);
     Object ground_1(400, 10, 400, 80);
@@ -333,7 +335,8 @@ int check_keys(XEvent *e, Object*hero)
             hero->setVelocityX(5);
         }
         if (key == XK_space) {
-            life-=1000;
+	    makeBullet(hero);
+       //   life-=1000;
         }
 
         return 0;
@@ -352,8 +355,8 @@ int check_keys(XEvent *e, Object*hero)
 	    hero->setCameraX( hero->getCameraX()+10 );
 	}
 
-    return 0;
     }
+    return 0;
 }
 
 bool detectCollide(Object *hero, Object *ground)
@@ -610,8 +613,8 @@ void render(Object *hero){
 	fail--;
     }
 
-    //Draw Bullets
-    {
+    //Draw Bullets (chad)
+   /* {
 	Bullet *b = g->bhead;
 	while (b) {
 	    //Log("draw bullet...\n");
@@ -630,12 +633,12 @@ void render(Object *hero){
 	    glEnd();
 	    b = b->next;
 	}
-    }
+    }*/
 
 
 }
 
-void physics(Game *g)
+/*void physics(Game *g)
 {
     //Update bullet positions
     struct timespec bt;
@@ -702,11 +705,24 @@ void physics(Game *g)
 	    if (g->bhead != NULL)
 		g->bhead->prev = b;
 	    g->bhead = b;
-	    g->nbullets++;
+	    g->nbullets++; 
 	}
     }
-}
+}*/
 
+void makeBullet(Object *sprite)
+{
+    double velocityX = sprite->getVelocityX();
+    // double velocityY = sprite->getVelocityY();
+
+    Object bullet(2, 2, sprite->getCenterX(), sprite->getCenterY());
+    bullet.setVelocityX(velocityX+5);
+    // bullet->setVelocityY(velocityY);
+    
+
+
+
+}
 
 void moveWindow(Object *hero) 
 {
@@ -820,7 +836,7 @@ void renderBackground()
     glLineWidth(1);
 }
 
-void deleteBullet(Game *g, Bullet *node)
+/*void deleteBullet(Game *g, Bullet *node)
 {
     //remove a node from linked list
     if (node->prev == NULL) {
@@ -842,7 +858,7 @@ void deleteBullet(Game *g, Bullet *node)
     }
     delete node;
     node = NULL;
-}
+}*/
 
 
 void cleanup_background(void)
