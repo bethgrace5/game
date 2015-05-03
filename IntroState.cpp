@@ -9,7 +9,7 @@
 #include "GameEngine.h"
 #include "GameState.h"
 #include "IntroState.h"
-#include "PlayState.h"
+#include "Stage1.h"
 
 #define WINDOW_WIDTH  900
 #define WINDOW_HEIGHT 600
@@ -64,7 +64,7 @@ void IntroState::HandleEvents(GameEngine* game) {
             }
         glXSwapBuffers(game->dpy, game->win);
     }
-    //game->ChangeState( PlayState::Instance() );
+    //game->ChangeState( Stage1::Instance() );
 }
 
 void IntroState::Update(GameEngine* game) {
@@ -116,7 +116,7 @@ int IntroState::check_keys(XEvent *e, GameEngine *game){
             game->Quit();
         }
         if (key == XK_i) {
-            game->ChangeState( PlayState::Instance() );
+            game->ChangeState( Stage1::Instance() );
         }
     }
     if(e->type == KeyRelease){

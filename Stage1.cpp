@@ -13,7 +13,7 @@
 
 #include "GameState.h"
 #include "GameEngine.h"
-#include "PlayState.h"
+#include "Stage1.h"
 #include "IntroState.h"
 #include "fonts.h"
 #include "Object.h"
@@ -31,7 +31,7 @@
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 using namespace std;
 
-PlayState PlayState::m_PlayState;
+Stage1 Stage1::m_Stage1;
 typedef double Vec[3];
 
 // background bits
@@ -88,7 +88,7 @@ Object ground_12(450, 10, 6500, 80);
 Object ground_13(450, 10, 7500, 80);
 Object ground_14(450, 10, 8500, 80); 
 
-void PlayState::Init() {
+void Stage1::Init() {
     gettimeofday(&start, NULL);
     srand(time(NULL));
 
@@ -153,7 +153,7 @@ void PlayState::Init() {
     delete [] silhouetteData;
 }
 
-void PlayState::Cleanup() {
+void Stage1::Cleanup() {
     //clean background
     bgBit *s;
     while (bitHead) {
@@ -164,13 +164,13 @@ void PlayState::Cleanup() {
     bitHead = NULL;
 }
 
-void PlayState::Pause() {
+void Stage1::Pause() {
 }
 
-void PlayState::Resume() {
+void Stage1::Resume() {
 }
 
-void PlayState::HandleEvents(GameEngine* game) {
+void Stage1::HandleEvents(GameEngine* game) {
     int done = 0;
         if(XPending(game->dpy)) {
             while(!done) {
@@ -183,7 +183,7 @@ void PlayState::HandleEvents(GameEngine* game) {
       
 }
 
-int PlayState::check_mouse(XEvent *e) {
+int Stage1::check_mouse(XEvent *e) {
 
     static int savex = 0, savey = 0;
     //static int n = 0;
@@ -206,7 +206,7 @@ int PlayState::check_mouse(XEvent *e) {
 }
 
     //check_keys
-int PlayState::check_keys(XEvent *e, Object *hero, GameEngine *game){
+int Stage1::check_keys(XEvent *e, Object *hero, GameEngine *game){
     //Was there input from the keyboard?
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
@@ -248,13 +248,13 @@ int PlayState::check_keys(XEvent *e, Object *hero, GameEngine *game){
     return 1;
 }
 
-void PlayState::Update(GameEngine* game) {
+void Stage1::Update(GameEngine* game) {
     // check object movement, move window
         movement(&hero);
         moveWindow(&hero);
 }
 
-void PlayState::Draw(GameEngine* game) {
+void Stage1::Draw(GameEngine* game) {
     // color background
     //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     //glTranslatef(150, 150, 0);
@@ -273,7 +273,7 @@ void PlayState::Draw(GameEngine* game) {
     glXSwapBuffers(game->dpy, game->win);
 }
 
-void PlayState::drawGround(int x, int y){
+void Stage1::drawGround(int x, int y){
     float w, h;
     Object *ground;
     glColor3ub(65,155,225);
@@ -295,7 +295,7 @@ void PlayState::drawGround(int x, int y){
         glEnd(); glPopMatrix();
     }
 }
-void PlayState::drawEnemy(int x, int y) {
+void Stage1::drawEnemy(int x, int y) {
     float w, h;
     glColor3ub(100,0,0);
     Object *enemy;
@@ -319,7 +319,7 @@ void PlayState::drawEnemy(int x, int y) {
 
 }
 
-void PlayState::drawHero(int x, int y) {
+void Stage1::drawHero(int x, int y) {
     // Draw Hero Sprite
     glPushMatrix();
     glTranslatef( hero.getCenterX() - x, hero.getCenterY() - y, 0);
@@ -346,7 +346,7 @@ void PlayState::drawHero(int x, int y) {
     glDisable(GL_ALPHA_TEST);
 }
 
-void PlayState::drawFonts() {
+void Stage1::drawFonts() {
     // font printing
     Rect r0, r1;
     r0.bot = WINDOW_HEIGHT - 32;
@@ -360,7 +360,7 @@ void PlayState::drawFonts() {
     }
 }
 
-void PlayState::drawBackground() {
+void Stage1::drawBackground() {
 // render background
     if (bg < MAX_BACKGROUND_BITS){
         // Create bit
@@ -437,12 +437,12 @@ void PlayState::drawBackground() {
 }
 
 // time difference in milliseconds
-int PlayState::diff_ms(timeval t1, timeval t2) {
+int Stage1::diff_ms(timeval t1, timeval t2) {
     return (((t1.tv_sec - t2.tv_sec) * 1000000) +
             (t1.tv_usec - t2.tv_usec))/1000;
 }
 
-bool PlayState::detectCollide(Object *obj1, Object *obj2){
+bool Stage1::detectCollide(Object *obj1, Object *obj2){
     //Gets (Moving Object, Static Object)
     //Reture True if Moving Object Collides with Static Object
     return (  obj1->getRight()  > obj2->getLeft() &&
@@ -452,7 +452,7 @@ bool PlayState::detectCollide(Object *obj1, Object *obj2){
                );
 }
 
-void PlayState::groundCollide(Object *obj, Object *ground){
+void Stage1::groundCollide(Object *obj, Object *ground){
     //(Moving Object, Static Object)
     //Detects Which boundaries the Moving Object is around the Static Object
     //top,down,left,right
@@ -501,7 +501,7 @@ void PlayState::groundCollide(Object *obj, Object *ground){
     }
 }
 
-void PlayState::movement(Object *hero){
+void Stage1::movement(Object *hero){
     Object *ground;
     for (int i=0; i<grounds_length; i++){
         ground = grounds[i];
@@ -585,14 +585,14 @@ void PlayState::movement(Object *hero){
     hero->setVelocityY( hero->getVelocityY() - GRAVITY);
 }
 
-Object PlayState::createAI( int w, int h, Object *ground) {
+Object Stage1::createAI( int w, int h, Object *ground) {
     Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
     //cout << glGetIntegerv(GL_VIEWPORT);
     return newEnemy;
 
 }
 
-void PlayState::moveWindow(Object *hero) {
+void Stage1::moveWindow(Object *hero) {
     double heroWinPosX = hero->getCenterX();
     double heroWinPosY = hero->getCenterY();
 
@@ -626,7 +626,7 @@ void PlayState::moveWindow(Object *hero) {
     }
 }
 
-unsigned char* PlayState::buildAlphaData(Ppmimage *img){
+unsigned char* Stage1::buildAlphaData(Ppmimage *img){
     //add 4th component to RGB stream...
     int a,b,c;
     unsigned char *newdata, *ptr;

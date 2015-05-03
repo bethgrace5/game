@@ -11,7 +11,7 @@ extern "C" {
 #include "fonts.h"
 }
 
-class PlayState : public GameState
+class Stage1 : public GameState
 {
 public:
 	void Init();
@@ -38,16 +38,16 @@ public:
     void drawBackground();
     void drawFonts();
 
-	static PlayState* Instance() {
-	    return &m_PlayState;
+	static Stage1* Instance() {
+	    return &m_Stage1;
 	}
 
 
 protected:
-	PlayState() { }
+	Stage1() { }
 
 private:
-	static PlayState m_PlayState;
+	static Stage1 m_Stage1;
 
 };
 

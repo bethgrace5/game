@@ -13,7 +13,7 @@
 #include "Object.cpp"
 #include "ppm.h"
 #include "GameEngine.h"
-#include "PlayState.h"
+#include "Stage1.h"
 
 extern "C" {
 #include "fonts.h"
@@ -27,7 +27,7 @@ int main ( int argc, char *argv[] )
 	game.Init(&game);
 
 	// set initial state
-	game.ChangeState( PlayState::Instance() );
+	game.ChangeState( Stage1::Instance() );
 	// main loop
 	while ( game.Running() ) {
         // handle events is check keys and mouse
