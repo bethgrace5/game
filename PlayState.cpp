@@ -109,7 +109,7 @@ void PlayState::Init() {
     //Set the screen background color
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glEnable(GL_TEXTURE_2D);
-    initialize_fonts();
+    //initialize_fonts();
     //Load images into ppm structure.
     heroImage = ppm6GetImage("./images/hero.ppm");
     //Create texture elements
@@ -152,8 +152,8 @@ void PlayState::HandleEvents(GameEngine* game) {
                 check_mouse(&e);
                 done = check_keys(&e, &hero, game);
             }
-        glXSwapBuffers(game->dpy, game->win);
     }
+      
 }
 
 int PlayState::check_mouse(XEvent *e) {
@@ -228,7 +228,7 @@ void PlayState::Update(GameEngine* game) {
 
 void PlayState::Draw(GameEngine* game) {
     // color background
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     //glTranslatef(150, 150, 0);
     //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(20, 30, 40);
@@ -237,11 +237,12 @@ void PlayState::Draw(GameEngine* game) {
     float y = roomY - (WINDOW_HEIGHT/2);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    drawGround(x, y);
+    //drawGround(x, y);
     drawFonts();
     drawEnemy(x, y);
     drawHero(x, y);
     drawBackground();
+    glXSwapBuffers(game->dpy, game->win);
 }
 
 void PlayState::drawGround(int x, int y){
@@ -322,11 +323,11 @@ void PlayState::drawFonts() {
     Rect r0, r1;
     r0.bot = WINDOW_HEIGHT - 32;
     r0.left = r0.center = 32;
-    ggprint12(&r0, 16, 0x0033aaff, "Lives ");
+    //ggprint12(&r0, 16, 0x0033aaff, "Lives ");
     r1.bot = WINDOW_HEIGHT/2;
     r1.left = r1.center = WINDOW_WIDTH/2;
     if (fail>0){
-        ggprint16(&r1, fail/2, 0x00ff0000, "FAIL");
+        //ggprint16(&r1, fail/2, 0x00ff0000, "FAIL");
         fail--;
     }
 }
@@ -396,11 +397,11 @@ void PlayState::drawBackground() {
                 i=0;
         }
         if (j>=1){
-            ggprint12(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
+            //ggprint12(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
         } else if (j>0.9) {
-            ggprint10(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
+            //ggprint10(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
         } else {
-            ggprint08(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
+            //ggprint08(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
         }
         bit = bit->next;
     }

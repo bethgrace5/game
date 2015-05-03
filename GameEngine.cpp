@@ -20,7 +20,7 @@ using namespace std;
 
 
 void GameEngine::Init(GameEngine *game) {
-
+    m_running = true; 
     //setup Xwindows
     GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
     int w=WINDOW_WIDTH, h=WINDOW_HEIGHT;
