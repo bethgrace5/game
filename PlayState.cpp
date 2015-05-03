@@ -251,6 +251,7 @@ int PlayState::check_keys(XEvent *e, Object *hero, GameEngine *game){
 void PlayState::Update(GameEngine* game) {
     // check object movement, move window
         movement(&hero);
+        moveWindow(&hero);
 }
 
 void PlayState::Draw(GameEngine* game) {
