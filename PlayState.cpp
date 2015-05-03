@@ -72,6 +72,22 @@ GLuint heroTexture;
 Object hero(46, 48, HERO_START_X + 50, HERO_START_Y + 50);
 timeval end, start;
 
+Object ground_0(10, 1000, -10, 600);
+Object ground_1(400, 10, 400, 80);
+Object ground_2(200, 10, 900, 200);
+Object ground_3(150, 10, 1200, 360);
+Object ground_4(250, 10, 1450, 80);
+Object ground_5(450, 10, 2500, 80);
+Object ground_6(350, 10, 2500, 360);
+Object ground_7(250, 10, 2800, 480);
+Object ground_8(450, 10, 3500, 80);
+Object ground_9(450, 10, 4000, 200);
+Object ground_10(450, 10, 4500, 80);
+Object ground_11(450, 10, 5500, 80);
+Object ground_12(450, 10, 6500, 80);
+Object ground_13(450, 10, 7500, 80);
+Object ground_14(450, 10, 8500, 80); 
+
 void PlayState::Init() {
     gettimeofday(&start, NULL);
     srand(time(NULL));
@@ -82,11 +98,22 @@ void PlayState::Init() {
     hero.setLeft(-26);
     hero.setRight(26);
 
-    Object ground_0(10, 1000, -10, 600);
-
     grounds[0] = &ground_0;
-    grounds_length=1;
-
+    grounds[1] = &ground_1;
+    grounds[2] = &ground_2;
+    grounds[3] = &ground_3;
+    grounds[4] = &ground_4;
+    grounds[5] = &ground_5;
+    grounds[6] = &ground_6;
+    grounds[7] = &ground_7;
+    grounds[8] = &ground_8;
+    grounds[9] = &ground_9;
+    grounds[10] = &ground_10;
+    grounds[11] = &ground_11;
+    grounds[12] = &ground_12;
+    grounds[13] = &ground_13;
+    grounds[14] = &ground_14;
+    grounds_length=15;
     //setup enemies
     //Object enemy_0 = createAI(20, 48, &ground_2);
     //Object enemy_1 = createAI(20, 48, &ground_3);
@@ -237,10 +264,10 @@ void PlayState::Draw(GameEngine* game) {
     float y = roomY - (WINDOW_HEIGHT/2);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    //drawGround(x, y);
+    drawGround(x, y);
     drawFonts();
     drawEnemy(x, y);
-    drawHero(x, y);
+    //drawHero(x, y);
     drawBackground();
     glXSwapBuffers(game->dpy, game->win);
 }

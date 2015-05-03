@@ -6,3 +6,5 @@ game
 
 # Vim swapfiles
 *.swp
+
+*.DS_Store
