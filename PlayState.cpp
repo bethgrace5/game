@@ -267,7 +267,7 @@ void PlayState::Draw(GameEngine* game) {
     drawGround(x, y);
     drawFonts();
     drawEnemy(x, y);
-    //drawHero(x, y);
+    drawHero(x, y);
     drawBackground();
     glXSwapBuffers(game->dpy, game->win);
 }
