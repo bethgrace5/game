@@ -232,6 +232,7 @@ int Stage1::check_keys(XEvent *e, Object *hero, GameEngine *game){
             game->Quit();
         }
         if (key == XK_i) {
+            hero->setVelocityX(0);
             game->ChangeState( IntroState::Instance() );
         }
 
