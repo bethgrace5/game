@@ -9,18 +9,13 @@ Object::Object( double w, double h, double x, double y ) {
 	velocity.x = 0;
 	velocity.y = 0;
 	velocity.z = 0;
-	camera.x = 0;
-	camera.y = 0;
-	camera.z = 0;
     index = 0;
-    windowCenter.x = 300;
-    windowCenter.y = 300;
-    windowCenter.z = 0;
-    interval = 50;
     left=w*-1;
     bottom=h*-1;
     right=w;
     top=h;
+    floor=NULL;
+    jump=0;
 }
 void Object::setWidth( double w ) {
     width = w;
@@ -45,17 +40,17 @@ double Object::getCenterX( void ) {
 double Object::getCenterY( void ) {
     return center.y;
 }
+void Object::setJump() {
+    jump++;
+}
+int Object::getJump() {
+    return jump;
+}
 double Object::getVelocityX( void ) {
     return velocity.x;
 }
 double Object::getVelocityY( void ) {
     return velocity.y;
-}
-double Object::getCameraX( void ) {
-    return camera.x;
-}
-double Object::getCameraY( void ) {
-    return camera.y;
 }
 void Object::setVelocityX( double x ) {
     velocity.x = x;
@@ -63,13 +58,6 @@ void Object::setVelocityX( double x ) {
 void Object::setVelocityY( double y ) {
     velocity.y = y;
 }
-void Object::setCameraX( double x ) {
-    camera.x = x;
-}
-void Object::setCameraY( double y ) {
-    camera.y = y;
-}
-
 
 double Object::getOldCenterX(void){
   return oldCenter.x;
@@ -124,20 +112,14 @@ double Object::getOldLeft(){
 void Object::setIndex(int ind){
   index = ind;
 }
-
-// screen boundaries for scrolling
-double Object::getWindowCenterX(){
-  return windowCenter.x;
-}
-double Object::getWindowCenterY(){
-  return windowCenter.y;
-}
-void Object::scrollHorizontal(double amount){
-  windowCenter.x += amount;
-}
-void Object::scrollVertical(double amount){
-  windowCenter.y += amount;
-}
 int Object::getIndex() {
     return index;
+}
+void Object::setFloor(Object *obj){
+  floor = obj;
+  if (obj)
+    jump=0;
+}
+Object *Object::getFloor() {
+    return floor;
 }
