@@ -13,6 +13,7 @@
 #include "Object.cpp"
 #include "ppm.h"
 #include <sstream>
+#include <algorithm>
 
 #define WINDOW_WIDTH 900
 #define WINDOW_HEIGHT 600
@@ -65,6 +66,14 @@ int diff_ms(timeval t1, timeval t2)
             (t1.tv_usec - t2.tv_usec))/1000;
 }
 
+template <typename T>
+string itos ( T Number )
+{
+    stringstream ss;
+    ss << Number;
+    return (ss.str());
+}
+
 //X Windows variables
 Display *dpy; Window win; GLXContext glc;
 
@@ -80,6 +89,7 @@ double h_right, h_left, h_top, h_bottom;
 timeval seqStart, seqEnd;
 
 //Game Globals
+string str = ""; 
 bgBit *bitHead = NULL;
 Object *grounds[MAX_GROUNDS] = {NULL};
 Object *enemies[32] = {NULL};
@@ -181,7 +191,7 @@ int main(void){
 
     enemies[0] = &enemy_0;
     enemies[1] = &enemy_1;
-    enemies_length=2;
+    enemies_length=1;
 
     level=1;
 
@@ -358,142 +368,310 @@ int check_keys(XEvent *e, Object *hero){
 void enemyAI(Object *hero, Object *enemy){
     Object *e_f = enemy->getFloor();
     Object *h_f = hero->getFloor();
-    cout << "enemy " << enemy << " ";
-    if (e_f){ // If enemy is not mid jump
-        float e_cx=enemy->getCenterX();
-        float e_cy=enemy->getCenterY();
-        float e_vx=enemy->getVelocityX();
-        //float e_vy=enemy->getVelocityY();
+    string old = str;
+    str = ""; 
+    if (!h_f){
+        return;
+    }
+    str += "enemy " + itos(enemy) + " ";
+    float h_cx=hero->getCenterX();
+    //float h_cy=hero->getCenterY();
+    //float h_vx=hero->getVelocityX();
+    float h_fl=h_f->getLeft();
+    float h_ft=h_f->getTop();
+    float h_fr=h_f->getRight();
+    //---------------------------------
+    float e_cx=enemy->getCenterX();
+    float e_cy=enemy->getCenterY();
+    float e_vx=enemy->getVelocityX();
+    float e_vy=enemy->getVelocityY();
+
+    if (e_f && h_f){ // If enemy is not mid jump
+        float e_fl=e_f->getLeft();
+        float e_ft=e_f->getTop();
+        float e_fr=e_f->getRight();
         float d_x=e_cx - hero->getCenterX();
         float d_y=e_cy - hero->getCenterY();
         int h_above = (d_y<0)?10:0;
         int h_right = (d_x<0)?1:0;
-        int h_close = (((d_x*d_x)+(d_y*d_y)<(400*400) && !isDying)?(((d_x*d_x)+(d_y*d_y)<(200*200))?2:1):0);
+        int range=(enemy->getAggro())?800:400;
+        int h_close = (((d_x*d_x)+(d_y*d_y)<(range*range) && !isDying)?(((d_x*d_x)+(d_y*d_y)<(200*200))?2:1):0);
+        int h_dir = h_above+h_right;
+        if (!isJumping and !isFalling)
+            h_dir+=((h_f==e_f)?100:0);
+        str += "[DIR: " + itos(h_dir) + "]";
         // If enemy is within 200px & not dead: 2; within 400px: 1; else: 0
         switch (h_close) {
             case 2: // hero close range
                 enemy->setVelocityX(0);
-                cout << "attack!";
+                str += "attack!";
                 //fall through?
                 break;
             case 1: // follow hero
-                switch ((h_above+h_right)){
+                if (!enemy->getAggro())
+                    enemy->setAggro(true);
+                    str += "Aggro! ";
+                switch (h_dir){
                     case 0: // If hero is to the lower left of enemy
-                        if (e_f->getLeft()<e_cx) { // If enemy won't fall
+                        if (e_fl<e_cx) { // If enemy won't fall
                             enemy->setVelocityX(-6); // then move to the left
-                            cout << "move!";
-                        } else { // If enemy is going to fall if he keeps going
+                            str += "move left!";
+                        } else { // If enemy is going to fall
                             enemy->setVelocityX(0); // then stop moving
-                            cout << "stop!";
-                            if (h_f->getRight()>e_f->getLeft()){
+                            str += "stop!";
+                            if (h_fr>e_fl){//grounds are overlapping
                                 //hero's ground is below enemy's ground
-                                if (h_f->getTop()<e_f->getTop()){
+                                if (h_ft<e_ft){
                                     enemy->setVelocityX(-6);// Jump down
-                                    cout << "jump down!";
+                                    str += "jump down!";
                                     enemy->setFloor(NULL);
                                 }
+                                else{
+                                    str += "NEVER CONDITION(1)";
+                                }
                             }
-                            else{
-                                if (h_f->getRight()>(e_f->getLeft()-350)){
-                                    enemy->setVelocityX(((e_f->getLeft()-h_f->getRight())/59)*-1);// Jump over
-                                    enemy->setVelocityY(6);
-                                    cout << "jump over!";
-                                    enemy->setJump();
-                                    cout << "jump #" << enemy->getJump() << " ";
+                            else{ // gap
+                                if ((e_fl-h_fr)<(e_ft-h_ft)){ // just run off
+                                    enemy->setVelocityX(-6);
+                                    str += "move left!";
                                     enemy->setFloor(NULL);
+                                }
+                                else if (h_fr>(e_fl-640)){
+                                    if ((h_cx+250)<e_cx){
+                                        enemy->setVelocityX(-6);// Jump over
+                                    }
+                                    else{
+                                        enemy->setVelocityX(((h_fr-e_fl)/59)*-1);// Jump over
+                                        if (enemy->getVelocityX()<-6)
+                                            enemy->setVelocityX(-6);
+                                    }
+                                    enemy->setVelocityY(6);
+                                    str += "jump over!";
+                                    enemy->setJump();
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
+                                    enemy->setFloor(NULL);
+                                }
+                                else{
+                                    str += " gap too large to jump!";
                                 }
                             }
                         }
                         break;
                     case 1: // If hero is to the lower right of enemy
-                        if (e_f->getRight()>e_cx) { // If enemy won't fall
+                        if (e_fr>e_cx) { // If enemy won't fall
                             enemy->setVelocityX(6); // then move to the right
-                            cout << "move right!";
+                            str += "move right!";
                         } else { // If enemy is going to fall if he keeps going
                             enemy->setVelocityX(0); // then stop moving
-                            cout << "stop!";
-                            if (h_f->getLeft()<e_f->getRight()){
+                            str += "stop!";
+                            if (h_fl<=e_fr){ // grounds are overlapping
                                 //hero's ground is below enemy's ground
-                                if (h_f->getTop()<e_f->getTop()){
+                                if (h_ft<=e_ft){
                                     enemy->setVelocityX(6);// Jump down
-                                    cout << "jump down!";
+                                    str += "jump down!";
                                     enemy->setFloor(NULL);
                                 }
+                                else{
+                                    str += "NEVER CONDITION(2)";
+                                }
                             }
-                            else{
-                                if (h_f->getLeft()<(e_f->getRight()+350)){
-                                    enemy->setVelocityX(((e_f->getRight()-h_f->getLeft())/59)*-1);// Jump over
-                                    enemy->setVelocityY(6);
-                                    cout << "jump over!";
-                                    enemy->setJump();
-                                    cout << "jump #" << enemy->getJump() << " ";
+                            else{ // gap
+                                if ((h_fl-e_fr)<(e_ft-h_ft)){ // just run off
+                                    enemy->setVelocityX(6);
+                                    str += "move right!";
                                     enemy->setFloor(NULL);
+                                }
+                                else if (h_fl<(e_fr+640)){
+                                    if ((h_cx-250)>e_cx){
+                                        enemy->setVelocityX(6);// Jump over
+                                    }
+                                    else{
+                                        enemy->setVelocityX(((e_fr-h_fl)/59)*-1);// Jump over
+                                        if (enemy->getVelocityX()>6)
+                                            enemy->setVelocityX(6);
+                                    }
+                                    enemy->setVelocityY(6);
+                                    str += "jump over!";
+                                    enemy->setJump();
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
+                                    enemy->setFloor(NULL);
+                                }
+                                else{
+                                    str += " gap too large to jump!";
                                 }
                             }
                         }
                         break;
                     case 10: // If hero is to the upper left of enemy
                         //hero's ground is above enemy's ground
-                        if (h_f->getTop()>e_f->getTop()){
-                            if (h_f->getRight()>e_f->getLeft()){
-                                if ((enemy->getLeft()-6)<h_f->getRight()){
+                        if (h_ft>e_ft && h_ft<(e_ft+220)){
+                            if (h_fr>e_fl){ // grounds are overlapping
+                                if ((enemy->getLeft()-6)<h_fr){
                                     enemy->setVelocityX(6);
+                                    str += "move right";
                                 }
-                                else if ((enemy->getLeft()-14)>h_f->getRight()){
+                                else if ((enemy->getLeft()-14)>h_fr){
                                     enemy->setVelocityX(-6);
+                                    str += "move left";
                                 }
                                 else{
                                     enemy->setVelocityX(0);
                                     enemy->setVelocityY(7);
                                     enemy->setJump();
-                                    cout << "jump #" << enemy->getJump() << " ";
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
                                     enemy->setFloor(NULL);
                                 }
                             }
                             else{
                                 //hero's floor is above and to the left with a gap
+                                if ((enemy->getLeft())>e_fl){
+                                    enemy->setVelocityX(-6);
+                                    str += "move left";
+                                }
+                                else{
+                                    enemy->setVelocityY(7);
+                                    enemy->setJump();
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
+                                    enemy->setFloor(NULL);
+                                }
+
+
+                            }
+                        }
+                        else{
+                            //hero's floor is equal or lower and to the left
+                            if ((enemy->getLeft())>e_fl){
+                                enemy->setVelocityX(-6);//move to edge
+                                str += "move left";
+                            }
+                            else if (h_f!=e_f){ // gap
+                                enemy->setVelocityX(0);
+                                if ((e_fl-h_fr)<(e_ft-h_ft)){ // just run off
+                                    enemy->setVelocityX(-6);
+                                    str += "move left!";
+                                    enemy->setFloor(NULL);
+                                }
+                                else if (h_fr>(e_fl-640)){
+                                    if ((h_cx+250)<e_cx){
+                                        enemy->setVelocityX(-6);// Jump over
+                                    }
+                                    else{
+                                        enemy->setVelocityX(((h_fr-e_fl)/59)*-1);// Jump over
+                                        if (enemy->getVelocityX()<-6)
+                                            enemy->setVelocityX(-6);
+                                    }
+                                    enemy->setVelocityY(6);
+                                    str += "jump over!";
+                                    enemy->setJump();
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
+                                    enemy->setFloor(NULL);
+                                }
+                                else{
+                                    str += " gap too large to jump!";
+                                }
                             }
                         }
                         break;
                     case 11: // If hero is to the upper right of enemy
                         //hero's ground is above enemy's ground
-                        if (h_f->getTop()>e_f->getTop()){
-                            if (h_f->getLeft()<e_f->getRight()){
-                                if ((enemy->getRight()+6)>h_f->getLeft()){
+                        if (h_ft>e_ft && h_ft<(e_ft+220)){
+                            if (h_fl<e_fr){
+                                if ((enemy->getRight()+6)>h_fl){
                                     enemy->setVelocityX(-6);
+                                    str += "move left";
                                 }
-                                else if ((enemy->getRight()+14)<h_f->getLeft()){
+                                else if ((enemy->getRight()+14)<h_fl){
                                     enemy->setVelocityX(6);
+                                    str += "move right";
                                 }
                                 else{
                                     enemy->setVelocityX(0);
+                                    str += "stop, ";
                                     enemy->setVelocityY(7);
                                     enemy->setJump();
-                                    cout << "jump #" << enemy->getJump() << " ";
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
                                     enemy->setFloor(NULL);
                                 }
                             }
                             else{
                                 //hero's floor is above and to the right with a gap
+                                if ((enemy->getRight())<e_fr){
+                                    enemy->setVelocityX(6);
+                                    str += "move left";
+                                }
+                                else{
+                                    enemy->setVelocityY(7);
+                                    enemy->setJump();
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
+                                    enemy->setFloor(NULL);
+                                }
+
+
                             }
                         }
-                    break;  
+                        else{
+                            //hero's floor is equal or lower and to the right
+                            if ((enemy->getRight())<e_fr){
+                                enemy->setVelocityX(6);//move to edge
+                                str += "move right";
+                            }
+                            else if (h_f!=e_f){ // gap
+                                enemy->setVelocityX(0);
+                                if ((h_fl-e_fr)<(e_ft-h_ft)){ // just run off
+                                    enemy->setVelocityX(6);
+                                    str += "move right!";
+                                    enemy->setFloor(NULL);
+                                }
+                                else if (h_fl<(e_fr+640)){
+                                    if ((h_cx-250)>e_cx){
+                                        enemy->setVelocityX(6);// Jump over
+                                    }
+                                    else{
+                                        enemy->setVelocityX(((e_fr-h_fl)/59)*-1);// Jump over
+                                        if (enemy->getVelocityX()>6)
+                                            enemy->setVelocityX(6);
+                                    }
+                                    enemy->setVelocityY(6);
+                                    str += "jump over!";
+                                    enemy->setJump();
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
+                                    enemy->setFloor(NULL);
+                                }
+                                else{
+                                    str += " gap too large to jump!";
+                                }
+                            }
+                        }
+                        break;  
+                    case 100:
+                    case 110:
+                        enemy->setVelocityX(-6);
+                        str += "move left!";
+                        break;
+                    case 101:
+                    case 111:
+                        enemy->setVelocityX(6);
+                        str += "move right!";
+                        break;
                 }
                 break;
             default: // patrol
+                enemy->setAggro(false);
                 if (e_vx==0){
                     enemy->setVelocityX((rnd()>.5)?(-0.6):(0.6));//Patrol ground object
-                    cout << "start patrolling";
+                    str += "start patrolling";
                 } else {
                     if (e_vx<0 && e_f!=NULL){
-                        if (enemy->getLeft()<e_f->getLeft()){
-                            enemy->setVelocityX(e_vx*-1);
-                            cout << "turn around";
+                        if (enemy->getLeft()<e_fl){
+                            e_vx*=-1; //must set this value for following code
+                            enemy->setVelocityX(e_vx);
+                            str += "turn around";
                         }
                     } else if (e_vx>0 && e_f!=NULL) {
-                        if (enemy->getRight()>e_f->getRight()){
-                            enemy->setVelocityX(e_vx*-1);
-                            cout << "turn around";
+                        if (enemy->getRight()>e_fr){
+                            e_vx*=-1; //must set this value for following code
+                            enemy->setVelocityX(e_vx);
+                            str += "turn around";
                         }
                     }
                 }
@@ -501,31 +679,86 @@ void enemyAI(Object *hero, Object *enemy){
         }
         //Check for falling off
         if (enemy->getFloor()){ // don't check e_f here
-            if (e_vx>0 && e_cx > e_f->getRight()){
+            if (e_vx>0 && e_cx > e_fr){
                 enemy->setVelocityX(0);
-                cout << "almost fell!";
+                str += "almost fell!";
             }
-            if (e_vx<0 && e_cx < e_f->getLeft()){
+            if (e_vx<0 && e_cx < e_fl){
                 enemy->setVelocityX(0);
-                cout << "almost fell!";
+                str += "almost fell!";
             }
         }
     }
-    else if (enemy->getVelocityX()==0 && h_f){ // enemy is mid jump
-        if ((enemy->getVelocityY() > -0.5) && 
-            (enemy->getVelocityY() <= 0) && 
-            (enemy->getBottom() < h_f->getTop())){ // enemy needs to double jump
-            if (enemy->getJump()<2){
-                enemy->setVelocityY(7);
-                enemy->setJump();
-                cout << "jump #" << enemy->getJump() << " ";
+    else if (h_f){ // enemy is mid jump
+        if (e_vx==0){
+            if ((e_vy > -0.5) && 
+                (e_vy <= 0)){ 
+                if (enemy->getBottom() < h_ft){ // enemy needs to double jump
+                    if (enemy->getJump()<2){
+                        enemy->setVelocityY(7);
+                        enemy->setJump();
+                        str += "jump #" + itos(enemy->getJump()) + " ";
+                    }
+                }
+                else if (enemy->getBottom() > h_ft){
+                    if (e_cx<h_cx){
+                        if (e_cx>(h_cx-100)){
+                            enemy->setVelocityX(1);
+                        }
+                        else if (e_cx>(h_cx-250)){
+                            enemy->setVelocityX(3);// Jump over
+                        }
+                        else{
+                            enemy->setVelocityX(6);
+                        }
+                    }
+                    else{
+                        if (e_cx<(h_cx+100)){
+                            enemy->setVelocityX(-1);
+                        }
+                        else if (e_cx<(h_cx+250)){
+                            enemy->setVelocityX(-3);// Jump over
+                        }
+                        else{
+                            enemy->setVelocityX(-6);
+                        }
+                    }
+                    str += "move";
+                }
             }
         }
-        else if (enemy->getBottom() > h_f->getTop()){
-            enemy->setVelocityX(((h_f->getCenterX()<enemy->getCenterX())?(-2):(2)));
+        else{ //enemy is moving left or right
+            e_vx=enemy->getVelocityX();
+            e_vy=enemy->getVelocityY();
+            if (e_cx>h_cx && e_vx>0){
+                enemy->setVelocityX(0);
+            }
+            else if (e_cx<h_cx && e_vx<0){
+                enemy->setVelocityX(0);
+            }
+            if ((e_vy > -0.5) && (e_vy <= 0)){ // check if enemy needs to double jump
+                if (((e_vx > 0) && (e_cy < (h_ft+360)) && (e_cx < (h_fl-180))) or
+                    ((e_vx < 0) && (e_cy > (h_ft+360)) && (e_cx > (h_fr+180)))){
+                    // enemy double jump to lower platform
+                    if (enemy->getJump()<2){
+                        enemy->setVelocityY(7);
+                        enemy->setJump();
+                        str += "jump #" + itos(enemy->getJump()) + " ";
+                    }
+                }
+                else{
+                    str += "too far? my x,y:" + itos(e_cx) + "," + itos(e_cy) + ";" + "ground's x,y:";
+                    if (e_vx>0)
+                        str += itos(h_fl) + "," + itos(h_ft);
+                    else
+                        str += itos(h_fr) + "," + itos(h_ft);
+                }
+            } 
         }
     }
-    cout << endl;
+    if ((str.length())>24 && str != old){
+        cout << str << endl;
+    }
 }
 
 bool detectCollide(Object *obj, Object *ground){

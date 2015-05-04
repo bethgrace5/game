@@ -16,6 +16,13 @@ Object::Object( double w, double h, double x, double y ) {
     top=h;
     floor=NULL;
     jump=0;
+    aggro=false;
+}
+void Object::setAggro( bool b ) {
+    aggro = b;
+}
+bool Object::getAggro( void ) {
+    return aggro;
 }
 void Object::setWidth( double w ) {
     width = w;

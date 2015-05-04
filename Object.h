@@ -23,6 +23,9 @@ class Object{
         void setJump(void);
         int getJump(void);
 
+        void setAggro(bool b);
+        bool getAggro(void);
+
         void setCenter(double x, double y);
 
         void setVelocityX(double x);
@@ -64,6 +67,7 @@ class Object{
         // from windowCenter
         int index;
         int jump;
+        bool aggro;
         Vec velocity;
         Vec center;
         Vec oldCenter;
