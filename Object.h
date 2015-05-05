@@ -20,12 +20,13 @@ class Object{
         double getVelocityX(void);
         double getVelocityY(void);
 
-        double getCameraX(void);
-        double getCameraY(void);
+        void setJump(void);
+        int getJump(void);
+
+        void setAggro(bool b);
+        bool getAggro(void);
 
         void setCenter(double x, double y);
-        void setCameraX(double x);
-        void setCameraY(double y);
 
         void setVelocityX(double x);
         void setVelocityY(double y);
@@ -51,12 +52,8 @@ class Object{
         void setIndex(int ind);
         int getIndex();
 
-        // used to update boundaries for window scrolling
-        double getWindowCenterX();
-        double getWindowCenterY();
-        void scrollHorizontal(double amount);
-        void scrollVertical(double amount);
-        double getWindowInterval();
+        void setFloor(Object *obj);
+        Object *getFloor();
 
         Object( double w, double h, double x, double y);
         // TODO: create destructor
@@ -68,13 +65,13 @@ class Object{
         int top, bottom, left, right;
         // interval is distance the sprite is allowed to move away
         // from windowCenter
-        int interval;
         int index;
-        Vec camera;
+        int jump;
+        bool aggro;
         Vec velocity;
         Vec center;
         Vec oldCenter;
-        Vec windowCenter;
+        Object *floor;
 };
 
 #endif
