@@ -143,11 +143,6 @@ void Stage1::Init() {
     enemy_0 = createAI(20, 48, &ground_2);
     enemy_1 = createAI(20, 48, &ground_3);
 
-    cout << enemy_0.getCenterX();
-    cout << enemy_0.getCenterY();
-    cout << enemy_1.getCenterX();
-    cout << enemy_1.getCenterY();
-
     enemies[0] = &enemy_0;
     enemies[1] = &enemy_1;
     enemies_length=1;
@@ -246,9 +241,9 @@ int Stage1::check_keys(XEvent *e, Object *hero, GameEngine *game){
         }
         if ((key == XK_w || key == XK_Up) && !isDying){
             //Jump
-            if (didJump < 2 && hero->getVelocityY() > -0.6){
+            if (didJump < 2 && hero->getVelocityY() > -0.5){
                 didJump++;
-                hero->setVelocityY(6);
+                hero->setVelocityY(7);
             }
         }
         if ((key == XK_a || key == XK_Left) && !isDying) {
@@ -341,12 +336,7 @@ void Stage1::drawEnemies(int x, int y) {
 
     for (int i=0;i<enemies_length;i++){
         enemy = enemies[i];
-        //cout << "centerx" << enemy->getCenterX()<<endl;
-        //cout << "centery" <<enemy->getCenterY()<<endl;
-        //cout << "width" <<enemy->getWidth()<<endl;
-        //cout << "height" <<enemy->getHeight()<<endl;
-        //if (inWindow(*enemy)){
-            //Ground
+        if (inWindow(*enemy)){
             glPushMatrix();
             glTranslatef(
                     enemy->getCenterX() - x,
@@ -360,7 +350,7 @@ void Stage1::drawEnemies(int x, int y) {
             glVertex2i( w, h);
             glVertex2i( w,-h);
             glEnd(); glPopMatrix();
-        //}
+        }
     }
 
 }
@@ -532,7 +522,7 @@ void Stage1::groundCollide(Object *obj, Object *ground){
             obj->setCenter(obj->getCenterX(),
                     g_top+(obj->getCenterY()-s_bottom)
                     );
-            isFalling=isJumping=didJump=0;
+            //isFalling=isJumping=didJump=0;
         }
         //If moving object is at the bottom of static object
         if(!(obj->getOldTop() > g_bottom) &&
@@ -562,16 +552,15 @@ void Stage1::groundCollide(Object *obj, Object *ground){
 }
 
 void Stage1::movement(Object *hero){
-    Object *ground;
-    for (int i=0; i<grounds_length; i++){
-        ground = grounds[i];
-        // Detect Collision
-        groundCollide(hero, ground);
-    }
+    // Hero Apply Velocity, Add Gravity
     hero->setOldCenter();
-    // Apply Velocity, Add Gravity
     hero->setCenter( (hero->getCenterX() + hero->getVelocityX()), (hero->getCenterY() + hero->getVelocityY()));
-    // Cycle through index sequences
+    hero->setVelocityY( hero->getVelocityY() - GRAVITY);
+    //Detect Collisions
+    for (i=0; i<grounds_length; i++){
+        groundCollide(hero, grounds[i]);
+    }
+    // Cycle through hero index sequences
     if (life<=0){
         hero->setVelocityX(0);
         isWalking=0;
@@ -613,57 +602,59 @@ void Stage1::movement(Object *hero){
         else
             hero->setIndex(1);
     } else if (!isDying) { // Walking
+        if (isFalling){ // Just hit ground object after fall
+            isFalling=isJumping=didJump=0; // Reset jump counter
+        }
         if (hero->getVelocityX() < -1 or
                 hero->getVelocityX() > 1){
-            if (!isWalking && !isJumping && !isFalling){
+            if (!isWalking && !isJumping && !isFalling){ // Just started walking
                 isWalking=1;
-                hero->setIndex(0);
+                hero->setIndex(0); // Start walk sequence
                 gettimeofday(&seqStart, NULL);
             }
             gettimeofday(&seqEnd, NULL);
-            if (isWalking && ((diff_ms(seqEnd, seqStart)) > 80)){
+            if (isWalking && ((diff_ms(seqEnd, seqStart)) > 80)){ // Walk sequence
                 hero->setIndex(((hero->getIndex()+1)%6));
                 gettimeofday(&seqStart, NULL);
                 isFalling=isJumping=0;
             }
-        } else {
+        } else { // Standing idle
             isWalking=0;
             if (!isJumping)
                 hero->setIndex(6);
         }
+    } else if (isJumping && hero->getVelocityY() < -1) {
+        isJumping=0;
+        isFalling=1;
+    } else if (isFalling && hero->getVelocityY() > -1){
+        isFalling=0;
     }
     if (!isWalking and !isFalling and !isJumping)
-        hero->setVelocityX(0);
+        hero->setVelocityX(0); // Prevent weird floating
     // Check for Death
     if (hero->getCenterY() < 0){
-        hero->setCenter(HERO_START_X, HERO_START_Y);
+        hero->setCenter(HERO_START_X, HERO_START_Y); // Respawn
         lives--;
-        life=fail=100;
+        life=fail=100; // Reset life points, Display fail for 100 frames
         hero->setVelocityX(0);
         isDying=0;
     }
-    hero->setVelocityY( hero->getVelocityY() - GRAVITY);
     // Enemy movement, enemy ai
-    for (int i=0;i<enemies_length;i++){
+    for (i=0;i<enemies_length;i++){
         enemyAI(hero, enemies[i]); //Where does enemy go?
         enemies[i]->setOldCenter();
         enemies[i]->setCenter( //Apply Physics
                 (enemies[i]->getCenterX() + enemies[i]->getVelocityX()),
                 (enemies[i]->getCenterY() + enemies[i]->getVelocityY()));
         enemies[i]->setVelocityY( enemies[i]->getVelocityY() - GRAVITY);
-        for (int j=0; j<grounds_length; j++){
+        for (j=0; j<grounds_length; j++){
             groundCollide(enemies[i], grounds[j]); //Collision Detection
         }
     }
 }
 
 Object Stage1::createAI( int w, int h, Object *ground) {
-    cout << ground->getCenterX()<<endl;
-    cout << ground->getCenterY()<<endl;
     Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
-    //cout << glGetIntegerv(GL_VIEWPORT);
-    cout << newEnemy.getCenterX()<<endl;
-    cout << newEnemy.getCenterY()<<endl;
     return newEnemy;
 
 }
