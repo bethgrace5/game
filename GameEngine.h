@@ -29,7 +29,10 @@ public:
 	void Draw();
 
 	bool Running() { return m_running; }
-	void Quit() { m_running = false; }
+	void Quit() { 
+        // check if user really would like to quit
+        m_running = false;
+    }
 
 
 private:

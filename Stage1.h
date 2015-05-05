@@ -38,6 +38,7 @@ public:
     void drawBackground();
     void drawFonts();
     void enemyAI(Object *hero, Object *enemy);
+    bool inWindow(Object &obj);
 
 	static Stage1* Instance() {
 	    return &m_Stage1;

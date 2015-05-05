@@ -23,12 +23,16 @@
 
 #define WINDOW_WIDTH  900
 #define WINDOW_HEIGHT 600
+#define WINDOW_HALF_WIDTH  WINDOW_WIDTH/2
+#define WINDOW_HALF_HEIGHT WINDOW_HEIGHT/2
+#define LEVEL_WIDTH 10000
+#define MAX_HEIGHT 1200
 
-#define MAX_BACKGROUND_BITS 1000
+#define MAX_BACKGROUND_BITS 6000
 #define HERO_START_X 150
 #define HERO_START_Y 350
 
-#define GRAVITY 0.1
+#define GRAVITY 0.2
 #define rnd()(float)rand() /(float)(RAND_MAX)
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 using namespace std;
@@ -51,6 +55,7 @@ struct bgBit {
     Vec vel;
     struct bgBit *next;
     struct bgBit *prev;
+    const char* n;
 };
 
 //Game Globals
@@ -58,9 +63,9 @@ string str = "";
 bgBit *bitHead = NULL;
 Object *grounds[32] = {NULL};
 Object *enemies[32] = {NULL};
-int bg, grounds_length, enemies_length;
-int roomX=WINDOW_WIDTH/2;
-int roomY=WINDOW_HEIGHT/2;
+int bg, grounds_length, enemies_length, i, j;
+int roomX=WINDOW_HALF_WIDTH;
+int roomY=WINDOW_HALF_HEIGHT;
 int fail=0;
 int interval=120;
 double g_left, g_right, g_top, g_bottom;
@@ -81,26 +86,28 @@ Ppmimage *heroImage=NULL;
 GLuint heroTexture;
 
 Object hero(46, 48, HERO_START_X + 50, HERO_START_Y + 50);
-timeval end, start;
 
-Object ground_0(10, 1000, -10, 600);
-Object ground_1(400, 10, 400, 80);
-Object ground_2(200, 10, 900, 200);
-Object ground_3(150, 10, 1200, 360);
-Object ground_4(250, 10, 1450, 80);
-Object ground_5(450, 10, 2500, 80);
-Object ground_6(350, 10, 2500, 360);
-Object ground_7(250, 10, 2800, 480);
-Object ground_8(450, 10, 3500, 80);
-Object ground_9(450, 10, 4000, 200);
-Object ground_10(450, 10, 4500, 80);
-Object ground_11(450, 10, 5500, 80);
-Object ground_12(450, 10, 6500, 80);
-Object ground_13(450, 10, 7500, 80);
-Object ground_14(450, 10, 8500, 80); 
+    Object ground_0(10, 1000, -10, 600);
+    Object ground_1(400, 10, 400, 80);
+    Object ground_2(200, 10, 900, 200);
+    Object ground_3(150, 10, 1200, 360);
+    Object ground_4(250, 10, 1450, 80);
+    Object ground_5(440, 10, 2500, 80);
+    Object ground_6(340, 10, 2300, 360);
+    Object ground_7(250, 10, 2800, 480);
+    Object ground_8(440, 10, 3500, 80);
+    Object ground_9(440, 10, 4000, 200);
+    Object ground_10(440, 10, 4500, 80);
+    Object ground_11(440, 10, 5500, 80);
+    Object ground_12(440, 10, 6500, 80);
+    Object ground_13(440, 10, 7500, 80);
+    Object ground_14(440, 10, 8500, 80); 
+    Object ground_15(440, 10, 9500, 80); 
+    Object ground_16(200, 10, 9700, 360); 
+    Object ground_17(200, 10, 300, 180); 
+
 
 void Stage1::Init() {
-    gettimeofday(&start, NULL);
     srand(time(NULL));
 
     //declare hero object
@@ -124,14 +131,18 @@ void Stage1::Init() {
     grounds[12] = &ground_12;
     grounds[13] = &ground_13;
     grounds[14] = &ground_14;
-    grounds_length=15;
-    //setup enemies
-    //Object enemy_0 = createAI(20, 48, &ground_2);
-    //Object enemy_1 = createAI(20, 48, &ground_3);
+    grounds[15] = &ground_15;
+    grounds[16] = &ground_16;
+    grounds[17] = &ground_17;
+    grounds_length=18;
 
-    //enemies[0] = &enemy_0;
-    //enemies[1] = &enemy_1;
-    enemies_length=0;
+    //setup enemies
+    Object enemy_0 = createAI(20, 48, &ground_2);
+    Object enemy_1 = createAI(20, 48, &ground_3);
+
+    enemies[0] = &enemy_0;
+    enemies[1] = &enemy_1;
+    enemies_length=1;
 
     //OpenGL initialization
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -222,20 +233,22 @@ int Stage1::check_keys(XEvent *e, Object *hero, GameEngine *game){
     //Was there input from the keyboard?
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
-        if (key == XK_Escape) exit(0);
+        if (key == XK_Escape) {
+            game->Quit();
+        }
         if ((key == XK_w || key == XK_Up) && !isDying){
             //Jump
-            if (didJump < 2 && hero->getVelocityY() > -0.5){
+            if (didJump < 2 && hero->getVelocityY() > -0.6){
                 didJump++;
-                hero->setVelocityY(5);
+                hero->setVelocityY(6);
             }
         }
         if ((key == XK_a || key == XK_Left) && !isDying) {
-            hero->setVelocityX(-5);
+            hero->setVelocityX(-6);
             cout << "hit a in Play State\n";
         }
         if ((key == XK_d || key == XK_Right) && !isDying) {
-            hero->setVelocityX(5);
+            hero->setVelocityX(6);
         }
         if (key == XK_space) {
             life-=1000;
@@ -244,7 +257,7 @@ int Stage1::check_keys(XEvent *e, Object *hero, GameEngine *game){
             game->Quit();
         }
         if (key == XK_i) {
-            hero->setVelocityX(0);
+            //hero->setVelocityX(0);
             game->ChangeState( IntroState::Instance() );
         }
 
@@ -274,8 +287,8 @@ void Stage1::Draw(GameEngine* game) {
     //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(20, 30, 40);
 
-    float x = roomX - (WINDOW_WIDTH/2);
-    float y = roomY - (WINDOW_HEIGHT/2);
+    float x = roomX - (WINDOW_HALF_WIDTH);
+    float y = roomY - (WINDOW_HALF_HEIGHT);
     glClear(GL_COLOR_BUFFER_BIT);
 
     drawGround(x, y);
@@ -290,44 +303,54 @@ void Stage1::drawGround(int x, int y){
     float w, h;
     Object *ground;
     glColor3ub(65,155,225);
+
     for (int i=0;i<grounds_length;i++){
         ground = grounds[i];
-        //Ground
-        glPushMatrix();
-        glTranslatef(
-                ground->getCenterX() - x,
-                ground->getCenterY() - y,
-                0);
-        w = ground->getWidth();
-        h = ground->getHeight();
-        glBegin(GL_QUADS);
-        glVertex2i(-w,-h);
-        glVertex2i(-w, h);
-        glVertex2i( w, h);
-        glVertex2i( w,-h);
-        glEnd(); glPopMatrix();
+        if (inWindow(*ground)){
+            //Ground
+            glPushMatrix();
+            glTranslatef(
+                    ground->getCenterX() - x,
+                    ground->getCenterY() - y,
+                    0);
+            w = ground->getWidth();
+            h = ground->getHeight();
+            glBegin(GL_QUADS);
+            glVertex2i(-w,-h);
+            glVertex2i(-w, h);
+            glVertex2i( w, h);
+            glVertex2i( w,-h);
+            glEnd(); glPopMatrix();
+        }
+
     }
 }
 void Stage1::drawEnemy(int x, int y) {
     float w, h;
     glColor3ub(100,0,0);
     Object *enemy;
+
     for (int i=0;i<enemies_length;i++){
         enemy = enemies[i];
-        //Ground
-        glPushMatrix();
-        glTranslatef(
-                enemy->getCenterX() - x,
-                enemy->getCenterY() - y,
-                0);
-        w = enemy->getWidth();
-        h = enemy->getHeight();
-        glBegin(GL_QUADS);
-        glVertex2i(-w,-h);
-        glVertex2i(-w, h);
-        glVertex2i( w, h);
-        glVertex2i( w,-h);
-        glEnd(); glPopMatrix();
+        if (inWindow(*enemy)){
+            //Ground
+            glPushMatrix();
+            glTranslatef(
+                    enemy->getCenterX() - x,
+                    enemy->getCenterY() - y,
+                    0);
+            w = enemy->getWidth();
+            h = enemy->getHeight();
+            glBegin(GL_QUADS);
+            glVertex2i(-w,-h);
+            glVertex2i(-w, h);
+            glVertex2i( w, h);
+            glVertex2i( w,-h);
+            glEnd(); glPopMatrix();
+        }
+        else{ 
+            cout <<"not in window";
+        }
     }
 
 }
@@ -362,32 +385,50 @@ void Stage1::drawHero(int x, int y) {
 void Stage1::drawFonts() {
     writeWords("LIVES", 32, WINDOW_HEIGHT-32);
     if (fail>0){
-        writeWords("FAIL", WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
+        writeWords("FAIL", WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
         fail--;
     }
 }
 
 void Stage1::drawBackground() {
-// render background
+    if (bg < 1){
+        for (i=0;i<=(MAX_BACKGROUND_BITS/3);i++){
+            bgBit *bit = new bgBit;
+            if (bit == NULL){
+                exit(EXIT_FAILURE);
+            }
+            bit->pos[0] = (rnd() * (LEVEL_WIDTH));
+            bit->pos[1] = (rnd() * (MAX_HEIGHT+100));
+            bit->pos[2] = 0.8 + (rnd() * 0.4);
+            bit->vel[0] = 0.0f;
+            bit->vel[1] = -1.0f;
+            bit->n = ((rnd()>0.5)?"1":"0");
+            bit->next = bitHead;
+            if (bitHead != NULL)
+                bitHead->prev = bit;
+            bitHead = bit;
+            bg++;
+        }
+    }
     if (bg < MAX_BACKGROUND_BITS){
         // Create bit
-        bgBit *bit = new bgBit;
-        if (bit == NULL){
-            exit(EXIT_FAILURE);
-        }
-        bit->pos[0] = (rnd() * ((float)WINDOW_WIDTH+3000)) +
-            (roomX-(WINDOW_WIDTH/2)) - 1000;
-        bit->pos[1] = rnd() * 100.0f + (float)WINDOW_HEIGHT +
-            (roomY-(WINDOW_HEIGHT/2));
-        bit->pos[2] = 0.8 + (rnd() * 0.4);
-        bit->vel[0] = 0.0f;
-        bit->vel[1] = -0.8f;
-        bit->vel[2] = (rnd());
-        bit->next = bitHead;
-        if (bitHead != NULL)
-            bitHead->prev = bit;
-        bitHead = bit;
-        bg++;
+        //for (i=0;i<=1;i++){
+            bgBit *bit = new bgBit;
+            if (bit == NULL){
+                exit(EXIT_FAILURE);
+            }
+            bit->pos[0] = (rnd() * (LEVEL_WIDTH));
+            bit->pos[1] = (rnd() * 100) + MAX_HEIGHT;
+            bit->pos[2] = 0.8 + (rnd() * 0.4);
+            bit->vel[0] = 0.0f;
+            bit->vel[1] = -1.0f;
+            bit->n = ((rnd()>0.5)?"1":"0");
+            bit->next = bitHead;
+            if (bitHead != NULL)
+                bitHead->prev = bit;
+            bitHead = bit;
+            bg++;
+        //}
     }
     // Reset pointer to beginning to render all bits
     bgBit *bit = bitHead;
@@ -395,7 +436,6 @@ void Stage1::drawBackground() {
         VecCopy(bit->pos, bit->lastpos);
         if (bit->pos[1] > 0){
             bit->pos[1] += bit->vel[1];
-
         }
         else{
             bgBit *savebit = bit->next;
@@ -419,33 +459,31 @@ void Stage1::drawBackground() {
             bg--;
             continue;
         }
-        Rect r0;
-        r0.bot = bit->pos[1];
-        r0.left = r0.center = (bit->pos[0]-((roomX-(WINDOW_WIDTH/2))*bit->pos[2]));
-        int j = bit->pos[2];
-        int i;
-        if (bit->pos[1]>(WINDOW_HEIGHT*0.7)){
-            i=255;
-        } else {
-            i = (bit->pos[1]-10)/(WINDOW_HEIGHT/255);
-            if (i<1)
+        j = (bit->pos[0]-((roomX-(WINDOW_HALF_WIDTH))*bit->pos[2]));
+        if ((j+100>(0)) && (j-100<(WINDOW_WIDTH))){
+            Rect r0;
+            r0.bot = (bit->pos[1]-((roomY-(WINDOW_HALF_HEIGHT))*bit->pos[2]));
+            r0.left = r0.center = j;
+            i = (bit->pos[1])/(WINDOW_HEIGHT/255);
+            if (i<0)
                 i=0;
-        }
-        if (j>=1){
-            //ggprint12(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
-            writeWords((bit->vel[2]>0.5?"1":"0"), i*65536+256*i+i,bit->pos[1]+WINDOW_HEIGHT/2);
-        } else if (j>0.9) {
-            //ggprint10(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
-            //writeWords("LIVES", i*65536+256*i+i, i);
-            writeWords((bit->vel[2]>0.5?"1":"0"), i*65536+256*i+i, i);
-        } else {
-            //ggprint08(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
-            //writeWords("LIVES", i*65536+256*i+i, i);
-            writeWords((bit->vel[2]>0.5?"1":"0"), i+256*i+i,bit->pos[1]+WINDOW_HEIGHT-35);
+            else if (i>255)
+                i=255;
+            i=(i*65536+256*i+i);
+            if (bit->pos[2]>=1.08){
+                //ggprint12(&r0, 16, i, bit->n );
+                writeWords((bit->vel[2]>0.5?"1":"0"), i*65536+256*i+i,bit->pos[1]+WINDOW_HALF_HEIGHT);
+            } else if (bit->pos[2]>0.94) {
+                //ggprint10(&r0, 16, i, bit->n );
+                writeWords((bit->vel[2]>0.5?"1":"0"), i*65536+256*i+i, i);
+            } else {
+                //ggprint08(&r0, 16, i, bit->n );
+                writeWords((bit->vel[2]>0.5?"1":"0"), i+256*i+i,bit->pos[1]+WINDOW_HEIGHT-35);
+            }
         }
         bit = bit->next;
     }
-    glLineWidth(1);
+    //glLineWidth(1);
 }
 
 // time difference in milliseconds
@@ -621,12 +659,12 @@ void Stage1::moveWindow(Object *hero) {
     double heroWinPosY = hero->getCenterY();
 
     //move window forward
-    if (heroWinPosX > roomX + interval) {
-        roomX+=5;
+    if ((heroWinPosX > roomX + interval) && ((roomX+WINDOW_HALF_WIDTH)<LEVEL_WIDTH-6)) {
+        roomX+=6;
     }
     //move window backward (fast move if hero is far away)
-    else if ((heroWinPosX < roomX - interval) && roomX>(WINDOW_WIDTH/2)) {
-        roomX-=5;
+    else if ((heroWinPosX < roomX - interval) && roomX>(WINDOW_HALF_WIDTH+6)) {
+        roomX-=6;
             if (heroWinPosX < (roomX - interval - 400)){
                 roomX-=20;
             }
@@ -635,18 +673,15 @@ void Stage1::moveWindow(Object *hero) {
             }
     }
     //move window up
-    if (heroWinPosY > roomY + interval) {
-        roomY+=5;
+    if ((heroWinPosY > roomY + interval) && ((roomY+6)<(MAX_HEIGHT-WINDOW_HALF_HEIGHT))) {
+        roomY+=6;
     }
     //move window down
-    else if ((heroWinPosY < roomY - interval) && roomY>(WINDOW_HEIGHT/2)) {
+    else if ((heroWinPosY < roomY - interval) && (roomY-6)>(WINDOW_HALF_HEIGHT)) {
         int i = hero->getVelocityY();
-        if (i>-5)
-            i=-5;
+        if (i>-6)
+            i=-6;
         roomY+=i;
-    }
-    else if(heroWinPosX > 5000) {
-        return;
     }
 }
 
@@ -1068,4 +1103,10 @@ void Stage1::enemyAI(Object *hero, Object *enemy){
     if ((str.length())>24 && str != old){
         cout << str << endl;
     }
+}
+bool Stage1::inWindow(Object &obj){
+    return ((obj.getLeft() < (roomX+(WINDOW_HALF_WIDTH)) and
+             obj.getLeft() > (roomX-(WINDOW_HALF_WIDTH))) or 
+            (obj.getRight() > (roomX-(WINDOW_HALF_WIDTH)) and
+             obj.getRight() < (roomX+(WINDOW_HALF_WIDTH))));
 }
