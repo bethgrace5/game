@@ -348,9 +348,6 @@ void Stage1::drawEnemy(int x, int y) {
             glVertex2i( w,-h);
             glEnd(); glPopMatrix();
         }
-        else{ 
-            cout <<"not in window";
-        }
     }
 
 }
