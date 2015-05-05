@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <sys/time.h>
 #include <unistd.h>
+#include <cstring>
 #include <string>
 #include <cmath>
 #include <X11/Xlib.h>

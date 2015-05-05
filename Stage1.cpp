@@ -17,6 +17,7 @@
 #include "IntroState.h"
 #include "fonts.h"
 #include "Object.h"
+#include "fastFont.h"
 //#include "menustate.h"
 
 #define WINDOW_WIDTH  900
@@ -137,6 +138,7 @@ void Stage1::Init() {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glEnable(GL_TEXTURE_2D);
     //initialize_fonts();
+    initFastFont();
     //Load images into ppm structure.
     heroImage = ppm6GetImage("./images/hero.ppm");
     //Create texture elements
@@ -348,15 +350,9 @@ void Stage1::drawHero(int x, int y) {
 }
 
 void Stage1::drawFonts() {
-    // font printing
-    Rect r0, r1;
-    r0.bot = WINDOW_HEIGHT - 32;
-    r0.left = r0.center = 32;
-    //ggprint12(&r0, 16, 0x0033aaff, "Lives ");
-    r1.bot = WINDOW_HEIGHT/2;
-    r1.left = r1.center = WINDOW_WIDTH/2;
+    writeWords("LIVES", 32, WINDOW_HEIGHT-32);
     if (fail>0){
-        //ggprint16(&r1, fail/2, 0x00ff0000, "FAIL");
+        writeWords("FAIL", WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
         fail--;
     }
 }
@@ -427,10 +423,13 @@ void Stage1::drawBackground() {
         }
         if (j>=1){
             //ggprint12(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
+            writeWords((bit->vel[2]>0.5?"1":"0"), i*65536+256*i+i, 100);
         } else if (j>0.9) {
             //ggprint10(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
+            //writeWords("LIVES", i*65536+256*i+i, i);
         } else {
             //ggprint08(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
+            //writeWords("LIVES", i*65536+256*i+i, i);
         }
         bit = bit->next;
     }
