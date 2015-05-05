@@ -248,7 +248,6 @@ int Stage1::check_keys(XEvent *e, Object *hero, GameEngine *game){
         }
         if ((key == XK_a || key == XK_Left) && !isDying) {
             hero->setVelocityX(-6);
-            cout << "hit a in Play State\n";
         }
         if ((key == XK_d || key == XK_Right) && !isDying) {
             hero->setVelocityX(6);
@@ -259,7 +258,7 @@ int Stage1::check_keys(XEvent *e, Object *hero, GameEngine *game){
         if (key == XK_q) {
             game->Quit();
         }
-        if (key == XK_i) {
+        if (key == XK_p) {
             //hero->setVelocityX(0);
             game->ChangeState( IntroState::Instance() );
         }

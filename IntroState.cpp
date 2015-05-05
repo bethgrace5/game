@@ -72,9 +72,9 @@ void IntroState::Update(GameEngine* game) {
 
 void IntroState::Draw(GameEngine* game) {
     // set color to black
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glTranslatef(0.0f, 0.0f, -5.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    //glTranslatef(0.0f, 0.0f, -5.0f);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 }
 int IntroState::check_mouse(XEvent *e) {
@@ -115,7 +115,7 @@ int IntroState::check_keys(XEvent *e, GameEngine *game){
         if (key == XK_q) {
             game->Quit();
         }
-        if (key == XK_i) {
+        if (key == XK_p) {
             game->ChangeState( Stage1::Instance() );
         }
     }
