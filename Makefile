@@ -4,8 +4,8 @@ LIB	= ./libggfonts.so
 
 all: game script
 
-game: main.cpp ppm.cpp
-	g++ $(CFLAGS) main.cpp ppm.cpp -Wall $(LIB) -o game -lX11 -lGL -lGLU -lm -I/usr/X11R6/include -L/usr/X11R6/lib -lX11
+game: main.cpp ppm.cpp GameEngine.cpp IntroState.cpp Stage1.cpp
+	g++ $(CFLAGS) main.cpp ppm.cpp GameEngine.cpp  IntroState.cpp Stage1.cpp -Wall $(LIB) -o game -lX11 -lGL -lm -I/usr/X11R6/include -L/usr/X11R6/lib -lX11
 
 clean:
 	rm -f game
