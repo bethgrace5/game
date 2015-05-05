@@ -37,6 +37,7 @@ public:
     void drawHero(int x, int y);
     void drawBackground();
     void drawFonts();
+    void enemyAI(Object *hero, Object *enemy);
 
 	static Stage1* Instance() {
 	    return &m_Stage1;
