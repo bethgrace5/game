@@ -7,13 +7,18 @@
 //      Example how to use:
 //        Sprite var1;
 //        ... 
-//        In initOpengl(){ 
+//        In initOpengl(){ //When Initiaizing Stuff
 //          ...
 //          var1.insert(image.ppm, row, column);
 //          ...
 //        }
-//        
+//        //In Rendering Function
+//          ...
+//          var1.drawTile(x,y)
+//          //This will draw on a coordinates of the tile
 //
+//For this to work properly, the image sheet must have sprite Evenly Split
+//between each other
 //---------------------------------------------------------------------
 class Sprite{
   //Global Access-------------------------------------------------------
@@ -113,17 +118,26 @@ void Sprite::replaceTexture(GLuint take){
 //=====================================================================
 //Outter Functions
 //=====================================================================
+//  These are functions that are use to call drawing events using the variables
+//  within this class. Also, giving out this class information
+
 GLuint Sprite::textureBox(){
+  //Gives out the texture data/value
   return texture;
 }
 
-void Sprite::drawTile(int row, int column){
 
+//This Draws a tile base on row number and column number
+//example:
+//     1 2 3 4
+//   1 # # # #
+//   2 # # # #
+//   3 # # # #
+void Sprite::drawTile(int row, int column){
+  //Need to add a safety...
   int atX = row; int atY = column;
 
   glPushMatrix();
-  glTranslatef(200, 200, 0);
-
   glBindTexture(GL_TEXTURE_2D, texture);
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_LESS, 1.0f);
@@ -141,9 +155,11 @@ void Sprite::drawTile(int row, int column){
   glDisable(GL_ALPHA_TEST);
 }
 
-void Sprite::drawFont(int atSet){
-  int atX = atSet, atY = 0;
-
+//This Draws a tile base on line # base on below example
+// 1  2  3  4  5  6  7
+// 8  9  10 11 12 13 14
+//
+void Sprite::drawFont(int atSet){     int atX = atSet, atY = 0;         
   atX = atSet % row;
   atY = (int)(atSet/row);
 
@@ -169,6 +185,9 @@ void Sprite::drawFont(int atSet){
 //=====================================================================
 //Function Aid
 //=====================================================================
+//Just A helper Function for the init() function in this group. 
+//This gets the image convert them to computer readable bytes
+//
 unsigned char *Sprite::buildAlphaData2(Ppmimage *img){
   //add 4th component to RGB stream...
   int a,b,c;
