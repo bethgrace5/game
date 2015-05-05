@@ -106,6 +106,9 @@ Object hero(46, 48, HERO_START_X + 50, HERO_START_Y + 50);
     Object ground_16(200, 10, 9700, 360); 
     Object ground_17(200, 10, 300, 180); 
 
+    Object enemy_0(0, 0, 0, 0);
+    Object enemy_1(0, 0, 0, 0);
+
 
 void Stage1::Init() {
     srand(time(NULL));
@@ -137,8 +140,13 @@ void Stage1::Init() {
     grounds_length=18;
 
     //setup enemies
-    Object enemy_0 = createAI(20, 48, &ground_2);
-    Object enemy_1 = createAI(20, 48, &ground_3);
+    enemy_0 = createAI(20, 48, &ground_2);
+    enemy_1 = createAI(20, 48, &ground_3);
+
+    cout << enemy_0.getCenterX();
+    cout << enemy_0.getCenterY();
+    cout << enemy_1.getCenterX();
+    cout << enemy_1.getCenterY();
 
     enemies[0] = &enemy_0;
     enemies[1] = &enemy_1;
@@ -293,8 +301,8 @@ void Stage1::Draw(GameEngine* game) {
 
     drawGround(x, y);
     drawFonts();
-    drawEnemy(x, y);
     drawHero(x, y);
+    drawEnemies(x, y);
     drawBackground();
     glXSwapBuffers(game->dpy, game->win);
 }
@@ -306,6 +314,7 @@ void Stage1::drawGround(int x, int y){
 
     for (int i=0;i<grounds_length;i++){
         ground = grounds[i];
+
         if (inWindow(*ground)){
             //Ground
             glPushMatrix();
@@ -325,14 +334,18 @@ void Stage1::drawGround(int x, int y){
 
     }
 }
-void Stage1::drawEnemy(int x, int y) {
-    float w, h;
-    glColor3ub(100,0,0);
+void Stage1::drawEnemies(int x, int y) {
+    float w, h ;
     Object *enemy;
+    glColor3ub(100,0,0);
 
     for (int i=0;i<enemies_length;i++){
         enemy = enemies[i];
-        if (inWindow(*enemy)){
+        //cout << "centerx" << enemy->getCenterX()<<endl;
+        //cout << "centery" <<enemy->getCenterY()<<endl;
+        //cout << "width" <<enemy->getWidth()<<endl;
+        //cout << "height" <<enemy->getHeight()<<endl;
+        //if (inWindow(*enemy)){
             //Ground
             glPushMatrix();
             glTranslatef(
@@ -347,7 +360,7 @@ void Stage1::drawEnemy(int x, int y) {
             glVertex2i( w, h);
             glVertex2i( w,-h);
             glEnd(); glPopMatrix();
-        }
+        //}
     }
 
 }
@@ -645,8 +658,12 @@ void Stage1::movement(Object *hero){
 }
 
 Object Stage1::createAI( int w, int h, Object *ground) {
+    cout << ground->getCenterX()<<endl;
+    cout << ground->getCenterY()<<endl;
     Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
     //cout << glGetIntegerv(GL_VIEWPORT);
+    cout << newEnemy.getCenterX()<<endl;
+    cout << newEnemy.getCenterY()<<endl;
     return newEnemy;
 
 }

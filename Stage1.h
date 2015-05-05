@@ -33,7 +33,7 @@ public:
     int check_mouse(XEvent *e);
     int check_keys(XEvent *e, Object *hero, GameEngine* game);
     void drawGround(int x, int y);
-    void drawEnemy(int x, int y);
+    void drawEnemies(int x, int y);
     void drawHero(int x, int y);
     void drawBackground();
     void drawFonts();
