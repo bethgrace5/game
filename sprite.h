@@ -9,13 +9,15 @@
 //        ... 
 //        In initOpengl(){ //When Initiaizing Stuff
 //          ...
-//          var1.insert(image.ppm, row, column);
+//          var1.insert("image.ppm", row, column);
 //          ...
 //        }
 //        //In Rendering Function
 //          ...
 //          var1.drawTile(x,y)
-//          //This will draw on a coordinates of the tile
+//
+//          // This will draw on a coordinates of the tile
+//          // make sure to use glTranslatef to change its coordinates
 //
 //For this to work properly, the image sheet must have sprite Evenly Split
 //between each other
@@ -28,11 +30,14 @@ class Sprite{
     int column;
     float imageHeight;
     float imageWidth;
+    float clipHeight;
+    float clipWidth;
     float clipX;
     float clipY;
 
     Ppmimage *image;
     GLuint texture;
+    int tileAt;
 
   //Functions-----------------------------------------------------------
   public:
@@ -42,10 +47,13 @@ class Sprite{
     void setFile(const char *filename);
     void initSprite();
     void setClip(int x, int y);
+    void setSize(int x, int y);
 
     //Outter Functions
     void drawFont(int atSet);
     void drawTile(int row, int column);
+    void drawTile(int atSet);
+    void drawSequence();
     void replaceTexture(GLuint take);
     GLuint textureBox();
 
@@ -65,11 +73,13 @@ Sprite::Sprite(){
   //when making a Sprite Variable, sets all variables within to 0 or NULL
   imageName = NULL;
   texture = 0;
-  clipX = 0; 
-  clipY = 0;
+  clipX = clipY = 0;
+  clipWidth = clipHeight = 0;
+
   setClip(0, 0);
   imageHeight = 0;
   imageWidth = 0;
+  tileAt = 0;
 }
 
 void Sprite::insert(const char *filename, int x, int y){
@@ -78,6 +88,7 @@ void Sprite::insert(const char *filename, int x, int y){
   setFile(filename);
   initSprite(); 
   setClip(x, y); 
+  setSize(imageWidth * clipX, imageHeight * clipY);
 }
 
 void Sprite::setFile(const char *filename){
@@ -96,11 +107,25 @@ void Sprite::setClip(int x, int y){
   std::cout << "give me CLIPY: " << clipY << std::endl;
 }
 
+void Sprite::setSize(int x, int y){
+  //Sets the size of sprite shown
+  clipWidth = x;
+  clipHeight = y;
+  std::cout << "what is x " << x << "\n what is y " << y << std::endl;
+}
+
 void Sprite::initSprite(){
   //Get an image in input inside the texure
   image = ppm6GetImage(imageName);
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
+
+ // glEnable (GL_BLEND);
+ // glBlendFunc (GL_ONE, GL_ONE);
+  // glEnable(GL_BLEND);
+  // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
+  //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   unsigned char *silhouetteData = buildAlphaData2(image);
@@ -121,11 +146,6 @@ void Sprite::replaceTexture(GLuint take){
 //  These are functions that are use to call drawing events using the variables
 //  within this class. Also, giving out this class information
 
-GLuint Sprite::textureBox(){
-  //Gives out the texture data/value
-  return texture;
-}
-
 
 //This Draws a tile base on row number and column number
 //example:
@@ -133,8 +153,9 @@ GLuint Sprite::textureBox(){
 //   1 # # # #
 //   2 # # # #
 //   3 # # # #
+//
 void Sprite::drawTile(int row, int column){
-  //Need to add a safety...
+  //Need to check if 0;
   int atX = row; int atY = column;
 
   glPushMatrix();
@@ -143,8 +164,8 @@ void Sprite::drawTile(int row, int column){
   glAlphaFunc(GL_LESS, 1.0f);
   glColor4ub(255,255,255,255);
   glBegin(GL_QUADS);
-  float w = imageWidth/32;
-  float h = imageHeight/32;
+  float w = clipWidth;
+  float h = clipHeight;
 
   glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
   glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
@@ -159,7 +180,8 @@ void Sprite::drawTile(int row, int column){
 // 1  2  3  4  5  6  7
 // 8  9  10 11 12 13 14
 //
-void Sprite::drawFont(int atSet){     int atX = atSet, atY = 0;         
+void Sprite::drawTile(int atSet){
+  int atX = atSet, atY = 0;         
   atX = atSet % row;
   atY = (int)(atSet/row);
 
@@ -169,8 +191,8 @@ void Sprite::drawFont(int atSet){     int atX = atSet, atY = 0;
   glAlphaFunc(GL_LESS, 1.0f);
   glColor4ub(255,255,255,255);
   glBegin(GL_QUADS);
-  float w = imageWidth/32;
-  float h = imageHeight/32;
+  float w = clipWidth;
+  float h = clipHeight;
 
   glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
   glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
@@ -178,10 +200,22 @@ void Sprite::drawFont(int atSet){     int atX = atSet, atY = 0;
   glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
 
   glEnd(); glPopMatrix();
-
   glDisable(GL_ALPHA_TEST);
 }
 
+//This will use the drawTile(int atSet)
+//Continously calling this function will switch to the next sprite in the sheet
+//Starting from the left then to right. It will do this for each row. Then reset
+//back to the start.
+void Sprite::drawSequence(){
+  drawTile(tileAt); tileAt++;
+  if(tileAt > row*column) tileAt = 0;
+}
+
+//Gives out the texture data/value
+GLuint Sprite::textureBox(){
+  return texture;
+}
 //=====================================================================
 //Function Aid
 //=====================================================================
