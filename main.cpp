@@ -12,15 +12,21 @@
 #include <GL/glx.h>
 #include "Object.cpp"
 #include "ppm.h"
+#include <sstream>
+#include <algorithm>
 
-#define WINDOW_WIDTH  900
+#define WINDOW_WIDTH 900
 #define WINDOW_HEIGHT 600
-#define MAX_PARTICLES 9000
-#define GRAVITY 0.1
+#define WINDOW_HALF_WIDTH  WINDOW_WIDTH/2
+#define WINDOW_HALF_HEIGHT WINDOW_HEIGHT/2
+#define LEVEL_WIDTH 10000
+#define MAX_HEIGHT 1200
+#define GRAVITY 0.2
+#define MAX_GROUNDS 32
 #define rnd()(float)rand() /(float)(RAND_MAX)
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 
-#define MAX_BACKGROUND_BITS 1000
+#define MAX_BACKGROUND_BITS 6000
 #define HERO_START_X 150
 #define HERO_START_Y 350
 
@@ -38,6 +44,7 @@ struct bgBit {
     Vec vel;
     struct bgBit *next;
     struct bgBit *prev;
+    const char* n;
 };
 
 struct Bullet {
@@ -53,12 +60,18 @@ struct Bullet {
         }
 };
 
-
-
 int diff_ms(timeval t1, timeval t2)
 {
     return (((t1.tv_sec - t2.tv_sec) * 1000000) +
             (t1.tv_usec - t2.tv_usec))/1000;
+}
+
+template <typename T>
+string itos ( T Number )
+{
+    stringstream ss;
+    ss << Number;
+    return (ss.str());
 }
 
 //X Windows variables
@@ -72,19 +85,21 @@ int isWalking=0;
 int isFalling=0;
 int isDying=0;
 int isJumping=0;
-double s_right, s_left, s_top, s_bottom;
+double h_right, h_left, h_top, h_bottom;
 timeval seqStart, seqEnd;
 
 //Game Globals
+string str = ""; 
 bgBit *bitHead = NULL;
-Object *grounds[32] = {NULL};
+Object *grounds[MAX_GROUNDS] = {NULL};
 Object *enemies[32] = {NULL};
-int bg, grounds_length, enemies_length,  i;
-int roomX=WINDOW_WIDTH/2;
-int roomY=WINDOW_HEIGHT/2;
+int bg, grounds_length, enemies_length,  i, j, level=0;
+int roomX=WINDOW_HALF_WIDTH;
+int roomY=WINDOW_HALF_HEIGHT;
 int fail=0;
 int interval=120;
 double g_left, g_right, g_top, g_bottom;
+int quit=0;
 
 //Images and Textures
 Ppmimage *heroImage=NULL;
@@ -94,27 +109,33 @@ GLuint heroTexture;
 void initXWindows(void);
 void init_opengl(void);
 void cleanupXWindows(void);
-void check_mouse(XEvent *e, Object *hero);
+void check_mouse(XEvent *e);
 int  check_keys (XEvent *e, Object *hero);
 void movement(Object *hero);
 void render(Object *hero);
+void renderMenu();
 void moveWindow(Object *hero);
 void renderBackground(void);
 void cleanup_background(void);
 Object createAI( int w, int h, Object *ground);
 
-void groundCollide(Object *hero, Object *ground);
-bool detectCollide(Object *hero, Object *ground);
+void groundCollide(Object *obj, Object *ground);
+bool detectCollide(Object *obj, Object *ground);
+
+bool inWindow(Object &obj){
+    return ((obj.getLeft() < (roomX+(WINDOW_HALF_WIDTH)) and
+             obj.getLeft() > (roomX-(WINDOW_HALF_WIDTH))) or 
+            (obj.getRight() > (roomX-(WINDOW_HALF_WIDTH)) and
+             obj.getRight() < (roomX+(WINDOW_HALF_WIDTH))));
+}
 
 int main(void){
-    string previousPosition;
-    timeval end, start;
-    gettimeofday(&start, NULL);
-    int done=0;
-    srand(time(NULL));
+    //string previousPosition;
+    //srand(time(NULL));
     initXWindows(); init_opengl();
+
     //declare hero object
-    Object hero(46, 48, HERO_START_X + 50, HERO_START_Y + 50);
+    Object hero(46, 48, HERO_START_X, HERO_START_Y);
     hero.setTop(44);
     hero.setBottom(-44);
     hero.setLeft(-26);
@@ -126,16 +147,19 @@ int main(void){
     Object ground_2(200, 10, 900, 200);
     Object ground_3(150, 10, 1200, 360);
     Object ground_4(250, 10, 1450, 80);
-    Object ground_5(450, 10, 2500, 80);
-    Object ground_6(350, 10, 2500, 360);
+    Object ground_5(440, 10, 2500, 80);
+    Object ground_6(340, 10, 2300, 360);
     Object ground_7(250, 10, 2800, 480);
-    Object ground_8(450, 10, 3500, 80);
-    Object ground_9(450, 10, 4000, 200);
-    Object ground_10(450, 10, 4500, 80);
-    Object ground_11(450, 10, 5500, 80);
-    Object ground_12(450, 10, 6500, 80);
-    Object ground_13(450, 10, 7500, 80);
-    Object ground_14(450, 10, 8500, 80); 
+    Object ground_8(440, 10, 3500, 80);
+    Object ground_9(440, 10, 4000, 200);
+    Object ground_10(440, 10, 4500, 80);
+    Object ground_11(440, 10, 5500, 80);
+    Object ground_12(440, 10, 6500, 80);
+    Object ground_13(440, 10, 7500, 80);
+    Object ground_14(440, 10, 8500, 80); 
+    Object ground_15(440, 10, 9500, 80); 
+    Object ground_16(200, 10, 9700, 360); 
+    Object ground_17(200, 10, 300, 180); 
 
     grounds[0] = &ground_0;
     grounds[1] = &ground_1;
@@ -152,29 +176,40 @@ int main(void){
     grounds[12] = &ground_12;
     grounds[13] = &ground_13;
     grounds[14] = &ground_14;
-    grounds_length=15;
-
+    grounds[15] = &ground_15;
+    grounds[16] = &ground_16;
+    grounds[17] = &ground_17;
+    grounds_length=18;
+/*
+    for (i=0;i<grounds_length;i++){
+        cout << "Ground " << i << ": " << grounds[i] << endl;
+    }
+*/
     //setup enemies
     Object enemy_0 = createAI(20, 48, &ground_2);
     Object enemy_1 = createAI(20, 48, &ground_3);
 
     enemies[0] = &enemy_0;
     enemies[1] = &enemy_1;
-    enemies_length=2;
+    enemies_length=1;
 
+    level=1;
 
-    while(!done) { //Staring Animation
+    while(!quit) { //Staring Animation
         while(XPending(dpy)) {
             //Player User Interfaces
             XEvent e; XNextEvent(dpy, &e);
-            check_mouse(&e, &hero);
-            done = check_keys(&e, &hero);
+            check_mouse(&e);
+            quit = check_keys(&e, &hero);
         }
-        movement(&hero);
-        render(&hero);
-        gettimeofday(&end, NULL);
-        if (diff_ms(end, start) > 1200)
+        if (level>0){
+            movement(&hero);
+            render(&hero);
             moveWindow(&hero);
+        }
+        else{
+            renderMenu();
+        }
         glXSwapBuffers(dpy, win);
     }
     cleanupXWindows(); return 0;
@@ -273,7 +308,7 @@ void init_opengl(void){
     delete [] silhouetteData;
 }
 
-void check_mouse(XEvent *e, Object *hero){
+void check_mouse(XEvent *e){
     static int savex = 0, savey = 0;
     //static int n = 0;
     if (e->type == ButtonRelease) { return;}
@@ -294,7 +329,7 @@ void check_mouse(XEvent *e, Object *hero){
     }
 }
 
-int check_keys(XEvent *e, Object*hero){
+int check_keys(XEvent *e, Object *hero){
     //Was there input from the keyboard?
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
@@ -303,14 +338,14 @@ int check_keys(XEvent *e, Object*hero){
             //Jump
             if (didJump < 2 && hero->getVelocityY() > -0.5){
                 didJump++;
-                hero->setVelocityY(5);
+                hero->setVelocityY(7);
             }
         }
         if ((key == XK_a || key == XK_Left) && !isDying) {
-            hero->setVelocityX(-5);
+            hero->setVelocityX(-6);
         }
         if ((key == XK_d || key == XK_Right) && !isDying) {
-            hero->setVelocityX(5);
+            hero->setVelocityX(6);
         }
         if (key == XK_space) {
             life-=1000;
@@ -330,76 +365,471 @@ int check_keys(XEvent *e, Object*hero){
     return 0;
 }
 
-bool detectCollide(Object *hero, Object *ground){
+void enemyAI(Object *hero, Object *enemy){
+    Object *e_f = enemy->getFloor();
+    Object *h_f = hero->getFloor();
+    string old = str;
+    str = ""; 
+    if (!h_f){
+        return;
+    }
+    str += "enemy " + itos(enemy) + " ";
+    float h_cx=hero->getCenterX();
+    //float h_cy=hero->getCenterY();
+    //float h_vx=hero->getVelocityX();
+    float h_fl=h_f->getLeft();
+    float h_ft=h_f->getTop();
+    float h_fr=h_f->getRight();
+    //---------------------------------
+    float e_cx=enemy->getCenterX();
+    float e_cy=enemy->getCenterY();
+    float e_vx=enemy->getVelocityX();
+    float e_vy=enemy->getVelocityY();
+
+    if (e_f && h_f){ // If enemy is not mid jump
+        float e_fl=e_f->getLeft();
+        float e_ft=e_f->getTop();
+        float e_fr=e_f->getRight();
+        float d_x=e_cx - hero->getCenterX();
+        float d_y=e_cy - hero->getCenterY();
+        int h_above = (d_y<0)?10:0;
+        int h_right = (d_x<0)?1:0;
+        int range=(enemy->getAggro())?800:400;
+        int h_close = (((d_x*d_x)+(d_y*d_y)<(range*range) && !isDying)?(((d_x*d_x)+(d_y*d_y)<(200*200))?2:1):0);
+        int h_dir = h_above+h_right;
+        if (!isJumping and !isFalling)
+            h_dir+=((h_f==e_f)?100:0);
+        str += "[DIR: " + itos(h_dir) + "]";
+        // If enemy is within 200px & not dead: 2; within 400px: 1; else: 0
+        switch (h_close) {
+            case 2: // hero close range
+                enemy->setVelocityX(0);
+                str += "attack!";
+                //fall through?
+                break;
+            case 1: // follow hero
+                if (!enemy->getAggro())
+                    enemy->setAggro(true);
+                    str += "Aggro! ";
+                switch (h_dir){
+                    case 0: // If hero is to the lower left of enemy
+                        if (e_fl<e_cx) { // If enemy won't fall
+                            enemy->setVelocityX(-6); // then move to the left
+                            str += "move left!";
+                        } else { // If enemy is going to fall
+                            enemy->setVelocityX(0); // then stop moving
+                            str += "stop!";
+                            if (h_fr>e_fl){//grounds are overlapping
+                                //hero's ground is below enemy's ground
+                                if (h_ft<e_ft){
+                                    enemy->setVelocityX(-6);// Jump down
+                                    str += "jump down!";
+                                    enemy->setFloor(NULL);
+                                }
+                                else{
+                                    str += "NEVER CONDITION(1)";
+                                }
+                            }
+                            else{ // gap
+                                if ((e_fl-h_fr)<(e_ft-h_ft)){ // just run off
+                                    enemy->setVelocityX(-6);
+                                    str += "move left!";
+                                    enemy->setFloor(NULL);
+                                }
+                                else if (h_fr>(e_fl-640)){
+                                    if ((h_cx+250)<e_cx){
+                                        enemy->setVelocityX(-6);// Jump over
+                                    }
+                                    else{
+                                        enemy->setVelocityX(((h_fr-e_fl)/59)*-1);// Jump over
+                                        if (enemy->getVelocityX()<-6)
+                                            enemy->setVelocityX(-6);
+                                    }
+                                    enemy->setVelocityY(6);
+                                    str += "jump over!";
+                                    enemy->setJump();
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
+                                    enemy->setFloor(NULL);
+                                }
+                                else{
+                                    str += " gap too large to jump!";
+                                }
+                            }
+                        }
+                        break;
+                    case 1: // If hero is to the lower right of enemy
+                        if (e_fr>e_cx) { // If enemy won't fall
+                            enemy->setVelocityX(6); // then move to the right
+                            str += "move right!";
+                        } else { // If enemy is going to fall if he keeps going
+                            enemy->setVelocityX(0); // then stop moving
+                            str += "stop!";
+                            if (h_fl<=e_fr){ // grounds are overlapping
+                                //hero's ground is below enemy's ground
+                                if (h_ft<=e_ft){
+                                    enemy->setVelocityX(6);// Jump down
+                                    str += "jump down!";
+                                    enemy->setFloor(NULL);
+                                }
+                                else{
+                                    str += "NEVER CONDITION(2)";
+                                }
+                            }
+                            else{ // gap
+                                if ((h_fl-e_fr)<(e_ft-h_ft)){ // just run off
+                                    enemy->setVelocityX(6);
+                                    str += "move right!";
+                                    enemy->setFloor(NULL);
+                                }
+                                else if (h_fl<(e_fr+640)){
+                                    if ((h_cx-250)>e_cx){
+                                        enemy->setVelocityX(6);// Jump over
+                                    }
+                                    else{
+                                        enemy->setVelocityX(((e_fr-h_fl)/59)*-1);// Jump over
+                                        if (enemy->getVelocityX()>6)
+                                            enemy->setVelocityX(6);
+                                    }
+                                    enemy->setVelocityY(6);
+                                    str += "jump over!";
+                                    enemy->setJump();
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
+                                    enemy->setFloor(NULL);
+                                }
+                                else{
+                                    str += " gap too large to jump!";
+                                }
+                            }
+                        }
+                        break;
+                    case 10: // If hero is to the upper left of enemy
+                        //hero's ground is above enemy's ground
+                        if (h_ft>e_ft && h_ft<(e_ft+220)){
+                            if (h_fr>e_fl){ // grounds are overlapping
+                                if ((enemy->getLeft()-6)<h_fr){
+                                    enemy->setVelocityX(6);
+                                    str += "move right";
+                                }
+                                else if ((enemy->getLeft()-14)>h_fr){
+                                    enemy->setVelocityX(-6);
+                                    str += "move left";
+                                }
+                                else{
+                                    enemy->setVelocityX(0);
+                                    enemy->setVelocityY(7);
+                                    enemy->setJump();
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
+                                    enemy->setFloor(NULL);
+                                }
+                            }
+                            else{
+                                //hero's floor is above and to the left with a gap
+                                if ((enemy->getLeft())>e_fl){
+                                    enemy->setVelocityX(-6);
+                                    str += "move left";
+                                }
+                                else{
+                                    enemy->setVelocityY(7);
+                                    enemy->setJump();
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
+                                    enemy->setFloor(NULL);
+                                }
+
+
+                            }
+                        }
+                        else{
+                            //hero's floor is equal or lower and to the left
+                            if ((enemy->getLeft())>e_fl){
+                                enemy->setVelocityX(-6);//move to edge
+                                str += "move left";
+                            }
+                            else if (h_f!=e_f){ // gap
+                                enemy->setVelocityX(0);
+                                if ((e_fl-h_fr)<(e_ft-h_ft)){ // just run off
+                                    enemy->setVelocityX(-6);
+                                    str += "move left!";
+                                    enemy->setFloor(NULL);
+                                }
+                                else if (h_fr>(e_fl-640)){
+                                    if ((h_cx+250)<e_cx){
+                                        enemy->setVelocityX(-6);// Jump over
+                                    }
+                                    else{
+                                        enemy->setVelocityX(((h_fr-e_fl)/59)*-1);// Jump over
+                                        if (enemy->getVelocityX()<-6)
+                                            enemy->setVelocityX(-6);
+                                    }
+                                    enemy->setVelocityY(6);
+                                    str += "jump over!";
+                                    enemy->setJump();
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
+                                    enemy->setFloor(NULL);
+                                }
+                                else{
+                                    str += " gap too large to jump!";
+                                }
+                            }
+                        }
+                        break;
+                    case 11: // If hero is to the upper right of enemy
+                        //hero's ground is above enemy's ground
+                        if (h_ft>e_ft && h_ft<(e_ft+220)){
+                            if (h_fl<e_fr){
+                                if ((enemy->getRight()+6)>h_fl){
+                                    enemy->setVelocityX(-6);
+                                    str += "move left";
+                                }
+                                else if ((enemy->getRight()+14)<h_fl){
+                                    enemy->setVelocityX(6);
+                                    str += "move right";
+                                }
+                                else{
+                                    enemy->setVelocityX(0);
+                                    str += "stop, ";
+                                    enemy->setVelocityY(7);
+                                    enemy->setJump();
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
+                                    enemy->setFloor(NULL);
+                                }
+                            }
+                            else{
+                                //hero's floor is above and to the right with a gap
+                                if ((enemy->getRight())<e_fr){
+                                    enemy->setVelocityX(6);
+                                    str += "move left";
+                                }
+                                else{
+                                    enemy->setVelocityY(7);
+                                    enemy->setJump();
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
+                                    enemy->setFloor(NULL);
+                                }
+
+
+                            }
+                        }
+                        else{
+                            //hero's floor is equal or lower and to the right
+                            if ((enemy->getRight())<e_fr){
+                                enemy->setVelocityX(6);//move to edge
+                                str += "move right";
+                            }
+                            else if (h_f!=e_f){ // gap
+                                enemy->setVelocityX(0);
+                                if ((h_fl-e_fr)<(e_ft-h_ft)){ // just run off
+                                    enemy->setVelocityX(6);
+                                    str += "move right!";
+                                    enemy->setFloor(NULL);
+                                }
+                                else if (h_fl<(e_fr+640)){
+                                    if ((h_cx-250)>e_cx){
+                                        enemy->setVelocityX(6);// Jump over
+                                    }
+                                    else{
+                                        enemy->setVelocityX(((e_fr-h_fl)/59)*-1);// Jump over
+                                        if (enemy->getVelocityX()>6)
+                                            enemy->setVelocityX(6);
+                                    }
+                                    enemy->setVelocityY(6);
+                                    str += "jump over!";
+                                    enemy->setJump();
+                                    str += "jump #" + itos(enemy->getJump()) + " ";
+                                    enemy->setFloor(NULL);
+                                }
+                                else{
+                                    str += " gap too large to jump!";
+                                }
+                            }
+                        }
+                        break;  
+                    case 100:
+                    case 110:
+                        enemy->setVelocityX(-6);
+                        str += "move left!";
+                        break;
+                    case 101:
+                    case 111:
+                        enemy->setVelocityX(6);
+                        str += "move right!";
+                        break;
+                }
+                break;
+            default: // patrol
+                enemy->setAggro(false);
+                if (e_vx==0){
+                    enemy->setVelocityX((rnd()>.5)?(-0.6):(0.6));//Patrol ground object
+                    str += "start patrolling";
+                } else {
+                    if (e_vx<0 && e_f!=NULL){
+                        if (enemy->getLeft()<e_fl){
+                            e_vx*=-1; //must set this value for following code
+                            enemy->setVelocityX(e_vx);
+                            str += "turn around";
+                        }
+                    } else if (e_vx>0 && e_f!=NULL) {
+                        if (enemy->getRight()>e_fr){
+                            e_vx*=-1; //must set this value for following code
+                            enemy->setVelocityX(e_vx);
+                            str += "turn around";
+                        }
+                    }
+                }
+                break;
+        }
+        //Check for falling off
+        if (enemy->getFloor()){ // don't check e_f here
+            if (e_vx>0 && e_cx > e_fr){
+                enemy->setVelocityX(0);
+                str += "almost fell!";
+            }
+            if (e_vx<0 && e_cx < e_fl){
+                enemy->setVelocityX(0);
+                str += "almost fell!";
+            }
+        }
+    }
+    else if (h_f){ // enemy is mid jump
+        if (e_vx==0){
+            if ((e_vy > -0.5) && 
+                (e_vy <= 0)){ 
+                if (enemy->getBottom() < h_ft){ // enemy needs to double jump
+                    if (enemy->getJump()<2){
+                        enemy->setVelocityY(7);
+                        enemy->setJump();
+                        str += "jump #" + itos(enemy->getJump()) + " ";
+                    }
+                }
+                else if (enemy->getBottom() > h_ft){
+                    if (e_cx<h_cx){
+                        if (e_cx>(h_cx-100)){
+                            enemy->setVelocityX(1);
+                        }
+                        else if (e_cx>(h_cx-250)){
+                            enemy->setVelocityX(3);// Jump over
+                        }
+                        else{
+                            enemy->setVelocityX(6);
+                        }
+                    }
+                    else{
+                        if (e_cx<(h_cx+100)){
+                            enemy->setVelocityX(-1);
+                        }
+                        else if (e_cx<(h_cx+250)){
+                            enemy->setVelocityX(-3);// Jump over
+                        }
+                        else{
+                            enemy->setVelocityX(-6);
+                        }
+                    }
+                    str += "move";
+                }
+            }
+        }
+        else{ //enemy is moving left or right
+            e_vx=enemy->getVelocityX();
+            e_vy=enemy->getVelocityY();
+            if (e_cx>h_cx && e_vx>0){
+                enemy->setVelocityX(0);
+            }
+            else if (e_cx<h_cx && e_vx<0){
+                enemy->setVelocityX(0);
+            }
+            if ((e_vy > -0.5) && (e_vy <= 0)){ // check if enemy needs to double jump
+                if (((e_vx > 0) && (e_cy < (h_ft+360)) && (e_cx < (h_fl-180))) or
+                    ((e_vx < 0) && (e_cy > (h_ft+360)) && (e_cx > (h_fr+180)))){
+                    // enemy double jump to lower platform
+                    if (enemy->getJump()<2){
+                        enemy->setVelocityY(7);
+                        enemy->setJump();
+                        str += "jump #" + itos(enemy->getJump()) + " ";
+                    }
+                }
+                else{
+                    str += "too far? my x,y:" + itos(e_cx) + "," + itos(e_cy) + ";" + "ground's x,y:";
+                    if (e_vx>0)
+                        str += itos(h_fl) + "," + itos(h_ft);
+                    else
+                        str += itos(h_fr) + "," + itos(h_ft);
+                }
+            } 
+        }
+    }
+    if ((str.length())>24 && str != old){
+        cout << str << endl;
+    }
+}
+
+bool detectCollide(Object *obj, Object *ground){
     //Gets (Moving Object, Static Object)
     //Reture True if Moving Object Collides with Static Object
-    return (  hero->getRight()  > ground->getLeft() &&
-            hero->getLeft()   < ground->getRight() &&
-            hero->getBottom() < ground->getTop()  &&
-            hero->getTop()    > ground->getBottom()
+    return (obj->getRight()  > ground->getLeft() &&
+            obj->getLeft()   < ground->getRight() &&
+            obj->getBottom() < ground->getTop()  &&
+            obj->getTop()    > ground->getBottom()
            );
 }
 
-void groundCollide(Object *hero, Object *ground){
+void groundCollide(Object *obj, Object *ground){
     //(Moving Object, Static Object)
     //Detects Which boundaries the Moving Object is around the Static Object
     //top,down,left,right
-    if(detectCollide(hero, ground)){
-        s_right=hero->getRight();
-        s_left=hero->getLeft();
-        s_top=hero->getTop();
-        s_bottom=hero->getBottom();
+    if(detectCollide(obj, ground)){
+        h_right=obj->getRight();
+        h_left=obj->getLeft();
+        h_top=obj->getTop();
+        h_bottom=obj->getBottom();
         g_right=ground->getRight();
         g_bottom=ground->getBottom();
         g_top=ground->getTop();
         g_left=ground->getLeft();
         //If moving object is on top of the static object
-        if(!(hero->getOldBottom() < g_top) &&
-                !(s_bottom >= g_top) && (hero->getVelocityY() < 0)){
-            hero->setVelocityY(0);
-            hero->setCenter(hero->getCenterX(),
-                    g_top+(hero->getCenterY()-s_bottom)
+        if(!(obj->getOldBottom() < g_top) &&
+                !(h_bottom >= g_top) && (obj->getVelocityY() < 0)){
+            obj->setVelocityY(0);
+            obj->setCenter(obj->getCenterX(),
+                    g_top+(obj->getCenterY()-h_bottom)
                     );
-            isFalling=isJumping=didJump=0;
+            obj->setFloor(ground);
         }
         //If moving object is at the bottom of static object
-        if(!(hero->getOldTop() > g_bottom) &&
-                !(s_top <= g_bottom)){
-            hero->setVelocityY(-0.51);
-            hero->setCenter(hero->getCenterX(),
-                    g_bottom-(s_top-hero->getCenterY())
+        if(!(obj->getOldTop() > g_bottom) &&
+                !(h_top <= g_bottom)){
+            obj->setVelocityY(-0.51);
+            obj->setCenter(obj->getCenterX(),
+                    g_bottom-(h_top-obj->getCenterY())
                     );
         }
         //If moving object is at the l-eft side of static object
-        if(!(hero->getOldRight() > g_left ) &&
-                !(s_right <= g_left)){
-            hero->setVelocityX(-0.51);
-            hero->setCenter(g_left-(s_right-hero->getCenterX()),
-                    hero->getCenterY()
+        if(!(obj->getOldRight() > g_left ) &&
+                !(h_right <= g_left)){
+            obj->setVelocityX(-0.51);
+            obj->setCenter(g_left-(h_right-obj->getCenterX()),
+                    obj->getCenterY()
                     );
         }
         //If moving object is at the right side of static object
-        if(!(hero->getOldLeft() < g_right ) &&
-                !(s_left >= g_right)){
-            hero->setVelocityX(0.51);
-            hero->setCenter(g_right+(hero->getCenterX()-s_left),
-                    hero->getCenterY()
+        if(!(obj->getOldLeft() < g_right ) &&
+                !(h_left >= g_right)){
+            obj->setVelocityX(0.51);
+            obj->setCenter(g_right+(obj->getCenterX()-h_left),
+                    obj->getCenterY()
                     );
         }
     }
 }
 
 void movement(Object *hero){
-    Object *ground;
-    for (i=0; i<grounds_length; i++){
-        ground = grounds[i];
-        // Detect Collision
-        groundCollide(hero, ground);
-    }
+    // Hero Apply Velocity, Add Gravity
     hero->setOldCenter();
-    // Apply Velocity, Add Gravity
     hero->setCenter( (hero->getCenterX() + hero->getVelocityX()), (hero->getCenterY() + hero->getVelocityY()));
-    // Cycle through index sequences
+    hero->setVelocityY( hero->getVelocityY() - GRAVITY);
+    //Detect Collisions
+    for (i=0; i<grounds_length; i++){
+        groundCollide(hero, grounds[i]);
+    }
+    // Cycle through hero index sequences
     if (life<=0){
         hero->setVelocityX(0);
         isWalking=0;
@@ -441,43 +871,65 @@ void movement(Object *hero){
         else
             hero->setIndex(1);
     } else if (!isDying) { // Walking
+        if (isFalling){ // Just hit ground object after fall
+            isFalling=isJumping=didJump=0; // Reset jump counter
+        }
         if (hero->getVelocityX() < -1 or
                 hero->getVelocityX() > 1){
-            if (!isWalking && !isJumping && !isFalling){
+            if (!isWalking && !isJumping && !isFalling){ // Just started walking
                 isWalking=1;
-                hero->setIndex(0);
+                hero->setIndex(0); // Start walk sequence
                 gettimeofday(&seqStart, NULL);
             }
             gettimeofday(&seqEnd, NULL);
-            if (isWalking && ((diff_ms(seqEnd, seqStart)) > 80)){
+            if (isWalking && ((diff_ms(seqEnd, seqStart)) > 80)){ // Walk sequence
                 hero->setIndex(((hero->getIndex()+1)%6));
                 gettimeofday(&seqStart, NULL);
                 isFalling=isJumping=0;
             }
-        } else {
+        } else { // Standing idle
             isWalking=0;
             if (!isJumping)
                 hero->setIndex(6);
         }
+    } else if (isJumping && hero->getVelocityY() < -1) {
+        isJumping=0;
+        isFalling=1;
+    } else if (isFalling && hero->getVelocityY() > -1){
+        isFalling=0;
     }
     if (!isWalking and !isFalling and !isJumping)
-        hero->setVelocityX(0);
+        hero->setVelocityX(0); // Prevent weird floating
     // Check for Death
     if (hero->getCenterY() < 0){
-        hero->setCenter(HERO_START_X, HERO_START_Y);
+        hero->setCenter(HERO_START_X, HERO_START_Y); // Respawn
         lives--;
-        life=fail=100;
+        life=fail=100; // Reset life points, Display fail for 100 frames
         hero->setVelocityX(0);
         isDying=0;
     }
-    hero->setVelocityY( hero->getVelocityY() - GRAVITY);
+    // Enemy movement, enemy ai
+    for (i=0;i<enemies_length;i++){
+        enemyAI(hero, enemies[i]); //Where does enemy go?
+        enemies[i]->setOldCenter();
+        enemies[i]->setCenter( //Apply Physics
+                (enemies[i]->getCenterX() + enemies[i]->getVelocityX()),
+                (enemies[i]->getCenterY() + enemies[i]->getVelocityY()));
+        enemies[i]->setVelocityY( enemies[i]->getVelocityY() - GRAVITY);
+        for (j=0; j<grounds_length; j++){
+            groundCollide(enemies[i], grounds[j]); //Collision Detection
+        }
+    }
 }
 
+void renderMenu(){
+
+}
 
 void render(Object *hero){
     float w, h, tl_sz, x, y;
-    x = roomX - (WINDOW_WIDTH/2);
-    y = roomY - (WINDOW_HEIGHT/2);
+    x = roomX - WINDOW_HALF_WIDTH;
+    y = roomY - WINDOW_HALF_HEIGHT;
     glClear(GL_COLOR_BUFFER_BIT);
     // Draw Background Falling Bits
     renderBackground();
@@ -487,40 +939,55 @@ void render(Object *hero){
     Object *ground;
     for (i=0;i<grounds_length;i++){
         ground = grounds[i];
-        //Ground
-        glPushMatrix();
-        glTranslatef(
-                ground->getCenterX() - x,
-                ground->getCenterY() - y,
-                0);
-        w = ground->getWidth();
-        h = ground->getHeight();
-        glBegin(GL_QUADS);
-        glVertex2i(-w,-h);
-        glVertex2i(-w, h);
-        glVertex2i( w, h);
-        glVertex2i( w,-h);
-        glEnd(); glPopMatrix();
+        if (inWindow(*ground)){
+            //Ground
+            glPushMatrix();
+            glTranslatef(
+                    ground->getCenterX() - x,
+                    ground->getCenterY() - y,
+                    0);
+            w = ground->getWidth();
+            h = ground->getHeight();
+            glBegin(GL_QUADS);
+            glVertex2i(-w,-h);
+            glVertex2i(-w, h);
+            glVertex2i( w, h);
+            glVertex2i( w,-h);
+            glEnd(); glPopMatrix();
+
+            stringstream strs;
+            strs << i;
+            string temp_str = strs.str();
+            char* char_type = (char*) temp_str.c_str();
+
+            Rect r0;
+            r0.bot = ground->getCenterY() - y - 8;
+            r0.left = r0.center = ground->getCenterX() - x;
+            ggprint12(&r0, 16, 0x00000000, (const char*)char_type);
+            glColor3ub(65,155,225);
+        }
     }
     // render enemies
     glColor3ub(100,0,0);
     Object *enemy;
     for (int i=0;i<enemies_length;i++){
         enemy = enemies[i];
-        //Ground
-        glPushMatrix();
-        glTranslatef(
-                enemy->getCenterX() - x,
-                enemy->getCenterY() - y,
-                0);
-        w = enemy->getWidth();
-        h = enemy->getHeight();
-        glBegin(GL_QUADS);
-        glVertex2i(-w,-h);
-        glVertex2i(-w, h);
-        glVertex2i( w, h);
-        glVertex2i( w,-h);
-        glEnd(); glPopMatrix();
+        if (inWindow(*enemy)){
+            //Enemy
+            glPushMatrix();
+            glTranslatef(
+                    enemy->getCenterX() - x,
+                    enemy->getCenterY() - y,
+                    0);
+            w = enemy->getWidth();
+            h = enemy->getHeight();
+            glBegin(GL_QUADS);
+            glVertex2i(-w,-h);
+            glVertex2i(-w, h);
+            glVertex2i( w, h);
+            glVertex2i( w,-h);
+            glEnd(); glPopMatrix();
+        }
     }
     //Non-Collision Object
     /*
@@ -574,8 +1041,8 @@ void render(Object *hero){
     r0.bot = WINDOW_HEIGHT - 32;
     r0.left = r0.center = 32;
     ggprint12(&r0, 16, 0x0033aaff, "Lives ");
-    r1.bot = WINDOW_HEIGHT/2;
-    r1.left = r1.center = WINDOW_WIDTH/2;
+    r1.bot = WINDOW_HALF_HEIGHT;
+    r1.left = r1.center = WINDOW_HALF_WIDTH;
     if (fail>0){
         ggprint16(&r1, fail/2, 0x00ff0000, "FAIL");
         fail--;
@@ -587,12 +1054,12 @@ void moveWindow(Object *hero) {
     double heroWinPosY = hero->getCenterY();
 
     //move window forward
-    if (heroWinPosX > roomX + interval) {
-        roomX+=5;
+    if ((heroWinPosX > roomX + interval) && ((roomX+WINDOW_HALF_WIDTH)<LEVEL_WIDTH-6)) {
+        roomX+=6;
     }
     //move window backward (fast move if hero is far away)
-    else if ((heroWinPosX < roomX - interval) && roomX>(WINDOW_WIDTH/2)) {
-        roomX-=5;
+    else if ((heroWinPosX < roomX - interval) && roomX>(WINDOW_HALF_WIDTH+6)) {
+        roomX-=6;
             if (heroWinPosX < (roomX - interval - 400)){
                 roomX-=20;
             }
@@ -601,42 +1068,56 @@ void moveWindow(Object *hero) {
             }
     }
     //move window up
-    if (heroWinPosY > roomY + interval) {
-        roomY+=5;
+    if ((heroWinPosY > roomY + interval) && ((roomY+6)<(MAX_HEIGHT-WINDOW_HALF_HEIGHT))) {
+        roomY+=6;
     }
     //move window down
-    else if ((heroWinPosY < roomY - interval) && roomY>(WINDOW_HEIGHT/2)) {
+    else if ((heroWinPosY < roomY - interval) && (roomY-6)>(WINDOW_HALF_HEIGHT)) {
         i = hero->getVelocityY();
-        if (i>-5)
-            i=-5;
+        if (i>-6)
+            i=-6;
         roomY+=i;
-    }
-
-    // TODO: update parameter to reflect the actual size of level.
-    else if(heroWinPosX > 5000) {
-        return;
     }
 }
 void renderBackground(){
+    if (bg < 1){
+        for (i=0;i<=(MAX_BACKGROUND_BITS/3);i++){
+            bgBit *bit = new bgBit;
+            if (bit == NULL){
+                exit(EXIT_FAILURE);
+            }
+            bit->pos[0] = (rnd() * (LEVEL_WIDTH));
+            bit->pos[1] = (rnd() * (MAX_HEIGHT+100));
+            bit->pos[2] = 0.8 + (rnd() * 0.4);
+            bit->vel[0] = 0.0f;
+            bit->vel[1] = -1.0f;
+            bit->n = ((rnd()>0.5)?"1":"0");
+            bit->next = bitHead;
+            if (bitHead != NULL)
+                bitHead->prev = bit;
+            bitHead = bit;
+            bg++;
+        }
+    }
     if (bg < MAX_BACKGROUND_BITS){
         // Create bit
-        bgBit *bit = new bgBit;
-        if (bit == NULL){
-            exit(EXIT_FAILURE);
-        }
-        bit->pos[0] = (rnd() * ((float)WINDOW_WIDTH+3000)) +
-            (roomX-(WINDOW_WIDTH/2)) - 1000;
-        bit->pos[1] = rnd() * 100.0f + (float)WINDOW_HEIGHT +
-            (roomY-(WINDOW_HEIGHT/2));
-        bit->pos[2] = 0.8 + (rnd() * 0.4);
-        bit->vel[0] = 0.0f;
-        bit->vel[1] = -0.8f;
-        bit->vel[2] = (rnd());
-        bit->next = bitHead;
-        if (bitHead != NULL)
-            bitHead->prev = bit;
-        bitHead = bit;
-        bg++;
+        //for (i=0;i<=1;i++){
+            bgBit *bit = new bgBit;
+            if (bit == NULL){
+                exit(EXIT_FAILURE);
+            }
+            bit->pos[0] = (rnd() * (LEVEL_WIDTH));
+            bit->pos[1] = (rnd() * 100) + MAX_HEIGHT;
+            bit->pos[2] = 0.8 + (rnd() * 0.4);
+            bit->vel[0] = 0.0f;
+            bit->vel[1] = -1.0f;
+            bit->n = ((rnd()>0.5)?"1":"0");
+            bit->next = bitHead;
+            if (bitHead != NULL)
+                bitHead->prev = bit;
+            bitHead = bit;
+            bg++;
+        //}
     }
     // Reset pointer to beginning to render all bits
     bgBit *bit = bitHead;
@@ -644,7 +1125,6 @@ void renderBackground(){
         VecCopy(bit->pos, bit->lastpos);
         if (bit->pos[1] > 0){
             bit->pos[1] += bit->vel[1];
-
         }
         else{
             bgBit *savebit = bit->next;
@@ -668,27 +1148,28 @@ void renderBackground(){
             bg--;
             continue;
         }
-        Rect r0;
-        r0.bot = bit->pos[1];
-        r0.left = r0.center = (bit->pos[0]-((roomX-(WINDOW_WIDTH/2))*bit->pos[2]));
-        int j = bit->pos[2];
-        if (bit->pos[1]>(WINDOW_HEIGHT*0.7)){
-            i=255;
-        } else {
-            i = (bit->pos[1]-10)/(WINDOW_HEIGHT/255);
-            if (i<1)
+        j = (bit->pos[0]-((roomX-(WINDOW_HALF_WIDTH))*bit->pos[2]));
+        if ((j+100>(0)) && (j-100<(WINDOW_WIDTH))){
+            Rect r0;
+            r0.bot = (bit->pos[1]-((roomY-(WINDOW_HALF_HEIGHT))*bit->pos[2]));
+            r0.left = r0.center = j;
+            i = (bit->pos[1])/(WINDOW_HEIGHT/255);
+            if (i<0)
                 i=0;
-        }
-        if (j>=1){
-            ggprint12(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
-        } else if (j>0.9) {
-            ggprint10(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
-        } else {
-            ggprint08(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
+            else if (i>255)
+                i=255;
+            i=(i*65536+256*i+i);
+            if (bit->pos[2]>=1.08){
+                ggprint12(&r0, 16, i, bit->n );
+            } else if (bit->pos[2]>0.94) {
+                ggprint10(&r0, 16, i, bit->n );
+            } else {
+                ggprint08(&r0, 16, i, bit->n );
+            }
         }
         bit = bit->next;
     }
-    glLineWidth(1);
+    //glLineWidth(1);
 }
 
 void cleanup_background(void){
