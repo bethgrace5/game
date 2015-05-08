@@ -19,6 +19,7 @@
 #include "fonts.h"
 #include "Object.h"
 #include "fastFont.h"
+#include "sprite.h"
 //#include "menustate.h"
 
 #define WINDOW_WIDTH  900
@@ -81,30 +82,32 @@ int isJumping=0;
 double s_right, s_left, s_top, s_bottom;
 timeval seqStart, seqEnd;
 
+
 //Images and Textures
 Ppmimage *heroImage=NULL;
 GLuint heroTexture;
 
 Object hero(46, 48, HERO_START_X + 50, HERO_START_Y + 50);
 
+    Sprite var1;
     Object ground_0(10, 1000, -10, 600);
-    Object ground_1(400, 10, 400, 80);
-    Object ground_2(200, 10, 900, 200);
-    Object ground_3(150, 10, 1200, 360);
-    Object ground_4(250, 10, 1450, 80);
-    Object ground_5(440, 10, 2500, 80);
-    Object ground_6(340, 10, 2300, 360);
-    Object ground_7(250, 10, 2800, 480);
-    Object ground_8(440, 10, 3500, 80);
-    Object ground_9(440, 10, 4000, 200);
-    Object ground_10(440, 10, 4500, 80);
-    Object ground_11(440, 10, 5500, 80);
-    Object ground_12(440, 10, 6500, 80);
-    Object ground_13(440, 10, 7500, 80);
-    Object ground_14(440, 10, 8500, 80); 
-    Object ground_15(440, 10, 9500, 80); 
-    Object ground_16(200, 10, 9700, 360); 
-    Object ground_17(200, 10, 300, 180); 
+    Object ground_1(400, 14, 400, 80);
+    Object ground_2(200, 14, 900, 200);
+    Object ground_3(150, 14, 1200, 360);
+    Object ground_4(250, 14, 1450, 80);
+    Object ground_5(440, 14, 2500, 80);
+    Object ground_6(340, 14, 2300, 360);
+    Object ground_7(250, 14, 2800, 480);
+    Object ground_8(440, 14, 3500, 80);
+    Object ground_9(440, 14, 4000, 200);
+    Object ground_10(440, 14, 4500, 80);
+    Object ground_11(440, 14, 5500, 80);
+    Object ground_12(440, 14, 6500, 80);
+    Object ground_13(440, 14, 7500, 80);
+    Object ground_14(440, 14, 8500, 80); 
+    Object ground_15(440, 14, 9500, 80); 
+    Object ground_16(200, 14, 9700, 360); 
+    Object ground_17(200, 14, 300, 250); 
 
     Object enemy_0(0, 0, 0, 0);
     Object enemy_1(0, 0, 0, 0);
@@ -163,6 +166,8 @@ void Stage1::Init() {
     glEnable(GL_TEXTURE_2D);
     //initialize_fonts();
     initFastFont();
+    var1.insert("./images/level.ppm", 10, 36);
+    drawTileGround();
     //Load images into ppm structure.
     heroImage = ppm6GetImage("./images/hero.ppm");
     //Create texture elements
@@ -178,6 +183,7 @@ void Stage1::Init() {
             GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
     delete [] silhouetteData;
 }
+
 
 void Stage1::Cleanup() {
     //clean background
@@ -287,6 +293,7 @@ void Stage1::Draw(GameEngine* game) {
     //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     //glTranslatef(150, 150, 0);
     //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
     glColor3f(20, 30, 40);
 
     float x = roomX - (WINDOW_HALF_WIDTH);
@@ -298,6 +305,8 @@ void Stage1::Draw(GameEngine* game) {
     drawHero(x, y);
     drawEnemies(x, y);
     drawBackground();
+    
+    
     glXSwapBuffers(game->dpy, game->win);
 }
 
@@ -324,10 +333,55 @@ void Stage1::drawGround(int x, int y){
             glVertex2i( w, h);
             glVertex2i( w,-h);
             glEnd(); glPopMatrix();
+            drawTileRow(ground->getLeft()-x +12, ground->getCenterY()-y +2, 31, (ground->getWidth())/(15));
         }
-
     }
+    // drawTileRow(400-x, 400-y, 30, 20);drawTileRow(ground->getLeft()-x +12, ground->getCenterY()-y +2, 38, 1);
+
+    
 }
+
+void Stage1::drawTileRow(float x, float y, float space, int row) {
+
+
+    //ground = grounds[17];
+    for ( int j=0; j<row; j++) {
+
+                glPushMatrix();
+                glTranslatef(x + (space*j), y, 0);
+	        var1.drawTile(0, 0);
+                glPopMatrix();
+		
+    }
+
+
+	//glTranslatef(ground->getLeft()-x + (var1.getClipWidth()/2) + j * (var1.getClipWidth()*1.5) , ground->getCenterY()-y, 0);
+                //glTranslatef(300, 180, 0);
+		//std::cout << "clip width is: " << var1.getClipWidth() << "\n";
+                //std::cout << "size of rec *2: " << ground->getWidth()*2 << "\n";
+                //std::cout << "size of rec *2/16: " << (ground->getWidth()*2)/16 << "\n";
+
+
+}
+
+
+float box; 
+void Stage1::drawTileGround() {
+
+    box = grounds[17]->getWidth()*2;
+    
+    //var1.setSize(box/16, grounds[17]->getHeight());
+
+
+		std::cout << "clip width is: " << var1.getClipWidth() << "\n";
+                std::cout << "size of rec *2: " << grounds[17]->getWidth()*2 << "\n";
+                std::cout << "size of rec *2/16: " << (grounds[17]->getWidth()*2)/16 << "\n";
+
+
+
+}
+
+
 void Stage1::drawEnemies(int x, int y) {
     float w, h ;
     Object *enemy;

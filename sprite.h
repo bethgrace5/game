@@ -22,7 +22,7 @@
 //For this to work properly, the image sheet must have sprite Evenly Split
 //between each other
 //---------------------------------------------------------------------
-class Sprite{
+class Sprite {
   //Global Access-------------------------------------------------------
   private:
     const char *imageName;
@@ -47,7 +47,9 @@ class Sprite{
     void setFile(const char *filename);
     void initSprite();
     void setClip(int x, int y);
-    void setSize(int x, int y);
+    void setSize(float x, float y);
+    float getClipWidth();
+    float getClipHeight();
 
     //Outter Functions
     void drawFont(int atSet);
@@ -69,7 +71,7 @@ class Sprite{
 //       the variables in the sprite class.
 
 //Default Contructor
-Sprite::Sprite(){
+Sprite::Sprite() {
   //when making a Sprite Variable, sets all variables within to 0 or NULL
   imageName = NULL;
   texture = 0;
@@ -82,7 +84,7 @@ Sprite::Sprite(){
   tileAt = 0;
 }
 
-void Sprite::insert(const char *filename, int x, int y){
+void Sprite::insert(const char *filename, int x, int y) {
   //Gets the number of images place in a row and column x , y
   //then gets the name of the image file
   setFile(filename);
@@ -91,12 +93,12 @@ void Sprite::insert(const char *filename, int x, int y){
   setSize(imageWidth * clipX, imageHeight * clipY);
 }
 
-void Sprite::setFile(const char *filename){
+void Sprite::setFile(const char *filename) {
   //Change the imageName to ppm file. imageName is used in the initSprite();
   imageName = filename; 
 }
 
-void Sprite::setClip(int x, int y){
+void Sprite::setClip(int x, int y) {
   //User defined row and column. The images must evenly split apart from each
   //other. ClipX and ClipY determines where to cut parts in the image.
   row = x; column = y; 
@@ -107,14 +109,22 @@ void Sprite::setClip(int x, int y){
   std::cout << "give me CLIPY: " << clipY << std::endl;
 }
 
-void Sprite::setSize(int x, int y){
+float Sprite::getClipWidth() {
+	return clipWidth;
+}
+
+float Sprite::getClipHeight() {
+	return clipHeight;
+}
+
+void Sprite::setSize(float x, float y) {
   //Sets the size of sprite shown
   clipWidth = x;
   clipHeight = y;
   std::cout << "what is x " << x << "\n what is y " << y << std::endl;
 }
 
-void Sprite::initSprite(){
+void Sprite::initSprite() {
   //Get an image in input inside the texure
   image = ppm6GetImage(imageName);
   glGenTextures(1, &texture);
@@ -133,9 +143,10 @@ void Sprite::initSprite(){
   imageHeight = image->height;
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
   delete [] silhouetteData;
+  setSize(imageWidth/row, imageHeight/column);
 }
 
-void Sprite::replaceTexture(GLuint take){
+void Sprite::replaceTexture(GLuint take) {
   //It replaces the texture with the texture it got
   //... but this function is not well defined yet
   texture = take;
@@ -154,7 +165,7 @@ void Sprite::replaceTexture(GLuint take){
 //   2 # # # #
 //   3 # # # #
 //
-void Sprite::drawTile(int row, int column){
+void Sprite::drawTile(int row, int column) {
   //Need to check if 0;
   int atX = row; int atY = column;
 
@@ -180,7 +191,7 @@ void Sprite::drawTile(int row, int column){
 // 1  2  3  4  5  6  7
 // 8  9  10 11 12 13 14
 //
-void Sprite::drawTile(int atSet){
+void Sprite::drawTile(int atSet) {
   int atX = atSet, atY = 0;         
   atX = atSet % row;
   atY = (int)(atSet/row);
@@ -207,13 +218,13 @@ void Sprite::drawTile(int atSet){
 //Continously calling this function will switch to the next sprite in the sheet
 //Starting from the left then to right. It will do this for each row. Then reset
 //back to the start.
-void Sprite::drawSequence(){
+void Sprite::drawSequence() {
   drawTile(tileAt); tileAt++;
   if(tileAt > row*column) tileAt = 0;
 }
 
 //Gives out the texture data/value
-GLuint Sprite::textureBox(){
+GLuint Sprite::textureBox() {
   return texture;
 }
 //=====================================================================
@@ -222,7 +233,7 @@ GLuint Sprite::textureBox(){
 //Just A helper Function for the init() function in this group. 
 //This gets the image convert them to computer readable bytes
 //
-unsigned char *Sprite::buildAlphaData2(Ppmimage *img){
+unsigned char *Sprite::buildAlphaData2(Ppmimage *img) {
   //add 4th component to RGB stream...
   int a,b,c;
   unsigned char *newdata, *ptr;

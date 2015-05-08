@@ -38,8 +38,9 @@ public:
     void drawBackground();
     void drawFonts();
     void enemyAI(Object *hero, Object *enemy);
+    void drawTileGround();
     bool inWindow(Object &obj);
-
+    void drawTileRow(float x, float y, float space, int row);
 	static Stage1* Instance() {
 	    return &m_Stage1;
 	}
