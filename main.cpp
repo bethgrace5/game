@@ -1018,7 +1018,7 @@ void render(Object *hero){
     h = hero->getHeight();
     glBindTexture(GL_TEXTURE_2D, heroTexture);
     glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_LESS, 1.0f);
+    glAlphaFunc(GL_GREATER, 0.0f);
     glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
     tl_sz = 0.076923077;
