@@ -93,7 +93,7 @@ string str = "";
 bgBit *bitHead = NULL;
 Object *grounds[MAX_GROUNDS] = {NULL};
 Object *enemies[32] = {NULL};
-int bg, grounds_length, enemies_length,  i, j, level=0;
+int bg, grounds_length, enemies_length,  i, j, level=1;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 int fail=0;
@@ -104,6 +104,9 @@ int quit=0;
 //Images and Textures
 Ppmimage *heroImage=NULL;
 GLuint heroTexture;
+
+Ppmimage *menu_0=NULL;
+GLuint menu_0_texture;
 
 //Function prototypes
 void initXWindows(void);
@@ -193,7 +196,6 @@ int main(void){
     enemies[1] = &enemy_1;
     enemies_length=1;
 
-    level=1;
 
     while(!quit) { //Staring Animation
         while(XPending(dpy)) {
@@ -201,16 +203,17 @@ int main(void){
             XEvent e; XNextEvent(dpy, &e);
             check_mouse(&e);
             quit = check_keys(&e, &hero);
+            switch(level) {
+                case 0:
+                    renderMenu();
+                    break;
+                case 1:
+                    movement(&hero);
+                    render(&hero);
+                    moveWindow(&hero);
+            }
+            glXSwapBuffers(dpy, win);
         }
-        if (level>0){
-            movement(&hero);
-            render(&hero);
-            moveWindow(&hero);
-        }
-        else{
-            renderMenu();
-        }
-        glXSwapBuffers(dpy, win);
     }
     cleanupXWindows(); return 0;
 }
@@ -305,7 +308,25 @@ void init_opengl(void){
     unsigned char *silhouetteData = buildAlphaData(heroImage);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
             GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+    //delete [] silhouetteData;
+
+
+    menu_0 = ppm6GetImage("./images/0.ppm");
+    //Create texture elements
+    glGenTextures(1, &menu_0_texture);
+    w = 300;
+    h = 300;
+    glBindTexture(GL_TEXTURE_2D, menu_0_texture);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //must build a new set of data...
+    silhouetteData = buildAlphaData(heroImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
     delete [] silhouetteData;
+
+
+
 }
 
 void check_mouse(XEvent *e){
@@ -333,7 +354,9 @@ int check_keys(XEvent *e, Object *hero){
     //Was there input from the keyboard?
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
+    //TODO instead of returning 1, set 
         if (key == XK_Escape) return 1;
+        if (key == XK_q) return 1;
         if ((key == XK_w || key == XK_Up) && !isDying){
             //Jump
             if (didJump < 2 && hero->getVelocityY() > -0.5){
@@ -349,6 +372,16 @@ int check_keys(XEvent *e, Object *hero){
         }
         if (key == XK_space) {
             life-=1000;
+        }
+        if (key == XK_p) {
+            // p toggles menu or pause
+            if(level) {
+                level = 0;
+            }
+            else {
+                level = 1;
+            }
+
         }
 
         return 0;
@@ -923,7 +956,34 @@ void movement(Object *hero){
 }
 
 void renderMenu(){
+    int w = WINDOW_WIDTH/2;
+    int h = WINDOW_HEIGHT/2;
 
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3ub(150,10,100);
+    renderBackground();
+
+    glPushMatrix();
+    glTranslatef( WINDOW_HALF_WIDTH-(w/2), WINDOW_HALF_HEIGHT-(h/2), 0);
+    //glBindTexture(GL_TEXTURE_2D, menu_0_texture);
+    //glEnable(GL_ALPHA_TEST);
+    //glAlphaFunc(GL_LESS, 1.0f);
+    //glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+    glVertex2i( 0, 0);
+    glVertex2i( w, 0);
+    glVertex2i( w, h);
+    glVertex2i( 0, h);
+
+    //glTexCoord2f(0.0, 0.0);                     glVertex2i(-8.0f,-8.0f);
+    //glTexCoord2f(WINDOW_WIDTH, 0.0f);           glVertex2i(8.0f,-8.0f);
+    //glTexCoord2f(WINDOW_WIDTH, WINDOW_HEIGHT);  glVertex2i(8.0f,8.0f);
+    //glTexCoord2f(0.0, WINDOW_HEIGHT);           glVertex2i(-8.0f,8.0f);
+
+
+
+    glEnd(); glPopMatrix();
+    glDisable(GL_ALPHA_TEST);
 }
 
 void render(Object *hero){
