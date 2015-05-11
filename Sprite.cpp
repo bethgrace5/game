@@ -1,15 +1,5 @@
-#ifndef SPRITE_H
-#define SPRITE_H
-//=====================================================================
-//Sprite
-//=====================================================================
-//Note: This is used to hold the images of ppm files
-//      Example how to use:
-//        Sprite var1;
-//        ... 
-//        In initOpengl(){ //When Initiaizing Stuff
-//          ...
-//          var1.insert("image.ppm", row, column);
+#include "Sprite.h"
+/*
 //          ...
 //        }
 //        //In Rendering Function
@@ -63,7 +53,7 @@ class Sprite{
     //Function Aid
     unsigned char *buildAlphaData2(Ppmimage *img);
 };
-/*
+*/
 //====================================================================
 //
 //=====================================================================
@@ -257,5 +247,3 @@ unsigned char *Sprite::buildAlphaData2(Ppmimage *img){
   }
   return newdata;
 }
-*/
-#endif
