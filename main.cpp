@@ -942,8 +942,8 @@ void renderMenu(){
     int h = WINDOW_HEIGHT/2;
 
     glClear(GL_COLOR_BUFFER_BIT);
-    glColor3ub(150,10,100);
     renderBackground();
+    glColor3ub(150,10,100);
 
     glPushMatrix();
     glTranslatef( WINDOW_HALF_WIDTH-(w/2), WINDOW_HALF_HEIGHT-(h/2), 0);
@@ -1060,7 +1060,7 @@ void render(Object *hero){
     h = hero->getHeight();
     glBindTexture(GL_TEXTURE_2D, heroTexture);
     glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_LESS, 1.0f);
+    glAlphaFunc(GL_GREATER, 0.0f);
     glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
     tl_sz = 0.076923077;
