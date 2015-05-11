@@ -1,11 +1,17 @@
-#ifndef PLATFORM_H
-#define PLATFORM_H
+//Chad Danner
+//cs335
+//HW3 
+//05-11-15
+
+#include <ppm.h>
+#include <Object.h>
+#include <sprite.h>
 
 //=====================================================================
 //  Platform
 //=====================================================================
-//---------------------------------------------------------------------
-class Platform : public Sprite, public Object{
+
+class Platform : public Sprite, public Object {
 
   private:
 
@@ -15,16 +21,19 @@ class Platform : public Sprite, public Object{
     void drawRow();
 };
 
-Platform::Platform() : Sprite(), Object(260, 200, 350, 400){
+Platform::Platform() : Sprite(), Object(260, 200, 350, 400) 
+{
     //Just An Intializer
     //this will set up Boundaries of the object and set Sprite to 0/NULL
 }
 
-void Platform::setupTile(){
+void Platform::setupTile() 
+{
   //Setup Object to match with tile rows
   std::cout << "===================================================\n";
   std::cout << "Platform Size = " << Object::getWidth() << " , "
     << Object::getHeight() << "\n"; 
+
   //The Object Will Allocate to fit with the tile
   int widthSize;
   int heightSize;
@@ -47,11 +56,12 @@ void Platform::setupTile(){
     << Object::getWidth()/Sprite::getClipWidth()  << std::endl;
 }
 
-void Platform::drawRow(){
+void Platform::drawRow() 
+{
   //Draws Tiles for a box
-
   //This is To Test The Boundaries Of The Platform
-    //you will see a colored box
+  //you will see a colored box
+  
   float w, h;
   glPushMatrix();
   glTranslatef(Object::getCenterX(), Object::getCenterY(), 0); 
@@ -69,11 +79,15 @@ void Platform::drawRow(){
   //This Will Draw The TileSet based on the Boundaries of Object
   glPushMatrix();
   glTranslatef(Object::getLeft(), Object::getCenterY(), 0); 
-  for(int i = 0; i < Object::getWidth()/Sprite::getClipWidth(); i++){
-    if(i == 0) glTranslatef(Sprite::getClipWidth(),0 , 0); 
-    else       glTranslatef(Sprite::getClipWidth() + Sprite::getClipWidth() ,0 , 0); 
+  
+  for (int i = 0; i < Object::getWidth()/Sprite::getClipWidth(); i++) {
+    if (i == 0) 
+	glTranslatef(Sprite::getClipWidth(),0 , 0); 
+    else       
+	glTranslatef(Sprite::getClipWidth() + Sprite::getClipWidth() ,0 , 0); 
     Sprite::drawTile(1,1);
   }
+  
   glPopMatrix(); 
 }
-#endif
+
