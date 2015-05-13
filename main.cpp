@@ -204,17 +204,18 @@ int main(void){
             XEvent e; XNextEvent(dpy, &e);
             check_mouse(&e);
             quit = check_keys(&e, &hero);
-	}
-	    if (level>0) {
-		movement(&hero);
-		render(&hero);
-		moveWindow(&hero);
-            }
-	    else {
-		renderMenu();
-	    }
-            glXSwapBuffers(dpy, win);
         }
+        switch (level) {
+            case 0: 
+                renderMenu();
+                break;
+            case 1:
+                movement(&hero);
+                render(&hero);
+                moveWindow(&hero);
+        }
+            glXSwapBuffers(dpy, win);
+    }
     cleanupXWindows(); return 0;
 }
 
