@@ -93,7 +93,7 @@ string str = "";
 bgBit *bitHead = NULL;
 Object *grounds[MAX_GROUNDS] = {NULL};
 Object *enemies[32] = {NULL};
-int bg, grounds_length, enemies_length,  i, j, level=0;
+int bg, grounds_length, enemies_length,  i, j, level=1;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 int fail=0;
@@ -195,7 +195,6 @@ int main(void){
     enemies[0] = &enemy_0;
     enemies[1] = &enemy_1;
     enemies_length=1;
-    level = 1;
 
 
     while(!quit) { //Staring Animation
@@ -204,17 +203,18 @@ int main(void){
             XEvent e; XNextEvent(dpy, &e);
             check_mouse(&e);
             quit = check_keys(&e, &hero);
-	}
-	    if (level>0) {
-		movement(&hero);
-		render(&hero);
-		moveWindow(&hero);
+            switch(level) {
+                case 0:
+                    renderMenu();
+                    break;
+                case 1:
+                    movement(&hero);
+                    render(&hero);
+                    moveWindow(&hero);
             }
-	    else {
-		renderMenu();
-	    }
             glXSwapBuffers(dpy, win);
         }
+    }
     cleanupXWindows(); return 0;
 }
 
@@ -308,7 +308,25 @@ void init_opengl(void){
     unsigned char *silhouetteData = buildAlphaData(heroImage);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
             GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+    //delete [] silhouetteData;
+
+
+    menu_0 = ppm6GetImage("./images/0.ppm");
+    //Create texture elements
+    glGenTextures(1, &menu_0_texture);
+    w = 300;
+    h = 300;
+    glBindTexture(GL_TEXTURE_2D, menu_0_texture);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //must build a new set of data...
+    silhouetteData = buildAlphaData(heroImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
     delete [] silhouetteData;
+
+
+
 }
 
 void check_mouse(XEvent *e){
@@ -942,8 +960,8 @@ void renderMenu(){
     int h = WINDOW_HEIGHT/2;
 
     glClear(GL_COLOR_BUFFER_BIT);
-    renderBackground();
     glColor3ub(150,10,100);
+    renderBackground();
 
     glPushMatrix();
     glTranslatef( WINDOW_HALF_WIDTH-(w/2), WINDOW_HALF_HEIGHT-(h/2), 0);
@@ -1060,7 +1078,7 @@ void render(Object *hero){
     h = hero->getHeight();
     glBindTexture(GL_TEXTURE_2D, heroTexture);
     glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_GREATER, 0.0f);
+    glAlphaFunc(GL_LESS, 1.0f);
     glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
     tl_sz = 0.076923077;
