@@ -116,10 +116,14 @@ void check_mouse(XEvent *e);
 int  check_keys (XEvent *e, Object *hero);
 void movement(Object *hero);
 void render(Object *hero);
-void renderMenu();
+void renderPauseMenu();
+void renderStartMenu();
 void moveWindow(Object *hero);
 void renderBackground(void);
 void cleanup_background(void);
+void renderGrounds(int x, int y);
+void renderEnemies(int x, int y);
+void renderHero(Object *hero, int x, int y);
 Object createAI( int w, int h, Object *ground);
 
 void groundCollide(Object *obj, Object *ground);
@@ -205,17 +209,11 @@ int main(void){
             check_mouse(&e);
             quit = check_keys(&e, &hero);
         }
-        switch (level){
-            case 0:
-                renderMenu();
-                break;
-            case 1:
-                movement(&hero);
-                render(&hero);
-                moveWindow(&hero);
-        }
+            movement(&hero);
+            render(&hero);
+            moveWindow(&hero);
             glXSwapBuffers(dpy, win);
-        }
+    }
     cleanupXWindows(); return 0;
 }
 
@@ -357,14 +355,12 @@ int check_keys(XEvent *e, Object *hero){
             life-=1000;
         }
         if (key == XK_p) {
-            // p toggles menu or pause
-            if(level) {
-                level = 0;
-            }
-            else {
-                level = 1;
-            }
-
+            // pause menu
+            level = 0;
+        }
+        if (key == XK_r) {
+            // pause menu
+            level = 1;
         }
 
         return 0;
@@ -938,7 +934,45 @@ void movement(Object *hero){
     }
 }
 
-void renderMenu(){
+void renderPauseMenu(){
+    int w = WINDOW_WIDTH/2;
+    int h = WINDOW_HEIGHT/2;
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    //renderBackground();
+    glColor3ub(150,10,100);
+
+    glPushMatrix();
+    glTranslatef( WINDOW_HALF_WIDTH-(w/2), WINDOW_HALF_HEIGHT-(h/2), 0);
+    //glBindTexture(GL_TEXTURE_2D, menu_0_texture);
+    //glEnable(GL_ALPHA_TEST);
+    //glAlphaFunc(GL_LESS, 1.0f);
+    //glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+    glVertex2i( 0, 0);
+    glVertex2i( w, 0);
+    glVertex2i( w, h);
+    glVertex2i( 0, h);
+
+    //glTexCoord2f(0.0, 0.0);                     glVertex2i(-8.0f,-8.0f);
+    //glTexCoord2f(WINDOW_WIDTH, 0.0f);           glVertex2i(8.0f,-8.0f);
+    //glTexCoord2f(WINDOW_WIDTH, WINDOW_HEIGHT);  glVertex2i(8.0f,8.0f);
+    //glTexCoord2f(0.0, WINDOW_HEIGHT);           glVertex2i(-8.0f,8.0f);
+
+    glEnd(); glPopMatrix();
+    //glDisable(GL_ALPHA_TEST);
+}
+void renderStartMenu(){
+           //glPushMatrix();
+           //glTranslatef(s->center.x + 600 + hero->camera.x , s->center.y, s->center.z);
+           //w = s->width;
+           //h = s->height;
+           //glBegin(GL_QUADS);
+           //glVertex2i(-w,-h);
+           //glVertex2i(-w, h);
+           //glVertex2i( w, h);
+           //glVertex2i( w,-h);
+           //glEnd(); glPopMatrix();
     int w = WINDOW_WIDTH/2;
     int h = WINDOW_HEIGHT/2;
 
@@ -969,14 +1003,8 @@ void renderMenu(){
     glDisable(GL_ALPHA_TEST);
 }
 
-void render(Object *hero){
-    float w, h, tl_sz, x, y;
-    x = roomX - WINDOW_HALF_WIDTH;
-    y = roomY - WINDOW_HALF_HEIGHT;
-    glClear(GL_COLOR_BUFFER_BIT);
-    // Draw Background Falling Bits
-    renderBackground();
-
+void renderGrounds(int x, int y) {
+    int w, h;
     glColor3ub(65,155,225);
     // render grounds
     Object *ground;
@@ -985,10 +1013,7 @@ void render(Object *hero){
         if (inWindow(*ground)){
             //Ground
             glPushMatrix();
-            glTranslatef(
-                    ground->getCenterX() - x,
-                    ground->getCenterY() - y,
-                    0);
+            glTranslatef( ground->getCenterX() - x, ground->getCenterY() - y, 0);
             w = ground->getWidth();
             h = ground->getHeight();
             glBegin(GL_QUADS);
@@ -998,18 +1023,11 @@ void render(Object *hero){
             glVertex2i( w,-h);
             glEnd(); glPopMatrix();
 
-            stringstream strs;
-            strs << i;
-            string temp_str = strs.str();
-            char* char_type = (char*) temp_str.c_str();
-
-            Rect r0;
-            r0.bot = ground->getCenterY() - y - 8;
-            r0.left = r0.center = ground->getCenterX() - x;
-            ggprint12(&r0, 16, 0x00000000, (const char*)char_type);
-            glColor3ub(65,155,225);
         }
     }
+}
+void renderEnemies(int x, int y) {
+    int w, h;
     // render enemies
     glColor3ub(100,0,0);
     Object *enemy;
@@ -1018,10 +1036,7 @@ void render(Object *hero){
         if (inWindow(*enemy)){
             //Enemy
             glPushMatrix();
-            glTranslatef(
-                    enemy->getCenterX() - x,
-                    enemy->getCenterY() - y,
-                    0);
+            glTranslatef( enemy->getCenterX() - x, enemy->getCenterY() - y, 0);
             w = enemy->getWidth();
             h = enemy->getHeight();
             glBegin(GL_QUADS);
@@ -1032,45 +1047,29 @@ void render(Object *hero){
             glEnd(); glPopMatrix();
         }
     }
-    //Non-Collision Object
-    /*
-       glPushMatrix();
-       glTranslatef(s->center.x + 600 + hero->camera.x , s->center.y, s->center.z);
-       w = s->width;
-       h = s->height;
-       glBegin(GL_QUADS);
-       glVertex2i(-w,-h);
-       glVertex2i(-w, h);
-       glVertex2i( w, h);
-       glVertex2i( w,-h);
-       glEnd(); glPopMatrix();
-       */
-    // for use in controlling screen movement.
-    // the hero should be 'left' at the beginning of the level,
-    // 'mid' throughout the level, and 'right' at the end of the level.
-    // retuns the position of the hero as left, mid, or right.
+}
 
-
+void renderHero(Object *hero, int x, int y) {
     // Draw Hero Sprite
     glPushMatrix();
-    glTranslatef(
-            hero->getCenterX() - x,
-            hero->getCenterY() - y,
-            0);
-    w = hero->getWidth();
-    h = hero->getHeight();
+    glTranslatef( hero->getCenterX() - x, hero->getCenterY() - y, 0);
+    int w = hero->getWidth();
+    //int h = hero->getHeight();
     glBindTexture(GL_TEXTURE_2D, heroTexture);
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.0f);
     glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
-    tl_sz = 0.076923077;
+    float tl_sz = 0.076923077;
+    // hero is facing left
     if ((hero->getVelocityX() < 0.0) or (hero->getOldCenterX()>hero->getCenterX())){
         glTexCoord2f((hero->getIndex()*tl_sz)+tl_sz, 1.0f); glVertex2i(-w,-w);
         glTexCoord2f((hero->getIndex()*tl_sz)+tl_sz, 0.0f); glVertex2i(-w,w);
         glTexCoord2f((hero->getIndex()*tl_sz), 0.0f); glVertex2i(w,w);
         glTexCoord2f((hero->getIndex()*tl_sz), 1.0f); glVertex2i(w,-w);
-    } else {
+    } 
+    // hero is facing right
+    else {
         glTexCoord2f(hero->getIndex()*tl_sz, 1.0f); glVertex2i(-w,-w);
         glTexCoord2f(hero->getIndex()*tl_sz, 0.0f); glVertex2i(-w,w);
         glTexCoord2f((hero->getIndex()*tl_sz)+tl_sz, 0.0f); glVertex2i(w,w);
@@ -1078,6 +1077,30 @@ void render(Object *hero){
     }
     glEnd(); glPopMatrix();
     glDisable(GL_ALPHA_TEST);
+}
+
+void render(Object *hero){
+    int x = roomX - WINDOW_HALF_WIDTH;
+    int y = roomY - WINDOW_HALF_HEIGHT;
+    glClear(GL_COLOR_BUFFER_BIT);
+    // Draw Background Falling Bits
+    renderBackground();
+
+    renderGrounds(x, y);
+    renderEnemies(x, y);
+    renderHero(hero, x, y);
+
+    //stringstream strs;
+    //strs << i;
+    //string temp_str = strs.str();
+    //char* char_type = (char*) temp_str.c_str();
+
+
+    //Rect r0;
+    //r0.bot = ground->getCenterY() - y - 8;
+    //r0.left = r0.center = ground->getCenterX() - x;
+    //ggprint12(&r0, 16, 0x00000000, (const char*)char_type);
+    //glColor3ub(65,155,225);
 
     // font printing
     Rect r0, r1;
@@ -1090,8 +1113,8 @@ void render(Object *hero){
         ggprint16(&r1, fail/2, 0x00ff0000, "FAIL");
         fail--;
     }
-
 }
+
 void moveWindow(Object *hero) {
     double heroWinPosX = hero->getCenterX();
     double heroWinPosY = hero->getCenterY();
