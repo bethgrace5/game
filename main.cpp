@@ -205,8 +205,8 @@ int main(void){
             check_mouse(&e);
             quit = check_keys(&e, &hero);
         }
-        switch (level) {
-            case 0: 
+        switch (level){
+            case 0:
                 renderMenu();
                 break;
             case 1:
@@ -215,7 +215,7 @@ int main(void){
                 moveWindow(&hero);
         }
             glXSwapBuffers(dpy, win);
-    }
+        }
     cleanupXWindows(); return 0;
 }
 
