@@ -104,8 +104,8 @@ int quit=0;
 Ppmimage *heroImage=NULL;
 GLuint heroTexture;
 
-Ppmimage *menuImage[8];
-GLuint menuTexture[8];
+Ppmimage *menuImage[40];
+GLuint menuTexture[40];
 
 //Function prototypes
 void initXWindows(void);
@@ -134,7 +134,7 @@ bool inWindow(Object &obj) {
 }
 void renderMenu () {
     gettimeofday(&frameStart, NULL);
-    int frameTime = 800;
+    int frameTime = 300;
 
     //slow the frames for the first few
     if (frameIndex == 0 or frameIndex == 1) {
@@ -144,12 +144,14 @@ void renderMenu () {
     // loop through frames
     if (diff_ms(frameStart, frameEnd) > frameTime) {
         frameIndex++;
-        frameIndex = frameIndex%7;
+        frameIndex = frameIndex%39;
         gettimeofday(&frameEnd, NULL);
+        //cout << "frame index: "<< frameIndex <<endl;
     }
 
     // end opening menu animation will add options to start the game
-    if (frameIndex == 6) {
+    // FIXME all frames after about 6 or 7 are the same, are the images messed up?
+    if (frameIndex == 12) {
         frameIndex = 0;
         // currently start playing without chosing any options
         level = 1;
@@ -352,19 +354,19 @@ void init_opengl (void) {
             GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
     delete [] silhouetteData;
 
-    menuImage[0] = ppm6GetImage("./images/menuScreen0.ppm");
-    menuImage[1] = ppm6GetImage("./images/menuScreen1.ppm");
-    menuImage[2] = ppm6GetImage("./images/menuScreen2.ppm");
-    menuImage[3] = ppm6GetImage("./images/menuScreen3.ppm");
-    menuImage[4] = ppm6GetImage("./images/menuScreen4.ppm");
-    menuImage[5] = ppm6GetImage("./images/menuScreen5.ppm");
-    menuImage[6] = ppm6GetImage("./images/menuScreen6.ppm");
-    menuImage[7] = ppm6GetImage("./images/menuScreen7.ppm");
-
     unsigned char *menuData;
     glGenTextures(6, menuTexture);
+    string fileName;
 
-    for (int q=0; q<8; q++) {
+    // FIXME there are 40 image files, but currently only 1/3 of them work, the others
+    // are all the same image
+    for (int q=0; q<12; q++) {
+        fileName = "./images/menuScreen";
+        fileName += itos(q);
+        fileName += ".ppm";
+        cout << "loading file: " <<fileName <<endl;
+        menuImage[q] = ppm6GetImage(fileName.c_str());
+
         glBindTexture(GL_TEXTURE_2D, menuTexture[q]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -373,6 +375,7 @@ void init_opengl (void) {
         h = menuImage[q]->height;
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
     }
+    delete [] menuData;
 }
 
 void check_mouse (XEvent *e) {
@@ -436,7 +439,6 @@ int check_keys (XEvent *e, Object *hero) {
                 level = 1;
             }
         }
-
         //return 0;
     }
     else if (e->type == KeyRelease) {
