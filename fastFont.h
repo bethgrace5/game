@@ -93,6 +93,7 @@ void drawFont(int atSet){
 
   glPushMatrix();
   //glTranslatef(500, 300, 0);
+  glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, alphabetTexture);
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_LESS, 1.0f);
@@ -112,11 +113,11 @@ void drawFont(int atSet){
   glTexCoord2f((0*clipX)+clipX, 1.0f); glVertex2i(w,-h);
 */
   glEnd(); glPopMatrix();
-
+  glDisable(GL_TEXTURE_2D);
   glDisable(GL_ALPHA_TEST);
 }
 
-void drawPixel(char pix){
+void drawPixel(int pix){
 
   glPushMatrix();
   //glTranslatef(500, 300, 0);
@@ -130,23 +131,20 @@ void drawPixel(char pix){
   float w = pixelWidth/4;
   float h = pixelHeight/2;
 
-  switch (pix) {
-
-      case '0':
+  if (pix == 0) {
       // draw 0
       glTexCoord2f(0  , 1) ; glVertex2i(-w,-h);
       glTexCoord2f(0  , 0) ; glVertex2i(-w,h);
       glTexCoord2f(0.5, 0) ; glVertex2i(w,h);
       glTexCoord2f(0.5, 1) ; glVertex2i(w,-h);
-      break;
+  }
+  else {
 
-      case '1':
       // draw 1
       glTexCoord2f(0.5, 1) ; glVertex2i(-w,-h);
       glTexCoord2f(0.5, 0) ; glVertex2i(-w,h);
       glTexCoord2f(1 , 0)  ; glVertex2i(w,h);
       glTexCoord2f(1 , 1)  ; glVertex2i(w,-h);
-      break;
   }
 
   glEnd(); glPopMatrix();
@@ -187,8 +185,7 @@ void getFont(char letter){
     case 'Z': drawFont(25); break;
     case '!': drawFont(26); break;
     case '?': drawFont(27); break;
-    //case '1': drawFont(28); break;
-    case '1': drawPixel('1'); break;
+    case '1': drawFont(28); break;
     case '2': drawFont(29); break;
     case '3': drawFont(30); break;
     case '4': drawFont(31); break;
@@ -197,8 +194,7 @@ void getFont(char letter){
     case '7': drawFont(34); break;
     case '8': drawFont(35); break;
     case '9': drawFont(36); break;
-    //case '0': drawFont(37); break;
-    case '0': drawPixel('0'); break;
+    case '0': drawFont(37); break;
     case '+': drawFont(38); break;
     case '-': drawFont(39); break;
     case 'x': drawFont(40); break;
@@ -224,6 +220,15 @@ void writeWords(std::string words, float x, float y){
     glTranslatef(20, 0, 0);
     getFont(cWords[i]);
   }//Note Need To Add Spacing Between Each Letter
+  glPopMatrix();
+
+}
+void writePixel(int p, float x, float y){
+
+  glPushMatrix();
+  glTranslatef(x, y, 0);
+  glTranslatef(20, 0, 0);
+  drawPixel(p);
   glPopMatrix();
 
 }

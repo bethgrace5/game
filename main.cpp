@@ -1036,23 +1036,13 @@ void render(Object *hero){
     //char* char_type = (char*) temp_str.c_str();
 
 
-    //Rect r0;
-    //r0.bot = ground->getCenterY() - y - 8;
-    //r0.left = r0.center = ground->getCenterX() - x;
-    //ggprint12(&r0, 16, 0x00000000, (const char*)char_type);
-    //glColor3ub(65,155,225);
-
-    //writeWords("YAY", 300, 150);
-
     // font printing
     Rect r0, r1;
     r0.bot = WINDOW_HEIGHT - 32;
     r0.left = r0.center = 32;
-    //ggprint12(&r0, 16, 0x0033aaff, "Lives ");
     r1.bot = WINDOW_HEIGHT/2;
     r1.left = r1.center = WINDOW_WIDTH/2;
     if (fail>0){
-      //ggprint16(&r1, fail/2, 0x00ff0000, "FAIL");
       writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
       fail--;
     }
@@ -1152,17 +1142,11 @@ void renderBackground(){
     }
 
     if (j>=1){
-      //ggprint12(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
-      //writeWords("1", bit->pos[0], bit->pos[1]);
-      writeWords("1", r0.center, bit->pos[1]);
+      writePixel(1, r0.center, bit->pos[1]);
     } else if (j>0.9) {
-      //ggprint10(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
-      //writeWords("0", bit->pos[0], bit->pos[1]);
       //writeWords("0", r0.center, bit->pos[1]);
     } else {
-      writeWords("0", r0.center, bit->pos[1]);
-      //ggprint08(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") )
-      //writeWords("!", bit->pos[0], bit->pos[1]);
+      writePixel(0, r0.center, bit->pos[1]);
       //writeWords("!", r0.center, bit->pos[1]);
     }
     bit = bit->next;
