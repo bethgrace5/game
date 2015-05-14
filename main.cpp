@@ -118,8 +118,6 @@ void check_mouse(XEvent *e);
 int  check_keys (XEvent *e, Object *hero);
 void movement(Object *hero);
 void render(Object *hero);
-void renderPauseMenu();
-void renderStartMenu();
 void moveWindow(Object *hero);
 void renderBackground(void);
 void cleanup_background(void);
@@ -940,74 +938,6 @@ void movement(Object *hero){
             groundCollide(enemies[i], grounds[j]); //Collision Detection
         }
     }
-}
-
-void renderPauseMenu(){
-    int w = WINDOW_WIDTH/2;
-    int h = WINDOW_HEIGHT/2;
-
-    glClear(GL_COLOR_BUFFER_BIT);
-    //renderBackground();
-    glColor3ub(150,10,100);
-
-    glPushMatrix();
-    glTranslatef( WINDOW_HALF_WIDTH-(w/2), WINDOW_HALF_HEIGHT-(h/2), 0);
-    //glBindTexture(GL_TEXTURE_2D, menu_0_texture);
-    //glEnable(GL_ALPHA_TEST);
-    //glAlphaFunc(GL_LESS, 1.0f);
-    //glColor4ub(255,255,255,255);
-    glBegin(GL_QUADS);
-    glVertex2i( 0, 0);
-    glVertex2i( w, 0);
-    glVertex2i( w, h);
-    glVertex2i( 0, h);
-
-    //glTexCoord2f(0.0, 0.0);                     glVertex2i(-8.0f,-8.0f);
-    //glTexCoord2f(WINDOW_WIDTH, 0.0f);           glVertex2i(8.0f,-8.0f);
-    //glTexCoord2f(WINDOW_WIDTH, WINDOW_HEIGHT);  glVertex2i(8.0f,8.0f);
-    //glTexCoord2f(0.0, WINDOW_HEIGHT);           glVertex2i(-8.0f,8.0f);
-
-    glEnd(); glPopMatrix();
-    //glDisable(GL_ALPHA_TEST);
-}
-void renderStartMenu(){
-           //glPushMatrix();
-           //glTranslatef(s->center.x + 600 + hero->camera.x , s->center.y, s->center.z);
-           //w = s->width;
-           //h = s->height;
-           //glBegin(GL_QUADS);
-           //glVertex2i(-w,-h);
-           //glVertex2i(-w, h);
-           //glVertex2i( w, h);
-           //glVertex2i( w,-h);
-           //glEnd(); glPopMatrix();
-    int w = WINDOW_WIDTH/2;
-    int h = WINDOW_HEIGHT/2;
-
-    glClear(GL_COLOR_BUFFER_BIT);
-    renderBackground();
-    glColor3ub(150,10,100);
-
-    glPushMatrix();
-    glTranslatef( WINDOW_HALF_WIDTH-(w/2), WINDOW_HALF_HEIGHT-(h/2), 0);
-    //glBindTexture(GL_TEXTURE_2D, menu_0_texture);
-    //glEnable(GL_ALPHA_TEST);
-    //glAlphaFunc(GL_LESS, 1.0f);
-    //glColor4ub(255,255,255,255);
-    glBegin(GL_QUADS);
-    glVertex2i( 0, 0);
-    glVertex2i( w, 0);
-    glVertex2i( w, h);
-    glVertex2i( 0, h);
-
-    //glTexCoord2f(0.0, 0.0);                     glVertex2i(-8.0f,-8.0f);
-    //glTexCoord2f(WINDOW_WIDTH, 0.0f);           glVertex2i(8.0f,-8.0f);
-    //glTexCoord2f(WINDOW_WIDTH, WINDOW_HEIGHT);  glVertex2i(8.0f,8.0f);
-    //glTexCoord2f(0.0, WINDOW_HEIGHT);           glVertex2i(-8.0f,8.0f);
-
-
-    glEnd(); glPopMatrix();
-    glDisable(GL_ALPHA_TEST);
 }
 
 void renderGrounds(int x, int y) {
