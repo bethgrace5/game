@@ -116,12 +116,13 @@ void drawFont(int atSet){
   glDisable(GL_ALPHA_TEST);
 }
 
-void drawPixelZero(){
+void drawPixel(char pix){
 
   glPushMatrix();
   //glTranslatef(500, 300, 0);
   glBindTexture(GL_TEXTURE_2D, pixelTexture);
   glEnable(GL_ALPHA_TEST);
+  glEnable(GL_TEXTURE_2D);
   glAlphaFunc(GL_GREATER, 0.0f);
   //glAlphaFunc(GL_LESS, 1.0f);
   glColor4ub(255,255,255,255);
@@ -129,37 +130,27 @@ void drawPixelZero(){
   float w = pixelWidth/4;
   float h = pixelHeight/2;
 
+  switch (pix) {
+
+      case '0':
       // draw 0
       glTexCoord2f(0  , 1) ; glVertex2i(-w,-h);
       glTexCoord2f(0  , 0) ; glVertex2i(-w,h);
       glTexCoord2f(0.5, 0) ; glVertex2i(w,h);
       glTexCoord2f(0.5, 1) ; glVertex2i(w,-h);
+      break;
 
-  glEnd(); glPopMatrix();
-
-  glDisable(GL_ALPHA_TEST);
-}
-void drawPixelOne(){
-
-  glPushMatrix();
-  //glTranslatef(500, 300, 0);
-  glBindTexture(GL_TEXTURE_2D, pixelTexture);
-  glEnable(GL_ALPHA_TEST);
-  //glAlphaFunc(GL_LESS, 1.0f);
-  glAlphaFunc(GL_GREATER, 0.0f);
-  glColor4ub(255,255,255,255);
-  glBegin(GL_QUADS);
-  float w = pixelWidth/4;
-  float h = pixelHeight/2;
-
+      case '1':
       // draw 1
       glTexCoord2f(0.5, 1) ; glVertex2i(-w,-h);
       glTexCoord2f(0.5, 0) ; glVertex2i(-w,h);
       glTexCoord2f(1 , 0)  ; glVertex2i(w,h);
       glTexCoord2f(1 , 1)  ; glVertex2i(w,-h);
+      break;
+  }
 
   glEnd(); glPopMatrix();
-
+  glDisable(GL_TEXTURE_2D);
   glDisable(GL_ALPHA_TEST);
 }
 
@@ -197,7 +188,7 @@ void getFont(char letter){
     case '!': drawFont(26); break;
     case '?': drawFont(27); break;
     //case '1': drawFont(28); break;
-    case '1': drawPixelOne(); break;
+    case '1': drawPixel('1'); break;
     case '2': drawFont(29); break;
     case '3': drawFont(30); break;
     case '4': drawFont(31); break;
@@ -207,7 +198,7 @@ void getFont(char letter){
     case '8': drawFont(35); break;
     case '9': drawFont(36); break;
     //case '0': drawFont(37); break;
-    case '0': drawPixelZero(); break;
+    case '0': drawPixel('0'); break;
     case '+': drawFont(38); break;
     case '-': drawFont(39); break;
     case 'x': drawFont(40); break;

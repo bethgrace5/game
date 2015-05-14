@@ -215,6 +215,7 @@ int main(void){
             glXSwapBuffers(dpy, win);
     }
   cleanupXWindows(); return 0;
+  //glDeleteTextures(1, &heroTexture);
 }
 
 void set_title(void){ //Set the window title bar.
@@ -989,6 +990,7 @@ void renderEnemies(int x, int y) {
 void renderHero(Object *hero, int x, int y) {
     // Draw Hero Sprite
     glPushMatrix();
+    glEnable(GL_TEXTURE_2D);
     glTranslatef( hero->getCenterX() - x, hero->getCenterY() - y, 0);
     int w = hero->getWidth();
     //int h = hero->getHeight();
@@ -1013,6 +1015,7 @@ void renderHero(Object *hero, int x, int y) {
         glTexCoord2f((hero->getIndex()*tl_sz)+tl_sz, 1.0f); glVertex2i(w,-w);
     }
     glEnd(); glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
 }
 
