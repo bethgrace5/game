@@ -32,10 +32,6 @@
 #define HERO_START_X 150
 #define HERO_START_Y 350
 
-extern "C" {
-#include "fonts.h"
-}
-
 using namespace std;
 
 typedef double Vec[3];
@@ -87,6 +83,8 @@ int isWalking=0;
 int isFalling=0;
 int isDying=0;
 int isJumping=0;
+// last facing 0 means facing forward, 1 means backward
+int lastFacing=0;
 double h_right, h_left, h_top, h_bottom;
 timeval seqStart, seqEnd;
 
@@ -351,9 +349,11 @@ int check_keys(XEvent *e, Object *hero){
         }
         if ((key == XK_a || key == XK_Left) && !isDying) {
             hero->setVelocityX(-6);
+            lastFacing = 1;
         }
         if ((key == XK_d || key == XK_Right) && !isDying) {
             hero->setVelocityX(6);
+            lastFacing = 0;
         }
         if (key == XK_space) {
             life-=1000;
@@ -372,9 +372,11 @@ int check_keys(XEvent *e, Object *hero){
     else if (e->type == KeyRelease) {
         if ((key == XK_a || key == XK_Left) && !isDying) {
             hero->setVelocityX(0);
+            lastFacing = 1;
         }
         if ((key == XK_d || key == XK_Right) && !isDying) {
             hero->setVelocityX(0);
+            lastFacing = 0;
         }
         if (key == XK_space) {
             life-=1000;
@@ -1001,7 +1003,8 @@ void renderHero(Object *hero, int x, int y) {
     glBegin(GL_QUADS);
     float tl_sz = 0.076923077;
     // hero is facing left
-    if ((hero->getVelocityX() < 0.0) or (hero->getOldCenterX()>hero->getCenterX())){
+    if ((hero->getVelocityX() < 0.0) or (hero->getOldCenterX()>hero->getCenterX())
+            or lastFacing == 1){
         glTexCoord2f((hero->getIndex()*tl_sz)+tl_sz, 1.0f); glVertex2i(-w,-w);
         glTexCoord2f((hero->getIndex()*tl_sz)+tl_sz, 0.0f); glVertex2i(-w,w);
         glTexCoord2f((hero->getIndex()*tl_sz), 0.0f); glVertex2i(w,w);
@@ -1036,16 +1039,11 @@ void render(Object *hero){
     //char* char_type = (char*) temp_str.c_str();
 
 
-    // font printing
-    Rect r0, r1;
-    r0.bot = WINDOW_HEIGHT - 32;
-    r0.left = r0.center = 32;
-    r1.bot = WINDOW_HEIGHT/2;
-    r1.left = r1.center = WINDOW_WIDTH/2;
     if (fail>0){
-      writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
+      writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 200, WINDOW_HEIGHT/2);
       fail--;
     }
+      writeWords("Lives:", WINDOW_WIDTH/2- 400, WINDOW_HEIGHT/2- 250);
 
 }
 
@@ -1129,9 +1127,7 @@ void renderBackground(){
       bg--;
       continue;
     }
-    Rect r0;
-    r0.bot = bit->pos[1];
-    r0.left = r0.center = (bit->pos[0]-((roomX-WINDOW_HALF_WIDTH)*bit->pos[2]));
+    int center = (bit->pos[0]-((roomX-WINDOW_HALF_WIDTH)*bit->pos[2]));
     int j = bit->pos[2];
     if (bit->pos[1]>(WINDOW_HEIGHT*0.7)){
         i=255;
@@ -1142,12 +1138,11 @@ void renderBackground(){
     }
 
     if (j>=1){
-      writePixel(1, r0.center, bit->pos[1]);
+      writePixel(1, center, bit->pos[1]);
     } else if (j>0.9) {
-      //writeWords("0", r0.center, bit->pos[1]);
+      writePixel(0, center, bit->pos[1]);
     } else {
-      writePixel(0, r0.center, bit->pos[1]);
-      //writeWords("!", r0.center, bit->pos[1]);
+      writePixel(0, center, bit->pos[1]);
     }
     bit = bit->next;
   }
@@ -1166,7 +1161,6 @@ void cleanup_background(void){
 
 Object createAI( int w, int h, Object *ground) {
   Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
-  //cout << glGetIntegerv(GL_VIEWPORT);
   return newEnemy;
 
 }
