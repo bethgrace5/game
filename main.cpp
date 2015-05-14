@@ -102,8 +102,8 @@ int quit=0;
 Ppmimage *heroImage=NULL;
 GLuint heroTexture;
 
-Ppmimage *menuImage[1];
-GLuint menuTexture[1];
+Ppmimage *menuImage[4];
+GLuint menuTexture[4];
 
 //Function prototypes
 void initXWindows(void);
@@ -234,6 +234,7 @@ int main(void) {
     }
     cleanupXWindows(); return 0;
     //glDeleteTextures(1, &heroTexture);
+    //glDeleteTextures(1, &menuTexture);
 }
 
 void set_title (void) { //Set the window title bar.
@@ -329,16 +330,23 @@ void init_opengl (void) {
             GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
     delete [] silhouetteData;
 
-    //Menu image
     menuImage[0] = ppm6GetImage("./images/menuScreen0.ppm");
-    glGenTextures(2, &menuTexture[0]);
-    glBindTexture(GL_TEXTURE_2D, menuTexture[0]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    unsigned char *menuData = buildAlphaData(menuImage[0]);
-    w = menuImage[0]->width;
-    h = menuImage[0]->height;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
+    //menuImage[1] = ppm6GetImage("./images/menuScreen1.ppm");
+    //menuImage[2] = ppm6GetImage("./images/menuScreen2.ppm");
+    //menuImage[3] = ppm6GetImage("./images/menuScreen3.ppm");
+
+    unsigned char *menuData;
+    //for (i=0; i<1; i++) {
+        glGenTextures(2, &menuTexture[0]);
+        glBindTexture(GL_TEXTURE_2D, menuTexture[0]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        menuData = buildAlphaData(menuImage[0]);
+        w = menuImage[0]->width;
+        h = menuImage[0]->height;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
+    //}
+
     delete [] menuData;
 }
 
