@@ -237,7 +237,7 @@ int main(void) {
     enemies[0] = &enemy_0;
     enemies[1] = &enemy_1;
     enemies_length=1;
-    level = 0;
+    level = 1;
 
     while (!quit) { //Staring Animation
         while (XPending(dpy)) {
@@ -360,7 +360,7 @@ void init_opengl (void) {
 
     // FIXME there are 40 image files, but currently only 1/3 of them work, the others
     // are all the same image
-    for (int q=0; q<12; q++) {
+    for (int q=0; q<1; q++) {
         fileName = "./images/menuScreen";
         fileName += itos(q);
         fileName += ".ppm";
