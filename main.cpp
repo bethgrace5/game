@@ -104,8 +104,8 @@ int quit=0;
 Ppmimage *heroImage=NULL;
 GLuint heroTexture;
 
-Ppmimage *menuImage[6];
-GLuint menuTexture[6];
+Ppmimage *menuImage[8];
+GLuint menuTexture[8];
 
 //Function prototypes
 void initXWindows(void);
@@ -134,11 +134,25 @@ bool inWindow(Object &obj) {
 }
 void renderMenu () {
     gettimeofday(&frameStart, NULL);
+    int frameTime = 800;
 
-    if (diff_ms(frameStart, frameEnd) > 300) {
+    //slow the frames for the first few
+    if (frameIndex == 0 or frameIndex == 1) {
+        frameTime = 1000;
+    }
+
+    // loop through frames
+    if (diff_ms(frameStart, frameEnd) > frameTime) {
         frameIndex++;
-        frameIndex = frameIndex%6;
-    gettimeofday(&frameEnd, NULL);
+        frameIndex = frameIndex%7;
+        gettimeofday(&frameEnd, NULL);
+    }
+
+    // end opening menu animation will add options to start the game
+    if (frameIndex == 6) {
+        frameIndex = 0;
+        // currently start playing without chosing any options
+        level = 1;
     }
 
     glPushMatrix();
@@ -161,6 +175,7 @@ void renderMenu () {
     glEnd(); glPopMatrix();
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
+
 
 }
 
@@ -343,11 +358,13 @@ void init_opengl (void) {
     menuImage[3] = ppm6GetImage("./images/menuScreen3.ppm");
     menuImage[4] = ppm6GetImage("./images/menuScreen4.ppm");
     menuImage[5] = ppm6GetImage("./images/menuScreen5.ppm");
+    menuImage[6] = ppm6GetImage("./images/menuScreen6.ppm");
+    menuImage[7] = ppm6GetImage("./images/menuScreen7.ppm");
 
     unsigned char *menuData;
     glGenTextures(6, menuTexture);
 
-    for (int q=0; q<6; q++) {
+    for (int q=0; q<8; q++) {
         glBindTexture(GL_TEXTURE_2D, menuTexture[q]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
