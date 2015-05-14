@@ -102,8 +102,8 @@ int quit=0;
 Ppmimage *heroImage=NULL;
 GLuint heroTexture;
 
-Ppmimage *menu_0=NULL;
-GLuint menu_0_texture;
+Ppmimage *menuImage[1];
+GLuint menuTexture[1];
 
 //Function prototypes
 void initXWindows(void);
@@ -130,10 +130,32 @@ bool inWindow(Object &obj) {
             (obj.getRight() > (roomX-(WINDOW_HALF_WIDTH)) and
              obj.getRight() < (roomX+(WINDOW_HALF_WIDTH))));
 }
+void renderMenu () {
+
+    glPushMatrix();
+    //glTranslatef(500, 300, 0);
+    glBindTexture(GL_TEXTURE_2D, menuTexture[0]);
+    glEnable(GL_ALPHA_TEST);
+    glEnable(GL_TEXTURE_2D);
+    //glAlphaFunc(GL_GREATER, 0.0f);
+    //glAlphaFunc(GL_LESS, 1.0f);
+    glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+    float w = menuImage[0]->width;
+    float h = menuImage[0]->height;
+
+    glTexCoord2f(0  , 1) ; glVertex2i(-w,-h);
+    glTexCoord2f(0  , 0) ; glVertex2i(-w,h);
+    glTexCoord2f(0.5, 0) ; glVertex2i(w,h);
+    glTexCoord2f(0.5, 1) ; glVertex2i(w,-h);
+
+    glEnd(); glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
+
+}
 
 int main(void) {
-    //string previousPosition;
-    //srand(time(NULL));
     initXWindows(); init_opengl();
 
     //declare hero object
@@ -191,7 +213,6 @@ int main(void) {
     enemies_length=1;
     level = 1;
 
-
     while (!quit) { //Staring Animation
         while (XPending(dpy)) {
             //Player User Interfaces
@@ -199,9 +220,14 @@ int main(void) {
             check_mouse(&e);
             quit = check_keys(&e, &hero);
         }
-        movement(&hero);
-        render(&hero);
-        moveWindow(&hero);
+        if (level == 0) {
+            renderMenu();
+        }
+        else {
+            movement(&hero);
+            render(&hero);
+            moveWindow(&hero);
+        }
         glXSwapBuffers(dpy, win);
     }
     cleanupXWindows(); return 0;
@@ -284,7 +310,9 @@ void init_opengl (void) {
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glEnable(GL_TEXTURE_2D);
     initFastFont();
+
     //Load images into ppm structure.
+    //Hero image
     heroImage = ppm6GetImage("./images/hero.ppm");
     //Create texture elements
     glGenTextures(1, &heroTexture);
@@ -293,11 +321,23 @@ void init_opengl (void) {
     glBindTexture(GL_TEXTURE_2D, heroTexture);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    //must build a new set of data...
+    //build a new set of data...
     unsigned char *silhouetteData = buildAlphaData(heroImage);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
             GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
     delete [] silhouetteData;
+
+    //Menu image
+    menuImage[0] = ppm6GetImage("./images/img0.ppm");
+    glGenTextures(2, &menuTexture[0]);
+    glBindTexture(GL_TEXTURE_2D, menuTexture[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    unsigned char *menuData = buildAlphaData(menuImage[0]);
+    w = menuImage[0]->width;
+    h = menuImage[0]->height;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
+    delete [] menuData;
 }
 
 void check_mouse (XEvent *e) {
