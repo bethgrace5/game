@@ -1225,11 +1225,12 @@ void renderBackground(){
     } else if (j>0.9) {
       //ggprint10(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
       //writeWords("0", bit->pos[0], bit->pos[1]);
-      writeWords("0", r0.center, bit->pos[1]);
+      //writeWords("0", r0.center, bit->pos[1]);
     } else {
+      writeWords("0", r0.center, bit->pos[1]);
       //ggprint08(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") )
       //writeWords("!", bit->pos[0], bit->pos[1]);
-      writeWords("!", r0.center, bit->pos[1]);
+      //writeWords("!", r0.center, bit->pos[1]);
     }
     bit = bit->next;
   }

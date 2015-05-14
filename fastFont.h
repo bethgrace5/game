@@ -17,8 +17,12 @@ float clipY = 0.166666;//6 in a Collumn
 //7 letters in a row, and a total of 6 rows
 Ppmimage *alphabetImage = NULL;
 GLuint alphabetTexture;
-
 float alphabetHeight, alphabetWidth;
+
+Ppmimage *pixelImage = NULL;
+GLuint pixelTexture;
+float pixelHeight, pixelWidth;
+
 //=====================================================================
 //  Setup
 //=====================================================================
@@ -34,6 +38,18 @@ void initFastFont(){
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
   delete [] silhouetteData;
+
+  pixelImage = ppm6GetImage("./images/backgroundPixels.ppm");
+  glGenTextures(2, &pixelTexture);
+  glBindTexture(GL_TEXTURE_2D, pixelTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  unsigned char *pixData = buildAlphaData2(pixelImage);
+  w = pixelWidth  = pixelImage->width;
+  h = pixelHeight = pixelImage->height;
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixData);
+  delete [] pixData;
 }
 
 unsigned char *buildAlphaData2(Ppmimage *img){
@@ -100,6 +116,53 @@ void drawFont(int atSet){
   glDisable(GL_ALPHA_TEST);
 }
 
+void drawPixelZero(){
+
+  glPushMatrix();
+  //glTranslatef(500, 300, 0);
+  glBindTexture(GL_TEXTURE_2D, pixelTexture);
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_GREATER, 0.0f);
+  //glAlphaFunc(GL_LESS, 1.0f);
+  glColor4ub(255,255,255,255);
+  glBegin(GL_QUADS);
+  float w = pixelWidth/4;
+  float h = pixelHeight/2;
+
+      // draw 0
+      glTexCoord2f(0  , 1) ; glVertex2i(-w,-h);
+      glTexCoord2f(0  , 0) ; glVertex2i(-w,h);
+      glTexCoord2f(0.5, 0) ; glVertex2i(w,h);
+      glTexCoord2f(0.5, 1) ; glVertex2i(w,-h);
+
+  glEnd(); glPopMatrix();
+
+  glDisable(GL_ALPHA_TEST);
+}
+void drawPixelOne(){
+
+  glPushMatrix();
+  //glTranslatef(500, 300, 0);
+  glBindTexture(GL_TEXTURE_2D, pixelTexture);
+  glEnable(GL_ALPHA_TEST);
+  //glAlphaFunc(GL_LESS, 1.0f);
+  glAlphaFunc(GL_GREATER, 0.0f);
+  glColor4ub(255,255,255,255);
+  glBegin(GL_QUADS);
+  float w = pixelWidth/4;
+  float h = pixelHeight/2;
+
+      // draw 1
+      glTexCoord2f(0.5, 1) ; glVertex2i(-w,-h);
+      glTexCoord2f(0.5, 0) ; glVertex2i(-w,h);
+      glTexCoord2f(1 , 0)  ; glVertex2i(w,h);
+      glTexCoord2f(1 , 1)  ; glVertex2i(w,-h);
+
+  glEnd(); glPopMatrix();
+
+  glDisable(GL_ALPHA_TEST);
+}
+
 //This Functions Gets A single letter base on the letter its given 
 //it wiill call writeFont(letter) with the corresponding letter.
 void getFont(char letter){
@@ -133,7 +196,8 @@ void getFont(char letter){
     case 'Z': drawFont(25); break;
     case '!': drawFont(26); break;
     case '?': drawFont(27); break;
-    case '1': drawFont(28); break;
+    //case '1': drawFont(28); break;
+    case '1': drawPixelOne(); break;
     case '2': drawFont(29); break;
     case '3': drawFont(30); break;
     case '4': drawFont(31); break;
@@ -142,7 +206,8 @@ void getFont(char letter){
     case '7': drawFont(34); break;
     case '8': drawFont(35); break;
     case '9': drawFont(36); break;
-    case '0': drawFont(37); break;
+    //case '0': drawFont(37); break;
+    case '0': drawPixelZero(); break;
     case '+': drawFont(38); break;
     case '-': drawFont(39); break;
     case 'x': drawFont(40); break;
