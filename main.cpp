@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <sys/time.h>
 #include <unistd.h>
+#include <cstring>
 #include <string>
 #include <cmath>
 #include <X11/Xlib.h>
@@ -14,6 +15,7 @@
 #include "ppm.h"
 #include <sstream>
 #include <algorithm>
+#include "fastFont.h"
 
 #define WINDOW_WIDTH 900
 #define WINDOW_HEIGHT 600
@@ -48,22 +50,22 @@ struct bgBit {
 };
 
 struct Bullet {
-        Vec pos;
-        Vec vel;
-        float color[3];
-        struct timespec time;
-        struct Bullet *prev;
-        struct Bullet *next;
-        Bullet() {
-                prev = NULL;
-                next = NULL;
-        }
+  Vec pos;
+  Vec vel;
+  float color[3];
+  struct timespec time;
+  struct Bullet *prev;
+  struct Bullet *next;
+  Bullet() {
+    prev = NULL;
+    next = NULL;
+  }
 };
 
 int diff_ms(timeval t1, timeval t2)
 {
-    return (((t1.tv_sec - t2.tv_sec) * 1000000) +
-            (t1.tv_usec - t2.tv_usec))/1000;
+  return (((t1.tv_sec - t2.tv_sec) * 1000000) +
+      (t1.tv_usec - t2.tv_usec))/1000;
 }
 
 template <typename T>
@@ -214,100 +216,100 @@ int main(void){
             moveWindow(&hero);
             glXSwapBuffers(dpy, win);
     }
-    cleanupXWindows(); return 0;
+  cleanupXWindows(); return 0;
 }
 
 void set_title(void){ //Set the window title bar.
-    XMapWindow(dpy, win); XStoreName(dpy, win, "Box Movement");
+  XMapWindow(dpy, win); XStoreName(dpy, win, "Box Movement");
 }
 
 void cleanupXWindows(void) { //do not change
-    cleanup_background();
-    XDestroyWindow(dpy, win); XCloseDisplay(dpy);
+  cleanup_background();
+  XDestroyWindow(dpy, win); XCloseDisplay(dpy);
 }
 
 void initXWindows(void) { //do not change
-    GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-    int w=WINDOW_WIDTH, h=WINDOW_HEIGHT;
-    dpy = XOpenDisplay(NULL);
-    if (dpy == NULL) {
-        cout << "\n\tcannot connect to X server\n" << endl;
-        //hose(&hero);
-        exit(EXIT_FAILURE);
-    }
-    Window root = DefaultRootWindow(dpy);
-    XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
-    if(vi == NULL) {
-        cout << "\n\tno appropriate visual found\n" << endl;
-        exit(EXIT_FAILURE);
-    }
-    Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
-    XSetWindowAttributes swa;
-    swa.colormap = cmap;
-    swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
-        ButtonPress | ButtonReleaseMask |
-        PointerMotionMask |
-        StructureNotifyMask | SubstructureNotifyMask;
-    win = XCreateWindow(dpy, root, 0, 0, w, h, 0, vi->depth,
-            InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
-    set_title();
-    glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
-    glXMakeCurrent(dpy, win, glc);
+  GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
+  int w=WINDOW_WIDTH, h=WINDOW_HEIGHT;
+  dpy = XOpenDisplay(NULL);
+  if (dpy == NULL) {
+    cout << "\n\tcannot connect to X server\n" << endl;
+    //hose(&hero);
+    exit(EXIT_FAILURE);
+  }
+  Window root = DefaultRootWindow(dpy);
+  XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
+  if(vi == NULL) {
+    cout << "\n\tno appropriate visual found\n" << endl;
+    exit(EXIT_FAILURE);
+  }
+  Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
+  XSetWindowAttributes swa;
+  swa.colormap = cmap;
+  swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
+    ButtonPress | ButtonReleaseMask |
+    PointerMotionMask |
+    StructureNotifyMask | SubstructureNotifyMask;
+  win = XCreateWindow(dpy, root, 0, 0, w, h, 0, vi->depth,
+      InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
+  set_title();
+  glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
+  glXMakeCurrent(dpy, win, glc);
 }
 
 unsigned char *buildAlphaData(Ppmimage *img){
-    //add 4th component to RGB stream...
-    int a,b,c;
-    unsigned char *newdata, *ptr;
-    unsigned char *data = (unsigned char *)img->data;
-    //newdata = (unsigned char *)malloc(img->width * img->height * 4);
-    newdata = new unsigned char[img->width * img->height * 4];
-    ptr = newdata;
-    for (i=0; i<img->width * img->height * 3; i+=3) {
-        a = *(data+0);
-        b = *(data+1);
-        c = *(data+2);
-        *(ptr+0) = a;
-        *(ptr+1) = b;
-        *(ptr+2) = c;
-        //get the alpha value
-        *(ptr+3) = (a|b|c);
-        ptr += 4;
-        data += 3;
-    }
-    return newdata;
+  //add 4th component to RGB stream...
+  int a,b,c;
+  unsigned char *newdata, *ptr;
+  unsigned char *data = (unsigned char *)img->data;
+  //newdata = (unsigned char *)malloc(img->width * img->height * 4);
+  newdata = new unsigned char[img->width * img->height * 4];
+  ptr = newdata;
+  for (i=0; i<img->width * img->height * 3; i+=3) {
+    a = *(data+0);
+    b = *(data+1);
+    c = *(data+2);
+    *(ptr+0) = a;
+    *(ptr+1) = b;
+    *(ptr+2) = c;
+    //get the alpha value
+    *(ptr+3) = (a|b|c);
+    ptr += 4;
+    data += 3;
+  }
+  return newdata;
 }
 
 void init_opengl(void){
-    //OpenGL initialization
-    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-    //Initialize matrices
-    glMatrixMode(GL_PROJECTION); glLoadIdentity();
-    glMatrixMode(GL_MODELVIEW); glLoadIdentity();
-    //Set 2D mode (no perspective)
-    glOrtho(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT, -1, 1);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_FOG);
-    glDisable(GL_CULL_FACE);
-    //Set the screen background color
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glEnable(GL_TEXTURE_2D);
-    initialize_fonts();
-    //Load images into ppm structure.
-    heroImage = ppm6GetImage("./images/hero.ppm");
-    //Create texture elements
-    glGenTextures(1, &heroTexture);
-    int w = heroImage->width;
-    int h = heroImage->height;
-    glBindTexture(GL_TEXTURE_2D, heroTexture);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    //must build a new set of data...
-    unsigned char *silhouetteData = buildAlphaData(heroImage);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
-            GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
-    delete [] silhouetteData;
+  //OpenGL initialization
+  glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+  //Initialize matrices
+  glMatrixMode(GL_PROJECTION); glLoadIdentity();
+  glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+  //Set 2D mode (no perspective)
+  glOrtho(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT, -1, 1);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_FOG);
+  glDisable(GL_CULL_FACE);
+  //Set the screen background color
+  glClearColor(0.0, 0.0, 0.0, 1.0);
+  glEnable(GL_TEXTURE_2D);
+  initFastFont();
+  //Load images into ppm structure.
+  heroImage = ppm6GetImage("./images/hero.ppm");
+  //Create texture elements
+  glGenTextures(1, &heroTexture);
+  int w = heroImage->width;
+  int h = heroImage->height;
+  glBindTexture(GL_TEXTURE_2D, heroTexture);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+  //must build a new set of data...
+  unsigned char *silhouetteData = buildAlphaData(heroImage);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+      GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+  delete [] silhouetteData;
 }
 
 void check_mouse(XEvent *e){
@@ -323,19 +325,22 @@ void check_mouse(XEvent *e){
             return;
         }
     }
-
-    //Did the mouse move?
-    if (savex != e->xbutton.x || savey != e->xbutton.y) {
-        savex = e->xbutton.x; //xpast = savex;
-        savey = e->xbutton.y; //ypast = savey;
+    if (e->xbutton.button==3) { //Right button was pressed
+      return;
     }
+
+  //Did the mouse move?
+  if (savex != e->xbutton.x || savey != e->xbutton.y) {
+    savex = e->xbutton.x; //xpast = savex;
+    savey = e->xbutton.y; //ypast = savey;
+  }
 }
 
 int check_keys(XEvent *e, Object *hero){
     //Was there input from the keyboard?
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
-    //TODO instead of returning 1, set 
+        //TODO instead of returning 1, set 
         if (key == XK_Escape) return 1;
         if (key == XK_q) return 1;
         if ((key == XK_w || key == XK_Up) && !isDying){
@@ -363,14 +368,17 @@ int check_keys(XEvent *e, Object *hero){
             level = 1;
         }
 
-        return 0;
+        //return 0;
     }
-    if(e->type == KeyRelease){
-        if (key == XK_a || key == XK_Left) {
+    else if (e->type == KeyRelease) {
+        if ((key == XK_a || key == XK_Left) && !isDying) {
             hero->setVelocityX(0);
         }
-        if (key == XK_d || key == XK_Right) {
+        if ((key == XK_d || key == XK_Right) && !isDying) {
             hero->setVelocityX(0);
+        }
+        if (key == XK_space) {
+            life-=1000;
         }
     }
 
@@ -998,7 +1006,6 @@ void renderStartMenu(){
     //glTexCoord2f(0.0, WINDOW_HEIGHT);           glVertex2i(-8.0f,8.0f);
 
 
-
     glEnd(); glPopMatrix();
     glDisable(GL_ALPHA_TEST);
 }
@@ -1102,17 +1109,21 @@ void render(Object *hero){
     //ggprint12(&r0, 16, 0x00000000, (const char*)char_type);
     //glColor3ub(65,155,225);
 
+    writeWords("YAY", 300, 150);
+
     // font printing
     Rect r0, r1;
     r0.bot = WINDOW_HEIGHT - 32;
     r0.left = r0.center = 32;
-    ggprint12(&r0, 16, 0x0033aaff, "Lives ");
-    r1.bot = WINDOW_HALF_HEIGHT;
-    r1.left = r1.center = WINDOW_HALF_WIDTH;
+    //ggprint12(&r0, 16, 0x0033aaff, "Lives ");
+    r1.bot = WINDOW_HEIGHT/2;
+    r1.left = r1.center = WINDOW_WIDTH/2;
     if (fail>0){
-        ggprint16(&r1, fail/2, 0x00ff0000, "FAIL");
-        fail--;
+      //ggprint16(&r1, fail/2, 0x00ff0000, "FAIL");
+      writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
+      fail--;
     }
+
 }
 
 void moveWindow(Object *hero) {
@@ -1120,19 +1131,19 @@ void moveWindow(Object *hero) {
     double heroWinPosY = hero->getCenterY();
 
     //move window forward
-    if ((heroWinPosX > roomX + interval) && ((roomX+WINDOW_HALF_WIDTH)<LEVEL_WIDTH-6)) {
-        roomX+=6;
-    }
+        if ((heroWinPosX > roomX + interval) && ((roomX+WINDOW_HALF_WIDTH)<LEVEL_WIDTH-6)) {
+            roomX+=6;
+        }
     //move window backward (fast move if hero is far away)
-    else if ((heroWinPosX < roomX - interval) && roomX>(WINDOW_HALF_WIDTH+6)) {
-        roomX-=6;
+        else if ((heroWinPosX < roomX - interval) && roomX>(WINDOW_HALF_WIDTH+6)) {
+            roomX-=6;
             if (heroWinPosX < (roomX - interval - 400)){
                 roomX-=20;
             }
             if (heroWinPosX < (roomX - interval - 800)){
                 roomX-=50;
             }
-    }
+        }
     //move window up
     if ((heroWinPosY > roomY + interval) && ((roomY+6)<(MAX_HEIGHT-WINDOW_HALF_HEIGHT))) {
         roomY+=6;
@@ -1146,112 +1157,96 @@ void moveWindow(Object *hero) {
     }
 }
 void renderBackground(){
-    if (bg < 1){
-        for (i=0;i<=(MAX_BACKGROUND_BITS/3);i++){
-            bgBit *bit = new bgBit;
-            if (bit == NULL){
-                exit(EXIT_FAILURE);
-            }
-            bit->pos[0] = (rnd() * (LEVEL_WIDTH));
-            bit->pos[1] = (rnd() * (MAX_HEIGHT+100));
-            bit->pos[2] = 0.8 + (rnd() * 0.4);
-            bit->vel[0] = 0.0f;
-            bit->vel[1] = -1.0f;
-            bit->n = ((rnd()>0.5)?"1":"0");
-            bit->next = bitHead;
-            if (bitHead != NULL)
-                bitHead->prev = bit;
-            bitHead = bit;
-            bg++;
-        }
+  if (bg < MAX_BACKGROUND_BITS){
+    // Create bit
+    bgBit *bit = new bgBit;
+    if (bit == NULL){
+      exit(EXIT_FAILURE);
     }
-    if (bg < MAX_BACKGROUND_BITS){
-        // Create bit
-        //for (i=0;i<=1;i++){
-            bgBit *bit = new bgBit;
-            if (bit == NULL){
-                exit(EXIT_FAILURE);
-            }
-            bit->pos[0] = (rnd() * (LEVEL_WIDTH));
-            bit->pos[1] = (rnd() * 100) + MAX_HEIGHT;
-            bit->pos[2] = 0.8 + (rnd() * 0.4);
-            bit->vel[0] = 0.0f;
-            bit->vel[1] = -1.0f;
-            bit->n = ((rnd()>0.5)?"1":"0");
-            bit->next = bitHead;
-            if (bitHead != NULL)
-                bitHead->prev = bit;
-            bitHead = bit;
-            bg++;
-        //}
+    bit->pos[0] = (rnd() * ((float)LEVEL_WIDTH + (roomX-(WINDOW_WIDTH/2)) - 1000));
+    bit->pos[1] = rnd() * 100.0f + (float)WINDOW_HEIGHT +
+      (roomY-(WINDOW_HEIGHT/2));
+    bit->pos[2] = 0.8 + (rnd() * 0.4);
+    bit->vel[0] = 0.0f;
+    bit->vel[1] = -0.8f;
+    bit->vel[2] = (rnd());
+    bit->next = bitHead;
+    if (bitHead != NULL)
+      bitHead->prev = bit;
+    bitHead = bit;
+    bg++;
+  }
+  // Reset pointer to beginning to render all bits
+  bgBit *bit = bitHead;
+  while (bit){
+    VecCopy(bit->pos, bit->lastpos);
+    if (bit->pos[1] > 0){
+      bit->pos[1] += bit->vel[1];
+
     }
-    // Reset pointer to beginning to render all bits
-    bgBit *bit = bitHead;
-    while (bit){
-        VecCopy(bit->pos, bit->lastpos);
-        if (bit->pos[1] > 0){
-            bit->pos[1] += bit->vel[1];
+    else{
+      bgBit *savebit = bit->next;
+      if (bit->prev == NULL){
+        if (bit->next == NULL){
+          bitHead = NULL;
+        } else {
+          bit->next->prev = NULL;
+          bitHead = bit->next;
         }
-        else{
-            bgBit *savebit = bit->next;
-            if (bit->prev == NULL){
-                if (bit->next == NULL){
-                    bitHead = NULL;
-                } else {
-                    bit->next->prev = NULL;
-                    bitHead = bit->next;
-                }
-            } else {
-                if (bit->next == NULL){
-                    bit->prev->next = NULL;
-                } else {
-                    bit->prev->next = bit->next;
-                    bit->next->prev = bit->prev;
-                }
-            }
-            delete bit;
-            bit = savebit;
-            bg--;
-            continue;
-        }
-        j = (bit->pos[0]-((roomX-(WINDOW_HALF_WIDTH))*bit->pos[2]));
-        if ((j+100>(0)) && (j-100<(WINDOW_WIDTH))){
-            Rect r0;
-            r0.bot = (bit->pos[1]-((roomY-(WINDOW_HALF_HEIGHT))*bit->pos[2]));
-            r0.left = r0.center = j;
-            i = (bit->pos[1])/(WINDOW_HEIGHT/255);
-            if (i<0)
-                i=0;
-            else if (i>255)
-                i=255;
-            i=(i*65536+256*i+i);
-            if (bit->pos[2]>=1.08){
-                ggprint12(&r0, 16, i, bit->n );
-            } else if (bit->pos[2]>0.94) {
-                ggprint10(&r0, 16, i, bit->n );
-            } else {
-                ggprint08(&r0, 16, i, bit->n );
-            }
-        }
-        bit = bit->next;
+      } else {
+        if (bit->next == NULL){
+          bit->prev->next = NULL;
+        } else {
+          bit->prev->next = bit->next;
+          bit->next->prev = bit->prev;
+          }
+      }
+      delete bit;
+      bit = savebit;
+      bg--;
+      continue;
     }
-    //glLineWidth(1);
+    Rect r0;
+    r0.bot = bit->pos[1];
+    r0.left = r0.center = (bit->pos[0]-((roomX-WINDOW_HALF_WIDTH)*bit->pos[2]));
+    int j = bit->pos[2];
+    if (bit->pos[1]>(WINDOW_HEIGHT*0.7)){
+        i=255;
+    } else {
+        i = (bit->pos[1]>(WINDOW_HEIGHT*0.7));
+        if (i<1)
+            i=0;
+    }
+
+    if (j>=1){
+      //ggprint12(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") ); 
+      writeWords("1", bit->pos[0], bit->pos[1]); 
+    } else if (j>0.9) {
+      //ggprint10(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") );
+      writeWords("0", bit->pos[0], bit->pos[1]); 
+    } else {
+      //ggprint08(&r0, 16, i*65536+256*i+i, (bit->vel[2]>0.5?"1":"0") )
+      writeWords("!", bit->pos[0], bit->pos[1]); 
+    }
+    bit = bit->next;
+  }
+  glLineWidth(1);
 }
 
 void cleanup_background(void){
-    bgBit *s;
-    while (bitHead) {
-        s = bitHead->next;
-        delete bitHead;
-        bitHead = s;
-    }
-    bitHead = NULL;
+  bgBit *s;
+  while (bitHead) {
+    s = bitHead->next;
+    delete bitHead;
+    bitHead = s;
+  }
+  bitHead = NULL;
 }
 
 Object createAI( int w, int h, Object *ground) {
-    Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
-    //cout << glGetIntegerv(GL_VIEWPORT);
-    return newEnemy;
+  Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
+  //cout << glGetIntegerv(GL_VIEWPORT);
+  return newEnemy;
 
 }
 
