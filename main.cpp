@@ -104,8 +104,8 @@ int quit=0;
 Ppmimage *heroImage=NULL;
 GLuint heroTexture;
 
-Ppmimage *menuImage[4];
-GLuint menuTexture[4];
+Ppmimage *menuImage[5];
+GLuint menuTexture[5];
 
 //Function prototypes
 void initXWindows(void);
@@ -222,7 +222,7 @@ int main(void) {
     enemies[0] = &enemy_0;
     enemies[1] = &enemy_1;
     enemies_length=1;
-    level = 1;
+    level = 0;
 
     while (!quit) { //Staring Animation
         while (XPending(dpy)) {
@@ -342,54 +342,20 @@ void init_opengl (void) {
     menuImage[0] = ppm6GetImage("./images/menuScreen0.ppm");
     menuImage[1] = ppm6GetImage("./images/menuScreen1.ppm");
     menuImage[2] = ppm6GetImage("./images/menuScreen2.ppm");
-    //menuImage[3] = ppm6GetImage("./images/menuScreen3.ppm");
+    menuImage[3] = ppm6GetImage("./images/menuScreen3.ppm");
 
     unsigned char *menuData;
-    // screen 0
-    glGenTextures(1, &menuTexture[0]);
-    glBindTexture(GL_TEXTURE_2D, menuTexture[0]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    menuData = buildAlphaData(menuImage[0]);
-    w = menuImage[0]->width;
-    h = menuImage[0]->height;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
+    glGenTextures(5, menuTexture);
 
-    // screen 1
-    glGenTextures(1, &menuTexture[1]);
-    glBindTexture(GL_TEXTURE_2D, menuTexture[1]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    menuData = buildAlphaData(menuImage[1]);
-    w = menuImage[1]->width;
-    h = menuImage[1]->height;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
-
-    // screen 2
-    glGenTextures(1, &menuTexture[2]);
-    glBindTexture(GL_TEXTURE_2D, menuTexture[2]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    menuData = buildAlphaData(menuImage[2]);
-    w = menuImage[2]->width;
-    h = menuImage[2]->height;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
-    delete [] menuData;
-
-    // screen 3
-    // FIXME loading this screen crashes, possibly due to quantity already loaded
-    //       look into memory allocation, or another workaround
-    /*
-    glGenTextures(2, &menuTexture[3]);
-    glBindTexture(GL_TEXTURE_2D, menuTexture[3]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    menuData = buildAlphaData(menuImage[3]);
-    w = menuImage[3]->width;
-    h = menuImage[3]->height;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
-    */
-
+    for (int q=0; q<4; q++) {
+        glBindTexture(GL_TEXTURE_2D, menuTexture[q]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        menuData = buildAlphaData(menuImage[q]);
+        w = menuImage[q]->width;
+        h = menuImage[q]->height;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
+    }
 }
 
 void check_mouse (XEvent *e) {
