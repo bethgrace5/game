@@ -89,8 +89,6 @@ void drawFont(int atSet){
   else if(atSet < 42){ atX = atSet - 35; atY = 5;}
   else if(atSet < 49){ atX = atSet - 42; atY = 6;}
 
-  int testX = 2, testY = 1;
-
   glPushMatrix();
   //glTranslatef(500, 300, 0);
   glEnable(GL_TEXTURE_2D);
