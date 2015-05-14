@@ -84,6 +84,8 @@ int isJumping=0;
 int lastFacing=0;
 double h_right, h_left, h_top, h_bottom;
 timeval seqStart, seqEnd;
+timeval frameStart, frameEnd;
+int frameIndex=0;
 
 //Game Globals
 string str = "";
@@ -131,12 +133,19 @@ bool inWindow(Object &obj) {
              obj.getRight() < (roomX+(WINDOW_HALF_WIDTH))));
 }
 void renderMenu () {
+    gettimeofday(&frameStart, NULL);
+
+    if (diff_ms(frameStart, frameEnd) > 300) {
+        frameIndex++;
+        frameIndex = frameIndex%3;
+    gettimeofday(&frameEnd, NULL);
+    }
 
     glPushMatrix();
     glClear(GL_COLOR_BUFFER_BIT);
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
-    glBindTexture(GL_TEXTURE_2D, menuTexture[0]);
+    glBindTexture(GL_TEXTURE_2D, menuTexture[frameIndex]);
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_TEXTURE_2D);
     //glAlphaFunc(GL_GREATER, 0.0f);
@@ -331,23 +340,56 @@ void init_opengl (void) {
     delete [] silhouetteData;
 
     menuImage[0] = ppm6GetImage("./images/menuScreen0.ppm");
-    //menuImage[1] = ppm6GetImage("./images/menuScreen1.ppm");
-    //menuImage[2] = ppm6GetImage("./images/menuScreen2.ppm");
+    menuImage[1] = ppm6GetImage("./images/menuScreen1.ppm");
+    menuImage[2] = ppm6GetImage("./images/menuScreen2.ppm");
     //menuImage[3] = ppm6GetImage("./images/menuScreen3.ppm");
 
     unsigned char *menuData;
-    //for (i=0; i<1; i++) {
-        glGenTextures(2, &menuTexture[0]);
-        glBindTexture(GL_TEXTURE_2D, menuTexture[0]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        menuData = buildAlphaData(menuImage[0]);
-        w = menuImage[0]->width;
-        h = menuImage[0]->height;
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
-    //}
+    // screen 0
+    glGenTextures(1, &menuTexture[0]);
+    glBindTexture(GL_TEXTURE_2D, menuTexture[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    menuData = buildAlphaData(menuImage[0]);
+    w = menuImage[0]->width;
+    h = menuImage[0]->height;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
 
+    // screen 1
+    glGenTextures(1, &menuTexture[1]);
+    glBindTexture(GL_TEXTURE_2D, menuTexture[1]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    menuData = buildAlphaData(menuImage[1]);
+    w = menuImage[1]->width;
+    h = menuImage[1]->height;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
+
+    // screen 2
+    glGenTextures(1, &menuTexture[2]);
+    glBindTexture(GL_TEXTURE_2D, menuTexture[2]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    menuData = buildAlphaData(menuImage[2]);
+    w = menuImage[2]->width;
+    h = menuImage[2]->height;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
     delete [] menuData;
+
+    // screen 3
+    // FIXME loading this screen crashes, possibly due to quantity already loaded
+    //       look into memory allocation, or another workaround
+    /*
+    glGenTextures(2, &menuTexture[3]);
+    glBindTexture(GL_TEXTURE_2D, menuTexture[3]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    menuData = buildAlphaData(menuImage[3]);
+    w = menuImage[3]->width;
+    h = menuImage[3]->height;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
+    */
+
 }
 
 void check_mouse (XEvent *e) {
