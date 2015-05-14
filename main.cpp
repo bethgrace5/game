@@ -133,7 +133,9 @@ bool inWindow(Object &obj) {
 void renderMenu () {
 
     glPushMatrix();
-    //glTranslatef(500, 300, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
     glBindTexture(GL_TEXTURE_2D, menuTexture[0]);
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_TEXTURE_2D);
@@ -141,13 +143,13 @@ void renderMenu () {
     //glAlphaFunc(GL_LESS, 1.0f);
     glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
-    float w = menuImage[0]->width;
-    float h = menuImage[0]->height;
+    //float w = menuImage[0]->width;
+    //float h = menuImage[0]->height;
 
-    glTexCoord2f(0  , 1) ; glVertex2i(-w,-h);
-    glTexCoord2f(0  , 0) ; glVertex2i(-w,h);
-    glTexCoord2f(0.5, 0) ; glVertex2i(w,h);
-    glTexCoord2f(0.5, 1) ; glVertex2i(w,-h);
+    glTexCoord2f(0.1, 0.9) ; glVertex2i(-WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+    glTexCoord2f(0.1, 0.1) ; glVertex2i(-WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(0.9, 0.1) ; glVertex2i( WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(0.9, 0.9) ; glVertex2i( WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
 
     glEnd(); glPopMatrix();
     glDisable(GL_TEXTURE_2D);
@@ -328,7 +330,7 @@ void init_opengl (void) {
     delete [] silhouetteData;
 
     //Menu image
-    menuImage[0] = ppm6GetImage("./images/img0.ppm");
+    menuImage[0] = ppm6GetImage("./images/menuScreen0.ppm");
     glGenTextures(2, &menuTexture[0]);
     glBindTexture(GL_TEXTURE_2D, menuTexture[0]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -392,9 +394,14 @@ int check_keys (XEvent *e, Object *hero) {
         if (key == XK_space) {
             life-=1000;
         }
-        // pause menu
-        if (key == XK_p) {
-            level = 0;
+        // toggle start menu
+        if (key == XK_m) {
+            if (level) {
+                level = 0;
+            }
+            else {
+                level = 1;
+            }
         }
 
         //return 0;
