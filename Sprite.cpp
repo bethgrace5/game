@@ -99,6 +99,8 @@ void Sprite::drawTile(int row, int column){
   int atX = row; int atY = column;
 
   glPushMatrix();
+  glEnable(GL_TEXTURE_2D);
+
   glBindTexture(GL_TEXTURE_2D, texture);
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_LESS, 1.0f);
@@ -113,6 +115,7 @@ void Sprite::drawTile(int row, int column){
   glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
 
   glEnd(); glPopMatrix();
+  glDisable(GL_TEXTURE_2D);
   glDisable(GL_ALPHA_TEST);
 }
 
