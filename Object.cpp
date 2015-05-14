@@ -1,14 +1,20 @@
 #include "Object.h"
 
 Object::Object( double w, double h, double x, double y ) {
+  init(w,h,x,y);
+}
+
+void Object::init( double w, double h, double x, double y ) {
     width  = w;
     height = h;
     center.x = x;
     center.y = y;
     center.z = 0;
-	velocity.x = 0;
-	velocity.y = 0;
-	velocity.z = 0;
+
+    velocity.x = 0;
+    velocity.y = 0;
+    velocity.z = 0;
+
     index = 0;
     left=w*-1;
     bottom=h*-1;
@@ -18,6 +24,14 @@ Object::Object( double w, double h, double x, double y ) {
     jump=0;
     aggro=false;
 }
+
+void Object::autoSet(){
+  center.x += velocity.x;
+  center.y += velocity.y;
+  center.z += velocity.z;
+}
+
+
 void Object::setAggro( bool b ) {
     aggro = b;
 }
