@@ -104,8 +104,8 @@ int quit=0;
 Ppmimage *heroImage=NULL;
 GLuint heroTexture;
 
-Ppmimage *menuImage[5];
-GLuint menuTexture[5];
+Ppmimage *menuImage[6];
+GLuint menuTexture[6];
 
 //Function prototypes
 void initXWindows(void);
@@ -137,7 +137,7 @@ void renderMenu () {
 
     if (diff_ms(frameStart, frameEnd) > 300) {
         frameIndex++;
-        frameIndex = frameIndex%3;
+        frameIndex = frameIndex%6;
     gettimeofday(&frameEnd, NULL);
     }
 
@@ -152,8 +152,6 @@ void renderMenu () {
     //glAlphaFunc(GL_LESS, 1.0f);
     glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
-    //float w = menuImage[0]->width;
-    //float h = menuImage[0]->height;
 
     glTexCoord2f(0.1, 0.9) ; glVertex2i(-WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
     glTexCoord2f(0.1, 0.1) ; glVertex2i(-WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
@@ -343,11 +341,13 @@ void init_opengl (void) {
     menuImage[1] = ppm6GetImage("./images/menuScreen1.ppm");
     menuImage[2] = ppm6GetImage("./images/menuScreen2.ppm");
     menuImage[3] = ppm6GetImage("./images/menuScreen3.ppm");
+    menuImage[4] = ppm6GetImage("./images/menuScreen4.ppm");
+    menuImage[5] = ppm6GetImage("./images/menuScreen5.ppm");
 
     unsigned char *menuData;
-    glGenTextures(5, menuTexture);
+    glGenTextures(6, menuTexture);
 
-    for (int q=0; q<4; q++) {
+    for (int q=0; q<6; q++) {
         glBindTexture(GL_TEXTURE_2D, menuTexture[q]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
