@@ -121,6 +121,7 @@ void cleanup_background(void);
 void renderGrounds(int x, int y);
 void renderEnemies(int x, int y);
 void renderHero(Object *hero, int x, int y);
+void renderMenu();
 Object createAI( int w, int h, Object *ground);
 
 void groundCollide(Object *obj, Object *ground);
@@ -131,54 +132,6 @@ bool inWindow(Object &obj) {
                 obj.getLeft() > (roomX-(WINDOW_HALF_WIDTH))) or
             (obj.getRight() > (roomX-(WINDOW_HALF_WIDTH)) and
              obj.getRight() < (roomX+(WINDOW_HALF_WIDTH))));
-}
-void renderMenu () {
-    gettimeofday(&frameStart, NULL);
-    int frameTime = 300;
-
-    //slow the frames for the first few
-    if (frameIndex == 0 or frameIndex == 1) {
-        frameTime = 1000;
-    }
-
-    // loop through frames
-    if (diff_ms(frameStart, frameEnd) > frameTime) {
-        frameIndex++;
-        frameIndex = frameIndex%39;
-        gettimeofday(&frameEnd, NULL);
-        //cout << "frame index: "<< frameIndex <<endl;
-    }
-
-    // end opening menu animation will add options to start the game
-    // FIXME all frames after about 6 or 7 are the same, are the images messed up?
-    if (frameIndex == 12) {
-        frameIndex = 0;
-        // currently start playing without chosing any options
-        level = 1;
-    }
-
-    glPushMatrix();
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
-    glBindTexture(GL_TEXTURE_2D, menuTexture[frameIndex]);
-    glEnable(GL_ALPHA_TEST);
-    glEnable(GL_TEXTURE_2D);
-    //glAlphaFunc(GL_GREATER, 0.0f);
-    //glAlphaFunc(GL_LESS, 1.0f);
-    glColor4ub(255,255,255,255);
-    glBegin(GL_QUADS);
-
-    glTexCoord2f(0.1, 0.9) ; glVertex2i(-WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
-    glTexCoord2f(0.1, 0.1) ; glVertex2i(-WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
-    glTexCoord2f(0.9, 0.1) ; glVertex2i( WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
-    glTexCoord2f(0.9, 0.9) ; glVertex2i( WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
-
-    glEnd(); glPopMatrix();
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_ALPHA_TEST);
-
-
 }
 
 int main(void) {
@@ -237,7 +190,8 @@ int main(void) {
     enemies[0] = &enemy_0;
     enemies[1] = &enemy_1;
     enemies_length=1;
-    level = 1;
+    level = 0;
+    frameIndex = 0;
 
     while (!quit) { //Staring Animation
         while (XPending(dpy)) {
@@ -355,12 +309,13 @@ void init_opengl (void) {
     delete [] silhouetteData;
 
     unsigned char *menuData;
-    glGenTextures(6, menuTexture);
+    glGenTextures(40, menuTexture);
     string fileName;
 
     // FIXME there are 40 image files, but currently only 1/3 of them work, the others
     // are all the same image
-    for (int q=0; q<1; q++) {
+    for (int q=0; q<40; q++) {
+
         fileName = "./images/menuScreen";
         fileName += itos(q);
         fileName += ".ppm";
@@ -438,6 +393,10 @@ int check_keys (XEvent *e, Object *hero) {
             else {
                 level = 1;
             }
+        }
+        // cycle through screens for debugging
+        if (key == XK_t) {
+            frameIndex++;
         }
         //return 0;
     }
@@ -1002,6 +961,54 @@ void movement(Object *hero) {
     }
 }
 
+void renderMenu () {
+    gettimeofday(&frameStart, NULL);
+    int frameTime = 300;
+
+    //slow the frames for the first few
+    if (frameIndex == 0 or frameIndex == 1) {
+        frameTime = 1000;
+    }
+
+    // loop through frames
+    if (diff_ms(frameStart, frameEnd) > frameTime) {
+        frameIndex++;
+        gettimeofday(&frameEnd, NULL);
+        //cout << "frame index: "<< frameIndex <<endl;
+    }
+
+    // end opening menu animation will add options to start the game
+    // FIXME all frames after about 6 or 7 are the same, are the images messed up?
+    if (frameIndex == 40) {
+        frameIndex = 0;
+        // currently start playing without chosing any options
+        level = 1;
+    }
+    //cout <<"frameIndex: "<< frameIndex <<endl;
+
+    glPushMatrix();
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
+    glBindTexture(GL_TEXTURE_2D, menuTexture[frameIndex]);
+    glEnable(GL_ALPHA_TEST);
+    glEnable(GL_TEXTURE_2D);
+    //glAlphaFunc(GL_GREATER, 0.0f);
+    //glAlphaFunc(GL_LESS, 1.0f);
+    glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+
+    glTexCoord2f(0.1, 0.9) ; glVertex2i(-WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+    glTexCoord2f(0.1, 0.1) ; glVertex2i(-WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(0.9, 0.1) ; glVertex2i( WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(0.9, 0.9) ; glVertex2i( WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+
+    glEnd(); glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
+
+
+}
 void renderGrounds (int x, int y) {
     int w, h;
     glColor3ub(65,155,225);
