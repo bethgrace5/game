@@ -8,18 +8,6 @@
 //Core Function    |making fonts
 //=================+
 
-//Purpose: Get the alphabets 
-/*
-#include <iostream>
-#include <cstdlib>
-#include <ctime>
-#include <cstring>
-#include <vector>
-#include <GL/glx.h>
-*/
-
-//#include "ppm.h"
-
 //=====================================================================
 //  Global Access
 //=====================================================================
