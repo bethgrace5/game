@@ -15,7 +15,8 @@
 #include "ppm.h"
 #include <sstream>
 #include <algorithm>
-#include "fastFont.h"
+//#include "fastFont.h"
+#include "tedP.cpp"
 #include "cdanner.cpp"
 #include "Sprite.cpp"
 
