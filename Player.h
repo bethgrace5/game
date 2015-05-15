@@ -7,7 +7,7 @@ class Player: public Object{
   private:
     std::string name;
 
-    int life, health;
+    int lives, health;
 
     int jumps, jumpLimit, jumpPower;
 
@@ -15,45 +15,55 @@ class Player: public Object{
 
   public:
     Player();
-    void move(int x);
+    Player(int width, int height, int x, int y);
+
+    void moveLeft();
+    void moveRight();
+    void jump();
+    void stop();
     void jumpRefresh();
-    void drawMovement();
+    void autoSet();
+
     void drawBox();
 };
-
-Player::Player() : Object(46, 48, 250, 250){
+//==============================================
+//Setup
+//==============================================
+Player::Player() : Object(26, 44, 250, 250){
   name = "No Name";
   //Basic Status
-  life = 3; health = 3;
+  lives = 3; health = 3;
 
-  jumps = 1; jumpLimit = 2; jumpPower = 5;
-  speed = 0; maxSpeed  = 5;
-
-  Object::setTop(44);
-  Object::setBottom(44);
-  Object::setLeft(-26);
-  Object::setRight(26);
+  jumps = 1; jumpLimit = 3; jumpPower = 5;
+  speed = 0; maxSpeed  = 7;
 }
-
+//===============================================
+//Movement Functions
+//===============================================
+void Player::moveRight(){ 
+  Object::setVelocityX(maxSpeed);
+}
+void Player::moveLeft(){
+  Object::setVelocityX(-maxSpeed);
+}
+void Player::jump(){
+  Object::setVelocityY(jumpPower);
+}
+void Player::stop(){
+  Object::setVelocityX(0);
+}
 void Player::jumpRefresh(){ 
   if(Player::getVelocityY() == 0) jumps = 0; 
 }
 
-void Player::move(int x){
-  switch(x){
-    case  1: Object::setVelocityX(maxSpeed);    break;
-    case -1: Object::setVelocityX(-(maxSpeed)); break;
-    case  0: Object::setVelocityX(0);           break;
+void Player::autoSet(){
+  Object::setCenter(Object::getCenterX() + Object::getVelocityX(), 
+                    Object::getCenterY() + Object::getVelocityY() );
 
-    case  2: 
-             if(jumps >= jumpLimit) break;
-             Object::setVelocityY(jumpPower);
-             break;
-
-    //case -2: Object::setVelocityY(-(jumpPower)); break;
-  }
 }
-
+//===============================================
+//Drawing Functions
+//===============================================
 void Player::drawBox(){
   int w = Object::getWidth();
   int h = Object::getHeight();
@@ -67,7 +77,6 @@ void Player::drawBox(){
   glVertex2i( w, -h);
   glEnd(); 
   //Sprite::drawTile(0);
-
   glPopMatrix();
 }
 
