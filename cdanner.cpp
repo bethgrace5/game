@@ -5,7 +5,7 @@
 
 #include "ppm.h"
 #include "Object.h"
-#include "sprite.h"
+#include "Sprite.h"
 //=====================================================================
 //  Platform
 //=====================================================================
@@ -14,7 +14,7 @@
 ////Global
 //  Platform var1; //This Sets Up The Platform Varaible
 //
-//  within init_opengl function
+//  within init_opengl function // in main.cpp
 //    add
 //    var1.insert("./images/"ppm file"", columns, rows);
 //    var1.init(width, height, x-cord, y-cord);
@@ -23,7 +23,7 @@
 //  within the movement function
 //    groundCollide(hero, &var1);
 //
-//  within the draw function
+//  within the render function
 //    var1.drawRow(0,0);
 //
 class Platform : public Sprite, public Object {
@@ -57,9 +57,10 @@ void Platform::setupTile() {
 
   //The Object will resize itself to fit with rows of tile. (by Downsizing)
   float addWidth = (int)Object::getWidth() % (int)Sprite::getClipWidth();
+  float addHeight = (int)Object::getHeight() % (int)Sprite::getClipHeight();
 
   widthSize = Object::getWidth() - addWidth; 
-  heightSize = Sprite::getClipHeight();
+  heightSize = Object::getHeight() - addHeight; 
 
   Object::init(widthSize, heightSize, Object::getCenterX(), Object::getCenterY());  
 
@@ -145,3 +146,36 @@ void Platform::drawRow(int x, int y) {
   glPopMatrix(); 
 }
 
+/*
+void Platform::drawColumn(int x, int y) {
+  //Draws Tiles for a box
+  //This is To Test The Boundaries Of The Platform
+  //you will see a colored box 
+  float w, h;
+  glPushMatrix();
+  glTranslatef(Object::getCenterX(), Object::getCenterY(), 0); 
+  w = Object::getWidth();
+  h = Object::getHeight();
+
+  glBegin(GL_QUADS);
+  glVertex2i(-w, -h);
+  glVertex2i(-w, h);
+  glVertex2i( w, h);
+  glVertex2i( w,-h);
+  glEnd();
+  glPopMatrix();
+
+  //This Will Draw The TileSet based on the Boundaries of Object
+  glPushMatrix();
+  glTranslatef(Object::getLeft(), Object::getCenterY(), 0); 
+  
+  for (int i = 0; i < Object::getWidth()/lineSpaceX; i++) {
+
+    if (i == 0) glTranslatef(lineSpaceX,0 , 0); 
+    else        glTranslatef(lineSpaceX + lineSpaceX ,0 , 0); 
+
+    Sprite::drawTile(x,y);
+  } 
+  glPopMatrix(); 
+}
+*/
