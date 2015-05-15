@@ -16,6 +16,9 @@
 #include <sstream>
 #include <algorithm>
 #include "fastFont.h"
+#include "cdanner.cpp"
+#include "Sprite.cpp"
+
 
 #define WINDOW_WIDTH 900
 #define WINDOW_HEIGHT 600
@@ -99,6 +102,7 @@ Bullet *bhead = NULL;
 Object *grounds[MAX_GROUNDS] = {NULL};
 Object *enemies[32] = {NULL};
 int bg, bullets, grounds_length, enemies_length,  i, j, level=-1;
+int platform_length=19;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 int fail=0;
@@ -115,6 +119,8 @@ GLuint initTextures[32];
 
 Ppmimage *computerScreenImages[26];
 GLuint computerScreenTextures[26];
+
+Platform var1[100];
 
 //Function prototypes
 void initXWindows(void);
@@ -134,6 +140,7 @@ void renderEnemies(int x, int y);
 void renderHero(Object *hero, int x, int y);
 void renderInitMenu();
 void renderComputerScreenMenu();
+void makePlatform(int i, int w, int h, int x, int y); 
 Object createAI( int w, int h, Object *ground);
 
 void groundCollide(Object *obj, Object *ground);
@@ -155,7 +162,7 @@ int main(void) {
     hero.setBottom(-44);
     hero.setLeft(-26);
     hero.setRight(26);
-
+    /*
     Object ground_0(10, 1000, -10, 600);
     Object ground_1(400, 10, 400, 80);
     Object ground_2(200, 10, 900, 200);
@@ -194,10 +201,10 @@ int main(void) {
     grounds[16] = &ground_16;
     grounds[17] = &ground_17;
     grounds_length=18;
-
+    */
     //setup enemies
-    Object enemy_0 = createAI(20, 48, &ground_2);
-    Object enemy_1 = createAI(20, 48, &ground_3);
+    Object enemy_0 = createAI(20, 48, &var1[1]);
+    Object enemy_1 = createAI(5, 48, &var1[1]);
 
     enemies[0] = &enemy_0;
     enemies[1] = &enemy_1;
@@ -378,6 +385,55 @@ void init_opengl (void) {
         }
         delete [] computerData;
     }
+
+    makePlatform(0, 0, 0, 0, 0);
+    makePlatform(1, 400, 16, 400, 80);
+    makePlatform(2, 200, 16, 900, 200);
+    makePlatform(3, 150, 16, 1200, 360);
+    makePlatform(4, 250, 16, 1450, 80);
+    makePlatform(5, 440, 16, 2500, 80);
+    makePlatform(6, 340, 16, 2300, 360);
+    makePlatform(7, 250, 16, 2800, 480);
+    makePlatform(8, 440, 16, 3500, 80);
+    makePlatform(9, 440, 16, 4000, 200);
+    makePlatform(10, 440, 16, 4500, 80);
+    makePlatform(11, 440, 16, 5500, 80);
+    makePlatform(12, 440, 16, 6500, 80);
+    makePlatform(13, 440, 16, 7500, 80);
+    makePlatform(14, 440, 16, 8500, 80);
+    makePlatform(15, 440, 16, 9500, 80);
+    makePlatform(16, 200, 16, 9700, 360);
+    makePlatform(17, 200, 16, 300, 200);
+    makePlatform(18, 20, 1000, -16, 600);
+
+    // FIXME there are 40 image files, but currently only 1/3 of them work, the others
+    // are all the same image
+    /*
+       for (int q=0; q<12; q++) {
+       fileName = "./images/menuScreen";
+       fileName += itos(q);
+       fileName += ".ppm";
+       cout << "loading file: " <<fileName <<endl;
+       menuImage[q] = ppm6GetImage(fileName.c_str());
+
+       glBindTexture(GL_TEXTURE_2D, menuTexture[q]);
+       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+       menuData = buildAlphaData(menuImage[q]);
+       w = menuImage[q]->width;
+       h = menuImage[q]->height;
+       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
+       }
+       delete [] menuData;
+       */
+}
+
+void makePlatform(int i, int w, int h, int x, int y) {
+    
+    var1[i].insert("./images/level.ppm", 1, 1);
+    var1[i].init(w, h, x, y);
+    var1[i].setupTile();
+
 }
 
 void check_mouse (XEvent *e) {
@@ -934,8 +990,10 @@ void movement(Object *hero) {
     hero->setCenter( (hero->getCenterX() + hero->getVelocityX()), (hero->getCenterY() + hero->getVelocityY()));
     hero->setVelocityY( hero->getVelocityY() - GRAVITY);
     //Detect Collisions
-    for (i=0; i<grounds_length; i++) {
-	groundCollide(hero, grounds[i]);
+    for (i=0; i<platform_length; i++) {
+	//groundCollide(hero, grounds[i]);
+	groundCollide(hero, &var1[i]);
+
     }
     // Cycle through hero index sequences
     if (life<=0) {
@@ -1065,8 +1123,9 @@ void movement(Object *hero) {
 		(enemies[i]->getCenterX() + enemies[i]->getVelocityX()),
 		(enemies[i]->getCenterY() + enemies[i]->getVelocityY()));
 	enemies[i]->setVelocityY( enemies[i]->getVelocityY() - GRAVITY);
-	for (j=0; j<grounds_length; j++) {
-	    groundCollide(enemies[i], grounds[j]); //Collision Detection
+	for (j=0; j<platform_length; j++) {
+	    //groundCollide(enemies[i], grounds[j]); //Collision Detection
+            groundCollide(enemies[i], &var1[j]); 
 	}
     }
 }
@@ -1173,6 +1232,17 @@ void renderGrounds (int x, int y) {
 
 	}
     }
+
+    
+    for (i=0;i<platform_length;i++) {
+	    //Platform
+	    glPushMatrix();
+	    glTranslatef(- x, - y, 0);
+            var1[i].drawRow(0,0);
+            glPopMatrix();
+    }
+
+
 }
 void renderEnemies (int x, int y) {
     int w, h;
