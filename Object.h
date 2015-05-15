@@ -30,6 +30,7 @@ class Object{
 
         void setVelocityX(double x);
         void setVelocityY(double y);
+        void autoSet();
 
         double getOldCenterX(void);
         double getOldCenterY(void);
@@ -56,6 +57,7 @@ class Object{
         Object *getFloor();
 
         Object( double w, double h, double x, double y);
+        void init(double w, double h, double x, double y);
         // TODO: create destructor
         //~Object(){ delete [] ground;}
 

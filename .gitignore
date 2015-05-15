@@ -7,4 +7,5 @@ game
 # Vim swapfiles
 *.swp
 
-*.DS_Store
+# OS X folder meta data
+*.DS_Store 
