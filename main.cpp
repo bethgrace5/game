@@ -28,6 +28,9 @@
 #define rnd()(float)rand() /(float)(RAND_MAX)
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 
+// 1 for quick load, 0 for slow load with menu images
+#define QUICK_LOAD_TIME 1
+
 #define MAX_BACKGROUND_BITS 6000
 #define HERO_START_X 150
 #define HERO_START_Y 350
@@ -95,7 +98,7 @@ bgBit *bitHead = NULL;
 Bullet *bhead = NULL;
 Object *grounds[MAX_GROUNDS] = {NULL};
 Object *enemies[32] = {NULL};
-int bg, bullets, grounds_length, enemies_length,  i, j, level=0;
+int bg, bullets, grounds_length, enemies_length,  i, j, level=-1;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 int fail=0;
@@ -107,8 +110,11 @@ int quit=0;
 Ppmimage *heroImage=NULL;
 GLuint heroTexture;
 
-Ppmimage *menuImage[40];
-GLuint menuTexture[40];
+Ppmimage *initImages[32];
+GLuint initTextures[32];
+
+Ppmimage *computerScreenImages[26];
+GLuint computerScreenTextures[26];
 
 //Function prototypes
 void initXWindows(void);
@@ -126,7 +132,8 @@ void renderBullets(int x, int y);
 void deleteBullet(Bullet *node);
 void renderEnemies(int x, int y);
 void renderHero(Object *hero, int x, int y);
-void renderMenu();
+void renderInitMenu();
+void renderComputerScreenMenu();
 Object createAI( int w, int h, Object *ground);
 
 void groundCollide(Object *obj, Object *ground);
@@ -195,19 +202,27 @@ int main(void) {
     enemies[0] = &enemy_0;
     enemies[1] = &enemy_1;
     enemies_length=1;
-    level = 0;
     frameIndex = 0;
+
+    if(QUICK_LOAD_TIME) {
+        level = 1;
+    }
 
     while (!quit) { //Staring Animation
 	while (XPending(dpy)) {
 	    //Player User Interfaces
 	    XEvent e; XNextEvent(dpy, &e);
-	    check_mouse(&e);
+	    //check_mouse(&e);
 	    quit = check_keys(&e, &hero);
 	}
-	if (level == 0) {
-	    renderMenu();
+	if (level == -1) {
+	    renderInitMenu();
+	    //check_mouse(&e);
+    // level = check_keys_menu(&e);
 	}
+    else if (level == 0) {
+        renderComputerScreenMenu();
+    }
 	else {
 	    movement(&hero);
 	    render(&hero);
@@ -314,27 +329,55 @@ void init_opengl (void) {
     delete [] silhouetteData;
 
     gettimeofday(&fireStart, NULL);
-    unsigned char *menuData;
-    glGenTextures(40, menuTexture);
-    string fileName;
 
-    for (int q=0; q<40; q++) {
+    if (!QUICK_LOAD_TIME) {
 
-        fileName = "./images/menuScreen";
-        fileName += itos(q);
-        fileName += ".ppm";
-        cout << "loading file: " <<fileName <<endl;
-        menuImage[q] = ppm6GetImage(fileName.c_str());
+        // load initialization screens
+        unsigned char *menuData;
+        glGenTextures(32, initTextures);
+        string fileName;
 
-        glBindTexture(GL_TEXTURE_2D, menuTexture[q]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        menuData = buildAlphaData(menuImage[q]);
-        w = menuImage[q]->width;
-        h = menuImage[q]->height;
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
+        for (int q=0; q<32; q++) {
+
+            fileName = "./images/init/init";
+            fileName += itos(q);
+            fileName += ".ppm";
+            cout << "loading file: " <<fileName <<endl;
+            initImages[q] = ppm6GetImage(fileName.c_str());
+
+            glBindTexture(GL_TEXTURE_2D, initTextures[q]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            menuData = buildAlphaData(initImages[q]);
+            w = initImages[q]->width;
+            h = initImages[q]->height;
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
+        }
+        delete [] menuData;
+
+        // load blinking computer screens
+        unsigned char *computerData;
+        glGenTextures(26, computerScreenTextures);
+        fileName = "";
+
+        for (int q=0; q<26; q++) {
+
+            fileName = "./images/cs/cs";
+            fileName += itos(q);
+            fileName += ".ppm";
+            cout << "loading file: " <<fileName <<endl;
+            computerScreenImages[q] = ppm6GetImage(fileName.c_str());
+
+            glBindTexture(GL_TEXTURE_2D, computerScreenTextures[q]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            computerData = buildAlphaData(computerScreenImages[q]);
+            w = computerScreenImages[q]->width;
+            h = computerScreenImages[q]->height;
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, computerData);
+        }
+        delete [] computerData;
     }
-    delete [] menuData;
 }
 
 void check_mouse (XEvent *e) {
@@ -420,6 +463,24 @@ int check_keys (XEvent *e, Object *hero) {
 	if (key == XK_space) {
 	    isShooting=0;
 	}
+    }
+
+    return 0;
+}
+int check_keys_menu (XEvent *e) {
+    //handle input from the keyboard
+    int key = XLookupKeysym(&e->xkey, 0);
+    if (e->type == KeyPress) {
+        if (key == XK_Escape or key == XK_q) {
+            return 1;
+        }
+        // cycle through screens for debugging
+        if (key == XK_t) {
+            frameIndex++;
+        }
+        //return 0;
+    }
+    else if (e->type == KeyRelease) {
     }
 
     return 0;
@@ -1010,14 +1071,49 @@ void movement(Object *hero) {
     }
 }
 
-void renderMenu () {
+void renderInitMenu () {
+    gettimeofday(&frameStart, NULL);
+    int frameTime = 100;
+
+    // loop through frames
+    if (diff_ms(frameStart, frameEnd) > frameTime) {
+        frameIndex++;
+        gettimeofday(&frameEnd, NULL);
+    }
+
+    if (frameIndex == 32) {
+        cout << "frame index: "<< frameIndex <<endl;
+        frameIndex = 0;
+        level = 0;
+        return;
+    }
+
+    glPushMatrix();
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
+    glEnable(GL_ALPHA_TEST);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, initTextures[frameIndex]);
+    //glAlphaFunc(GL_GREATER, 0.0f);
+    //glAlphaFunc(GL_LESS, 1.0f);
+    glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+
+    glTexCoord2f(0, 1) ; glVertex2i(-WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+    glTexCoord2f(0, 0) ; glVertex2i(-WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(1, 0) ; glVertex2i( WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(1, 1) ; glVertex2i( WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+
+    glEnd(); glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
+
+
+}
+void renderComputerScreenMenu () {
     gettimeofday(&frameStart, NULL);
     int frameTime = 300;
-
-    //slow the frames for the first few
-    if (frameIndex == 0 or frameIndex == 1) {
-        frameTime = 1000;
-    }
 
     // loop through frames
     if (diff_ms(frameStart, frameEnd) > frameTime) {
@@ -1026,31 +1122,28 @@ void renderMenu () {
         //cout << "frame index: "<< frameIndex <<endl;
     }
 
-    // end opening menu animation will add options to start the game
-    // FIXME all frames after about 6 or 7 are the same, are the images messed up?
-    if (frameIndex == 40) {
+    if (frameIndex == 26) {
         frameIndex = 0;
-        // currently start playing without chosing any options
         level = 1;
+        return;
     }
-    //cout <<"frameIndex: "<< frameIndex <<endl;
 
     glPushMatrix();
     glClear(GL_COLOR_BUFFER_BIT);
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
-    glBindTexture(GL_TEXTURE_2D, menuTexture[frameIndex]);
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, computerScreenTextures[frameIndex]);
     //glAlphaFunc(GL_GREATER, 0.0f);
     //glAlphaFunc(GL_LESS, 1.0f);
     glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
 
-    glTexCoord2f(0.1, 0.9) ; glVertex2i(-WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
-    glTexCoord2f(0.1, 0.1) ; glVertex2i(-WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
-    glTexCoord2f(0.9, 0.1) ; glVertex2i( WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
-    glTexCoord2f(0.9, 0.9) ; glVertex2i( WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+    glTexCoord2f(0, 1) ; glVertex2i(-WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+    glTexCoord2f(0, 0) ; glVertex2i(-WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(1, 0) ; glVertex2i( WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(1, 1) ; glVertex2i( WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
 
     glEnd(); glPopMatrix();
     glDisable(GL_TEXTURE_2D);
