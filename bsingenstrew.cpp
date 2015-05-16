@@ -26,25 +26,28 @@
 //  within the render function
 //    var1.drawRow(0,0);
 //
-class Platform : public Sprite, public Object {
+class Enemy : public Sprite, public Object {
 
   private:
-    int lineSpaceX;
-    int lineSpaceY;
+    int life;
+    int speed;
+    int type; // 0: enemy 1, 1: enemy 2, 2: boss
+    int fire_rate;
 
   public:
-    Platform();
-    void setupTile();
+    Enemy();
+    /*void setupTile();
     void drawRow();
     void saveLineSpace();
     void drawRow(int x, int y);
+    */
 };
 
-Platform::Platform() : Sprite(), Object(260, 200, 350, 400) {
+Enemy::Enemy() : Sprite(), Object(260, 200, 350, 400) {
     //Just An Intializer
     //this will set up Boundaries of the object and set Sprite to 0/NULL
 }
-
+/*
 void Platform::setupTile() {
   //Setup Object to match with tile rows
   //std::cout << "===================================================\n";
@@ -146,7 +149,7 @@ void Platform::drawRow(int x, int y) {
   glPopMatrix(); 
 }
 
-/*
+////////////////////////////////////////////////
 void Platform::drawColumn(int x, int y) {
   //Draws Tiles for a box
   //This is To Test The Boundaries Of The Platform

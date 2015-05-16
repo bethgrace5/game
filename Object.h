@@ -9,6 +9,7 @@ class Object{
         float x, y, z;
     };
     public:
+        int life;
         void setWidth(double w);
         double getWidth(void);
         void setHeight(double w);

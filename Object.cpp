@@ -15,6 +15,8 @@ void Object::init( double w, double h, double x, double y ) {
     velocity.y = 0;
     velocity.z = 0;
 
+    life=100;
+
     index = 0;
     left=w*-1;
     bottom=h*-1;

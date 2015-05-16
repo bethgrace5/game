@@ -40,18 +40,18 @@ void Sprite::setClip(int x, int y){
   //User defined row and column. The images must evenly split apart from each
   //other. ClipX and ClipY determines where to cut parts in the image.
   row = x; column = y; 
-  std::cout << "What is (x,y): (" << row << "," << column << ")\n";
+  //std::cout << "What is (x,y): (" << row << "," << column << ")\n";
   if(x > 0) clipX = (float)1/row;
-  std::cout << "give me CLIPX: " << clipX << std::endl;
+  //std::cout << "give me CLIPX: " << clipX << std::endl;
   if(y > 0) clipY = (float)1/column;
-  std::cout << "give me CLIPY: " << clipY << std::endl;
+  //std::cout << "give me CLIPY: " << clipY << std::endl;
 }
 
 void Sprite::setSize(int x, int y){
   //Sets the size of sprite shown
   clipWidth = x;
   clipHeight = y;
-  std::cout << "what is x " << x << "\n what is y " << y << std::endl;
+  //std::cout << "what is x " << x << "\n what is y " << y << std::endl;
 }
 
 void Sprite::initSprite(){

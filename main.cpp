@@ -87,19 +87,17 @@ int isJumping=0;
 // last facing 0 means facing forward(right), 1 means backward(left)
 int lastFacing=0;
 double h_right, h_left, h_top, h_bottom;
-timeval seqStart, seqEnd;
-timeval fireStart, fireEnd;
-timeval frameStart, frameEnd;
+timeval seqStart, seqEnd; // hero's sprite index
+timeval fireStart, fireEnd; // hero's fire rate timer
+timeval frameStart, frameEnd; // menu
 int frameIndex=0;
 
 //Game Globals
 string str = "";
 bgBit *bitHead = NULL;
 Bullet *bhead = NULL;
-Object *grounds[MAX_GROUNDS] = {NULL};
 Object *enemies[32] = {NULL};
-int bg, bullets, grounds_length, enemies_length,  i, j, level=0;
-int platform_length=19;
+int bg, bullets, platform_length, enemies_length,  i, j, level=0;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 int fail=0;
@@ -113,7 +111,7 @@ GLuint heroTexture;
 
 Ppmimage *menuImage[40];
 GLuint menuTexture[40];
-Platform var1[100];
+Platform grounds[MAX_GROUNDS];
 
 //Function prototypes
 void initXWindows(void);
@@ -129,6 +127,7 @@ void cleanup_background(void);
 void renderGrounds(int x, int y);
 void renderBullets(int x, int y);
 void deleteBullet(Bullet *node);
+void deleteEnemy(int ind);
 void renderEnemies(int x, int y);
 void renderHero(Object *hero, int x, int y);
 void makePlatform(int i, int w, int h, int x, int y); 
@@ -136,6 +135,7 @@ Object createAI( int w, int h, Object *ground);
 
 void groundCollide(Object *obj, Object *ground);
 bool detectCollide(Object *obj, Object *ground);
+bool bulletCollide(Bullet *b, Object *obj);
 
 bool inWindow(Object &obj) {
     return ((obj.getLeft() < (roomX+(WINDOW_HALF_WIDTH)) and
@@ -201,53 +201,18 @@ int main(void) {
     hero.setBottom(-44);
     hero.setLeft(-26);
     hero.setRight(26);
-    /*
-    Object ground_0(10, 1000, -10, 600);
-    Object ground_1(400, 10, 400, 80);
-    Object ground_2(200, 10, 900, 200);
-    Object ground_3(150, 10, 1200, 360);
-    Object ground_4(250, 10, 1450, 80);
-    Object ground_5(440, 10, 2500, 80);
-    Object ground_6(340, 10, 2300, 360);
-    Object ground_7(250, 10, 2800, 480);
-    Object ground_8(440, 10, 3500, 80);
-    Object ground_9(440, 10, 4000, 200);
-    Object ground_10(440, 10, 4500, 80);
-    Object ground_11(440, 10, 5500, 80);
-    Object ground_12(440, 10, 6500, 80);
-    Object ground_13(440, 10, 7500, 80);
-    Object ground_14(440, 10, 8500, 80);
-    Object ground_15(440, 10, 9500, 80);
-    Object ground_16(200, 10, 9700, 360);
-    Object ground_17(200, 10, 300, 180);
-
-    grounds[0] = &ground_0;
-    grounds[1] = &ground_1;
-    grounds[2] = &ground_2;
-    grounds[3] = &ground_3;
-    grounds[4] = &ground_4;
-    grounds[5] = &ground_5;
-    grounds[6] = &ground_6;
-    grounds[7] = &ground_7;
-    grounds[8] = &ground_8;
-    grounds[9] = &ground_9;
-    grounds[10] = &ground_10;
-    grounds[11] = &ground_11;
-    grounds[12] = &ground_12;
-    grounds[13] = &ground_13;
-    grounds[14] = &ground_14;
-    grounds[15] = &ground_15;
-    grounds[16] = &ground_16;
-    grounds[17] = &ground_17;
-    grounds_length=18;
-    */
+    
     //setup enemies
-    Object enemy_0 = createAI(20, 48, &var1[1]);
-    Object enemy_1 = createAI(5, 48, &var1[1]);
+    Object enemy_0 = createAI(20, 48, &grounds[0]);
+    Object enemy_1 = createAI(20, 48, &grounds[1]);
+    Object enemy_2 = createAI(20, 48, &grounds[2]);
+    Object enemy_3 = createAI(20, 48, &grounds[3]);
 
     enemies[0] = &enemy_0;
     enemies[1] = &enemy_1;
-    enemies_length=1;
+    enemies[2] = &enemy_2;
+    enemies[3] = &enemy_3;
+    enemies_length=4;
     level = 1;
 
     while (!quit) { //Staring Animation
@@ -370,7 +335,7 @@ void init_opengl (void) {
     glGenTextures(6, menuTexture);
     string fileName;
 
-    makePlatform(0, 0, 0, 0, 0);
+    makePlatform(0, 20, 1000, -16, 600);
     makePlatform(1, 400, 16, 400, 80);
     makePlatform(2, 200, 16, 900, 200);
     makePlatform(3, 150, 16, 1200, 360);
@@ -389,6 +354,8 @@ void init_opengl (void) {
     makePlatform(16, 200, 16, 9700, 360);
     makePlatform(17, 200, 16, 300, 200);
     makePlatform(18, 20, 1000, -16, 600);
+
+    platform_length=19;
 
     // FIXME there are 40 image files, but currently only 1/3 of them work, the others
     // are all the same image
@@ -414,9 +381,9 @@ void init_opengl (void) {
 
 void makePlatform(int i, int w, int h, int x, int y) {
     
-    var1[i].insert("./images/level.ppm", 1, 1);
-    var1[i].init(w, h, x, y);
-    var1[i].setupTile();
+    grounds[i].insert("./images/level.ppm", 1, 1);
+    grounds[i].init(w, h, x, y);
+    grounds[i].setupTile();
 
 }
 
@@ -903,10 +870,19 @@ void enemyAI (Object *hero, Object *enemy) {
 bool detectCollide (Object *obj, Object *ground) {
     //Gets (Moving Object, Static Object)
     //Reture True if Moving Object Collides with Static Object
-    return (obj->getRight()  > ground->getLeft() &&
+    return (obj->getRight() > ground->getLeft() &&
 	    obj->getLeft()   < ground->getRight() &&
 	    obj->getBottom() < ground->getTop()  &&
 	    obj->getTop()    > ground->getBottom());
+}
+
+bool bulletCollide (Bullet *b, Object *obj) {
+    //Gets (Bullet, Object)
+    //Reture True if Bullet Collides with Object
+    return (obj->getRight() > b->pos[0] &&
+	    obj->getLeft()   < b->pos[0] &&
+	    obj->getBottom() < b->pos[1]  &&
+	    obj->getTop()    > b->pos[1]);
 }
 
 void groundCollide (Object *obj, Object *ground) {
@@ -953,9 +929,7 @@ void movement(Object *hero) {
     hero->setVelocityY( hero->getVelocityY() - GRAVITY);
     //Detect Collisions
     for (i=0; i<platform_length; i++) {
-	//groundCollide(hero, grounds[i]);
-	groundCollide(hero, &var1[i]);
-
+	    groundCollide(hero, &grounds[i]);
     }
     // Cycle through hero index sequences
     if (life<=0) {
@@ -1069,6 +1043,11 @@ void movement(Object *hero) {
 	//move the bullet
 	b->pos[0] += b->vel[0];
 	b->pos[1] += b->vel[1];
+    
+    for (i=0;i<platform_length;i++){
+        if (bulletCollide(b,&grounds[i]))
+            deleteBullet(b);
+    }
 	//Check for collision with window edges
 	if (b->pos[0] > WINDOW_WIDTH+roomX or b->pos[0] < 0) {
 	    deleteBullet(b);
@@ -1076,56 +1055,46 @@ void movement(Object *hero) {
 	b = b->next;
     }
 
-
     // Enemy movement, enemy ai
     for (i=0;i<enemies_length;i++) {
-	enemyAI(hero, enemies[i]); //Where does enemy go?
-	enemies[i]->setOldCenter();
-	enemies[i]->setCenter( //Apply Physics
-		(enemies[i]->getCenterX() + enemies[i]->getVelocityX()),
-		(enemies[i]->getCenterY() + enemies[i]->getVelocityY()));
-	enemies[i]->setVelocityY( enemies[i]->getVelocityY() - GRAVITY);
-	for (j=0; j<platform_length; j++) {
-	    //groundCollide(enemies[i], grounds[j]); //Collision Detection
-            groundCollide(enemies[i], &var1[j]); 
-	}
+	    enemyAI(hero, enemies[i]); //Where does enemy go?
+	    enemies[i]->setOldCenter();
+	    enemies[i]->setCenter( //Apply Physics
+		    (enemies[i]->getCenterX() + enemies[i]->getVelocityX()),
+		    (enemies[i]->getCenterY() + enemies[i]->getVelocityY()));
+	    enemies[i]->setVelocityY( enemies[i]->getVelocityY() - GRAVITY);
+        //bullets
+        b = bhead;
+        while (b) {
+            if (bulletCollide(b,enemies[i])){
+                deleteBullet(b);
+                enemies[i]->life-=20;
+            }
+	        b = b->next;
+        }
+	    for (j=0; j<platform_length; j++) {
+	        //Collision Detection
+            groundCollide(enemies[i], &grounds[j]); 
+	    }
+        if (enemies[i]->life<=0){
+            deleteEnemy(i);
+        }
     }
 }
 
 void renderGrounds (int x, int y) {
-    int w, h;
-    glColor3ub(65,155,225);
     // render grounds
-    Object *ground;
-    for (i=0;i<grounds_length;i++) {
-	ground = grounds[i];
-	if (inWindow(*ground)) {
-	    //Ground
-	    glPushMatrix();
-	    glTranslatef( ground->getCenterX() - x, ground->getCenterY() - y, 0);
-	    w = ground->getWidth();
-	    h = ground->getHeight();
-	    glBegin(GL_QUADS);
-	    glVertex2i(-w,-h);
-	    glVertex2i(-w, h);
-	    glVertex2i( w, h);
-	    glVertex2i( w,-h);
-	    glEnd(); glPopMatrix();
-
-	}
-    }
-
-    
     for (i=0;i<platform_length;i++) {
-	    //Platform
-	    glPushMatrix();
-	    glTranslatef(- x, - y, 0);
-            var1[i].drawRow(0,0);
+	    if (inWindow(grounds[i])) {
+	        //Platform
+	        glPushMatrix();
+	        glTranslatef(- x, - y, 0);
+            grounds[i].drawRow(0,0);
             glPopMatrix();
+        }
     }
-
-
 }
+
 void renderEnemies (int x, int y) {
     int w, h;
     // render enemies
@@ -1349,6 +1318,13 @@ void deleteBullet(Bullet *node) {
     delete node;
     node = NULL;
     bullets--;
+}
+
+void deleteEnemy(int ind){
+    for (i=ind;i<enemies_length;i++){
+        enemies[i]=(i==enemies_length?NULL:enemies[i+1]);
+    } 
+    enemies_length--;
 }
 
 void cleanup_background(void) {
