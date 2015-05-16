@@ -15,7 +15,8 @@
 #include "ppm.h"
 #include <sstream>
 #include <algorithm>
-#include "fastFont.h"
+//#include "fastFont.h"
+#include "tedP.cpp"
 #include "cdanner.cpp"
 #include "Sprite.cpp"
 
@@ -30,6 +31,9 @@
 #define MAX_GROUNDS 32
 #define rnd()(float)rand() /(float)(RAND_MAX)
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
+
+// 1 for quick load, 0 for slow load with menu images
+#define QUICK_LOAD_TIME 1
 
 #define MAX_BACKGROUND_BITS 6000
 #define HERO_START_X 150
@@ -97,7 +101,7 @@ string str = "";
 bgBit *bitHead = NULL;
 Bullet *bhead = NULL;
 Object *enemies[32] = {NULL};
-int bg, bullets, platform_length, enemies_length,  i, j, level=0;
+int bg, bullets, grounds_length, enemies_length,  i, j, level=-1;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 int fail=0;
@@ -112,6 +116,11 @@ GLuint heroTexture;
 Ppmimage *menuImage[40];
 GLuint menuTexture[40];
 Platform grounds[MAX_GROUNDS];
+Ppmimage *initImages[32];
+GLuint initTextures[32];
+
+Ppmimage *computerScreenImages[26];
+GLuint computerScreenTextures[26];
 
 //Function prototypes
 void initXWindows(void);
@@ -130,6 +139,8 @@ void deleteBullet(Bullet *node);
 void deleteEnemy(int ind);
 void renderEnemies(int x, int y);
 void renderHero(Object *hero, int x, int y);
+void renderInitMenu();
+void renderComputerScreenMenu();
 void makePlatform(int i, int w, int h, int x, int y); 
 Object createAI( int w, int h, Object *ground);
 
@@ -142,54 +153,6 @@ bool inWindow(Object &obj) {
 		obj.getLeft() > (roomX-(WINDOW_HALF_WIDTH))) or
 	    (obj.getRight() > (roomX-(WINDOW_HALF_WIDTH)) and
 	     obj.getRight() < (roomX+(WINDOW_HALF_WIDTH))));
-}
-void renderMenu () {
-    gettimeofday(&frameStart, NULL);
-    int frameTime = 300;
-
-    //slow the frames for the first few
-    if (frameIndex == 0 or frameIndex == 1) {
-	frameTime = 1000;
-    }
-
-    // loop through frames
-    if (diff_ms(frameStart, frameEnd) > frameTime) {
-	frameIndex++;
-	frameIndex = frameIndex%39;
-	gettimeofday(&frameEnd, NULL);
-	//cout << "frame index: "<< frameIndex <<endl;
-    }
-
-    // end opening menu animation will add options to start the game
-    // FIXME all frames after about 6 or 7 are the same, are the images messed up?
-    if (frameIndex == 12) {
-	frameIndex = 0;
-	// currently start playing without chosing any options
-	level = 1;
-    }
-
-    glPushMatrix();
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
-    glBindTexture(GL_TEXTURE_2D, menuTexture[frameIndex]);
-    glEnable(GL_ALPHA_TEST);
-    glEnable(GL_TEXTURE_2D);
-    //glAlphaFunc(GL_GREATER, 0.0f);
-    //glAlphaFunc(GL_LESS, 1.0f);
-    glColor4ub(255,255,255,255);
-    glBegin(GL_QUADS);
-
-    glTexCoord2f(0.1, 0.9) ; glVertex2i(-WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
-    glTexCoord2f(0.1, 0.1) ; glVertex2i(-WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
-    glTexCoord2f(0.9, 0.1) ; glVertex2i( WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
-    glTexCoord2f(0.9, 0.9) ; glVertex2i( WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
-
-    glEnd(); glPopMatrix();
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_ALPHA_TEST);
-
-
 }
 
 int main(void) {
@@ -214,17 +177,27 @@ int main(void) {
     enemies[3] = &enemy_3;
     enemies_length=4;
     level = 1;
+    frameIndex = 0;
+
+    if(QUICK_LOAD_TIME) {
+        level = 1;
+    }
 
     while (!quit) { //Staring Animation
 	while (XPending(dpy)) {
 	    //Player User Interfaces
 	    XEvent e; XNextEvent(dpy, &e);
-	    check_mouse(&e);
+	    //check_mouse(&e);
 	    quit = check_keys(&e, &hero);
 	}
-	if (level == 0) {
-	    renderMenu();
+	if (level == -1) {
+	    renderInitMenu();
+	    //check_mouse(&e);
+    // level = check_keys_menu(&e);
 	}
+    else if (level == 0) {
+        renderComputerScreenMenu();
+    }
 	else {
 	    movement(&hero);
 	    render(&hero);
@@ -331,9 +304,55 @@ void init_opengl (void) {
     delete [] silhouetteData;
 
     gettimeofday(&fireStart, NULL);
-    unsigned char *menuData;
-    glGenTextures(6, menuTexture);
-    string fileName;
+
+    if (!QUICK_LOAD_TIME) {
+
+        // load initialization screens
+        unsigned char *menuData;
+        glGenTextures(32, initTextures);
+        string fileName;
+
+        for (int q=0; q<32; q++) {
+
+            fileName = "./images/init/init";
+            fileName += itos(q);
+            fileName += ".ppm";
+            cout << "loading file: " <<fileName <<endl;
+            initImages[q] = ppm6GetImage(fileName.c_str());
+
+            glBindTexture(GL_TEXTURE_2D, initTextures[q]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            menuData = buildAlphaData(initImages[q]);
+            w = initImages[q]->width;
+            h = initImages[q]->height;
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
+        }
+        delete [] menuData;
+
+        // load blinking computer screens
+        unsigned char *computerData;
+        glGenTextures(26, computerScreenTextures);
+        fileName = "";
+
+        for (int q=0; q<26; q++) {
+
+            fileName = "./images/cs/cs";
+            fileName += itos(q);
+            fileName += ".ppm";
+            cout << "loading file: " <<fileName <<endl;
+            computerScreenImages[q] = ppm6GetImage(fileName.c_str());
+
+            glBindTexture(GL_TEXTURE_2D, computerScreenTextures[q]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            computerData = buildAlphaData(computerScreenImages[q]);
+            w = computerScreenImages[q]->width;
+            h = computerScreenImages[q]->height;
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, computerData);
+        }
+        delete [] computerData;
+    }
 
     makePlatform(0, 20, 1000, -16, 600);
     makePlatform(1, 400, 16, 400, 80);
@@ -355,12 +374,13 @@ void init_opengl (void) {
     makePlatform(17, 200, 16, 300, 200);
     makePlatform(18, 20, 1000, -16, 600);
 
-    platform_length=19;
+    grounds_length=19;
 
     // FIXME there are 40 image files, but currently only 1/3 of them work, the others
     // are all the same image
-    /*
+   /* 
        for (int q=0; q<12; q++) {
+           string fileName;
        fileName = "./images/menuScreen";
        fileName += itos(q);
        fileName += ".ppm";
@@ -376,7 +396,7 @@ void init_opengl (void) {
        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
        }
        delete [] menuData;
-       */
+     */  
 }
 
 void makePlatform(int i, int w, int h, int x, int y) {
@@ -415,44 +435,48 @@ int check_keys (XEvent *e, Object *hero) {
     //handle input from the keyboard
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
-	if (key == XK_Escape or key == XK_q) {
-	    return 1;
-	}
-	// Jump
-	if ((key == XK_w || key == XK_Up) && !isDying) {
-	    if (didJump < 2 && hero->getVelocityY() > -0.5) {
-		didJump++;
-		hero->setVelocityY(7);
-	    }
-	}
-	// move character left
-	if ((key == XK_a || key == XK_Left) && !isDying) {
-	    hero->setVelocityX(-6);
-	    lastFacing = 1;
-	}
-	// move character right
-	if ((key == XK_d || key == XK_Right) && !isDying) {
-	    hero->setVelocityX(6);
-	    lastFacing = 0;
-	}
-	// shoot
-	if (key == XK_space) {
-	    isShooting=1;
-	}
-	// debug death
-	if (key == XK_q) {
-	    life-=1000;
-	}
-	// toggle start menu
-	if (key == XK_m) {
-	    if (level) {
-		level = 0;
-	    }
-	    else {
-		level = 1;
-	    }
-	}
-	//return 0;
+        if (key == XK_Escape or key == XK_q) {
+            return 1;
+        }
+        // Jump
+        if ((key == XK_w || key == XK_Up) && !isDying) {
+            if (didJump < 2 && hero->getVelocityY() > -0.5) {
+                didJump++;
+                hero->setVelocityY(7);
+            }
+        }
+        // move character left
+        if ((key == XK_a || key == XK_Left) && !isDying) {
+            hero->setVelocityX(-6);
+            lastFacing = 1;
+        }
+        // move character right
+        if ((key == XK_d || key == XK_Right) && !isDying) {
+            hero->setVelocityX(6);
+            lastFacing = 0;
+        }
+        // shooting
+        if (key == XK_space) {
+            isShooting=1;
+        }
+        // debug death
+        if (key == XK_q) {
+            life-=1000;
+        }
+        // toggle start menu
+        if (key == XK_m) {
+            if (level) {
+                level = 0;
+            }
+            else {
+                level = 1;
+            }
+        }
+        // cycle through screens for debugging
+        if (key == XK_t) {
+            frameIndex++;
+        }
+        //return 0;
     }
     else if (e->type == KeyRelease) {
 	if ((key == XK_a || key == XK_Left) && !isDying) {
@@ -466,6 +490,24 @@ int check_keys (XEvent *e, Object *hero) {
 	if (key == XK_space) {
 	    isShooting=0;
 	}
+    }
+
+    return 0;
+}
+int check_keys_menu (XEvent *e) {
+    //handle input from the keyboard
+    int key = XLookupKeysym(&e->xkey, 0);
+    if (e->type == KeyPress) {
+        if (key == XK_Escape or key == XK_q) {
+            return 1;
+        }
+        // cycle through screens for debugging
+        if (key == XK_t) {
+            frameIndex++;
+        }
+        //return 0;
+    }
+    else if (e->type == KeyRelease) {
     }
 
     return 0;
@@ -845,7 +887,7 @@ void enemyAI (Object *hero, Object *enemy) {
 	    if ((e_vy > -0.5) && (e_vy <= 0)) { // check if enemy needs to double jump
 		if (((e_vx > 0) && (e_cy < (h_ft+360)) && (e_cx < (h_fl-180))) or
 			((e_vx < 0) && (e_cy > (h_ft+360)) && (e_cx > (h_fr+180)))) {
-		    // enemy double jump to lower platform
+		    // enemy double jump to lower ground object
 		    if (enemy->getJump()<2) {
 			enemy->setVelocityY(7);
 			enemy->setJump();
@@ -928,7 +970,7 @@ void movement(Object *hero) {
     hero->setCenter( (hero->getCenterX() + hero->getVelocityX()), (hero->getCenterY() + hero->getVelocityY()));
     hero->setVelocityY( hero->getVelocityY() - GRAVITY);
     //Detect Collisions
-    for (i=0; i<platform_length; i++) {
+    for (i=0; i<grounds_length; i++) {
 	    groundCollide(hero, &grounds[i]);
     }
     // Cycle through hero index sequences
@@ -1044,7 +1086,7 @@ void movement(Object *hero) {
 	b->pos[0] += b->vel[0];
 	b->pos[1] += b->vel[1];
     
-    for (i=0;i<platform_length;i++){
+    for (i=0;i<grounds_length;i++){
         if (bulletCollide(b,&grounds[i]))
             deleteBullet(b);
     }
@@ -1072,7 +1114,7 @@ void movement(Object *hero) {
             }
 	        b = b->next;
         }
-	    for (j=0; j<platform_length; j++) {
+	    for (j=0; j<grounds_length; j++) {
 	        //Collision Detection
             groundCollide(enemies[i], &grounds[j]); 
 	    }
@@ -1082,9 +1124,89 @@ void movement(Object *hero) {
     }
 }
 
+void renderInitMenu () {
+    gettimeofday(&frameStart, NULL);
+    int frameTime = 100;
+
+    // loop through frames
+    if (diff_ms(frameStart, frameEnd) > frameTime) {
+        frameIndex++;
+        gettimeofday(&frameEnd, NULL);
+    }
+
+    if (frameIndex == 32) {
+        cout << "frame index: "<< frameIndex <<endl;
+        frameIndex = 0;
+        level = 0;
+        return;
+    }
+
+    glPushMatrix();
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
+    glEnable(GL_ALPHA_TEST);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, initTextures[frameIndex]);
+    //glAlphaFunc(GL_GREATER, 0.0f);
+    //glAlphaFunc(GL_LESS, 1.0f);
+    glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+
+    glTexCoord2f(0, 1) ; glVertex2i(-WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+    glTexCoord2f(0, 0) ; glVertex2i(-WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(1, 0) ; glVertex2i( WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(1, 1) ; glVertex2i( WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+
+    glEnd(); glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
+
+
+}
+void renderComputerScreenMenu () {
+    gettimeofday(&frameStart, NULL);
+    int frameTime = 300;
+
+    // loop through frames
+    if (diff_ms(frameStart, frameEnd) > frameTime) {
+        frameIndex++;
+        gettimeofday(&frameEnd, NULL);
+        //cout << "frame index: "<< frameIndex <<endl;
+    }
+
+    if (frameIndex == 26) {
+        frameIndex = 0;
+        level = 1;
+        return;
+    }
+
+    glPushMatrix();
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
+    glEnable(GL_ALPHA_TEST);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, computerScreenTextures[frameIndex]);
+    //glAlphaFunc(GL_GREATER, 0.0f);
+    //glAlphaFunc(GL_LESS, 1.0f);
+    glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+
+    glTexCoord2f(0, 1) ; glVertex2i(-WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+    glTexCoord2f(0, 0) ; glVertex2i(-WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(1, 0) ; glVertex2i( WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(1, 1) ; glVertex2i( WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+
+    glEnd(); glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
+
+
+}
 void renderGrounds (int x, int y) {
     // render grounds
-    for (i=0;i<platform_length;i++) {
+    for (i=0;i<grounds_length;i++) {
 	    if (inWindow(grounds[i])) {
 	        //Platform
 	        glPushMatrix();
