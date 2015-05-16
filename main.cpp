@@ -485,7 +485,7 @@ int check_keys (XEvent *e, Object *hero) {
                      else level = 1;
                      break;
       case XK_t: frameIndex++; break;
-      case XK_y: life-=1000  ; break;
+      case XK_y: testHero.setHealth(0); break;
     }
     // debug death
   }
@@ -941,6 +941,7 @@ void groundCollide (Object *obj, Object *ground) {
     if (!(obj->getOldBottom() < g_top) && !(h_bottom >= g_top) && (obj->getVelocityY() < 0)) {
       obj->setVelocityY(0);
       obj->setCenter(obj->getCenterX(), g_top+(obj->getCenterY()-h_bottom));
+      testHero.setOnGround(1);
       obj->setFloor(ground);
     }
     //If moving object is at the bottom of static object
@@ -963,93 +964,20 @@ void groundCollide (Object *obj, Object *ground) {
 
 void movement(Object *hero) {
   // Hero Apply Velocity, Add Gravity
-  hero->setOldCenter();
   testHero.setOldCenter();
-
-  hero->setCenter( (hero->getCenterX() + hero->getVelocityX()), (hero->getCenterY() + hero->getVelocityY()));
   testHero.autoSet();
 
-  hero->setVelocityY( hero->getVelocityY() - GRAVITY);
-  testHero.setVelocityY(testHero.getVelocityY() - GRAVITY);
   //Detect Collisions
+  testHero.setOnGround(0);
   for (i=0; i<platform_length; i++) {
     //groundCollide(hero, grounds[i]);
     groundCollide(hero, &var1[i]);
     groundCollide(&testHero, &var1[i]);
   }
-
   testHero.cycleAnimations();
-  // Cycle through hero index sequences
-  if (life<=0) {
-    hero->setVelocityX(0);
-    isWalking=0;
-    if (!isDying) {
-      isDying=1;
-      hero->setIndex(7);
-      gettimeofday(&seqStart, NULL);
-      fail=100;
-    }
-    else{
-      gettimeofday(&seqEnd, NULL);
-      if (((diff_ms(seqEnd, seqStart)) > 100) && (!isFalling && !isJumping)) {
-        if ((hero->getIndex()<12)) {
-          hero->setIndex(hero->getIndex()+1);
-          gettimeofday(&seqStart, NULL);
-        }
-        else{
-          if (((diff_ms(seqEnd, seqStart)) > 500)) {
-            hero->setCenter(HERO_START_X, HERO_START_Y);
-            isDying=0;
-            hero->setIndex(6);
-            life=100;
-            lives--;
-          }
-        }
-      }
-    }
-  }
-  if ((hero->getVelocityY() < -1) && !isDying) { // Falling
-    isFalling=1;
-    isJumping=isWalking=0;
-    if (didJump<1)
-      hero->setIndex(7);
-  } else if ((hero->getVelocityY() > 1) && !isDying) { // Jumping
-    isJumping=1;
-    isWalking=isFalling=0;
-    if (didJump>1)
-      hero->setIndex(0);
-    else
-      hero->setIndex(1);
-  } else if (!isDying) { // Walking
-    if (isFalling) { // Just hit ground object after fall
-      isFalling=isJumping=didJump=0; // Reset jump counter
-    }
-    if (hero->getVelocityX() < -1 or
-        hero->getVelocityX() > 1) {
-      if (!isWalking && !isJumping && !isFalling) { // Just started walking
-        isWalking=1;
-        hero->setIndex(0); // Start walk sequence
-        gettimeofday(&seqStart, NULL);
-      }
-      gettimeofday(&seqEnd, NULL);
-      if (isWalking && ((diff_ms(seqEnd, seqStart)) > 80)) { // Walk sequence
-        hero->setIndex(((hero->getIndex()+1)%6));
-        gettimeofday(&seqStart, NULL);
-        isFalling=isJumping=0;
-      }
-    } else { // Standing idle
-      isWalking=0;
-      if (!isJumping)
-        hero->setIndex(6);
-    }
-  } else if (isJumping && hero->getVelocityY() < -1) {
-    isJumping=0;
-    isFalling=1;
-  } else if (isFalling && hero->getVelocityY() > -1) {
-    isFalling=0;
-  }
-  if (!isWalking and !isFalling and !isJumping)
-    hero->setVelocityX(0); // Prevent weird floating
+
+  testHero.setVelocityY(testHero.getVelocityY() - GRAVITY);
+
   // Check for Death
   if (hero->getCenterY() < 0) {
     hero->setCenter(HERO_START_X, HERO_START_Y); // Respawn
@@ -1338,8 +1266,8 @@ void render (Object *hero) {
 }
 
 void moveWindow (Object *hero) {
-  double heroWinPosX = hero->getCenterX();
-  double heroWinPosY = hero->getCenterY();
+  double heroWinPosX = testHero.getCenterX();
+  double heroWinPosY = testHero.getCenterY();
 
   //move window forward
   if ((heroWinPosX > roomX + interval) && ((roomX+WINDOW_HALF_WIDTH)<LEVEL_WIDTH-6)) {

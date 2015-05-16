@@ -10,7 +10,10 @@ class Player: public Object, public Sprite{
     int maxSpeed, speed;
 
     int index;
+    int once;
+    bool grounded;
     bool cycleStop;
+
 
     timeval seqStart, seqEnd;
 
@@ -24,8 +27,13 @@ class Player: public Object, public Sprite{
     void stop();
     void jumpRefresh();
 
+    void setHealth(int take);
+    int getHealth();
+
     void drawBox();
     void cycleAnimations();
+    void setOnGround(bool take);
+    bool onGround();
 
     int diff_ms (timeval t1, timeval t2);
 };
@@ -57,28 +65,69 @@ void Player::stop(){
   Object::velocity.x = 0;
 }
 void Player::jumpRefresh(){ 
-  if(Player::velocity.x == 0) jumps = 0; 
+  if(Player::getVelocityX() == 0) jumps = 0; 
+}
+
+bool Player::onGround(){
+  return grounded;
+}
+
+void Player::setOnGround(bool take){
+ grounded = take;
+}
+
+//==============================================
+//Stats Functions
+//==============================================
+void Player::setHealth(int take){
+  health = take;
+}
+
+int Player::getHealth(){
+  return health;
 }
 //===============================================
 //Drawing Functions
-//===============================================
+//===============================================/
+//    Note: This is a Prototype -
+//            I will add more control over the sprites
+//
+//        : when you make a new Animation State Remember
+//            Once = 0;// this will reset the starting timer/
+//       Right Now There Are 13 sprites in 1 sheet
 void Player::cycleAnimations(){
-  //Right Now There Are 13
-  if(cycleStop == 1) return;
-  if(health == 0){
- 
-  }
-  else if(Object::getVelocityY() > 0){
-    index = 8; 
-  }
-  else if(Object::getVelocityX() != 0){
-    if(index < 7) index++;
-    else index = 0;
-  }
-  else index = 0; 
+  //Start Timer
+  if(once == 0){ gettimeofday(&seqStart, NULL); once = 1 ;}
+  gettimeofday(&seqEnd, NULL);
 
-  //if(index < 13) index++;
-  //else index = 0;
+  //Death
+  if(getHealth() == 0){
+    if(diff_ms(seqEnd, seqStart) > 180){
+      if(index == 12) return;
+      if(index < 7) index = 7;
+      index++; once = 0;
+    }
+  }
+  //Jumping
+  else if(Object::getVelocityY() > 0){
+    index = 1;
+  }
+  //Failing
+  else if(Object::getVelocityY() < 0){ //&& !onGround() ){
+    std::cout << "Falling\n";
+    index = 1; return;
+  }
+  //Walking/Running
+  else if(Object::getVelocityX() != 0){
+    if(diff_ms(seqEnd, seqStart) > 80){
+      std::cout << "Walking\n";
+      index++; 
+      if(index >= 6) index = 0;
+      once = 0;
+    }
+  }
+  //Standing
+  else index = 6;
 }
 
 void Player::drawBox(){
