@@ -129,9 +129,12 @@ void Sprite::drawTile(int atSet){
   atY = (int)(atSet/row);
 
   glPushMatrix();
+  glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, texture);
   glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_LESS, 1.0f);
+  //glAlphaFunc(GL_LESS, 1.0f);
+  glAlphaFunc(GL_GREATER, 0.0f);
+
   glColor4ub(255,255,255,255);
   glBegin(GL_QUADS);
   int w = clipWidth;
@@ -143,6 +146,7 @@ void Sprite::drawTile(int atSet){
   glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
 
   glEnd(); glPopMatrix();
+  glDisable(GL_TEXTURE_2D);
   glDisable(GL_ALPHA_TEST);
 }
 

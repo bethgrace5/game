@@ -61,7 +61,7 @@ class Object{
         // TODO: create destructor
         //~Object(){ delete [] ground;}
 
-    private:
+    protected:
         int width;
         int height;
         int top, bottom, left, right;
