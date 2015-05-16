@@ -33,7 +33,7 @@
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 
 // 1 for quick load, 0 for slow load with menu images
-#define QUICK_LOAD_TIME 1
+#define QUICK_LOAD_TIME 0
 
 #define MAX_BACKGROUND_BITS 6000
 #define HERO_START_X 150
@@ -116,7 +116,7 @@ Ppmimage *heroImage=NULL;
 GLuint heroTexture;
 
 Ppmimage *initImages[32];
-GLuint initTextures[32];
+GLuint initTextures[65];
 
 Ppmimage *computerScreenImages[26];
 GLuint computerScreenTextures[26];
@@ -142,6 +142,7 @@ void renderHero(Object *hero, int x, int y);
 void renderInitMenu();
 void renderComputerScreenMenu();
 void makePlatform(int i, int w, int h, int x, int y); 
+void highlightBox(int x, int y);
 Object createAI( int w, int h, Object *ground);
 
 void groundCollide(Object *obj, Object *ground);
@@ -220,13 +221,15 @@ int main(void) {
 	while (XPending(dpy)) {
 	    //Player User Interfaces
 	    XEvent e; XNextEvent(dpy, &e);
-	    //check_mouse(&e);
+        // the menu is showing. accept mouse events
+        if (level == 0) {
+            XNextEvent(dpy, &e);
+            check_mouse(&e);
+        }
 	    quit = check_keys(&e, &hero);
 	}
 	if (level == -1) {
 	    renderInitMenu();
-	    //check_mouse(&e);
-    // level = check_keys_menu(&e);
 	}
     else if (level == 0) {
         renderComputerScreenMenu();
@@ -363,6 +366,28 @@ void init_opengl (void) {
         }
         delete [] menuData;
 
+        // repeat blinking dot for several frames
+        // frame 30 has no dot, frame 31 has a dot
+
+        initTextures[32] = initTextures[30];
+        initTextures[33] = initTextures[30];
+
+        // repeat dot blinking frames in initialization sequence
+        // by repeating frames that have already been loaded
+        // after 4 iterations, add 5
+        int offset = 1;
+        for (int i=34; i<65; i++) {
+            initTextures[i] = initTextures[30];
+            initTextures[i+4] = initTextures[31];
+            if( offset == 4 ){
+                i+=4;
+                offset = 0;
+            }
+            offset++;
+        }
+        initTextures[31] = initTextures[30];
+
+
         // load blinking computer screens
         unsigned char *computerData;
         glGenTextures(26, computerScreenTextures);
@@ -407,26 +432,6 @@ void init_opengl (void) {
     makePlatform(17, 200, 16, 300, 200);
     makePlatform(18, 20, 1000, -16, 600);
 
-    // FIXME there are 40 image files, but currently only 1/3 of them work, the others
-    // are all the same image
-    /*
-       for (int q=0; q<12; q++) {
-       fileName = "./images/menuScreen";
-       fileName += itos(q);
-       fileName += ".ppm";
-       cout << "loading file: " <<fileName <<endl;
-       menuImage[q] = ppm6GetImage(fileName.c_str());
-
-       glBindTexture(GL_TEXTURE_2D, menuTexture[q]);
-       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-       menuData = buildAlphaData(menuImage[q]);
-       w = menuImage[q]->width;
-       h = menuImage[q]->height;
-       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
-       }
-       delete [] menuData;
-       */
 }
 
 void makePlatform(int i, int w, int h, int x, int y) {
@@ -436,28 +441,34 @@ void makePlatform(int i, int w, int h, int x, int y) {
     var1[i].setupTile();
 
 }
+void highlightBox(int x, int y) {
+    cout << "x: " << x << "y: " << y <<endl;
+}
 
 void check_mouse (XEvent *e) {
+    // the menu is showing
     static int savex = 0, savey = 0;
     //static int n = 0;
     if (e->type == ButtonRelease) { return;}
     if (e->type == ButtonPress) {
-	if (e->xbutton.button==1) { //Left button was pressed
-	    //int y = WINDOW_HEIGHT - e->xbutton.y;
-	    return;
-	}
-	if (e->xbutton.button==3) { //Right button was pressed
-	    return;
-	}
+    if (e->xbutton.button==1) { //Left button was pressed
+        //int y = WINDOW_HEIGHT - e->xbutton.y;
+        highlightBox(e->xbutton.x, e->xbutton.y);
+        return;
     }
     if (e->xbutton.button==3) { //Right button was pressed
-	return;
+        return;
+    }
+    }
+    if (e->xbutton.button==3) { //Right button was pressed
+    return;
     }
 
     //Did the mouse move?
     if (savex != e->xbutton.x || savey != e->xbutton.y) {
-	savex = e->xbutton.x; //xpast = savex;
-	savey = e->xbutton.y; //ypast = savey;
+        savex = e->xbutton.x; //xpast = savex;
+        savey = e->xbutton.y; //ypast = savey;
+
     }
 }
 
@@ -505,6 +516,7 @@ int check_keys (XEvent *e, Object *hero) {
         // cycle through screens for debugging
         if (key == XK_t) {
             frameIndex++;
+            cout << frameIndex <<endl;
         }
         //return 0;
     }
@@ -1133,7 +1145,7 @@ void movement(Object *hero) {
 
 void renderInitMenu () {
     gettimeofday(&frameStart, NULL);
-    int frameTime = 100;
+    int frameTime = 150;
 
     // loop through frames
     if (diff_ms(frameStart, frameEnd) > frameTime) {
@@ -1141,8 +1153,7 @@ void renderInitMenu () {
         gettimeofday(&frameEnd, NULL);
     }
 
-    if (frameIndex == 32) {
-        cout << "frame index: "<< frameIndex <<endl;
+    if (frameIndex == 65) {
         frameIndex = 0;
         level = 0;
         return;
@@ -1179,13 +1190,11 @@ void renderComputerScreenMenu () {
     if (diff_ms(frameStart, frameEnd) > frameTime) {
         frameIndex++;
         gettimeofday(&frameEnd, NULL);
-        //cout << "frame index: "<< frameIndex <<endl;
     }
 
     if (frameIndex == 26) {
+        // reset frame sequence
         frameIndex = 0;
-        level = 1;
-        return;
     }
 
     glPushMatrix();
