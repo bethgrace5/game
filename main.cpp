@@ -15,11 +15,16 @@
 #include "ppm.h"
 #include <sstream>
 #include <algorithm>
-//#include "fastFont.h"
-#include "tedP.cpp"
-#include "cdanner.cpp"
 #include "Sprite.cpp"
 
+//#include "fastFont.h"
+#include "tedP.cpp"
+
+//Platforms/Grounds
+#include "cdanner.cpp"
+
+//Enemies
+#include "bsingenstrew.cpp"
 
 #define WINDOW_WIDTH 900
 #define WINDOW_HEIGHT 600
@@ -100,7 +105,8 @@ int frameIndex=0;
 string str = "";
 bgBit *bitHead = NULL;
 Bullet *bhead = NULL;
-Object *enemies[32] = {NULL};
+Enemy *enemies[32];
+Platform grounds[MAX_GROUNDS];
 int bg, bullets, grounds_length, enemies_length,  i, j, level=-1;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
@@ -112,13 +118,10 @@ int quit=0;
 //Images and Textures
 Ppmimage *heroImage=NULL;
 GLuint heroTexture;
-
 Ppmimage *menuImage[40];
 GLuint menuTexture[40];
-Platform grounds[MAX_GROUNDS];
 Ppmimage *initImages[32];
 GLuint initTextures[32];
-
 Ppmimage *computerScreenImages[26];
 GLuint computerScreenTextures[26];
 
@@ -142,6 +145,7 @@ void renderHero(Object *hero, int x, int y);
 void renderInitMenu();
 void renderComputerScreenMenu();
 void makePlatform(int i, int w, int h, int x, int y); 
+void makeEnemy(int w, int h, Object *ground, int type); 
 Object createAI( int w, int h, Object *ground);
 
 void groundCollide(Object *obj, Object *ground);
@@ -166,16 +170,23 @@ int main(void) {
     hero.setRight(26);
     
     //setup enemies
-    Object enemy_0 = createAI(20, 48, &grounds[0]);
-    Object enemy_1 = createAI(20, 48, &grounds[1]);
-    Object enemy_2 = createAI(20, 48, &grounds[2]);
-    Object enemy_3 = createAI(20, 48, &grounds[3]);
+    //Object enemy_0 = createAI(20, 48, &grounds[0]);
+    //Object enemy_1 = createAI(20, 48, &grounds[1]);
+    //Object enemy_2 = createAI(20, 48, &grounds[2]);
+    //Object enemy_3 = createAI(20, 48, &grounds[3]);
 
-    enemies[0] = &enemy_0;
-    enemies[1] = &enemy_1;
-    enemies[2] = &enemy_2;
-    enemies[3] = &enemy_3;
-    enemies_length=4;
+    //enemies[0] = &enemy_0;
+    //enemies[1] = &enemy_1;
+    //enemies[2] = &enemy_2;
+    //enemies[3] = &enemy_3;
+    //enemies_length=4;
+    //
+    //
+
+
+
+
+
     level = 1;
     frameIndex = 0;
 
@@ -376,6 +387,9 @@ void init_opengl (void) {
 
     grounds_length=19;
 
+    makeEnemy(20, 48, &grounds[1], 1);
+
+
     // FIXME there are 40 image files, but currently only 1/3 of them work, the others
     // are all the same image
    /* 
@@ -405,6 +419,16 @@ void makePlatform(int i, int w, int h, int x, int y) {
     grounds[i].init(w, h, x, y);
     grounds[i].setupTile();
 
+}
+
+void makeEnemy(int w, int h, Object *ground, int type) {
+    enemies[enemies_length] = new Enemy(w, h, ground); 
+    enemies[enemies_length]->insert("./images/enemy1.ppm", 1, 1);
+    cout << "enemy created: " << enemies[enemies_length] << endl;
+    cout << enemies[enemies_length]->getCenterX();
+    cout << ", " << enemies[enemies_length]->getCenterY();
+    cout << endl;
+    enemies_length++;
 }
 
 void check_mouse (XEvent *e) {
