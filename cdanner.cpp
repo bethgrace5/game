@@ -6,6 +6,9 @@
 #include "ppm.h"
 #include "Object.h"
 #include "Sprite.h"
+
+// change to 1 to show console output
+#define SHOW_CONSOLE_OUTPUT 0
 //=====================================================================
 //  Platform
 //=====================================================================
@@ -47,9 +50,11 @@ Platform::Platform() : Sprite(), Object(260, 200, 350, 400) {
 
 void Platform::setupTile() {
   //Setup Object to match with tile rows
-  std::cout << "===================================================\n";
-  std::cout << "Platform Size = " << Object::getWidth() << " , "
-    << Object::getHeight() << "\n"; 
+  if (SHOW_CONSOLE_OUTPUT) {
+      std::cout << "===================================================\n";
+      std::cout << "Platform Size = " << Object::getWidth() << " , "
+        << Object::getHeight() << "\n"; 
+  }
 
   //The Object Will Allocate to fit with the tile
   int widthSize;
@@ -64,14 +69,17 @@ void Platform::setupTile() {
 
   Object::init(widthSize, heightSize, Object::getCenterX(), Object::getCenterY());  
 
-  std::cout << "Clip Size = " << Sprite::getClipWidth() << " , " 
-    << Sprite::getClipHeight() << "\n";
+  if (SHOW_CONSOLE_OUTPUT) {
 
-  std::cout << "Platform Size = " << Object::getWidth() << " , "
-    << Object::getHeight() << "\n"; 
+      std::cout << "Clip Size = " << Sprite::getClipWidth() << " , " 
+        << Sprite::getClipHeight() << "\n";
 
-  std::cout << "Total tiles inside that fit side "
-    << Object::getWidth()/Sprite::getClipWidth()  << std::endl;
+      std::cout << "Platform Size = " << Object::getWidth() << " , "
+        << Object::getHeight() << "\n"; 
+
+      std::cout << "Total tiles inside that fit side "
+        << Object::getWidth()/Sprite::getClipWidth()  << std::endl;
+  }
 
   saveLineSpace();
 }
