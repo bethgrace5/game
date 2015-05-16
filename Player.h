@@ -53,16 +53,16 @@ Player::Player() : Object(26, 44, 250, 250), Sprite(){
 //Movement Functions
 //===============================================
 void Player::moveRight(){ 
-  Object::velocity.x = maxSpeed;
+  Object::setVelocityX(maxSpeed);
 }
 void Player::moveLeft(){
-  Object::velocity.x = (-maxSpeed);
+  Object::setVelocityX(-maxSpeed);
 }
 void Player::jump(){
-  if(jumps < jumpLimit) Object::velocity.y = jumpPower;
+  if(jumps < jumpLimit) Object::setVelocityY(jumpPower);
 }
 void Player::stop(){
-  Object::velocity.x = 0;
+  Object::setVelocityX(0);
 }
 void Player::jumpRefresh(){ 
   if(Player::getVelocityX() == 0) jumps = 0; 

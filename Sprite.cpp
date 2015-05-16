@@ -97,16 +97,15 @@ void Sprite::replaceTexture(GLuint take){
 void Sprite::drawTile(int row, int column){
   //Need to check if 0;
   int atX = row; int atY = column;
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_LESS, 1.0f);
 
   glPushMatrix();
   glEnable(GL_TEXTURE_2D);
-
   glBindTexture(GL_TEXTURE_2D, texture);
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_LESS, 1.0f);
   glColor4ub(255,255,255,255);
   glBegin(GL_QUADS);
-  int  w = clipWidth;
+  int w = clipWidth;
   int h = clipHeight;
 
   glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
@@ -118,11 +117,18 @@ void Sprite::drawTile(int row, int column){
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_ALPHA_TEST);
 }
+/*
+void Sprite::drawTile(int atSet){
+  int atX = atSet, atY = 0;
+  atX = atSet % row;
+  atY = (int)(atSet/row);
+  
+  drawTile(atX, atY);
+}*/
 
 //This Draws a tile base on line # base on below example
 // 1  2  3  4  5  6  7
 // 8  9  10 11 12 13 14
-//
 void Sprite::drawTile(int atSet){
   int atX = atSet, atY = 0;         
   atX = atSet % row;
@@ -171,7 +177,6 @@ int Sprite::getClipHeight(){
 int Sprite::getClipWidth(){
   return clipWidth;
 }
-
 //=====================================================================
 //Function Aid
 //=====================================================================
