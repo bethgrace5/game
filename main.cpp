@@ -32,7 +32,8 @@
 #define WINDOW_HALF_HEIGHT WINDOW_HEIGHT/2
 #define LEVEL_WIDTH 10000
 #define MAX_HEIGHT 1200
-#define MAX_GROUNDS 32
+#define MAX_GROUNDS 100
+#define MAX_ENEMIES 100
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 
 // 1 for quick load, 0 for slow load with menu images
@@ -98,7 +99,7 @@ int frameIndex=0;
 string str = "";
 bgBit *bitHead = NULL;
 Bullet *bhead = NULL;
-Enemy *enemies[32];
+Enemy *enemies[MAX_ENEMIES];
 Object *hero; // Class Player
 Platform *grounds[MAX_GROUNDS];
 int bg, bullets, grounds_length, enemies_length,  i, j, level=-1;
@@ -338,9 +339,31 @@ void init_opengl (void) {
     makePlatform(200, 16, 300, 200);
     makePlatform(20, 1000, -16, 600);
 
+    //for (i=0;i<=100;i++){
+    makeEnemy(37, 80, grounds[2], 1);
+    //}
     makeEnemy(37, 80, grounds[2], 1);
     makeEnemy(37, 80, grounds[2], 1);
     makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
+    makeEnemy(37, 80, grounds[2], 1);
     makeEnemy(37, 80, grounds[3], 1);
     makeEnemy(37, 80, grounds[3], 1);
     makeEnemy(37, 80, grounds[3], 1);
@@ -351,6 +374,19 @@ void init_opengl (void) {
     makeEnemy(37, 80, grounds[3], 1);
     makeEnemy(37, 80, grounds[3], 1);
     makeEnemy(37, 80, grounds[3], 1);
+    makeEnemy(37, 80, grounds[4], 1);
+    makeEnemy(37, 80, grounds[4], 1);
+    makeEnemy(37, 80, grounds[4], 1);
+    makeEnemy(37, 80, grounds[4], 1);
+    makeEnemy(37, 80, grounds[4], 1);
+    makeEnemy(37, 80, grounds[4], 1);
+    makeEnemy(37, 80, grounds[4], 1);
+    makeEnemy(37, 80, grounds[4], 1);
+    makeEnemy(37, 80, grounds[4], 1);
+    makeEnemy(37, 80, grounds[4], 1);
+    makeEnemy(37, 80, grounds[4], 1);
+    makeEnemy(37, 80, grounds[4], 1);
+    makeEnemy(37, 80, grounds[4], 1);
 
 
     // FIXME there are 40 image files, but currently only 1/3 of them work, the others
@@ -386,18 +422,23 @@ void makePlatform(int w, int h, int x, int y) {
 }
 
 void makeEnemy(int w, int h, Object *ground, int type) {
-    switch (type){
-        case 1:
-            enemies[enemies_length] = new Enemy(w, h, ground); 
-            enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
-            enemies[enemies_length]->setBottom(-44);
-            enemies[enemies_length]->setLeft(-24);
-            enemies[enemies_length]->setRight(24);
-            enemies[enemies_length]->setTop(24);
-            enemies[enemies_length]->setHeight(25);
-            break;
+    if (enemies_length<MAX_ENEMIES){
+        switch (type){
+            case 1:
+                enemies[enemies_length] = new Enemy(w, h, ground); 
+                enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
+                enemies[enemies_length]->setBottom(-44);
+                enemies[enemies_length]->setLeft(-24);
+                enemies[enemies_length]->setRight(24);
+                enemies[enemies_length]->setTop(24);
+                enemies[enemies_length]->setHeight(25);
+                break;
+        }
+        enemies_length++;
     }
-    enemies_length++;
+    else{
+        cout << "Enemies array full!!!!" << endl;
+    }
 }
 
 void check_mouse (XEvent *e) {
@@ -717,7 +758,7 @@ void movement() {
             //Collision Detection
             groundCollide(enemies[i], grounds[j]); 
         }
-        if (enemies[i]->life<=0 or enemies[i]->getCenterY()<0){
+        if ((enemies[i]->isDead) or enemies[i]->getCenterY()<0){
             deleteEnemy(i);
         }
     }
@@ -1030,11 +1071,19 @@ void deleteBullet(Bullet *node) {
 }
 
 void deleteEnemy(int ind){
+    enemies_length--;
+    delete enemies[i];
+    enemies[i] = enemies[enemies_length];
+    enemies[enemies_length]=NULL;
+
+/*
     for (i=ind;i<enemies_length;i++){
-        enemies[i]=(i==enemies_length?NULL:enemies[i+1]);
+        enemies[i]=(i==(MAX_ENEMIES-1)?NULL:enemies[i+1]);
+        cout << "e[" << i << "] = " << (i==(MAX_ENEMIES-1)?NULL:enemies[i+1]);
     } 
     enemies_length--;
     cout << "deleted enemy, count : " << enemies_length << endl;
+    */
 }
 
 void cleanup_background(void) {

@@ -30,6 +30,7 @@ void Object::init( double w, double h, double x, double y ) {
     isWalking=0;
     isShooting=0;
     isDying=0;
+    isDead=0;
 }
 
 void Object::autoSet(){

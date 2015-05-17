@@ -26,7 +26,6 @@ class Enemy : public Sprite, public Object {
         timeval sStart, sEnd;
 
     public:
-        int life;
         Enemy(int w, int h, Object *ground);
         void enemyAI(Object *hero);
         void draw();
@@ -37,7 +36,7 @@ Enemy::Enemy(int w, int h, Object *ground) : Sprite(), Object (w, h, ground->get
     life=100;
     fire_rate=220;
     frame_rate=100;
-    gettimeofday(&fEnd, NULL);
+    gettimeofday(&fStart, NULL);
 
 }
 
@@ -443,16 +442,35 @@ void Enemy::enemyAI (Object *hero) {
             }
         }
     }
-    cout << str << endl;
+    //cout << str << endl;
+    if (Object::life<=0 && !(Object::isDying)){
+        Object::isDying=1;
+        Sprite::setIndex(21);
+        gettimeofday(&fStart, NULL);
+    }
+    if (Object::isDying){
+        gettimeofday(&fEnd, NULL);
+        if (diff_ms(fEnd, fStart)>frame_rate){
+            int tmp = (Sprite::getIndex()+1);
+            if (tmp<26){
+                Sprite::setIndex(tmp);
+            }
+            else{
+                Object::isDead=1;
+            }
+            gettimeofday(&fStart, NULL);
+        }
+    }
+    else{
+        gettimeofday(&fEnd, NULL);
+        if (diff_ms(fEnd, fStart)>frame_rate){
+            Sprite::setIndex(((Sprite::getIndex()+1)%8)+(Object::getAggro()?8:0));
+            gettimeofday(&fStart, NULL);
+        }
+    }
 }
 
 void Enemy::draw() {
-    gettimeofday(&fEnd, NULL);
-    if (diff_ms(fEnd, fStart)>frame_rate){
-        Sprite::setIndex(((Sprite::getIndex()+1)%8)+(Object::getAggro()?8:0));
-        gettimeofday(&fStart, NULL);
-    }
-
     float w, h;
     glPushMatrix();
     glTranslatef(Object::getCenterX(), Object::getCenterY(), 0); 

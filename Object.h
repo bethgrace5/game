@@ -58,7 +58,7 @@ class Object{
         void setFloor(Object *obj);
         Object *getFloor();
         
-        int isJumping, isFalling, isDying, isWalking, isShooting;
+        int isJumping, isFalling, isDying, isWalking, isShooting, isDead;
 
         Object( double w, double h, double x, double y);
         void init(double w, double h, double x, double y);
