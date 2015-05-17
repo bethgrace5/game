@@ -387,7 +387,12 @@ void init_opengl (void) {
 
     grounds_length=19;
 
-    makeEnemy(10, 24, &grounds[1], 1);
+    makeEnemy(37, 80, &grounds[2], 1);
+    makeEnemy(37, 80, &grounds[2], 1);
+    makeEnemy(37, 80, &grounds[2], 1);
+    makeEnemy(37, 80, &grounds[1], 1);
+    makeEnemy(37, 80, &grounds[1], 1);
+    makeEnemy(37, 80, &grounds[1], 1);
 
 
     // FIXME there are 40 image files, but currently only 1/3 of them work, the others
@@ -422,12 +427,17 @@ void makePlatform(int i, int w, int h, int x, int y) {
 }
 
 void makeEnemy(int w, int h, Object *ground, int type) {
-    enemies[enemies_length] = new Enemy(w, h, ground); 
-    enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
-    enemies[enemies_length]->init(w, h, 
-            enemies[enemies_length]->getCenterX(),
-            enemies[enemies_length]->getCenterY());
-    //enemies[enemies_length]->setupTile(); 
+    switch (type){
+        case 1:
+            enemies[enemies_length] = new Enemy(w, h, ground); 
+            enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
+            enemies[enemies_length]->setBottom(-40);
+            enemies[enemies_length]->setLeft(-24);
+            enemies[enemies_length]->setRight(24);
+            enemies[enemies_length]->setTop(24);
+            enemies[enemies_length]->setHeight(25);
+            break;
+    }
     enemies_length++;
 }
 
@@ -542,7 +552,7 @@ void enemyAI (Object *enemy) {
     Object *h_f = hero->getFloor();
     string old = str;
     str = "";
-    if (!h_f) {
+    if (!h_f or !enemy){
         return;
     }
     str += "enemy " + itos(enemy) + " ";
@@ -558,6 +568,10 @@ void enemyAI (Object *enemy) {
     float e_vx=enemy->getVelocityX();
     float e_vy=enemy->getVelocityY();
 
+    enemy->setOldCenter();
+    enemy->setCenter((e_cx + e_vx),(e_cy + e_vy));
+    enemy->setVelocityY(e_vy - GRAVITY);
+
     if (e_f && h_f) { // If enemy is not mid jump
         float e_fl=e_f->getLeft();
         float e_ft=e_f->getTop();
@@ -567,11 +581,13 @@ void enemyAI (Object *enemy) {
         int h_above = (d_y<0)?10:0;
         int h_right = (d_x<0)?1:0;
         int range=(enemy->getAggro())?800:400;
-        int h_close = (((d_x*d_x)+(d_y*d_y)<(range*range) && !isDying)?(((d_x*d_x)+(d_y*d_y)<(200*200))?2:1):0);
+        int rnd_tmp = (rnd()*100)+150;
+        int h_close = (((d_x*d_x)+(d_y*d_y)<(range*range) && !isDying)?(((d_x*d_x)+(d_y*d_y)<(rnd_tmp*rnd_tmp))?2:1):0);
         int h_dir = h_above+h_right;
         if (!isJumping and !isFalling)
             h_dir+=((h_f==e_f)?100:0);
-        str += "[DIR: " + itos(h_dir) + "]";
+        str += "[DIR: " + itos(h_dir) + "] [" + itos(h_close) + "]";
+        str += "{" + itos(enemy->getVelocityX()) + "}";
         // If enemy is within 200px & not dead: 2; within 400px: 1; else: 0
         switch (h_close) {
             case 2: // hero close range
@@ -861,7 +877,7 @@ void enemyAI (Object *enemy) {
             }
         }
     }
-    else if (h_f) { // enemy is mid jump
+    else if (h_f && enemy->getAggro()) { // enemy is mid jump
         if (e_vx==0) {
             if ((e_vy > -0.5) &&
                     (e_vy <= 0)) {
@@ -1077,7 +1093,7 @@ void movement() {
         isDying=0;
     }
 
-    //Bullets
+    //Bullet creation
     Bullet *b;
     if (isShooting){
         gettimeofday(&fireEnd, NULL);
@@ -1103,7 +1119,7 @@ void movement() {
         }
     }
 
-    //bullets
+    //bullet collisions
     b = bhead;
     while (b) {
         //move the bullet
@@ -1124,11 +1140,6 @@ void movement() {
     // Enemy movement, enemy ai
     for (i=0;i<enemies_length;i++) {
         enemyAI(enemies[i]); //Where does enemy go?
-        enemies[i]->setOldCenter();
-        enemies[i]->setCenter( //Apply Physics
-                (enemies[i]->getCenterX() + enemies[i]->getVelocityX()),
-                (enemies[i]->getCenterY() + enemies[i]->getVelocityY()));
-        enemies[i]->setVelocityY( enemies[i]->getVelocityY() - GRAVITY);
         //bullets
         b = bhead;
         while (b) {
@@ -1248,6 +1259,7 @@ void renderEnemies (int x, int y) {
             glTranslatef(- x, - y, 0);
             enemies[i]->draw();
             glEnd(); glPopMatrix();
+
         }
     }
 }

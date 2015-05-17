@@ -52,6 +52,7 @@ class Sprite{
     //Outter Functions
     void drawFont(int atSet);
     void drawTile(int row, int column);
+    void drawTile(int row, int column, int w, int h);
     void drawTile(int atSet);
     void drawSequence();
     void replaceTexture(GLuint take);

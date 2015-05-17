@@ -1,6 +1,7 @@
 #include "ppm.h"
 #include "Object.h"
 #include "Sprite.h"
+#define rnd()(float)rand() /(float)(RAND_MAX)
 //=====================================================================
 //  Enemies
 //=====================================================================
@@ -24,7 +25,7 @@ class Enemy : public Sprite, public Object {
 
 };
 
-Enemy::Enemy(int w, int h, Object *ground) : Sprite(), Object (w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h) {
+Enemy::Enemy(int w, int h, Object *ground) : Sprite(), Object (w, h, ground->getCenterX()+rnd() * ground->getWidth() * (rnd()>.5?-1:1), ground->getCenterY() + ground->getHeight() + h) {
     life=100;
     //return newEnemy;
 }
@@ -37,7 +38,7 @@ void Enemy::draw() {
     glTranslatef(Object::getCenterX(), Object::getCenterY(), 0); 
     w = Object::getWidth();
     h = Object::getHeight();
-
+/*
     glBegin(GL_QUADS);
     glVertex2i(-w, -h);
     glVertex2i(-w, h);
@@ -45,11 +46,11 @@ void Enemy::draw() {
     glVertex2i( w,-h);
     glEnd();
     glPopMatrix();
-
+*/
     //This Will Draw The TileSet based on the Boundaries of Object
-    glPushMatrix();
-    glTranslatef(Object::getLeft(), Object::getCenterY(), 0); 
+    //glPushMatrix();
+    //glTranslatef(Object::getLeft(), Object::getCenterY(), 0); 
 
-    Sprite::drawTile(0,0);
+    Sprite::drawTile(Object::getIndex(), 0, w, h);
     glPopMatrix(); 
 }

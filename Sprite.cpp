@@ -103,11 +103,34 @@ void Sprite::drawTile(int row, int column){
 
   glBindTexture(GL_TEXTURE_2D, texture);
   glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_LESS, 1.0f);
+  glAlphaFunc(GL_GREATER, 0.0f);
   glColor4ub(255,255,255,255);
   glBegin(GL_QUADS);
   int  w = clipWidth;
   int h = clipHeight;
+
+  glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
+  glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
+  glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
+  glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
+
+  glEnd(); glPopMatrix();
+  glDisable(GL_TEXTURE_2D);
+  glDisable(GL_ALPHA_TEST);
+}
+
+void Sprite::drawTile(int row, int column, int w, int h){
+  //Need to check if 0;
+  int atX = row; int atY = column;
+
+  glPushMatrix();
+  glEnable(GL_TEXTURE_2D);
+
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_GREATER, 0.0f);
+  glColor4ub(255,255,255,255);
+  glBegin(GL_QUADS);
 
   glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
   glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
