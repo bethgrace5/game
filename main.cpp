@@ -941,7 +941,10 @@ void groundCollide (Object *obj, Object *ground) {
     if (!(obj->getOldBottom() < g_top) && !(h_bottom >= g_top) && (obj->getVelocityY() < 0)) {
       obj->setVelocityY(0);
       obj->setCenter(obj->getCenterX(), g_top+(obj->getCenterY()-h_bottom));
-      testHero.setOnGround(1);
+
+      //This Needs to be Changed vvvvvvvvvvvvv
+      testHero.setOnGround(1); testHero.jumpRefresh();
+      //-----^^^^^^
       obj->setFloor(ground);
     }
     //If moving object is at the bottom of static object
@@ -1029,7 +1032,7 @@ void movement(Object *hero) {
 
   // Enemy movement, enemy ai
   for (i=0;i<enemies_length;i++) {
-    enemyAI(hero, enemies[i]); //Where does enemy go?
+    enemyAI(&testHero, enemies[i]); //Where does enemy go?
     enemies[i]->setOldCenter();
     enemies[i]->setCenter( //Apply Physics
         (enemies[i]->getCenterX() + enemies[i]->getVelocityX()),

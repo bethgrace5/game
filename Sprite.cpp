@@ -20,6 +20,7 @@ Sprite::Sprite(){
   imageHeight = 0;
   imageWidth = 0;
   tileAt = 0;
+  mirror = 0;
 }
 
 void Sprite::insert(const char *filename, int x, int y){
@@ -60,8 +61,8 @@ void Sprite::initSprite(){
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
 
- // glEnable (GL_BLEND);
- // glBlendFunc (GL_ONE, GL_ONE);
+  // glEnable (GL_BLEND);
+  // glBlendFunc (GL_ONE, GL_ONE);
   // glEnable(GL_BLEND);
   // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
   //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -80,6 +81,13 @@ void Sprite::replaceTexture(GLuint take){
   //... but this function is not well defined yet
   texture = take;
 }
+
+void Sprite::setMirror(bool take){
+  mirror = take;
+}
+bool Sprite::checkMirror(){
+  return mirror; 
+}
 //=====================================================================
 //Outter Functions
 //=====================================================================
@@ -93,115 +101,128 @@ void Sprite::replaceTexture(GLuint take){
 //   1 # # # #
 //   2 # # # #
 //   3 # # # #
-//
-void Sprite::drawTile(int row, int column){
-  //Need to check if 0;
-  int atX = row; int atY = column;
+
+//Draws TitleSet
+void Sprite::drawTilePure(int atSet){
+  int atX = atSet;
+  int atY = 0;
+  atX = atSet % row;
+  atY = (int)(atSet/row);
+
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_LESS, 1.0f);
-
-  glPushMatrix();
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, texture);
-  glColor4ub(255,255,255,255);
-  glBegin(GL_QUADS);
-  int w = clipWidth;
-  int h = clipHeight;
-
-  glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
-  glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
-  glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
-  glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
-
-  glEnd(); glPopMatrix();
-  glDisable(GL_TEXTURE_2D);
+  Sprite::drawingTile(atX, atY);
   glDisable(GL_ALPHA_TEST);
 }
-/*
-void Sprite::drawTile(int atSet){
-  int atX = atSet, atY = 0;
-  atX = atSet % row;
-  atY = (int)(atSet/row);
-  
-  drawTile(atX, atY);
-}*/
 
-//This Draws a tile base on line # base on below example
-// 1  2  3  4  5  6  7
-// 8  9  10 11 12 13 14
-void Sprite::drawTile(int atSet){
-  int atX = atSet, atY = 0;         
-  atX = atSet % row;
-  atY = (int)(atSet/row);
-
-  glPushMatrix();
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, texture);
+void Sprite::drawTilePure(int x, int y){
   glEnable(GL_ALPHA_TEST);
-  //glAlphaFunc(GL_LESS, 1.0f);
-  glAlphaFunc(GL_GREATER, 0.0f);
+  glAlphaFunc(GL_LESS, 1.0f);
+  Sprite::drawingTile(x, y);
+  glDisable(GL_ALPHA_TEST);
+}
 
+void Sprite::drawTile(int atSet){
+  int atX = atSet;
+  int atY = 0;
+  atX = atSet % row;
+  atY = (int)(atSet/row);
+
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_GREATER, 0.0f);
+  Sprite::drawingTile(atX, atY);
+  glDisable(GL_ALPHA_TEST);
+}
+
+void Sprite::drawTile(int x, int y){
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_GREATER, 0.0f);
+  Sprite::drawingTile(x, y);
+  glDisable(GL_ALPHA_TEST);
+}
+
+void Sprite::drawingTile(int atX, int atY){
+  glPushMatrix();
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, texture);
   glColor4ub(255,255,255,255);
   glBegin(GL_QUADS);
   int w = clipWidth;
   int h = clipHeight;
 
-  glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
-  glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
-  glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
-  glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
-
-  glEnd(); glPopMatrix();
-  glDisable(GL_TEXTURE_2D);
-  glDisable(GL_ALPHA_TEST);
-}
-
-//This will use the drawTile(int atSet)
-//Continously calling this function will switch to the next sprite in the sheet
-//Starting from the left then to right. It will do this for each row. Then reset
-//back to the start.
-void Sprite::drawSequence(){
-  drawTile(tileAt); tileAt++;
-  if(tileAt > row*column) tileAt = 0;
-}
-
-//Gives out the texture data/value
-GLuint Sprite::textureBox(){
-  return texture;
-}
-
-int Sprite::getClipHeight(){
-  return clipHeight;
-}
-
-int Sprite::getClipWidth(){
-  return clipWidth;
-}
-//=====================================================================
-//Function Aid
-//=====================================================================
-//Just A helper Function for the init() function in this group. 
-//This gets the image convert them to computer readable bytes
-//
-unsigned char *Sprite::buildAlphaData2(Ppmimage *img){
-  //add 4th component to RGB stream...
-  int a,b,c;
-  unsigned char *newdata, *ptr;
-  unsigned char *data = (unsigned char *)img->data;
-  //newdata = (unsigned char *)malloc(img->width * img->height * 4);
-  newdata = new unsigned char[img->width * img->height * 4];
-  ptr = newdata;
-  for (int i=0; i<img->width * img->height * 3; i+=3) {
-    a = *(data+0);
-    b = *(data+1);
-    c = *(data+2);
-    *(ptr+0) = a;
-    *(ptr+1) = b;
-    *(ptr+2) = c;
-    //get the alpha value
-    *(ptr+3) = (a|b|c);
-    ptr += 4;
-    data += 3;
+  if(!checkMirror()){
+    glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
+    glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
+    glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
+    glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
+  }else{
+    glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(-w,-h);
+    glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(-w,h);
+    glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(w,h);
+    glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(w,-h);  
   }
-  return newdata;
+
+    glEnd(); glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
 }
+  /*
+     void Sprite::drawTile(int atSet){
+     int atX = atSet, atY = 0;
+     atX = atSet % row;
+     atY = (int)(atSet/row);
+
+     drawTile(atX, atY);
+     }*/
+
+  //This Draws a tile base on line # base on below example
+  // 1  2  3  4  5  6  7
+  // 8  9  10 11 12 13 14
+
+  //This will use the drawTile(int atSet)
+  //Continously calling this function will switch to the next sprite in the sheet
+  //Starting from the left then to right. It will do this for each row. Then reset
+  //back to the start.
+  void Sprite::drawSequence(){
+    drawTile(tileAt); tileAt++;
+    if(tileAt > row*column) tileAt = 0;
+  }
+
+  //Gives out the texture data/value
+  GLuint Sprite::textureBox(){
+    return texture;
+  }
+
+  int Sprite::getClipHeight(){
+    return clipHeight;
+  }
+
+  int Sprite::getClipWidth(){
+    return clipWidth;
+  }
+  //=====================================================================
+  //Function Aid
+  //=====================================================================
+  //Just A helper Function for the init() function in this group. 
+  //This gets the image convert them to computer readable bytes
+  unsigned char *Sprite::buildAlphaData2(Ppmimage *img){
+    //add 4th component to RGB stream...
+    int a,b,c;
+    unsigned char *newdata, *ptr;
+    unsigned char *data = (unsigned char *)img->data;
+    //newdata = (unsigned char *)malloc(img->width * img->height * 4);
+    newdata = new unsigned char[img->width * img->height * 4];
+    ptr = newdata;
+    for (int i=0; i<img->width * img->height * 3; i+=3) {
+      a = *(data+0);
+      b = *(data+1);
+      c = *(data+2);
+      *(ptr+0) = a;
+      *(ptr+1) = b;
+      *(ptr+2) = c;
+      //get the alpha value
+      *(ptr+3) = (a|b|c);
+      ptr += 4;
+      data += 3;
+    }
+    return newdata;
+  }

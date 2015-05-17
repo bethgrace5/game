@@ -53,19 +53,21 @@ Player::Player() : Object(26, 44, 250, 250), Sprite(){
 //Movement Functions
 //===============================================
 void Player::moveRight(){ 
+  Sprite::setMirror(false);
   Object::setVelocityX(maxSpeed);
 }
 void Player::moveLeft(){
+  Sprite::setMirror(true);
   Object::setVelocityX(-maxSpeed);
 }
 void Player::jump(){
-  if(jumps < jumpLimit) Object::setVelocityY(jumpPower);
+  if(jumps < jumpLimit){ Object::setVelocityY(jumpPower); jumps++; }
 }
 void Player::stop(){
   Object::setVelocityX(0);
 }
 void Player::jumpRefresh(){ 
-  if(Player::getVelocityX() == 0) jumps = 0; 
+  if(Player::getVelocityY() == 0) jumps = 0; 
 }
 
 bool Player::onGround(){
