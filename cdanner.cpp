@@ -145,7 +145,6 @@ void Platform::drawRow(int x, int y) {
   } 
   glPopMatrix(); 
 }
-
 /*
 void Platform::drawColumn(int x, int y) {
   //Draws Tiles for a box

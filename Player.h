@@ -115,14 +115,12 @@ void Player::cycleAnimations(){
     index = 1;
   }
   //Failing
-  else if(Object::getVelocityY() < 0){ //&& !onGround() ){
-    std::cout << "Falling\n";
+  else if(Object::getVelocityY() < 0){
     index = 1; return;
   }
   //Walking/Running
   else if(Object::getVelocityX() != 0){
     if(diff_ms(seqEnd, seqStart) > 80){
-      std::cout << "Walking\n";
       index++; 
       if(index >= 6) index = 0;
       once = 0;

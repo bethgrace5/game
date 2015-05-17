@@ -941,10 +941,6 @@ void groundCollide (Object *obj, Object *ground) {
     if (!(obj->getOldBottom() < g_top) && !(h_bottom >= g_top) && (obj->getVelocityY() < 0)) {
       obj->setVelocityY(0);
       obj->setCenter(obj->getCenterX(), g_top+(obj->getCenterY()-h_bottom));
-
-      //This Needs to be Changed vvvvvvvvvvvvv
-      testHero.setOnGround(1); testHero.jumpRefresh();
-      //-----^^^^^^
       obj->setFloor(ground);
     }
     //If moving object is at the bottom of static object
@@ -977,17 +973,17 @@ void movement(Object *hero) {
     groundCollide(hero, &var1[i]);
     groundCollide(&testHero, &var1[i]);
   }
+  testHero.jumpRefresh();
   testHero.cycleAnimations();
 
   testHero.setVelocityY(testHero.getVelocityY() - GRAVITY);
 
   // Check for Death
-  if (hero->getCenterY() < 0) {
-    hero->setCenter(HERO_START_X, HERO_START_Y); // Respawn
-    lives--;
-    life=fail=100; // Reset life points, Display fail for 100 frames
-    hero->setVelocityX(0);
-    isDying=0;
+  if (testHero.getCenterY() < 0) {
+    testHero.setCenter(HERO_START_X, HERO_START_Y); // Respawn
+    //lives--;
+    //life=fail=100; // Reset life points, Display fail for 100 frames
+    testHero.stop(); fail = 100;
   }
 
   //Bullets
@@ -1028,7 +1024,6 @@ void movement(Object *hero) {
     }
     b = b->next;
   }
-
 
   // Enemy movement, enemy ai
   for (i=0;i<enemies_length;i++) {

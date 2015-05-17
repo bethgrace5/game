@@ -93,16 +93,16 @@ bool Sprite::checkMirror(){
 //=====================================================================
 //  These are functions that are use to call drawing events using the variables
 //  within this class. Also, giving out this class information
+//  NOTE: drawTilePure and drawTile have diffrent Alpha Configuration
+//  
+//    Right Now I Think im going to make it use a booleon to check 
+//    instead of having 4 diffrent functions
 
 
-//This Draws a tile base on row number and column number
-//example:
-//     1 2 3 4
-//   1 # # # #
-//   2 # # # #
-//   3 # # # #
+//These functions  Draws a tile base on line # base on below example
+// 1  2  3  4  5  6  7
+// 8  9  10 11 12 13 14
 
-//Draws TitleSet
 void Sprite::drawTilePure(int atSet){
   int atX = atSet;
   int atY = 0;
@@ -112,13 +112,6 @@ void Sprite::drawTilePure(int atSet){
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_LESS, 1.0f);
   Sprite::drawingTile(atX, atY);
-  glDisable(GL_ALPHA_TEST);
-}
-
-void Sprite::drawTilePure(int x, int y){
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_LESS, 1.0f);
-  Sprite::drawingTile(x, y);
   glDisable(GL_ALPHA_TEST);
 }
 
@@ -134,6 +127,19 @@ void Sprite::drawTile(int atSet){
   glDisable(GL_ALPHA_TEST);
 }
 
+//These functions  Draws a tile base on row number and column number
+//example:
+//     1 2 3 4
+//   1 # # # #
+//   2 # # # #
+//   3 # # # #
+void Sprite::drawTilePure(int x, int y){
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_LESS, 1.0f);
+  Sprite::drawingTile(x, y);
+  glDisable(GL_ALPHA_TEST);
+}
+
 void Sprite::drawTile(int x, int y){
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_GREATER, 0.0f);
@@ -141,6 +147,7 @@ void Sprite::drawTile(int x, int y){
   glDisable(GL_ALPHA_TEST);
 }
 
+//This Draws Where you want to draw.
 void Sprite::drawingTile(int atX, int atY){
   glPushMatrix();
   glEnable(GL_TEXTURE_2D);
@@ -165,18 +172,6 @@ void Sprite::drawingTile(int atX, int atY){
     glEnd(); glPopMatrix();
     glDisable(GL_TEXTURE_2D);
 }
-  /*
-     void Sprite::drawTile(int atSet){
-     int atX = atSet, atY = 0;
-     atX = atSet % row;
-     atY = (int)(atSet/row);
-
-     drawTile(atX, atY);
-     }*/
-
-  //This Draws a tile base on line # base on below example
-  // 1  2  3  4  5  6  7
-  // 8  9  10 11 12 13 14
 
   //This will use the drawTile(int atSet)
   //Continously calling this function will switch to the next sprite in the sheet
