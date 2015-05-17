@@ -34,6 +34,7 @@ class Sprite{
     int clipWidth;
     float clipX;
     float clipY;
+    int index;
 
     Ppmimage *image;
     GLuint texture;
@@ -60,6 +61,9 @@ class Sprite{
 
     int getClipHeight();
     int getClipWidth();
+
+    int getIndex();
+    void setIndex(int ind);
 
     //Function Aid
     unsigned char *buildAlphaData2(Ppmimage *img);

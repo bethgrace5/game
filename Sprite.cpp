@@ -1,4 +1,5 @@
 #include "Sprite.h"
+#include "functions.h"
 
 //====================================================================
 //
@@ -15,11 +16,19 @@ Sprite::Sprite(){
   texture = 0;
   clipX = clipY = 0;
   clipWidth = clipHeight = 0;
-
+  index = 0;
   setClip(0, 0);
   imageHeight = 0;
   imageWidth = 0;
   tileAt = 0;
+}
+
+void Sprite::setIndex(int ind){
+    index = ind;
+}
+
+int Sprite::getIndex() {
+    return index;
 }
 
 void Sprite::insert(const char *filename, int x, int y){
@@ -68,7 +77,7 @@ void Sprite::initSprite(){
   //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  unsigned char *silhouetteData = buildAlphaData2(image);
+  unsigned char *silhouetteData = buildAlphaData(image);
   imageWidth  = image->width;
   imageHeight = image->height;
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
@@ -189,33 +198,4 @@ int Sprite::getClipHeight(){
 
 int Sprite::getClipWidth(){
   return clipWidth;
-}
-
-//=====================================================================
-//Function Aid
-//=====================================================================
-//Just A helper Function for the init() function in this group. 
-//This gets the image convert them to computer readable bytes
-//
-unsigned char *Sprite::buildAlphaData2(Ppmimage *img){
-  //add 4th component to RGB stream...
-  int a,b,c;
-  unsigned char *newdata, *ptr;
-  unsigned char *data = (unsigned char *)img->data;
-  //newdata = (unsigned char *)malloc(img->width * img->height * 4);
-  newdata = new unsigned char[img->width * img->height * 4];
-  ptr = newdata;
-  for (int i=0; i<img->width * img->height * 3; i+=3) {
-    a = *(data+0);
-    b = *(data+1);
-    c = *(data+2);
-    *(ptr+0) = a;
-    *(ptr+1) = b;
-    *(ptr+2) = c;
-    //get the alpha value
-    *(ptr+3) = (a|b|c);
-    ptr += 4;
-    data += 3;
-  }
-  return newdata;
 }

@@ -51,11 +51,14 @@ class Object{
         double getOldBottom(void);
         double getOldLeft(void);
 
+        //Moved to Sprite Class
         void setIndex(int ind);
         int getIndex();
 
         void setFloor(Object *obj);
         Object *getFloor();
+        
+        int isJumping, isFalling, isDying, isWalking, isShooting;
 
         Object( double w, double h, double x, double y);
         void init(double w, double h, double x, double y);
@@ -68,6 +71,7 @@ class Object{
         int top, bottom, left, right;
         // interval is distance the sprite is allowed to move away
         // from windowCenter
+        
         int index;
         int jump;
         bool aggro;
