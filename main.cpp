@@ -15,16 +15,18 @@
 #include "functions.h"
 #include <sstream>
 #include <algorithm>
-#include "Sprite.cpp"
+
+//#include "Sprite.cpp"
+#include "bethanyA.cpp"
 
 //#include "fastFont.h"
 #include "tedP.cpp"
 
 //Platforms/Grounds
-#include "cdanner.cpp"
+#include "chadD.cpp"
 
 //Enemies
-#include "bsingenstrew.cpp"
+#include "brianS.cpp"
 
 #define WINDOW_WIDTH 900
 #define WINDOW_HEIGHT 600
