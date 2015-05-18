@@ -15,13 +15,13 @@
 #include "functions.h"
 #include <sstream>
 #include <algorithm>
-#include "Player.h"
 
 //#include "Sprite.cpp"
 #include "bethanyA.cpp"
 
 //#include "fastFont.h"
 #include "tedP.cpp"
+#include "Player.h"
 
 //Platforms/Grounds
 #include "chadD.cpp"
@@ -608,17 +608,10 @@ void groundCollide (Object *obj, Object *ground) {
 
 void movement() {
   // Hero Apply Velocity, Add Gravity
-  hero->setOldCenter();
-  hero->setCenter( (hero->getCenterX() + hero->getVelocityX()), (hero->getCenterY() + hero->getVelocityY()));
-  hero->setVelocityY( hero->getVelocityY() - GRAVITY);
-
-
-  if(testHero->getHealth() <= 0){
-    testHero->stop();  
-  }
 
   testHero->setOldCenter();
   testHero->autoSet();
+  if(testHero->getHealth() <= 0) testHero->stop();  
 
   //Detect Collisions
   for (i=0; i<grounds_length; i++) {
