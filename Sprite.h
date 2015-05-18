@@ -74,6 +74,9 @@ class Sprite{
     int getRow();
     int getColumn();
 
+    void setMirror(bool reflect);
+    bool checkMirror();
+
     void setIndexXY(int x, int y);
     void setIndexAt(int ind);
     //Function Aid
