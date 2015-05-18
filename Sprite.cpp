@@ -199,3 +199,24 @@ int Sprite::getClipHeight(){
 int Sprite::getClipWidth(){
   return clipWidth;
 }
+
+int Sprite::getColumn(){
+  return column;
+}
+int Sprite::getRow(){
+  return row;
+}
+int Sprite::getIndexX(){
+  return indexX;
+}
+int Sprite::getIndexY(){
+  return indexY;
+}
+int Sprite::getIndexAt(){
+  return indexAt;
+}
+void Sprite::setIndexXY(int x, int y){
+  indexX = x;
+  indexY = y;
+}
+
