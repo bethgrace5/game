@@ -15,7 +15,7 @@
 #include "functions.h"
 #include <sstream>
 #include <algorithm>
-#include "Player.h"
+//#include "Player.h"
 
 //#include "Sprite.cpp"
 #include "bethanyA.cpp"
