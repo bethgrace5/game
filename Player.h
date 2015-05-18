@@ -40,7 +40,7 @@ Player::Player() : Object(26, 44, 250, 250), Sprite(){
   //Set The Default stats
   lives = 3; health = 3;
 
-  jumps = 1; jumpLimit = 3; jumpPower = 7;
+  jumps = 1; jumpLimit = 2; jumpPower = 7;
   speed = 0; maxSpeed  = 7;
 
   index = 0; once = 0;
@@ -57,7 +57,10 @@ void Player::moveLeft(){
   Object::setVelocityX(-maxSpeed);
 }
 void Player::jump(){
-  if(jumps < jumpLimit){ Object::setVelocityY(jumpPower); jumps++; }
+  if(jumps < jumpLimit){ 
+      Object::setVelocityY(jumpPower); 
+      jumps++;
+  }
 }
 void Player::stop(){
   Object::setVelocityX(0);
@@ -100,11 +103,16 @@ void Player::cycleAnimations(){
   }
   //Jumping
   else if(Object::getVelocityY() > 0){
-    index = 1;
+      if(jumps==2) {
+          index=0;
+      }
+      else {
+        index = 1;
+      }
   }
-  //Failing
+  //Falling
   else if(Object::getVelocityY() < 0){
-    index = 1;
+    index = 0;
   }
   //Walking/Running
   else if(Object::getVelocityX() != 0){
@@ -120,8 +128,8 @@ void Player::cycleAnimations(){
 }
 
 void Player::drawBox(){
-  int w = Object::getWidth();
-  int h = Object::getHeight();
+  //int w = Object::getWidth();
+  //int h = Object::getHeight();
   glPushMatrix();
   glTranslatef(Object::getCenterX(), Object::getCenterY(), 0);
 

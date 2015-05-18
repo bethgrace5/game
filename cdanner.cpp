@@ -47,9 +47,6 @@ Platform::Platform() : Sprite(), Object(260, 200, 350, 400) {
 
 void Platform::setupTile() {
   //Setup Object to match with tile rows
-  std::cout << "===================================================\n";
-  std::cout << "Platform Size = " << Object::getWidth() << " , "
-    << Object::getHeight() << "\n"; 
 
   //The Object Will Allocate to fit with the tile
   int widthSize;
@@ -63,15 +60,6 @@ void Platform::setupTile() {
   heightSize = Object::getHeight() - addHeight; 
 
   Object::init(widthSize, heightSize, Object::getCenterX(), Object::getCenterY());  
-
-  std::cout << "Clip Size = " << Sprite::getClipWidth() << " , " 
-    << Sprite::getClipHeight() << "\n";
-
-  std::cout << "Platform Size = " << Object::getWidth() << " , "
-    << Object::getHeight() << "\n"; 
-
-  std::cout << "Total tiles inside that fit side "
-    << Object::getWidth()/Sprite::getClipWidth()  << std::endl;
 
   saveLineSpace();
 }

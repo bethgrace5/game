@@ -167,47 +167,6 @@ int main(void) {
 
   testHero.insert("./images/hero.ppm", 13, 1);
   testHero.setSize(46, 48);
-  /*
-     Object ground_0(10, 1000, -10, 600);
-     Object ground_1(400, 10, 400, 80);
-     Object ground_2(200, 10, 900, 200);
-     Object ground_3(150, 10, 1200, 360);
-     Object ground_4(250, 10, 1450, 80);
-     Object ground_5(440, 10, 2500, 80);
-     Object ground_6(340, 10, 2300, 360);
-     Object ground_7(250, 10, 2800, 480);
-     Object ground_8(440, 10, 3500, 80);
-     Object ground_9(440, 10, 4000, 200);
-     Object ground_10(440, 10, 4500, 80);
-     Object ground_11(440, 10, 5500, 80);
-     Object ground_12(440, 10, 6500, 80);
-     Object ground_13(440, 10, 7500, 80);
-     Object ground_14(440, 10, 8500, 80);
-     Object ground_15(440, 10, 9500, 80);
-     Object ground_16(200, 10, 9700, 360);
-     Object ground_17(200, 10, 300, 180);
-
-     grounds[0] = &ground_0;
-     grounds[1] = &ground_1;
-     grounds[2] = &ground_2;
-     grounds[3] = &ground_3;
-     grounds[4] = &ground_4;
-     grounds[5] = &ground_5;
-     grounds[6] = &ground_6;
-     grounds[7] = &ground_7;
-     grounds[8] = &ground_8;
-     grounds[9] = &ground_9;
-     grounds[10] = &ground_10;
-     grounds[11] = &ground_11;
-     grounds[12] = &ground_12;
-     grounds[13] = &ground_13;
-     grounds[14] = &ground_14;
-     grounds[15] = &ground_15;
-     grounds[16] = &ground_16;
-     grounds[17] = &ground_17;
-     grounds_length=18;
-     */
-
   //setup enemies
   Object enemy_0 = createAI(20, 48, &var1[1]);
   Object enemy_1 = createAI(5, 48, &var1[1]);
@@ -412,26 +371,6 @@ void init_opengl (void) {
   makePlatform(17, 200, 16, 300, 200);
   makePlatform(18, 20, 1000, -16, 600);
 
-  // FIXME there are 40 image files, but currently only 1/3 of them work, the others
-  // are all the same image
-  /*
-     for (int q=0; q<12; q++) {
-     fileName = "./images/menuScreen";
-     fileName += itos(q);
-     fileName += ".ppm";
-     cout << "loading file: " <<fileName <<endl;
-     menuImage[q] = ppm6GetImage(fileName.c_str());
-
-     glBindTexture(GL_TEXTURE_2D, menuTexture[q]);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-     menuData = buildAlphaData(menuImage[q]);
-     w = menuImage[q]->width;
-     h = menuImage[q]->height;
-     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
-     }
-     delete [] menuData;
-     */
 }
 
 void makePlatform(int i, int w, int h, int x, int y) {
@@ -1048,7 +987,7 @@ void renderInitMenu () {
   }
 
   if (frameIndex == 32) {
-    cout << "frame index: "<< frameIndex <<endl;
+    //cout << "frame index: "<< frameIndex <<endl;
     frameIndex = 0;
     level = 0;
     return;
@@ -1236,11 +1175,11 @@ void moveWindow (Object *hero) {
 
   //move window forward
   if ((heroWinPosX > roomX + interval) && ((roomX+WINDOW_HALF_WIDTH)<LEVEL_WIDTH-6)) {
-    roomX+=6;
+    roomX+=7;
   }
   //move window backward (fast move if hero is far away)
   else if ((heroWinPosX < roomX - interval) && roomX>(WINDOW_HALF_WIDTH+6)) {
-    roomX-=6;
+    roomX-=7;
     if (heroWinPosX < (roomX - interval - 400)) {
       roomX-=20;
     }
