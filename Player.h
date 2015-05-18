@@ -9,10 +9,10 @@ class Player: public Object, public Sprite{
     int jumps, jumpLimit, jumpPower;
     int maxSpeed, speed;
 
-    int index;
+    int indexp;
     int once;
 
-    timeval seqStart, seqEnd;
+    timeval seqStartA, seqEndA;
 
   public:
     Player();
@@ -43,7 +43,7 @@ Player::Player() : Object(26, 44, 250, 250), Sprite(){
   jumps = 1; jumpLimit = 2; jumpPower = 7;
   speed = 0; maxSpeed  = 7;
 
-  index = 0; once = 0;
+  indexp = 0; once = 0;
 }
 //===============================================
 //Movement Functions
@@ -90,57 +90,61 @@ void Player::cycleAnimations(){
   //int tmpRow = Sprite::getRow();
 
   //Start Timer
-  if(once == 0){ gettimeofday(&seqStart, NULL); once = 1 ;}
-  gettimeofday(&seqEnd, NULL);//This Can Be Universal For All Stuff
+  if(once == 0){ gettimeofday(&seqStartA, NULL); once = 1 ;}
+  gettimeofday(&seqEndA, NULL);//This Can Be Universal For All Stuff
 
   //Death
   if(getHealth() == 0){
-    if(diff_ms(seqEnd, seqStart) > 180){
-      if(index == 12) return;
-      if(index < 7) index = 7;
-      index++; once = 0;
+    if(diff_ms(seqEndA, seqStartA) > 180){
+      if(indexp == 12) return;
+      if(indexp < 7) indexp = 7;
+      indexp++; once = 0;
     }
   }
   //Jumping
   else if(Object::getVelocityY() > 0){
       if(jumps==2) {
-          index=0;
+          indexp=0;
       }
       else {
-        index = 1;
+        indexp = 1;
       }
   }
   //Falling
   else if(Object::getVelocityY() < 0){
-    index = 0;
+    indexp = 0;
   }
   //Walking/Running
   else if(Object::getVelocityX() != 0){
-    if(diff_ms(seqEnd, seqStart) > 80){
-      index = (index + 1) % 6;
+    if(diff_ms(seqEndA, seqStartA) > 80){
+      indexp = (indexp + 1) % 6;
       once = 0;
     }
   }
   //Standing
-  else index = 6; 
+  else indexp = 6; 
 
-  Sprite::setIndexAt(index);
+  std::cout << "what is velocityX " << Object::getVelocityX() << "\n";
+
+  std::cout << "index test " << indexp << std::endl;
+  Sprite::setIndexAt(indexp);
 }
 
 void Player::drawBox(){
-  //int w = Object::getWidth();
-  //int h = Object::getHeight();
+  int w = Object::getWidth();
+  int h = Object::getHeight();
   glPushMatrix();
   glTranslatef(Object::getCenterX(), Object::getCenterY(), 0);
 
-  /*glBegin(GL_QUADS);
+  glBegin(GL_QUADS);
   glVertex2i(-w, -h);
   glVertex2i(-w,  h);
   glVertex2i( w,  h);
   glVertex2i( w, -h);
-  glEnd();*/
+  glEnd();
 
-  Sprite::drawTile(Sprite::getIndexAt());
+  //Sprite::drawTile(Sprite::getIndexAt());
+  Sprite::drawTile(indexp, 1);
 
   glPopMatrix();
 }

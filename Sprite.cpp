@@ -117,12 +117,17 @@ void Sprite::drawTile(int row, int column){
   glBegin(GL_QUADS);
   int  w = clipWidth;
   int h = clipHeight;
-
-  glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
-  glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
-  glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
-  glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
-
+  if(!checkMirror()){
+    glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
+    glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
+    glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
+    glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
+  }else{
+    glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(-w,-h);
+    glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(-w,h);
+    glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(w,h);
+    glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(w,-h);
+  }
   glEnd(); glPopMatrix();
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_ALPHA_TEST);
@@ -160,6 +165,8 @@ void Sprite::drawTile(int atSet){
   atX = atSet % row;
   atY = (int)(atSet/row);
 
+  drawTile(atX, atY);
+/*
   glPushMatrix();
   glBindTexture(GL_TEXTURE_2D, texture);
   glEnable(GL_ALPHA_TEST);
@@ -175,7 +182,7 @@ void Sprite::drawTile(int atSet){
   glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
 
   glEnd(); glPopMatrix();
-  glDisable(GL_ALPHA_TEST);
+  glDisable(GL_ALPHA_TEST);*/
 }
 
 //This will use the drawTile(int atSet)

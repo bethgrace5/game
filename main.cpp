@@ -25,7 +25,7 @@
 #include "cdanner.cpp"
 
 //Enemies
-#include "bsingenstrew.cpp"
+#include "brianS.cpp"
 
 #define WINDOW_WIDTH 900
 #define WINDOW_HEIGHT 600
@@ -102,6 +102,7 @@ bgBit *bitHead = NULL;
 Bullet *bhead = NULL;
 Enemy *enemies[MAX_ENEMIES];
 Object *hero; // Class Player
+Player *testHero;
 Platform *grounds[MAX_GROUNDS];
 int bg, bullets, grounds_length, enemies_length,  i, j, level=-1;
 int roomX=WINDOW_HALF_WIDTH;
@@ -164,7 +165,10 @@ int main(void) {
     hero->setBottom(-44);
     hero->setLeft(-26);
     hero->setRight(26);
-
+    testHero = new Player();
+    testHero->insert("./images/hero.ppm", 13, 1);
+    testHero->setSize(44,44);
+ 
     level = 1;
     frameIndex = 0;
 
@@ -475,20 +479,15 @@ int check_keys (XEvent *e) {
         }
         // Jump
         if ((key == XK_w || key == XK_Up) && !(hero->isDying)) {
-            if (didJump < 2 && hero->getVelocityY() > -0.5) {
-                didJump++;
-                hero->setVelocityY(7);
-            }
+          testHero->jump();
         }
         // move character left
         if ((key == XK_a || key == XK_Left) && !(hero->isDying)) {
-            hero->setVelocityX(-6);
-            lastFacing = 1;
+          testHero->moveLeft();
         }
         // move character right
         if ((key == XK_d || key == XK_Right) && !(hero->isDying)) {
-            hero->setVelocityX(6);
-            lastFacing = 0;
+          testHero->moveRight();
         }
         // shooting
         if (key == XK_space) {
@@ -515,12 +514,11 @@ int check_keys (XEvent *e) {
     }
     else if (e->type == KeyRelease) {
         if ((key == XK_a || key == XK_Left) && !(hero->isDying)) {
-            hero->setVelocityX(0);
-            lastFacing = 1;
+            testHero->stop();
         }
         if ((key == XK_d || key == XK_Right) && !(hero->isDying)) {
+            testHero->stop();
             hero->setVelocityX(0);
-            lastFacing = 0;
         }
         if (key == XK_space) {
             hero->isShooting=0;
@@ -608,10 +606,19 @@ void movement() {
     hero->setOldCenter();
     hero->setCenter( (hero->getCenterX() + hero->getVelocityX()), (hero->getCenterY() + hero->getVelocityY()));
     hero->setVelocityY( hero->getVelocityY() - GRAVITY);
+
+    testHero->setOldCenter();
+    testHero->autoSet();
+
     //Detect Collisions
     for (i=0; i<grounds_length; i++) {
         groundCollide(hero, grounds[i]);
+        groundCollide(testHero, grounds[i]);
     }
+    testHero->jumpRefresh();
+    testHero->cycleAnimations(); 
+    testHero->setVelocityY( testHero->getVelocityY() - GRAVITY);
+
     // Cycle through hero index sequences
     if (life<=0) {
         hero->setVelocityX(0);
@@ -743,7 +750,7 @@ void movement() {
 
     // Enemy movement, enemy ai
     for (i=0;i<enemies_length;i++) {
-        enemies[i]->enemyAI(hero); //Where does enemy go?
+        enemies[i]->enemyAI(testHero); //Where does enemy go?
         //enemyAI(enemies[i]);
         //bullets
         b = bhead;
@@ -870,6 +877,12 @@ void renderEnemies (int x, int y) {
 }
 
 void renderHero (int x, int y) {
+    //Easy Drawing
+    glPushMatrix();
+    glTranslatef(-x, -y, 0);
+    testHero->drawBox();
+    glPopMatrix();
+/*
     // Draw Hero Sprite
     glPushMatrix();
     glEnable(GL_TEXTURE_2D);
@@ -900,6 +913,7 @@ void renderHero (int x, int y) {
     glEnd(); glPopMatrix();
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
+    */
 }
 void renderBullets (int x, int y) {
     //Draw the bullets
@@ -948,8 +962,8 @@ void render () {
 }
 
 void moveWindow () {
-    double heroWinPosX = hero->getCenterX();
-    double heroWinPosY = hero->getCenterY();
+    double heroWinPosX = testHero->getCenterX();
+    double heroWinPosY = testHero->getCenterY();
 
     //move window forward
     if ((heroWinPosX > roomX + interval) && ((roomX+WINDOW_HALF_WIDTH)<LEVEL_WIDTH-6)) {
