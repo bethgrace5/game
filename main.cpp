@@ -21,7 +21,6 @@
 #include "Sprite.cpp"
 #include "Player.h"
 
-
 #define WINDOW_WIDTH 900
 #define WINDOW_HEIGHT 600
 #define WINDOW_HALF_WIDTH  WINDOW_WIDTH/2
@@ -967,7 +966,6 @@ void movement(Object *hero) {
   testHero.autoSet();
 
   //Detect Collisions
-  testHero.setOnGround(0);
   for (i=0; i<platform_length; i++) {
     //groundCollide(hero, grounds[i]);
     groundCollide(hero, &var1[i]);
@@ -975,15 +973,14 @@ void movement(Object *hero) {
   }
   testHero.jumpRefresh();
   testHero.cycleAnimations();
-
   testHero.setVelocityY(testHero.getVelocityY() - GRAVITY);
 
   // Check for Death
-  if (testHero.getCenterY() < 0) {
+  if (testHero.getCenterY() < 0 || testHero.getHealth() < 0) {
     testHero.setCenter(HERO_START_X, HERO_START_Y); // Respawn
     //lives--;
     //life=fail=100; // Reset life points, Display fail for 100 frames
-    testHero.stop(); fail = 100;
+    testHero.stop(); fail = 200;
   }
 
   //Bullets
@@ -1158,6 +1155,7 @@ void renderEnemies (int x, int y) {
   int w, h;
   // render enemies
   glColor3ub(100,0,0);
+
   Object *enemy;
   for (int i=0;i<enemies_length;i++) {
     enemy = enemies[i];
@@ -1183,40 +1181,9 @@ void renderHero (Object *hero, int x, int y) {
   glPushMatrix();
   glTranslatef(-x, -y, 0);
   testHero.drawBox();
-
   glPopMatrix();
 
-  /*
-     glPushMatrix();
-     glEnable(GL_TEXTURE_2D);
-     glTranslatef( hero->getCenterX() - x, hero->getCenterY() - y, 0);
-     int w = hero->getWidth();
-  //int h = hero->getHeight();
-  glBindTexture(GL_TEXTURE_2D, heroTexture);
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_GREATER, 0.0f);
-  glColor4ub(255,255,255,255);
-  glBegin(GL_QUADS);
-  float tl_sz = 0.076923077;
-  // hero is facing left
-  if ((hero->getVelocityX() < 0.0) or (hero->getOldCenterX()>hero->getCenterX())
-  or lastFacing == 1) {
-  glTexCoord2f((hero->getIndex()*tl_sz)+tl_sz, 1.0f); glVertex2i(-w,-w);
-  glTexCoord2f((hero->getIndex()*tl_sz)+tl_sz, 0.0f); glVertex2i(-w,w);
-  glTexCoord2f((hero->getIndex()*tl_sz), 0.0f); glVertex2i(w,w);
-  glTexCoord2f((hero->getIndex()*tl_sz), 1.0f); glVertex2i(w,-w);
-  }
-  // hero is facing right
-  else {
-  glTexCoord2f(hero->getIndex()*tl_sz, 1.0f); glVertex2i(-w,-w);
-  glTexCoord2f(hero->getIndex()*tl_sz, 0.0f); glVertex2i(-w,w);
-  glTexCoord2f((hero->getIndex()*tl_sz)+tl_sz, 0.0f); glVertex2i(w,w);
-  glTexCoord2f((hero->getIndex()*tl_sz)+tl_sz, 1.0f); glVertex2i(w,-w);
-  }
-  glEnd(); glPopMatrix();
-  glDisable(GL_TEXTURE_2D);
-  glDisable(GL_ALPHA_TEST);*/
-}
+ }
 void renderBullets (int x, int y) {
   //Draw the bullets
   Bullet *b = bhead;
@@ -1256,8 +1223,8 @@ void render (Object *hero) {
   //char* char_type = (char*) temp_str.c_str();
 
   if (fail>0) {
-    writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 200, WINDOW_HEIGHT/2);
-    fail--;
+    writeWords("CRITICAL MISSION FAILURE", WINDOW_WIDTH/2- 200, WINDOW_HEIGHT/2);
+    fail--; if(fail == 0) testHero.setHealth(3);
   }
   writeWords("Lives:", WINDOW_WIDTH/2- 400, WINDOW_HEIGHT/2- 250);
 

@@ -40,11 +40,11 @@ void Sprite::setFile(const char *filename){
 void Sprite::setClip(int x, int y){
   //User defined row and column. The images must evenly split apart from each
   //other. ClipX and ClipY determines where to cut parts in the image.
-  row = x; column = y; 
-  std::cout << "What is (x,y): (" << row << "," << column << ")\n";
-  if(x > 0) clipX = (float)1/row;
+  column = x; row = y; 
+  std::cout << "What is (x,y): (" << column << "," << row << ")\n";
+  if(x > 0) clipX = (float)1/column;
   std::cout << "give me CLIPX: " << clipX << std::endl;
-  if(y > 0) clipY = (float)1/column;
+  if(y > 0) clipY = (float)1/row;
   std::cout << "give me CLIPY: " << clipY << std::endl;
 }
 
@@ -82,8 +82,8 @@ void Sprite::replaceTexture(GLuint take){
   texture = take;
 }
 
-void Sprite::setMirror(bool take){
-  mirror = take;
+void Sprite::setMirror(bool reflect){
+  mirror = reflect;
 }
 bool Sprite::checkMirror(){
   return mirror; 
@@ -103,28 +103,12 @@ bool Sprite::checkMirror(){
 // 1  2  3  4  5  6  7
 // 8  9  10 11 12 13 14
 
-void Sprite::drawTilePure(int atSet){
-  int atX = atSet;
-  int atY = 0;
-  atX = atSet % row;
-  atY = (int)(atSet/row);
-
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_LESS, 1.0f);
-  Sprite::drawingTile(atX, atY);
-  glDisable(GL_ALPHA_TEST);
-}
-
 void Sprite::drawTile(int atSet){
   int atX = atSet;
   int atY = 0;
-  atX = atSet % row;
-  atY = (int)(atSet/row);
-
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_GREATER, 0.0f);
-  Sprite::drawingTile(atX, atY);
-  glDisable(GL_ALPHA_TEST);
+  atX = atSet % column;
+  atY = (int)(atSet/column);
+  Sprite::drawTile(atX, atY);
 }
 
 //These functions  Draws a tile base on row number and column number
@@ -133,26 +117,18 @@ void Sprite::drawTile(int atSet){
 //   1 # # # #
 //   2 # # # #
 //   3 # # # #
-void Sprite::drawTilePure(int x, int y){
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_LESS, 1.0f);
-  Sprite::drawingTile(x, y);
-  glDisable(GL_ALPHA_TEST);
-}
-
-void Sprite::drawTile(int x, int y){
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_GREATER, 0.0f);
-  Sprite::drawingTile(x, y);
-  glDisable(GL_ALPHA_TEST);
-}
 
 //This Draws Where you want to draw.
-void Sprite::drawingTile(int atX, int atY){
+void Sprite::drawTile(int atX, int atY){
   glPushMatrix();
   glEnable(GL_TEXTURE_2D);
+
   glBindTexture(GL_TEXTURE_2D, texture);
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_GREATER, 0.0f);
+
   glColor4ub(255,255,255,255);
+
   glBegin(GL_QUADS);
   int w = clipWidth;
   int h = clipHeight;
@@ -168,56 +144,79 @@ void Sprite::drawingTile(int atX, int atY){
     glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(w,h);
     glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(w,-h);  
   }
-
-    glEnd(); glPopMatrix();
-    glDisable(GL_TEXTURE_2D);
+  glEnd(); glPopMatrix();
+  glDisable(GL_ALPHA_TEST);
+  glDisable(GL_TEXTURE_2D);
 }
 
-  //This will use the drawTile(int atSet)
-  //Continously calling this function will switch to the next sprite in the sheet
-  //Starting from the left then to right. It will do this for each row. Then reset
-  //back to the start.
-  void Sprite::drawSequence(){
-    drawTile(tileAt); tileAt++;
-    if(tileAt > row*column) tileAt = 0;
-  }
+//This will use the drawTile(int atSet)
+//Continously calling this function will switch to the next sprite in the sheet
+//Starting from the left then to right. It will do this for each row. Then reset
+//back to the start.
+void Sprite::drawSequence(){
+  drawTile(tileAt); tileAt++;
+  if(tileAt > row*column) tileAt = 0;
+}
 
-  //Gives out the texture data/value
-  GLuint Sprite::textureBox(){
-    return texture;
-  }
+//==========================
+GLuint Sprite::textureBox(){
+  return texture;
+}
 
-  int Sprite::getClipHeight(){
-    return clipHeight;
-  }
+int Sprite::getClipHeight(){
+  return clipHeight;
+}
 
-  int Sprite::getClipWidth(){
-    return clipWidth;
+int Sprite::getClipWidth(){
+  return clipWidth;
+}
+
+int Sprite::getRow(){
+  return row; 
+}
+int Sprite::getColumn(){
+  return column;  
+}
+
+int Sprite::getIndexX(){
+  return indexX; 
+}
+int Sprite::getIndexY(){
+  return indexY; 
+}
+int Sprite::getIndexAt(){
+  return indexAt; 
+}
+void Sprite::setIndexAt(int take ){
+  indexAt = take; 
+}
+void Sprite::setIndexXY(int x, int y){
+  indexX = x; indexY = y; 
+}
+//=====================================================================
+//Function Aid
+//=====================================================================
+//Just A helper Function for the init() function in this group. 
+//This gets the image convert them to computer readable bytes
+unsigned char *Sprite::buildAlphaData2(Ppmimage *img){
+  //add 4th component to RGB stream...
+  int a,b,c;
+  unsigned char *newdata, *ptr;
+  unsigned char *data = (unsigned char *)img->data;
+  //newdata = (unsigned char *)malloc(img->width * img->height * 4);
+  newdata = new unsigned char[img->width * img->height * 4];
+  ptr = newdata;
+  for (int i=0; i<img->width * img->height * 3; i+=3) {
+    a = *(data+0);
+    b = *(data+1);
+    c = *(data+2);
+    *(ptr+0) = a;
+    *(ptr+1) = b;
+    *(ptr+2) = c;
+    //get the alpha value
+    *(ptr+3) = (a|b|c);
+    ptr += 4;
+    data += 3;
   }
-  //=====================================================================
-  //Function Aid
-  //=====================================================================
-  //Just A helper Function for the init() function in this group. 
-  //This gets the image convert them to computer readable bytes
-  unsigned char *Sprite::buildAlphaData2(Ppmimage *img){
-    //add 4th component to RGB stream...
-    int a,b,c;
-    unsigned char *newdata, *ptr;
-    unsigned char *data = (unsigned char *)img->data;
-    //newdata = (unsigned char *)malloc(img->width * img->height * 4);
-    newdata = new unsigned char[img->width * img->height * 4];
-    ptr = newdata;
-    for (int i=0; i<img->width * img->height * 3; i+=3) {
-      a = *(data+0);
-      b = *(data+1);
-      c = *(data+2);
-      *(ptr+0) = a;
-      *(ptr+1) = b;
-      *(ptr+2) = c;
-      //get the alpha value
-      *(ptr+3) = (a|b|c);
-      ptr += 4;
-      data += 3;
-    }
-    return newdata;
-  }
+  return newdata;
+}

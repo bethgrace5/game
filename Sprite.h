@@ -26,8 +26,8 @@ class Sprite{
   //Global Access-------------------------------------------------------
   private:
     const char *imageName;
-    int row;
     int column;
+    int row;
     int imageHeight;
     int imageWidth;
     int clipHeight;
@@ -39,6 +39,8 @@ class Sprite{
     Ppmimage *image;
     GLuint texture;
     int tileAt;
+    int indexX, indexY;
+    int indexAt;
 
   //Functions-----------------------------------------------------------
   public:
@@ -53,12 +55,8 @@ class Sprite{
     //Outter Functions
     //void drawFont(int atSet);
 
-    void drawTilePure(int x, int y);
-    void drawTile(int row, int column);
-    void drawTilePure(int atSet);
+    void drawTile(int column, int row);
     void drawTile(int atSet);
-
-    void drawingTile(int row, int column);
 
     void drawSequence();
     void replaceTexture(GLuint take);
@@ -66,9 +64,17 @@ class Sprite{
 
     int getClipHeight();
     int getClipWidth();
-    void setMirror(bool take);
+    void setMirror(bool reflect);
     bool checkMirror();
 
+    int getColumn();
+    int getRow();
+    int getIndexX();
+    int getIndexY();
+    int getIndexAt(); 
+
+    void setIndexXY(int x, int y);
+    void setIndexAt(int take);
     //Function Aid
     unsigned char *buildAlphaData2(Ppmimage *img);
 };
