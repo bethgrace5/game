@@ -16,6 +16,7 @@
 #include <sstream>
 #include <algorithm>
 #include "Sprite.cpp"
+#include "Player.h"
 
 //#include "fastFont.h"
 #include "tedP.cpp"

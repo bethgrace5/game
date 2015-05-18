@@ -206,6 +206,13 @@ int Sprite::getColumn(){
 int Sprite::getRow(){
   return row;
 }
+void Sprite::setMirror(bool reflect){
+  mirror = reflect;
+}
+bool Sprite::checkMirror(){
+  return mirror;
+}
+
 int Sprite::getIndexX(){
   return indexX;
 }
@@ -214,6 +221,9 @@ int Sprite::getIndexY(){
 }
 int Sprite::getIndexAt(){
   return indexAt;
+}
+void Sprite::setIndexAt(int ind){
+  indexAt = ind; 
 }
 void Sprite::setIndexXY(int x, int y){
   indexX = x;
