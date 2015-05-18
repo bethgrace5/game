@@ -1,3 +1,5 @@
+#include "Sprite.h"
+
 #ifndef PLAYER_H
 #define PLAYER_H
 //=====================================================================
@@ -11,6 +13,8 @@ class Player: public Object, public Sprite{
 
     int indexp;
     int once;
+
+    bool triggerShooting;
 
     timeval seqStartA, seqEndA;
 
@@ -27,11 +31,16 @@ class Player: public Object, public Sprite{
     void setHealth(int take);
     int getHealth();
 
+    bool checkShooting();
+    void setShooting(bool take);
+
     void drawBox();
     void cycleAnimations();
     void setOnGround(bool take);
+    void autoState();
 
     int diff_ms (timeval t1, timeval t2);
+
 };
 //==============================================
 //Setup
@@ -77,6 +86,13 @@ void Player::setHealth(int take){
 int Player::getHealth(){
   return health;
 }
+
+bool Player::checkShooting(){
+  return triggerShooting;
+}
+void Player::setShooting(bool take){ 
+  triggerShooting = take;
+}
 //===============================================
 //Drawing Functions
 //===============================================/
@@ -86,15 +102,18 @@ int Player::getHealth(){
 //
 //       Right Now There Are 13 sprites in 1 sheet
 void Player::cycleAnimations(){
-  //int tmpColumn = Sprite::getColumn();
+  //int tmpColumn = Sprite::getColumn();//
   //int tmpRow = Sprite::getRow();
 
   //Start Timer
   if(once == 0){ gettimeofday(&seqStartA, NULL); once = 1 ;}
-  gettimeofday(&seqEndA, NULL);//This Can Be Universal For All Stuff
+  gettimeofday(&seqEndA, NULL);//This Can Be Universal For All Stuff so Maybe Make This
+                               //Global in main.cpp
+
+  //The Earilier Animations States gets first priority
 
   //Death
-  if(getHealth() == 0){
+  if(getHealth() <=0){
     if(diff_ms(seqEndA, seqStartA) > 180){
       if(indexp == 12) return;
       if(indexp < 7) indexp = 7;
@@ -124,10 +143,20 @@ void Player::cycleAnimations(){
   //Standing
   else indexp = 6; 
 
-  std::cout << "what is velocityX " << Object::getVelocityX() << "\n";
-
-  std::cout << "index test " << indexp << std::endl;
+  //std::cout << "Index: " << indexp << endl;
   Sprite::setIndexAt(indexp);
+}
+
+void Player::autoState(){
+  //This Is a Temporary Fix. For The Enemy AI
+  if(getVelocityY() < 0) Object::isJumping = 1;
+  else Object::isJumping = 0;
+
+  if(getVelocityX() < 0) Object::isWalking = 1;
+  else Object::isWalking = 0;
+
+  if(getVelocityY() > 0) Object::isFalling = 1;
+  else Object::isFalling = 0;
 }
 
 void Player::drawBox(){
@@ -135,13 +164,13 @@ void Player::drawBox(){
   int h = Object::getHeight();
   glPushMatrix();
   glTranslatef(Object::getCenterX(), Object::getCenterY(), 0);
-
+/*
   glBegin(GL_QUADS);
   glVertex2i(-w, -h);
   glVertex2i(-w,  h);
   glVertex2i( w,  h);
   glVertex2i( w, -h);
-  glEnd();
+  glEnd();*/
 
   //Sprite::drawTile(Sprite::getIndexAt());
   Sprite::drawTile(indexp, 1);
