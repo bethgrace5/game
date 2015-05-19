@@ -491,21 +491,14 @@ int check_keys (XEvent *e) {
             // shooting
             if (key == XK_space) {
                 testHero->setShooting(true);
-                hero->isShooting=1;
             }
             // debug death
             if (key == XK_y) {
                 testHero->setHealth(0);
-                life-=1000;
             }
             // toggle start menu
             if (key == XK_m) {
-                if (level) {
-                    level = 0;
-                }
-                else {
-                    level = 1;
-                }
+                level = 0;
             }
             // cycle through screens for debugging
             if (key == XK_t) {
