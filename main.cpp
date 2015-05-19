@@ -95,6 +95,7 @@ timeval seqStart, seqEnd;
 timeval fireStart, fireEnd;
 timeval frameStart, frameEnd;
 int frameIndex=0;
+int menuSelection = 0;
 
 //Game Globals
 string str = "";
@@ -102,7 +103,7 @@ bgBit *bitHead = NULL;
 Bullet *bhead = NULL;
 Object *grounds[MAX_GROUNDS] = {NULL};
 Object *enemies[32] = {NULL};
-int bg, bullets, grounds_length, enemies_length,  i, j, level=-1;
+int bg, bullets, grounds_length, enemies_length,  i, j, level=0;
 int platform_length=19;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
@@ -110,6 +111,7 @@ int fail=0;
 int interval=120;
 double g_left, g_right, g_top, g_bottom;
 int quit=0;
+int showInvalid=0;
 
 //Images and Textures
 Ppmimage *heroImage=NULL;
@@ -222,10 +224,10 @@ int main(void) {
 	    //Player User Interfaces
 	    XEvent e; XNextEvent(dpy, &e);
         // the menu is showing. accept mouse events
-        if (level == 0) {
-            XNextEvent(dpy, &e);
-            check_mouse(&e);
-        }
+        //if (level == 0) {
+            //XNextEvent(dpy, &e);
+            //check_mouse(&e);
+        //}
 	    quit = check_keys(&e, &hero);
 	}
 	if (level == -1) {
@@ -480,47 +482,147 @@ int check_keys (XEvent *e, Object *hero) {
     //handle input from the keyboard
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
-        if (key == XK_Escape or key == XK_q) {
-            return 1;
-        }
-        // Jump
-        if ((key == XK_w || key == XK_Up) && !isDying) {
-            if (didJump < 2 && hero->getVelocityY() > -0.5) {
-                didJump++;
-                hero->setVelocityY(7);
+
+
+        if(level==1) {
+            if (key == XK_Escape or key == XK_q) {
+                return 1;
+            }
+            // Jump
+            if ((key == XK_w || key == XK_Up) && !isDying) {
+                if (didJump < 2 && hero->getVelocityY() > -0.5) {
+                    didJump++;
+                    hero->setVelocityY(7);
+                }
+            }
+            // move character left
+            if ((key == XK_a || key == XK_Left) && !isDying) {
+                hero->setVelocityX(-6);
+                lastFacing = 1;
+            }
+            // move character right
+            if ((key == XK_d || key == XK_Right) && !isDying) {
+                hero->setVelocityX(6);
+                lastFacing = 0;
+            }
+            // shooting
+            if (key == XK_space) {
+                isShooting=1;
+            }
+            // debug death
+            if (key == XK_q) {
+                life-=1000;
+            }
+            // toggle start menu
+            if (key == XK_m) {
+                if (level) {
+                    level = 0;
+                }
+                else {
+                    level = 1;
+                }
+            }
+            // cycle through screens for debugging
+            if (key == XK_t) {
+                if(menuSelection == 4) {
+                    menuSelection = 0;
+                }
+                else {
+                    menuSelection++;
+                }
             }
         }
-        // move character left
-        if ((key == XK_a || key == XK_Left) && !isDying) {
-            hero->setVelocityX(-6);
-            lastFacing = 1;
-        }
-        // move character right
-        if ((key == XK_d || key == XK_Right) && !isDying) {
-            hero->setVelocityX(6);
-            lastFacing = 0;
-        }
-        // shooting
-        if (key == XK_space) {
-            isShooting=1;
-        }
-        // debug death
-        if (key == XK_q) {
-            life-=1000;
-        }
-        // toggle start menu
-        if (key == XK_m) {
-            if (level) {
-                level = 0;
+        else if(level ==0) {
+            if (key == XK_Return) {
+                if(menuSelection==0) {
+                    level=-1;
+                    lastFacing = 0;
+                }
+                if(menuSelection==1 or menuSelection==2 or menuSelection==4) {
+                    showInvalid = 1;
+                }
+                if(menuSelection==3) {
+                    showInvalid = 0;
+                    return 1;
+                }
             }
-            else {
-                level = 1;
+
+            if ( key == XK_t){
+                if(menuSelection ==4){
+                    menuSelection=0;
+                }
+                else{
+                    menuSelection++;
+                }
+                cout<<menuSelection<<endl;
             }
-        }
-        // cycle through screens for debugging
-        if (key == XK_t) {
-            frameIndex++;
-            cout << frameIndex <<endl;
+            if ( key == XK_Down){
+                    showInvalid = 0;
+                if(menuSelection ==0) {
+                    menuSelection =1;
+                }
+                else if(menuSelection ==1) {
+                    menuSelection =0;
+                }
+                else if(menuSelection ==3) {
+                    menuSelection = 4;
+                }
+                else if(menuSelection ==4) {
+                    menuSelection = 3;
+                }
+            }
+            if ( key == XK_Up){
+                    showInvalid = 0;
+                if(menuSelection ==0) {
+                    menuSelection =1;
+                }
+                else if(menuSelection ==4) {
+                    menuSelection = 3;
+                }
+                else if(menuSelection ==1) {
+                    menuSelection =0;
+                }
+                else if(menuSelection ==3) {
+                    menuSelection = 4;
+                }
+            }
+            if ( key == XK_Right){
+                    showInvalid = 0;
+                if(menuSelection ==0) {
+                    menuSelection = 4;
+                }
+                else if(menuSelection ==1) {
+                    menuSelection = 2;
+                }
+                else if(menuSelection ==2) {
+                    menuSelection = 3;
+                }
+                else if(menuSelection ==3){
+                    menuSelection=1;
+                }
+                else if(menuSelection ==4){
+                    menuSelection=0;
+                }
+            }
+            if ( key == XK_Left){
+                    showInvalid = 0;
+                if(menuSelection ==0) {
+                    menuSelection = 4;
+                }
+                else if(menuSelection ==1) {
+                    menuSelection = 3;
+                }
+                else if(menuSelection ==2) {
+                    menuSelection = 1;
+                }
+                else if(menuSelection ==3){
+                    menuSelection=2;
+                }
+                else if(menuSelection ==4){
+                    menuSelection=0;
+                }
+            }
+
         }
         //return 0;
     }
@@ -1159,7 +1261,7 @@ void renderInitMenu () {
 
     if (frameIndex == 65) {
         frameIndex = 0;
-        level = 0;
+        level = 1;
         return;
     }
 
@@ -1199,7 +1301,6 @@ void renderComputerScreenMenu () {
     if (frameIndex == 26) {
          //reset frame sequence
         frameIndex = 0;
-        level = 1;
     }
 
     glPushMatrix();
@@ -1212,35 +1313,43 @@ void renderComputerScreenMenu () {
 
     glBegin(GL_QUADS);
 
-    // bottom left corner
-    //glVertex2i(-WHW, -WHW+230);
-    //glVertex2i(-WHW, 50);
-    //glVertex2i( -150, 50);
-    //glVertex2i( -150, -WHW+230);
-
-    // top left corner
-    glVertex2i(-WHW, 50);
-    glVertex2i(-WHW, WHW);
-    glVertex2i( -210, WHW);
-    glVertex2i( -210, 50);
-
-    // top right corner
-    //glVertex2i(WHW, WHW);
-    //glVertex2i(190, WHW);
-    //glVertex2i( 190, 50);
-    //glVertex2i( WHW, 50);
-
-    // bottom right corner
-    //glVertex2i(WHW, -WHW+240);
-    //glVertex2i(190, -WHW+240);
-    //glVertex2i( 190, 50);
-    //glVertex2i( WHW, 50);
-
-    // bottom center
-    //glVertex2i(-150, -WHW+280);
-    //glVertex2i(-150, 50);
-    //glVertex2i( 190, 50);
-    //glVertex2i( 190, -WHW+280);
+    switch(menuSelection) {
+        case 0:
+            // top left corner
+            glVertex2i(-WHW, 50);
+            glVertex2i(-WHW, WHW);
+            glVertex2i( -210, WHW);
+            glVertex2i( -210, 50);
+            break;
+        case 1:
+            // bottom left corner
+            glVertex2i(-WHW, -WHW+230);
+            glVertex2i(-WHW, 50);
+            glVertex2i( -150, 50);
+            glVertex2i( -150, -WHW+230);
+            break;
+        case 2:
+            // bottom center
+            glVertex2i(-150, -WHW+280);
+            glVertex2i(-150, 50);
+            glVertex2i( 190, 50);
+            glVertex2i( 190, -WHW+280);
+            break;
+        case 3:
+            // bottom right corner
+            glVertex2i(WHW, -WHW+240);
+            glVertex2i(190, -WHW+240);
+            glVertex2i( 190, 50);
+            glVertex2i( WHW, 50);
+            break;
+        case 4:
+            // top right corner
+            glVertex2i(WHW, WHW);
+            glVertex2i(190, WHW);
+            glVertex2i( 190, 50);
+            glVertex2i( WHW, 50);
+            break;
+    }
 
     glEnd(); //glPopMatrix();
 
@@ -1248,7 +1357,7 @@ void renderComputerScreenMenu () {
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, computerScreenTextures[frameIndex]);
     //glAlphaFunc(GL_GREATER, 0.8f);
-    //glAlphaFunc(GL_LESS, 0.2f);
+    glAlphaFunc(GL_LESS, 0.2f);
     glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
 
@@ -1260,8 +1369,29 @@ void renderComputerScreenMenu () {
     glEnd(); glPopMatrix();
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
-    writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 230);
+    writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 205, WINDOW_HEIGHT/2 + 230);
+    writeWords("--- selection ---", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 130);
+    switch(menuSelection) {
+        case 0:
+            writeWords("       RAM", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+            break;
+        case 1:
+            writeWords("       CPU", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+            break;
+        case 2:
+            writeWords("  MOTHER BOARD", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+            break;
+        case 3:
+            writeWords("  /EXIT SYSTEM/", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+            break;
+        case 4:
+            writeWords("   HARD DRIVE", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+            break;
+    }
 
+    if(showInvalid) {
+        writeWords("error requires ram!", WINDOW_WIDTH/2- 205, WINDOW_HEIGHT/2 + 190);
+    }
 
 }
 void renderGrounds (int x, int y) {
