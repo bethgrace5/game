@@ -394,10 +394,14 @@ void init_opengl (void) {
         fileName = "";
 
         for (int q=0; q<26; q++) {
-
-            fileName = "./images/cs/cs";
-            fileName += itos(q);
-            fileName += ".ppm";
+            if (q == 0) {
+                fileName = "./images/whiteComputer.ppm";
+            }
+            else {
+                fileName = "./images/cs/cs";
+                fileName += itos(q);
+                fileName += ".ppm";
+            }
             cout << "loading file: " <<fileName <<endl;
             computerScreenImages[q] = ppm6GetImage(fileName.c_str());
 
@@ -1145,7 +1149,7 @@ void movement(Object *hero) {
 
 void renderInitMenu () {
     gettimeofday(&frameStart, NULL);
-    int frameTime = 150;
+    int frameTime = 70;
 
     // loop through frames
     if (diff_ms(frameStart, frameEnd) > frameTime) {
@@ -1184,7 +1188,7 @@ void renderInitMenu () {
 }
 void renderComputerScreenMenu () {
     gettimeofday(&frameStart, NULL);
-    int frameTime = 300;
+    int frameTime = 190;
 
     // loop through frames
     if (diff_ms(frameStart, frameEnd) > frameTime) {
@@ -1193,19 +1197,58 @@ void renderComputerScreenMenu () {
     }
 
     if (frameIndex == 26) {
-        // reset frame sequence
+         //reset frame sequence
         frameIndex = 0;
+        level = 1;
     }
 
     glPushMatrix();
     glClear(GL_COLOR_BUFFER_BIT);
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(1.0, 0.0, 0.0, 1.0);
     glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
+    glColor3ub(255,255,51);
+
+    int WHW = WINDOW_HALF_WIDTH;
+
+    glBegin(GL_QUADS);
+
+    // bottom left corner
+    //glVertex2i(-WHW, -WHW+230);
+    //glVertex2i(-WHW, 50);
+    //glVertex2i( -150, 50);
+    //glVertex2i( -150, -WHW+230);
+
+    // top left corner
+    glVertex2i(-WHW, 50);
+    glVertex2i(-WHW, WHW);
+    glVertex2i( -210, WHW);
+    glVertex2i( -210, 50);
+
+    // top right corner
+    //glVertex2i(WHW, WHW);
+    //glVertex2i(190, WHW);
+    //glVertex2i( 190, 50);
+    //glVertex2i( WHW, 50);
+
+    // bottom right corner
+    //glVertex2i(WHW, -WHW+240);
+    //glVertex2i(190, -WHW+240);
+    //glVertex2i( 190, 50);
+    //glVertex2i( WHW, 50);
+
+    // bottom center
+    //glVertex2i(-150, -WHW+280);
+    //glVertex2i(-150, 50);
+    //glVertex2i( 190, 50);
+    //glVertex2i( 190, -WHW+280);
+
+    glEnd(); //glPopMatrix();
+
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, computerScreenTextures[frameIndex]);
-    //glAlphaFunc(GL_GREATER, 0.0f);
-    //glAlphaFunc(GL_LESS, 1.0f);
+    //glAlphaFunc(GL_GREATER, 0.8f);
+    //glAlphaFunc(GL_LESS, 0.2f);
     glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
 
@@ -1217,6 +1260,7 @@ void renderComputerScreenMenu () {
     glEnd(); glPopMatrix();
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
+    writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 230);
 
 
 }
