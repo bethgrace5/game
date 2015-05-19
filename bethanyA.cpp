@@ -82,6 +82,21 @@ void Sprite::initSprite(){
   imageHeight = image->height;
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
   delete [] silhouetteData;
+  strImageName = imageName;
+}
+
+void Sprite::reInitSprite(){
+  //Refresh the new Sprite Image
+  imageName = strImageName.c_str();
+  image = ppm6GetImage(imageName);
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  unsigned char *silhouetteData = buildAlphaData(image);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+  delete [] silhouetteData;
 }
 
 void Sprite::replaceTexture(GLuint take){

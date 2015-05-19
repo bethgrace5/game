@@ -26,6 +26,7 @@ class Sprite{
   //Global Access-------------------------------------------------------
   private:
     const char *imageName;
+    std::string strImageName;
     int column;
     int row;
     int imageHeight;
@@ -50,6 +51,7 @@ class Sprite{
     void insert(const char *filename, int x, int y);
     void setFile(const char *filename);
     void initSprite();
+    void reInitSprite();
     void setClip(int x, int y);
     void setSize(int x, int y);
 
