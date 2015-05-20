@@ -16,13 +16,15 @@ Adventure through the harware of a computer cleansing it of malicious viruses.
 ### Using Tool Editor
 * Create a new blank slate:
     ```./tool```
-* Inside Tool Editor
+
+*  Inside Tool Editor
     *  ```c``` - create mode -> click to place objects
     *  ```v``` - select mode -> select created objects
     *  ```r``` - increase row size of selected object
     *  ```s``` - save level as created
     *  ```l``` - revert back to last saved state
-* Notes:
-    * There must be at least 7 objects, or segmentation fault is thrown
-* TODO:
-    * put usage instructions on level editor
+    *  
+*  Notes:
+    *  There must be at least 7 objects, or segmentation fault is thrown
+*  TODO:
+    *  put usage instructions on level editor
