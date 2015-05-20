@@ -29,6 +29,8 @@
 //Enemies
 #include "brianS.cpp"
 
+#include <fstream>
+
 #define WINDOW_WIDTH 900
 #define WINDOW_HEIGHT 600
 #define WINDOW_HALF_WIDTH  WINDOW_WIDTH/2
@@ -40,7 +42,7 @@
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 
 // 1 for quick load, 0 for slow load with menu images
-#define QUICK_LOAD_TIME 0
+#define QUICK_LOAD_TIME 1
 
 #define MAX_BACKGROUND_BITS 6000
 #define HERO_START_X 150
@@ -71,6 +73,11 @@ struct Bullet {
     next = NULL;
   }
 };
+
+struct data{
+  Platform grounds[MAX_GROUNDS];
+  int grounds_length;
+} storeIn;
 /*
    int diff_ms (timeval t1, timeval t2) {
    return (((t1.tv_sec - t2.tv_sec) * 1000000) + (t1.tv_usec - t2.tv_usec))/1000;
@@ -277,96 +284,109 @@ void init_opengl (void) {
   gettimeofday(&fireStart, NULL);
 
   if (!QUICK_LOAD_TIME) {
-        // load initialization screens
-        unsigned char *menuData;
-        glGenTextures(65, initTextures);
-        string fileName;
+    // load initialization screens
+    unsigned char *menuData;
+    glGenTextures(65, initTextures);
+    string fileName;
 
-        for (int q=0; q<32; q++) {
+    for (int q=0; q<32; q++) {
 
-            fileName = "./images/init/init";
-            fileName += itos(q);
-            fileName += ".ppm";
-            cout << "loading file: " <<fileName <<endl;
-            initImages[q] = ppm6GetImage(fileName.c_str());
+      fileName = "./images/init/init";
+      fileName += itos(q);
+      fileName += ".ppm";
+      cout << "loading file: " <<fileName <<endl;
+      initImages[q] = ppm6GetImage(fileName.c_str());
 
-            glBindTexture(GL_TEXTURE_2D, initTextures[q]);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            menuData = buildAlphaData(initImages[q]);
-            w = initImages[q]->width;
-            h = initImages[q]->height;
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
-        }
-        delete [] menuData;
+      glBindTexture(GL_TEXTURE_2D, initTextures[q]);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      menuData = buildAlphaData(initImages[q]);
+      w = initImages[q]->width;
+      h = initImages[q]->height;
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, menuData);
+    }
+    delete [] menuData;
 
-        // repeat blinking dot for several frames
-        // frame 30 has no dot, frame 31 has a dot
+    // repeat blinking dot for several frames
+    // frame 30 has no dot, frame 31 has a dot
 
-        initTextures[32] = initTextures[30];
-        initTextures[33] = initTextures[30];
+    initTextures[32] = initTextures[30];
+    initTextures[33] = initTextures[30];
 
-        // repeat dot blinking frames in initialization sequence
-        // by repeating frames that have already been loaded
-        // after 4 iterations, add 5
-        int offset = 1;
-        for (int i=34; i<65; i++) {
-            initTextures[i] = initTextures[30];
-            initTextures[i+4] = initTextures[31];
-            if( offset == 4 ){
-                i+=4;
-                offset = 0;
-            }
-            offset++;
-        }
-        initTextures[31] = initTextures[30];
+    // repeat dot blinking frames in initialization sequence
+    // by repeating frames that have already been loaded
+    // after 4 iterations, add 5
+    int offset = 1;
+    for (int i=34; i<65; i++) {
+      initTextures[i] = initTextures[30];
+      initTextures[i+4] = initTextures[31];
+      if( offset == 4 ){
+        i+=4;
+        offset = 0;
+      }
+      offset++;
+    }
+    initTextures[31] = initTextures[30];
 
 
-        // load blinking computer screens
-        unsigned char *computerData;
-        glGenTextures(26, computerScreenTextures);
-        fileName = "";
+    // load blinking computer screens
+    unsigned char *computerData;
+    glGenTextures(26, computerScreenTextures);
+    fileName = "";
 
-        for (int q=0; q<26; q++) {
-            fileName = "./images/cs/cs";
-            fileName += itos(q);
-            fileName += ".ppm";
-            cout << "loading file: " <<fileName <<endl;
-            computerScreenImages[q] = ppm6GetImage(fileName.c_str());
+    for (int q=0; q<26; q++) {
+      fileName = "./images/cs/cs";
+      fileName += itos(q);
+      fileName += ".ppm";
+      cout << "loading file: " <<fileName <<endl;
+      computerScreenImages[q] = ppm6GetImage(fileName.c_str());
 
-            glBindTexture(GL_TEXTURE_2D, computerScreenTextures[q]);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            computerData = buildAlphaData(computerScreenImages[q]);
-            w = computerScreenImages[q]->width;
-            h = computerScreenImages[q]->height;
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, computerData);
-        }
-        delete [] computerData;
+      glBindTexture(GL_TEXTURE_2D, computerScreenTextures[q]);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      computerData = buildAlphaData(computerScreenImages[q]);
+      w = computerScreenImages[q]->width;
+      h = computerScreenImages[q]->height;
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, computerData);
+    }
+    delete [] computerData;
   }
 
-  makePlatform(20, 1000, -16, 600);
-  makePlatform(400, 16, 400, 70);
-  makePlatform(200, 16, 900, 200);
-  makePlatform(150, 16, 1200, 360);
-  makePlatform(250, 16, 1450, 70);
-  makePlatform(440, 16, 2500, 70);
-  makePlatform(340, 16, 2300, 360);
-  makePlatform(250, 16, 2800, 480);
-  makePlatform(440, 16, 3500, 70);
-  makePlatform(440, 16, 4000, 200);
-  makePlatform(440, 16, 4500, 70);
-  makePlatform(440, 16, 5500, 70);
-  makePlatform(440, 16, 6500, 70);
-  makePlatform(440, 16, 7500, 70);
-  makePlatform(440, 16, 8500, 70);
-  makePlatform(440, 16, 9500, 70);
-  makePlatform(200, 16, 9700, 360);
-  makePlatform(200, 16, 300, 200);
-  makePlatform(20, 1000, -16, 600);
+  ifstream dfs("test.ros", ios::binary);
+  dfs.read((char *)&storeIn, sizeof(storeIn));
+
+  cout << "what is the length in storeIn " << storeIn.grounds_length << "\n";
+  for(int i = 0; i < storeIn.grounds_length; i++){
+    //grounds[i] = *storeIn.grounds[i];
+    storeIn.grounds[i].reInitSprite();
+    //grounds_length++;
+  }
+
+  /*
+     makePlatform(20, 1000, -16, 600);
+     makePlatform(400, 16, 400, 70);
+     makePlatform(200, 16, 900, 200);
+     makePlatform(150, 16, 1200, 360);
+     makePlatform(250, 16, 1450, 70);
+     makePlatform(440, 16, 2500, 70);
+     makePlatform(340, 16, 2300, 360);
+     makePlatform(250, 16, 2800, 480);
+     makePlatform(440, 16, 3500, 70);
+     makePlatform(440, 16, 4000, 200);
+     makePlatform(440, 16, 4500, 70);
+     makePlatform(440, 16, 5500, 70);
+     makePlatform(440, 16, 6500, 70);
+     makePlatform(440, 16, 7500, 70);
+     makePlatform(440, 16, 8500, 70);
+     makePlatform(440, 16, 9500, 70);
+     makePlatform(200, 16, 9700, 360);
+     makePlatform(200, 16, 300, 200);
+     makePlatform(20, 1000, -16, 600);
+     */
 
   //for (i=0;i<=100;i++){
-  makeEnemy(37, 80, grounds[2], 1);
+  /*
+     makeEnemy(37, 80, grounds[2], 1);
   //}
   makeEnemy(37, 80, grounds[2], 1);
   makeEnemy(37, 80, grounds[2], 1);
@@ -412,7 +432,7 @@ void init_opengl (void) {
   makeEnemy(37, 80, grounds[4], 1);
   makeEnemy(37, 80, grounds[4], 1);
   makeEnemy(37, 80, grounds[4], 1);
-  makeEnemy(37, 80, grounds[4], 1);
+  makeEnemy(37, 80, grounds[4], 1);*/
 }
 
 void makePlatform(int w, int h, int x, int y) {
@@ -421,7 +441,6 @@ void makePlatform(int w, int h, int x, int y) {
   grounds[grounds_length]->init(w, h, x, y);
   grounds[grounds_length]->setupTile();
   grounds_length++;
-
 }
 
 void makeEnemy(int w, int h, Object *ground, int type) {
@@ -444,7 +463,7 @@ void makeEnemy(int w, int h, Object *ground, int type) {
   }
 }
 void highlightBox(int x, int y) {
-    cout << "x: " << x << "y: " << y <<endl;
+  cout << "x: " << x << "y: " << y <<endl;
 }
 
 void check_mouse (XEvent *e) {
@@ -469,106 +488,113 @@ void check_mouse (XEvent *e) {
 }
 
 int check_keys (XEvent *e) {
-    //handle input from the keyboard
-    int key = XLookupKeysym(&e->xkey, 0);
-    if (e->type == KeyPress) {
-        if (level==1) {
-            if (key == XK_Escape or key == XK_q) {
-                return 1;
-            }
-            // Jump
-            if ((key == XK_w || key == XK_Up)) {
-                testHero->jump();
-            }
-            // move character left
-            if (key == XK_a || key == XK_Left) {
-                testHero->moveLeft();
-            }
-            // move character right
-            if (key == XK_d || key == XK_Right){
-                testHero->moveRight();
-            }
-            // shooting
-            if (key == XK_space) {
-                testHero->setShooting(true);
-            }
-            // debug death
-            if (key == XK_y) {
-                testHero->setHealth(0);
-            }
-            // toggle start menu
-            if (key == XK_m) {
-                level = 0;
-            }
-            // cycle through screens for debugging
-            if (key == XK_t) {
-                frameIndex++;
-            }
+  //handle input from the keyboard
+  int key = XLookupKeysym(&e->xkey, 0);
+  if (e->type == KeyPress) {
+    if (level==1) {
+      if (key == XK_Escape or key == XK_q) {
+        return 1;
+      }
+      // Jump
+      if ((key == XK_w || key == XK_Up)) {
+        testHero->jump();
+      }
+      // move character left
+      if (key == XK_a || key == XK_Left) {
+        testHero->moveLeft();
+      }
+      // move character right
+      if (key == XK_d || key == XK_Right){
+        testHero->moveRight();
+      }
+      // shooting
+      if (key == XK_space) {
+        testHero->setShooting(true);
+        hero->isShooting=1;
+      }
+      // debug death
+      if (key == XK_y) {
+        testHero->setHealth(0);
+        life-=1000;
+      }
+      // toggle start menu
+      if (key == XK_m) {
+        if (level) {
+          level = 0;
         }
-        if(level ==0) {
-            // menu selection
-            if (key == XK_Return) {
-                if(menuSelection==0) {
-                    level=-1;
-                    lastFacing = 0;
-                }
-                if(menuSelection==1 or menuSelection==2 or menuSelection==4)
-                    showInvalid = 1;
-                if(menuSelection==3) {
-                    showInvalid = 0;
-                    return 1;
-                }
-            }
-            if ( key == XK_Down){
-                showInvalid = 0;
-                if(menuSelection ==0)
-                    menuSelection =1;
-                else if(menuSelection ==1)
-                    menuSelection =0;
-                else if(menuSelection ==3)
-                    menuSelection = 4;
-                else if(menuSelection ==4)
-                    menuSelection = 3;
-            }
-            if ( key == XK_Up){
-                showInvalid = 0;
-                if(menuSelection ==0)
-                    menuSelection =1;
-                else if(menuSelection ==4)
-                    menuSelection = 3;
-                else if(menuSelection ==1)
-                    menuSelection =0;
-                else if(menuSelection ==3)
-                    menuSelection = 4;
-            }
-            if ( key == XK_Right){
-                showInvalid = 0;
-                if(menuSelection ==0)
-                    menuSelection = 4;
-                else if(menuSelection ==1)
-                    menuSelection = 2;
-                else if(menuSelection ==2)
-                    menuSelection = 3;
-                else if(menuSelection ==3)
-                    menuSelection=1;
-                else if(menuSelection ==4)
-                    menuSelection=0;
-            }
-            if ( key == XK_Left){
-                showInvalid = 0;
-                if(menuSelection ==0)
-                    menuSelection = 4;
-                else if(menuSelection ==1)
-                    menuSelection = 3;
-                else if(menuSelection ==2)
-                    menuSelection = 1;
-                else if(menuSelection ==3)
-                    menuSelection=2;
-                else if(menuSelection ==4)
-                    menuSelection=0;
-            }
+        else {
+          level = 1;
         }
+      }
+      // cycle through screens for debugging
+      if (key == XK_t) {
+        frameIndex++;
+      }
     }
+    if(level ==0) {
+      // menu selection
+      if (key == XK_Return) {
+        if(menuSelection==0) {
+          level=-1;
+          lastFacing = 0;
+        }
+        if(menuSelection==1 or menuSelection==2 or menuSelection==4)
+          showInvalid = 1;
+        if(menuSelection==3) {
+          showInvalid = 0;
+          return 1;
+        }
+      }
+      if ( key == XK_Down){
+        showInvalid = 0;
+        if(menuSelection ==0)
+          menuSelection =1;
+        else if(menuSelection ==1)
+          menuSelection =0;
+        else if(menuSelection ==3)
+          menuSelection = 4;
+        else if(menuSelection ==4)
+          menuSelection = 3;
+      }
+      if ( key == XK_Up){
+        showInvalid = 0;
+        if(menuSelection ==0)
+          menuSelection =1;
+        else if(menuSelection ==4)
+          menuSelection = 3;
+        else if(menuSelection ==1)
+          menuSelection =0;
+        else if(menuSelection ==3)
+          menuSelection = 4;
+      }
+      if ( key == XK_Right){
+        showInvalid = 0;
+        if(menuSelection ==0)
+          menuSelection = 4;
+        else if(menuSelection ==1)
+          menuSelection = 2;
+        else if(menuSelection ==2)
+          menuSelection = 3;
+        else if(menuSelection ==3)
+          menuSelection=1;
+        else if(menuSelection ==4)
+          menuSelection=0;
+      }
+      if ( key == XK_Left){
+        showInvalid = 0;
+        if(menuSelection ==0)
+          menuSelection = 4;
+        else if(menuSelection ==1)
+          menuSelection = 3;
+        else if(menuSelection ==2)
+          menuSelection = 1;
+        else if(menuSelection ==3)
+          menuSelection=2;
+        else if(menuSelection ==4)
+          menuSelection=0;
+      }
+    }
+  }
   else if (e->type == KeyRelease) {
     if ((key == XK_a || key == XK_Left) && !(hero->isDying)) {
       testHero->stop();
@@ -639,6 +665,53 @@ void groundCollide (Object *obj, Object *ground) {
   }
 }
 
+bool detectCollide2 (Object *obj, Object ground) {
+  //Gets (Moving Object, Static Object)
+  //Reture True if Moving Object Collides with Static Object
+  return (obj->getRight() > ground.getLeft() &&
+      obj->getLeft()   < ground.getRight() &&
+      obj->getBottom() < ground.getTop()  &&
+      obj->getTop()    > ground.getBottom());
+}
+
+void groundCollide2 (Object *obj, Object ground) {
+  //(Moving Object, Static Object)
+  //Detects Which boundaries the Moving Object is around the Static Object
+  //top,down,left,right
+  if (detectCollide2(obj, ground)) {
+    h_right=obj->getRight();
+    h_left=obj->getLeft();
+    h_top=obj->getTop();
+    h_bottom=obj->getBottom();
+    g_right=ground.getRight();
+    g_bottom=ground.getBottom();
+    g_top=ground.getTop();
+    g_left=ground.getLeft();
+    //If moving object is on top of the static object
+    if (!(obj->getOldBottom() < g_top) && !(h_bottom >= g_top) && (obj->getVelocityY() < 0)) {
+      obj->setVelocityY(0);
+      obj->setCenter(obj->getCenterX(), g_top+(obj->getCenterY()-h_bottom));
+      //obj->setFloor(ground);
+    }
+    //If moving object is at the bottom of static object
+    if (!(obj->getOldTop() > g_bottom) && !(h_top <= g_bottom)) {
+      obj->setVelocityY(-0.51);
+      obj->setCenter(obj->getCenterX(), g_bottom-(h_top-obj->getCenterY()));
+    }
+    //If moving object is at the l-eft side of static object
+    if (!(obj->getOldRight() > g_left ) && !(h_right <= g_left)) {
+      obj->setVelocityX(-0.51); obj->setCenter(g_left-(h_right-obj->getCenterX()), obj->getCenterY()
+          );
+    }
+    //If moving object is at the right side of static object
+    if (!(obj->getOldLeft() < g_right ) && !(h_left >= g_right)) {
+      obj->setVelocityX(0.51);
+      obj->setCenter(g_right+(obj->getCenterX()-h_left), obj->getCenterY());
+    }
+  }
+}
+
+
 void movement() {
   // Hero Apply Velocity, Add Gravity
 
@@ -650,14 +723,18 @@ void movement() {
   for (i=0; i<grounds_length; i++) {
     groundCollide(hero, grounds[i]);
     groundCollide(testHero, grounds[i]);
+  } 
+  for (i=0; i<storeIn.grounds_length; i++) {
+    groundCollide2(testHero, storeIn.grounds[i]);
   }
+
   testHero->jumpRefresh();
   testHero->cycleAnimations();
   testHero->autoState();//This set the isStuff like isWalking, tmp fix
   testHero->setVelocityY( testHero->getVelocityY() - GRAVITY);
 
   // Cycle through hero index sequences
-  
+
   if (testHero->getCenterY() < 0){ life = 0; testHero->setHealth(0);}
 
   if (life<=0) {//Going to try to Mimic The Death Function. Heres a tmp fix though
@@ -669,15 +746,15 @@ void movement() {
     }
     else{
       gettimeofday(&seqEnd, NULL);
-        if (((diff_ms(seqEnd, seqStart)) > 1000)) {
-          testHero->setCenter(HERO_START_X, HERO_START_Y);
+      if (((diff_ms(seqEnd, seqStart)) > 1000)) {
+        testHero->setCenter(HERO_START_X, HERO_START_Y);
 
-          testHero->isDying=0;
-          testHero->setHealth(100); life=100; lives--;
-        }
+        testHero->isDying=0;
+        testHero->setHealth(100); life=100; lives--;
+      }
     }
   }
- 
+
   //Bullet creation
   Bullet *b;
   if (testHero->checkShooting()){
@@ -760,9 +837,9 @@ void movement() {
     }
 
     if (frameIndex == 65) {
-        frameIndex = 0;
-        level = 1;
-        return;
+      frameIndex = 0;
+      level = 1;
+      return;
     }
 
     glPushMatrix();
@@ -794,13 +871,13 @@ void movement() {
 
     // loop through frames
     if (diff_ms(frameStart, frameEnd) > frameTime) {
-        frameIndex++;
-        gettimeofday(&frameEnd, NULL);
+      frameIndex++;
+      gettimeofday(&frameEnd, NULL);
     }
 
     if (frameIndex == 26) {
-         //reset frame sequence
-        frameIndex = 0;
+      //reset frame sequence
+      frameIndex = 0;
     }
 
     glPushMatrix();
@@ -814,41 +891,41 @@ void movement() {
     // draw highlighted portion of menu based on current selection
     glBegin(GL_QUADS);
     switch(menuSelection) {
-        case 0:
-            // top left corner
-            glVertex2i(-WHW, 50);
-            glVertex2i(-WHW, WHW);
-            glVertex2i( -210, WHW);
-            glVertex2i( -210, 50);
-            break;
-        case 1:
-            // bottom left corner
-            glVertex2i(-WHW, -WHW+230);
-            glVertex2i(-WHW, 50);
-            glVertex2i( -150, 50);
-            glVertex2i( -150, -WHW+230);
-            break;
-        case 2:
-            // bottom center
-            glVertex2i(-150, -WHW+280);
-            glVertex2i(-150, 50);
-            glVertex2i( 190, 50);
-            glVertex2i( 190, -WHW+280);
-            break;
-        case 3:
-            // bottom right corner
-            glVertex2i(WHW, -WHW+240);
-            glVertex2i(190, -WHW+240);
-            glVertex2i( 190, 50);
-            glVertex2i( WHW, 50);
-            break;
-        case 4:
-            // top right corner
-            glVertex2i(WHW, WHW);
-            glVertex2i(190, WHW);
-            glVertex2i( 190, 50);
-            glVertex2i( WHW, 50);
-            break;
+      case 0:
+        // top left corner
+        glVertex2i(-WHW, 50);
+        glVertex2i(-WHW, WHW);
+        glVertex2i( -210, WHW);
+        glVertex2i( -210, 50);
+        break;
+      case 1:
+        // bottom left corner
+        glVertex2i(-WHW, -WHW+230);
+        glVertex2i(-WHW, 50);
+        glVertex2i( -150, 50);
+        glVertex2i( -150, -WHW+230);
+        break;
+      case 2:
+        // bottom center
+        glVertex2i(-150, -WHW+280);
+        glVertex2i(-150, 50);
+        glVertex2i( 190, 50);
+        glVertex2i( 190, -WHW+280);
+        break;
+      case 3:
+        // bottom right corner
+        glVertex2i(WHW, -WHW+240);
+        glVertex2i(190, -WHW+240);
+        glVertex2i( 190, 50);
+        glVertex2i( WHW, 50);
+        break;
+      case 4:
+        // top right corner
+        glVertex2i(WHW, WHW);
+        glVertex2i(190, WHW);
+        glVertex2i( 190, 50);
+        glVertex2i( WHW, 50);
+        break;
     }
     glEnd(); //glPopMatrix();
 
@@ -872,25 +949,25 @@ void movement() {
     writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 205, WINDOW_HEIGHT/2 + 230);
     writeWords("--- selection ---", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 130);
     switch(menuSelection) {
-        case 0:
-            writeWords("       RAM", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
-            break;
-        case 1:
-            writeWords("       CPU", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
-            break;
-        case 2:
-            writeWords("  MOTHER BOARD", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
-            break;
-        case 3:
-            writeWords("  /EXIT SYSTEM/", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
-            break;
-        case 4:
-            writeWords("   HARD DRIVE", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
-            break;
+      case 0:
+        writeWords("       RAM", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+        break;
+      case 1:
+        writeWords("       CPU", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+        break;
+      case 2:
+        writeWords("  MOTHER BOARD", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+        break;
+      case 3:
+        writeWords("  /EXIT SYSTEM/", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+        break;
+      case 4:
+        writeWords("   HARD DRIVE", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+        break;
     }
 
     if(showInvalid) {
-        writeWords("error requires ram!", WINDOW_WIDTH/2- 205, WINDOW_HEIGHT/2 + 190);
+      writeWords("error requires ram!", WINDOW_WIDTH/2- 205, WINDOW_HEIGHT/2 + 190);
     }
 
   }
@@ -905,6 +982,16 @@ void movement() {
         glEnd(); glPopMatrix();
       }
     }
+    for (i=0;i< storeIn.grounds_length ;i++) {
+      //if (inWindow(*(storeIn.grounds[i]))) {
+        //Platform
+        glPushMatrix();
+        glTranslatef(- x, - y, 0);
+        storeIn.grounds[i].drawRow(0,0);
+        glEnd(); glPopMatrix();
+      //}
+    }
+
   }
 
   void renderEnemies (int x, int y) {

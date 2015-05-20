@@ -55,6 +55,9 @@ class Object{
         void setIndex(int ind);
         int getIndex();
 
+        void setID(int objID);
+        int getID();
+
         void setFloor(Object *obj);
         Object *getFloor();
         
@@ -73,12 +76,14 @@ class Object{
         // from windowCenter
         
         int index;
+        int obj_id;;
         int jump;
         bool aggro;
         Vec velocity;
         Vec center;
         Vec oldCenter;
         Object *floor;
+        
 };
 
 #endif

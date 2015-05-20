@@ -2,7 +2,9 @@
 .gitignore
 
 # ignore executable
+*.ros
 game
+tool
 
 # Vim swapfiles
 *.swp

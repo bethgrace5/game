@@ -144,6 +144,12 @@ void Object::setIndex(int ind){
 int Object::getIndex() {
     return index;
 }
+void Object::setID(int ind){
+  obj_id = ind;
+}
+int Object::getID() {
+    return obj_id;
+}
 void Object::setFloor(Object *obj){
   floor = obj;
   if (obj)
