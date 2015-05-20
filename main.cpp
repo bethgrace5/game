@@ -44,6 +44,9 @@
 // 1 for quick load, 0 for slow load with menu images
 #define QUICK_LOAD_TIME 1
 
+// 1 to use tool editor, 0 to use pre-defined objects
+#define USE_TOOLS 1
+
 #define MAX_BACKGROUND_BITS 6000
 #define HERO_START_X 150
 #define HERO_START_Y 350
@@ -352,18 +355,23 @@ void init_opengl (void) {
     delete [] computerData;
   }
 
-  ifstream dfs("test.ros", ios::binary);
-  dfs.read((char *)&storeIn, sizeof(storeIn));
+  if( USE_TOOLS ){
+      // loads platform objects from file
+      ifstream dfs("test.ros", ios::binary);
+      dfs.read((char *)&storeIn, sizeof(storeIn));
 
-  cout << "what is the length in storeIn " << storeIn.grounds_length << "\n";
-  for(int i = 0; i < storeIn.grounds_length; i++){
-    grounds[i] = &storeIn.grounds[i];
-    grounds[i]->reInitSprite();
-    //storeIn.grounds[i].reInitSprite();
-    grounds_length++;
+      // pulls in created objects from store
+      cout << "what is the length in storeIn " << storeIn.grounds_length << "\n";
+      for(int i = 0; i < storeIn.grounds_length; i++){
+        grounds[i] = &storeIn.grounds[i];
+        grounds[i]->reInitSprite();
+        //storeIn.grounds[i].reInitSprite();
+        grounds_length++;
+      }
   }
+  // don't use the tools, use pre defined objects
+  else {
   //storeIn.grounds_length = 0;
-  /*
      makePlatform(20, 1000, -16, 600);
      makePlatform(400, 16, 400, 70);
      makePlatform(200, 16, 900, 200);
@@ -383,7 +391,7 @@ void init_opengl (void) {
      makePlatform(200, 16, 9700, 360);
      makePlatform(200, 16, 300, 200);
      makePlatform(20, 1000, -16, 600);
-  */
+  }
 
   //for (i=0;i<=100;i++){
 
