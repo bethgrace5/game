@@ -76,10 +76,13 @@ struct data{
 bool create = 0;
 bool selecter = 0;
 int  holdID = -1;
+int saveID = -1;
 int id = 0;
 
 int mouse(int x, int y);
 void draging(int x, int y);
+void incRow();
+void incColumn(int height);
 
 
 //Images and Textures
@@ -249,13 +252,13 @@ void check_mouse (XEvent *e) {
     if (e->xbutton.button==1) { //Left button was pressed
       if(create == 1){
         std::cout << " x " << savex << ", y " << savey << "\n";
-        makePlatform(90, 90, savex, savey);
+        makePlatform(30, 30, savex, savey);
         return;
       }
       if(selecter == 1){
         take = mouse(savex, savey); 
         std::cout << "The Id is: " << take << "\n";
-        holdID = take;
+        saveID = holdID = take;
       }
     }
     if (e->xbutton.button==2) { //Right button was pressed
@@ -297,9 +300,13 @@ int mouse(int x, int y){
 }
 
 void draging(int x, int y){
-  std::cout << "what is holdID: " << holdID << std::endl;
   if(holdID < 0) return;
   storeIn.grounds[holdID].setCenter(x, y);
+}
+void incRow(){
+  if(saveID < 0) return;
+  storeIn.grounds[saveID].init(storeIn.grounds[saveID].getWidth()+30, 30);
+  storeIn.grounds[saveID].setupTile();
 }
 
 int check_keys (XEvent *e) {
@@ -328,6 +335,9 @@ int check_keys (XEvent *e) {
     }
     if(key == XK_v){
       create = 0; selecter = 1;  
+    }
+    if(key == XK_r){
+      incRow();  
     }
 
     if(key == XK_a) roomX -= 50;

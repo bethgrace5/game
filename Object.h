@@ -65,6 +65,7 @@ class Object{
 
         Object( double w, double h, double x, double y);
         void init(double w, double h, double x, double y);
+        void init(double w, double h);
         // TODO: create destructor
         //~Object(){ delete [] ground;}
 

@@ -33,6 +33,15 @@ void Object::init( double w, double h, double x, double y ) {
     isDead=0;
 }
 
+void Object::init( double w, double h ) {
+    width  = w;
+    height = h;
+    left=w*-1;
+    bottom=h*-1;
+    right=w;
+    top=h;
+}
+
 void Object::autoSet(){
   center.x += velocity.x;
   center.y += velocity.y;

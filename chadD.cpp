@@ -89,7 +89,6 @@ void Platform::drawRow(int x, int y) {
 
   //This Will Draw The TileSet based on the Boundaries of Object
   glPushMatrix();
-  std::cout << "testing\n";
   glTranslatef(Object::getLeft(), Object::getTop(), 0);
   //glTranslatef(Object::getLeft(), 0, 0); 
   for(int j = 0; j < Object::getHeight()/lineSpaceY; j++){

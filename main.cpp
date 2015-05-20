@@ -357,11 +357,12 @@ void init_opengl (void) {
 
   cout << "what is the length in storeIn " << storeIn.grounds_length << "\n";
   for(int i = 0; i < storeIn.grounds_length; i++){
-    //grounds[i] = *storeIn.grounds[i];
-    storeIn.grounds[i].reInitSprite();
-    //grounds_length++;
+    grounds[i] = &storeIn.grounds[i];
+    grounds[i]->reInitSprite();
+    //storeIn.grounds[i].reInitSprite();
+    grounds_length++;
   }
-
+  //storeIn.grounds_length = 0;
   /*
      makePlatform(20, 1000, -16, 600);
      makePlatform(400, 16, 400, 70);
@@ -382,10 +383,10 @@ void init_opengl (void) {
      makePlatform(200, 16, 9700, 360);
      makePlatform(200, 16, 300, 200);
      makePlatform(20, 1000, -16, 600);
-     */
+  */
 
   //for (i=0;i<=100;i++){
-  /*
+
      makeEnemy(37, 80, grounds[2], 1);
   //}
   makeEnemy(37, 80, grounds[2], 1);
@@ -432,7 +433,8 @@ void init_opengl (void) {
   makeEnemy(37, 80, grounds[4], 1);
   makeEnemy(37, 80, grounds[4], 1);
   makeEnemy(37, 80, grounds[4], 1);
-  makeEnemy(37, 80, grounds[4], 1);*/
+  makeEnemy(37, 80, grounds[4], 1);
+
 }
 
 void makePlatform(int w, int h, int x, int y) {
