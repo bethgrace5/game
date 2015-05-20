@@ -15,7 +15,7 @@ Adventure through the harware of a computer cleansing it of malicious viruses.
 
 ### Using Tool Editor
 * Create a new blank slate:
-    ```./tool```
+    `$ ./tool`
 
 *  Inside Tool Editor
     *  `c` - create mode -> click to place objects
