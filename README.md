@@ -18,11 +18,11 @@ Adventure through the harware of a computer cleansing it of malicious viruses.
     ```./tool```
 
 *  Inside Tool Editor
-    *  ```c``` - create mode -> click to place objects
-    *  ```v``` - select mode -> select created objects
-    *  ```r``` - increase row size of selected object
-    *  ```s``` - save level as created
-    *  ```l``` - revert back to last saved state
+    *  `c` - create mode -> click to place objects
+    *  `v` - select mode -> select created objects
+    *  `r` - increase row size of selected object
+    *  `s` - save level as created
+    *  `l` - revert back to last saved state
     *  
 *  Notes:
     *  There must be at least 7 objects, or segmentation fault is thrown
