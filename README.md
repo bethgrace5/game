@@ -1,16 +1,7 @@
 ## Game Title
-#### Software Engineering (cs335) Final Game Project, CSUB
-#### Collaborators
-* Bethany Armitage
-* Chad Danner
-* Ted Pascua
-* Brian Singenstrew
+**Software Engineering (cs335) Final Game Project, CSUB**
 
-#### Game Description
-Paralax side scroller developed using mainly C/C++ with OpenGL game graphics.
-Adventure through the harware of a computer cleansing it of malicious viruses.
-
-#### to run on desktop in CSUB Science III
+**to run on desktop in CSUB Science III**
 ```export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/mesa/libGL.so.1```
 
 ### Using Tool Editor
@@ -28,3 +19,13 @@ Adventure through the harware of a computer cleansing it of malicious viruses.
     *  There must be at least 7 objects, or segmentation fault is thrown
 *  TODO:
     *  put usage instructions on level editor
+
+### Collaborators
+* Bethany Armitage
+* Chad Danner
+* Ted Pascua
+* Brian Singenstrew
+
+### Game Description
+Paralax side scroller developed using mainly C/C++ with OpenGL game graphics.
+Adventure through the harware of a computer cleansing it of malicious viruses.
