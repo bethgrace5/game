@@ -831,8 +831,7 @@ void movement() {
     int frameTime = 70;
 
     // loop through frames
-    if (diff_ms(frameStart, frameEnd) > frameTime) {
-      frameIndex++;
+    if (diff_ms(frameStart, frameEnd) > frameTime) { frameIndex++;
       gettimeofday(&frameEnd, NULL);
     }
 
@@ -871,8 +870,8 @@ void movement() {
 
     // loop through frames
     if (diff_ms(frameStart, frameEnd) > frameTime) {
-      frameIndex++;
-      gettimeofday(&frameEnd, NULL);
+        frameIndex++;
+    	  gettimeofday(&frameEnd, NULL);
     }
 
     if (frameIndex == 26) {
@@ -882,12 +881,30 @@ void movement() {
 
     glPushMatrix();
     glClear(GL_COLOR_BUFFER_BIT);
-    glClearColor(1.0, 0.0, 0.0, 1.0);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
     glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
-    glColor3ub(255,255,51);
+    glColor3ub(0,100,40);
 
     int WHW = WINDOW_HALF_WIDTH;
 
+    //draw sequence of computer images
+   // glEnable(GL_ALPHA_TEST);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, computerScreenTextures[frameIndex]);
+//    glAlphaFunc(GL_GREATER, 0.0f);
+    glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+
+    glTexCoord2f(0, 1) ; glVertex2i(-WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+    glTexCoord2f(0, 0) ; glVertex2i(-WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(1, 0) ; glVertex2i( WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(1, 1) ; glVertex2i( WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+
+    glEnd(); //glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+   // glDisable(GL_ALPHA_TEST);
+
+    glColor3ub(120,200,100);
     // draw highlighted portion of menu based on current selection
     glBegin(GL_QUADS);
     switch(menuSelection) {
@@ -929,11 +946,9 @@ void movement() {
     }
     glEnd(); //glPopMatrix();
 
-
     //draw sequence of computer images
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, computerScreenTextures[frameIndex]);
     glAlphaFunc(GL_LESS, 0.2f);
     glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
@@ -946,24 +961,25 @@ void movement() {
     glEnd(); glPopMatrix();
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
+
     writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 205, WINDOW_HEIGHT/2 + 230);
-    writeWords("--- selection ---", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 130);
+    writeWords("--- selection ---", WINDOW_WIDTH/2- 205, WINDOW_HEIGHT/2 + 130);
     switch(menuSelection) {
-      case 0:
-        writeWords("       RAM", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
-        break;
-      case 1:
-        writeWords("       CPU", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
-        break;
-      case 2:
-        writeWords("  MOTHER BOARD", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
-        break;
-      case 3:
-        writeWords("  /EXIT SYSTEM/", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
-        break;
-      case 4:
-        writeWords("   HARD DRIVE", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
-        break;
+        case 0:
+            writeWords("       RAM", WINDOW_WIDTH/2- 205, WINDOW_HEIGHT/2 + 95);
+            break;
+        case 1:
+            writeWords("       CPU", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+            break;
+        case 2:
+            writeWords("  MOTHER BOARD", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+            break;
+        case 3:
+            writeWords("  /EXIT SYSTEM/", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+            break;
+        case 4:
+            writeWords("   HARD DRIVE", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+            break;
     }
 
     if(showInvalid) {
