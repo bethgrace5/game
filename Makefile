@@ -6,8 +6,8 @@ all: game tool script
 game: main.cpp ppm.cpp
 	g++ $(CFLAGS) main.cpp ppm.cpp -Wall -o game -lX11 -lGL -lGLU -lm -I/usr/X11R6/include -L/usr/X11R6/lib -lX11
 
-tool: editorX.cpp ppm.cpp
-	g++ $(CFLAGS) editorX.cpp ppm.cpp -Wall -o tool -lX11 -lGL -lGLU -lm -I/usr/X11R6/include -L/usr/X11R6/lib -lX11
+tool: editor.cpp ppm.cpp
+	g++ $(CFLAGS) editor.cpp ppm.cpp -Wall -o tool -lX11 -lGL -lGLU -lm -I/usr/X11R6/include -L/usr/X11R6/lib -lX11
 
 clean:
 	rm -f game

@@ -82,7 +82,7 @@ int id = 0;
 int mouse(int x, int y);
 void draging(int x, int y);
 void incRow();
-void incColumn(int height);
+void incColumn();
 
 
 //Images and Textures
@@ -305,7 +305,14 @@ void draging(int x, int y){
 }
 void incRow(){
   if(saveID < 0) return;
-  storeIn.grounds[saveID].init(storeIn.grounds[saveID].getWidth()+30, 30);
+  storeIn.grounds[saveID].init(storeIn.grounds[saveID].getWidth()+30,
+                               storeIn.grounds[saveID].getHeight());
+  storeIn.grounds[saveID].setupTile();
+}
+void incColumn(){
+  if(saveID < 0) return;
+  storeIn.grounds[saveID].init(storeIn.grounds[saveID].getWidth(),
+                               storeIn.grounds[saveID].getHeight()+30);
   storeIn.grounds[saveID].setupTile();
 }
 
@@ -325,7 +332,7 @@ int check_keys (XEvent *e) {
       std::cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
       dfs.read((char *)&storeIn, sizeof(storeIn));
     }
-    if( key == XK_r){
+    if( key == XK_y){
       for(int i = 0; i < storeIn.grounds_length; i++){
         storeIn.grounds[i].reInitSprite(); 
       } 
@@ -338,6 +345,9 @@ int check_keys (XEvent *e) {
     }
     if(key == XK_r){
       incRow();  
+    }
+    if(key == XK_t){
+      incColumn(); 
     }
 
     if(key == XK_a) roomX -= 50;

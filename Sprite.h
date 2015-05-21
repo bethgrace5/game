@@ -27,6 +27,7 @@ class Sprite{
   private:
     const char *imageName;
     std::string strImageName;
+    char save[30];
     int column;
     int row;
     int imageHeight;

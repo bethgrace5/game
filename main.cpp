@@ -45,7 +45,7 @@
 #define QUICK_LOAD_TIME 1
 
 // 1 to use tool editor, 0 to use pre-defined objects
-#define USE_TOOLS 1
+#define USE_TOOLS 0
 
 #define MAX_BACKGROUND_BITS 6000
 #define HERO_START_X 150

@@ -43,16 +43,17 @@ void Sprite::insert(const char *filename, int x, int y){
 void Sprite::setFile(const char *filename){
   //Change the imageName to ppm file. imageName is used in the initSprite();
   imageName = filename; 
+  strcpy(save, imageName);
+  //std::cout << "Setting File image" << save << std::endl;
 }
 
 void Sprite::setClip(int x, int y){
   //User defined row and column. The images must evenly split apart from each
   //other. ClipX and ClipY determines where to cut parts in the image.
   row = x; column = y; 
-  //std::cout << "What is (x,y): (" << row << "," << column << ")\n";
   if(x > 0) clipX = (float)1/row;
-  //std::cout << "give me CLIPX: " << clipX << std::endl;
   if(y > 0) clipY = (float)1/column;
+  //std::cout << "give me CLIPX: " << clipX << std::endl;
   //std::cout << "give me CLIPY: " << clipY << std::endl;
 }
 
@@ -87,7 +88,9 @@ void Sprite::initSprite(){
 
 void Sprite::reInitSprite(){
   //Refresh the new Sprite Image
-  imageName = strImageName.c_str();
+  std::cout << "Setting File image" << save << std::endl;
+  //imageName = strImageName.c_str();
+  imageName = &save[0];
   image = ppm6GetImage(imageName);
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
@@ -181,23 +184,6 @@ void Sprite::drawTile(int atSet){
   atY = (int)(atSet/row);
 
   drawTile(atX, atY);
-/*
-  glPushMatrix();
-  glBindTexture(GL_TEXTURE_2D, texture);
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_LESS, 1.0f);
-  glColor4ub(255,255,255,255);
-  glBegin(GL_QUADS);
-  int w = clipWidth;
-  int h = clipHeight;
-
-  glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
-  glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
-  glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
-  glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
-
-  glEnd(); glPopMatrix();
-  glDisable(GL_ALPHA_TEST);*/
 }
 
 //This will use the drawTile(int atSet)
