@@ -9,6 +9,7 @@ class Object{
         float x, y, z;
     };
     public:
+        int life;
         void setWidth(double w);
         double getWidth(void);
         void setHeight(double w);
@@ -20,15 +21,17 @@ class Object{
         double getVelocityX(void);
         double getVelocityY(void);
 
-        double getCameraX(void);
-        double getCameraY(void);
+        void setJump(void);
+        int getJump(void);
+
+        void setAggro(bool b);
+        bool getAggro(void);
 
         void setCenter(double x, double y);
-        void setCameraX(double x);
-        void setCameraY(double y);
 
         void setVelocityX(double x);
         void setVelocityY(double y);
+        void autoSet();
 
         double getOldCenterX(void);
         double getOldCenterY(void);
@@ -48,17 +51,21 @@ class Object{
         double getOldBottom(void);
         double getOldLeft(void);
 
+        //Moved to Sprite Class
         void setIndex(int ind);
         int getIndex();
 
-        // used to update boundaries for window scrolling
-        double getWindowCenterX();
-        double getWindowCenterY();
-        void scrollHorizontal(double amount);
-        void scrollVertical(double amount);
-        double getWindowInterval();
+        void setID(int objID);
+        int getID();
+
+        void setFloor(Object *obj);
+        Object *getFloor();
+        
+        int isJumping, isFalling, isDying, isWalking, isShooting, isDead;
 
         Object( double w, double h, double x, double y);
+        void init(double w, double h, double x, double y);
+        void init(double w, double h);
         // TODO: create destructor
         //~Object(){ delete [] ground;}
 
@@ -68,13 +75,16 @@ class Object{
         int top, bottom, left, right;
         // interval is distance the sprite is allowed to move away
         // from windowCenter
-        int interval;
+        
         int index;
-        Vec camera;
+        int obj_id;;
+        int jump;
+        bool aggro;
         Vec velocity;
         Vec center;
         Vec oldCenter;
-        Vec windowCenter;
+        Object *floor;
+        
 };
 
 #endif

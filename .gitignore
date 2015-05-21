@@ -3,6 +3,11 @@
 
 # ignore executable
 game
+tool
+*.ros
 
 # Vim swapfiles
 *.swp
+
+# OS X folder meta data
+*.DS_Store 
