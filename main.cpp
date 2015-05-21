@@ -15,6 +15,7 @@
 #include "functions.h"
 #include <sstream>
 #include <algorithm>
+#include <fstream>
 
 //#include "Sprite.cpp"
 #include "bethanyA.cpp"
@@ -29,7 +30,7 @@
 //Enemies
 #include "brianS.cpp"
 
-#include <fstream>
+#include "Storage.cpp"
 
 #define WINDOW_WIDTH 900
 #define WINDOW_HEIGHT 600
@@ -77,10 +78,6 @@ struct Bullet {
   }
 };
 
-struct data{
-  Platform grounds[MAX_GROUNDS];
-  int grounds_length;
-} storeIn;
 /*
    int diff_ms (timeval t1, timeval t2) {
    return (((t1.tv_sec - t2.tv_sec) * 1000000) + (t1.tv_usec - t2.tv_usec))/1000;

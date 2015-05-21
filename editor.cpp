@@ -1,3 +1,17 @@
+/*
+======================+
+    Tool Editor       |
+======================+
+  Main Center         |
+  Platform Editor     |
+  Enemy Editor        |
+  Mouse Check         |
+  Key Check           |
+  Physics             |
+  Drawing             |
+  Window Setup        |
+======================+
+*/
 #include <iomanip>
 #include <iostream>
 #include <cstdio>
@@ -15,7 +29,7 @@
 #include "functions.h"
 #include <sstream>
 #include <algorithm>
-
+#include <fstream>
 //#include "Sprite.cpp"
 #include "bethanyA.cpp"
 
@@ -29,7 +43,7 @@
 //Enemies
 #include "brianS.cpp"
 
-#include <fstream>
+#include "Storage.cpp"
 
 #define WINDOW_WIDTH 900
 #define WINDOW_HEIGHT 600
@@ -54,24 +68,17 @@ typedef double Vec[3];
 
 //X Windows variables
 Display *dpy; Window win; GLXContext glc;
-
+//------------------------------
 //Game Globals
-string str = "";
-Enemy *enemies[MAX_ENEMIES];
-Object *hero; // Class Player
+//------------------------------
 Player *testHero;
-Platform *grounds[MAX_GROUNDS];
-int bg, bullets, grounds_length, enemies_length,  i, j, level=-1;
+Enemy *enemies[MAX_ENEMIES];
+int grounds_length, enemies_length;
+int i, j;
+
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
-int interval=120;
-double g_left, g_right, g_top, g_bottom;
 int quit=0;
-
-struct data{
-  Platform grounds[MAX_GROUNDS];
-  int grounds_length;
-} storeIn;
 
 bool create = 0;
 bool selecter = 0;
@@ -79,39 +86,36 @@ int  holdID = -1;
 int saveID = -1;
 int id = 0;
 
-int mouse(int x, int y);
+//------------------------------
+//Function Prototype
+//------------------------------
+int clickObject(int x, int y);
 void draging(int x, int y);
-void incRow();
-void incColumn();
 
-
-//Images and Textures
-Ppmimage *heroImage=NULL;
-GLuint heroTexture;
-Ppmimage *menuImage[40];
-GLuint menuTexture[40];
-Ppmimage *initImages[32];
-GLuint initTextures[32];
-Ppmimage *computerScreenImages[26];
-GLuint computerScreenTextures[26];
-
-//Function prototypes
 void initXWindows(void);
 void init_opengl(void);
 void cleanupXWindows(void);
+void moveWindow(void);
+
 void check_mouse(XEvent *e);
 int  check_keys (XEvent *e);
-void movement(void);
-void render(void);
-void moveWindow(void);
-void renderGrounds(int x, int y);
-void deleteEnemy(int ind);
-void renderEnemies(int x, int y);
-void renderHero(int x, int y);
+
 void makePlatform(int w, int h, int x, int y); 
+void incRow();
+void incColumn();
+
+void renderHero(int x, int y);
+
 void makeEnemy(int w, int h, Object *ground, int type); 
 Object createAI( int w, int h, Object *ground);
+void deleteEnemy(int ind);
 
+
+void render(void);
+void renderEnemies(int x, int y);
+void renderGrounds(int x, int y);
+
+void movement(void);
 bool detectCollide(Object *obj, Object *ground);
 
 bool inWindow(Object &obj) {
@@ -121,7 +125,9 @@ bool inWindow(Object &obj) {
        obj.getRight() < (roomX+(WINDOW_HALF_WIDTH))));
 }
 
-
+//====================================================================
+//    Main Center
+//====================================================================
 int main(void) {
   initXWindows(); init_opengl();
 
@@ -129,10 +135,6 @@ int main(void) {
   testHero = new Player();
   testHero->insert("./images/hero.ppm", 13, 1);
   testHero->setSize(44,48);
-
-  if(QUICK_LOAD_TIME) {
-    level = 1;
-  }
 
   while (!quit) { //Staring Animation
     while (XPending(dpy)) {
@@ -145,44 +147,6 @@ int main(void) {
     glXSwapBuffers(dpy, win);
   }
   cleanupXWindows(); return 0;
-  //glDeleteTextures(1, &heroTexture);
-  //glDeleteTextures(1, &menuTexture);
-}
-
-void set_title (void) { //Set the window title bar.
-  XMapWindow(dpy, win); XStoreName(dpy, win, "Revenge of the Code");
-}
-
-void cleanupXWindows (void) { //do not change
-  XDestroyWindow(dpy, win); XCloseDisplay(dpy);
-}
-
-void initXWindows (void) { //do not change
-  GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-  int w=WINDOW_WIDTH, h=WINDOW_HEIGHT;
-  dpy = XOpenDisplay(NULL);
-  if (dpy == NULL) {
-    cout << "\n\tcannot connect to X server\n" << endl;
-    exit(EXIT_FAILURE);
-  }
-  Window root = DefaultRootWindow(dpy);
-  XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
-  if (vi == NULL) {
-    cout << "\n\tno appropriate visual found\n" << endl;
-    exit(EXIT_FAILURE);
-  }
-  Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
-  XSetWindowAttributes swa;
-  swa.colormap = cmap;
-  swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
-    ButtonPress | ButtonReleaseMask |
-    PointerMotionMask |
-    StructureNotifyMask | SubstructureNotifyMask;
-  win = XCreateWindow(dpy, root, 0, 0, w, h, 0, vi->depth,
-      InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
-  set_title();
-  glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
-  glXMakeCurrent(dpy, win, glc);
 }
 
 void init_opengl (void) {
@@ -201,9 +165,11 @@ void init_opengl (void) {
   glClearColor(0.0, 0.0, 0.0, 1.0);
   glEnable(GL_TEXTURE_2D);
   initFastFont();
-
 }
 
+//=====================================================================
+//  Platform Editor
+//=====================================================================
 void makePlatform(int w, int h, int x, int y) {
   cout << "Make Ground \n";
   //storeIn.grounds[storeIn.grounds_length] = new Platform();
@@ -216,7 +182,21 @@ void makePlatform(int w, int h, int x, int y) {
     std::endl;
   storeIn.grounds_length++;
 }
-
+void incRow(){
+  if(saveID < 0) return;
+  storeIn.grounds[saveID].init(storeIn.grounds[saveID].getWidth()+30,
+                               storeIn.grounds[saveID].getHeight());
+  storeIn.grounds[saveID].setupTile();
+}
+void incColumn(){
+  if(saveID < 0) return;
+  storeIn.grounds[saveID].init(storeIn.grounds[saveID].getWidth(),
+                               storeIn.grounds[saveID].getHeight()+30);
+  storeIn.grounds[saveID].setupTile();
+}
+//=====================================================================
+//  Enemy Editor
+//=====================================================================
 void makeEnemy(int w, int h, Object *ground, int type) {
   if (enemies_length<MAX_ENEMIES){
     switch (type){
@@ -237,14 +217,34 @@ void makeEnemy(int w, int h, Object *ground, int type) {
   }
 }
 
+void deleteEnemy(int ind){
+  enemies_length--;
+  delete enemies[i];
+  enemies[i] = enemies[enemies_length];
+  enemies[enemies_length]=NULL;
+
+  /*
+     for (i=ind;i<enemies_length;i++){
+     enemies[i]=(i==(MAX_ENEMIES-1)?NULL:enemies[i+1]);
+     cout << "e[" << i << "] = " << (i==(MAX_ENEMIES-1)?NULL:enemies[i+1]);
+     } 
+     enemies_length--;
+     cout << "deleted enemy, count : " << enemies_length << endl;
+     */
+}
+Object createAI (int w, int h, Object *ground) {
+  Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
+  return newEnemy;
+}
+//=====================================================================
+//  Mouse Check
+//=====================================================================
 static int savex = 0, savey = 0;
 void check_mouse (XEvent *e) {
   //static int n = 0;
   if (e->type == ButtonRelease) { 
     std::cout << " Release\n";
-    holdID = -1; 
-
-    return;
+    holdID = -1;  return;
   }
 
   int take;
@@ -256,25 +256,21 @@ void check_mouse (XEvent *e) {
         return;
       }
       if(selecter == 1){
-        take = mouse(savex, savey); 
+        take = clickObject(savex, savey); 
         std::cout << "The Id is: " << take << "\n";
         saveID = holdID = take;
       }
     }
-    if (e->xbutton.button==2) { //Right button was pressed
-      take = mouse(savex, savey);
-      std::cout << "The Id is: " << take << "\n";
+    if (e->xbutton.button==2) {
 
       return;
     }
-    if (e->xbutton.button==3) { //Right button was pressed
-      take = mouse(savex, savey);
-      std::cout << "The Id is: " << take << "\n";
+    if (e->xbutton.button==3) {
 
       return;
     }
   }
-  if (e->xbutton.button==3) { //Right button was pressed
+  if (e->xbutton.button==3) {
     return;
   }
 
@@ -287,7 +283,8 @@ void check_mouse (XEvent *e) {
     savey  = WINDOW_HEIGHT - e->xbutton.y;
   }
 }
-int mouse(int x, int y){
+
+int clickObject(int x, int y){
   for(int i = 0; i < storeIn.grounds_length; i++){
     if(storeIn.grounds[i].getRight()  > x &&
         storeIn.grounds[i].getLeft()   < x &&
@@ -303,19 +300,9 @@ void draging(int x, int y){
   if(holdID < 0) return;
   storeIn.grounds[holdID].setCenter(x, y);
 }
-void incRow(){
-  if(saveID < 0) return;
-  storeIn.grounds[saveID].init(storeIn.grounds[saveID].getWidth()+30,
-                               storeIn.grounds[saveID].getHeight());
-  storeIn.grounds[saveID].setupTile();
-}
-void incColumn(){
-  if(saveID < 0) return;
-  storeIn.grounds[saveID].init(storeIn.grounds[saveID].getWidth(),
-                               storeIn.grounds[saveID].getHeight()+30);
-  storeIn.grounds[saveID].setupTile();
-}
-
+//=====================================================================
+//  Key Check
+//=====================================================================
 int check_keys (XEvent *e) {
   //handle input from the keyboard
   int key = XLookupKeysym(&e->xkey, 0);
@@ -352,22 +339,20 @@ int check_keys (XEvent *e) {
 
     if(key == XK_a) roomX -= 50;
     if(key == XK_d) roomX += 50;
-    /*
-       if ((key == XK_w || key == XK_Up)); 
-       if (key == XK_a || key == XK_Left);
-       if (key == XK_d || key == XK_Right);
-       if (key == XK_space) ;
-       if (key == XK_y) {}
-       */
   }
 
   else if (e->type == KeyRelease) {
-    /*
-       if ((key == XK_a || key == XK_Left) && !(hero->isDying));
-       if ((key == XK_d || key == XK_Right) && !(hero->isDying));
-       if (key == XK_space);*/
+    
+  
   }
   return 0;
+}
+
+//=====================================================================
+//  Physics
+//=====================================================================
+void movement() {
+  draging(savex, savey);
 }
 
 bool detectCollide (Object *obj, Object *ground) {
@@ -379,11 +364,9 @@ bool detectCollide (Object *obj, Object *ground) {
       obj->getTop()    > ground->getBottom());
 }
 
-void movement() {
-  draging(savex, savey);
-  // Hero Apply Velocity, Add Gravity
-}
-
+//=====================================================================
+//  Drawing
+//=====================================================================
 void renderGrounds (int x, int y) {
   // render grounds
   for (i=0;i<storeIn.grounds_length;i++) {
@@ -426,24 +409,41 @@ void render () {
   renderHero(x, y);
 }
 
-void deleteEnemy(int ind){
-  enemies_length--;
-  delete enemies[i];
-  enemies[i] = enemies[enemies_length];
-  enemies[enemies_length]=NULL;
-
-  /*
-     for (i=ind;i<enemies_length;i++){
-     enemies[i]=(i==(MAX_ENEMIES-1)?NULL:enemies[i+1]);
-     cout << "e[" << i << "] = " << (i==(MAX_ENEMIES-1)?NULL:enemies[i+1]);
-     } 
-     enemies_length--;
-     cout << "deleted enemy, count : " << enemies_length << endl;
-     */
+//=====================================================================
+//Window Setup
+//=====================================================================
+void set_title (void) { //Set the window title bar.
+  XMapWindow(dpy, win); XStoreName(dpy, win, "Revenge of the Code");
 }
 
-Object createAI (int w, int h, Object *ground) {
-  Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
-  return newEnemy;
+void cleanupXWindows (void) { //do not change
+  XDestroyWindow(dpy, win); XCloseDisplay(dpy);
 }
 
+void initXWindows (void) { //do not change
+  GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
+  int w=WINDOW_WIDTH, h=WINDOW_HEIGHT;
+  dpy = XOpenDisplay(NULL);
+  if (dpy == NULL) {
+    cout << "\n\tcannot connect to X server\n" << endl;
+    exit(EXIT_FAILURE);
+  }
+  Window root = DefaultRootWindow(dpy);
+  XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
+  if (vi == NULL) {
+    cout << "\n\tno appropriate visual found\n" << endl;
+    exit(EXIT_FAILURE);
+  }
+  Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
+  XSetWindowAttributes swa;
+  swa.colormap = cmap;
+  swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
+    ButtonPress | ButtonReleaseMask |
+    PointerMotionMask |
+    StructureNotifyMask | SubstructureNotifyMask;
+  win = XCreateWindow(dpy, root, 0, 0, w, h, 0, vi->depth,
+      InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
+  set_title();
+  glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
+  glXMakeCurrent(dpy, win, glc);
+}

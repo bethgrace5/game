@@ -88,7 +88,7 @@ void Sprite::initSprite(){
 
 void Sprite::reInitSprite(){
   //Refresh the new Sprite Image
-  std::cout << "Setting File image" << save << std::endl;
+  //std::cout << "Setting File image" << save << std::endl;
   //imageName = strImageName.c_str();
   imageName = &save[0];
   image = ppm6GetImage(imageName);
