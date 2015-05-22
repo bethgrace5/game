@@ -784,6 +784,7 @@ void movement() {
       b = new Bullet;
       b->pos[0] = testHero->getCenterX();
       b->pos[1] = testHero->getCenterY()+15;
+      fmod_playsound(0);
       //if (lastFacing or testHero->getVelocityX()<0) {
       //    b->vel[0] = -18;
       //} else {
