@@ -483,7 +483,10 @@ void save(){
   std::cout << "Save File As: ";
   string fileName;
   cin >> fileName; fileName.append(".ros");
-  ofstream saveFileAs(fileName, ios::binary); 
+  char charFileName[40];
+  strcpy(charFileName, fileName.c_str());
+  ofstream saveFileAs(charFileName, ios::binary); 
+
   saveFileAs.write((char *)&storeIn, sizeof(storeIn));
 }
 
@@ -505,7 +508,10 @@ void load(){
         std::cout << "! Will Only take .ros files !\n";
         return;
       }
-      ifstream dfs(fileName, ios::binary);
+      char charFileName[40];
+      strcpy(charFileName, fileName.c_str());
+
+      ifstream dfs(charFileName, ios::binary);
       std::cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
       dfs.read((char *)&storeIn, sizeof(storeIn));
 
