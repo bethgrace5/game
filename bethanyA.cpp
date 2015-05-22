@@ -22,6 +22,7 @@ Sprite::Sprite(){
   imageWidth = 0;
   tileAt = 0;
   indexX = indexY = 0;
+  background = 0;
 }
 
 void Sprite::setIndex(int ind){
@@ -130,7 +131,9 @@ void Sprite::drawTile(int row, int column){
 
   glBindTexture(GL_TEXTURE_2D, texture);
   glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_GREATER, 0.0f);
+  if(background == 0) glAlphaFunc(GL_GREATER, 0.0f);
+  else glAlphaFunc(GL_LESS, 1.0f);
+
   glColor4ub(255,255,255,255);
   glBegin(GL_QUADS);
   int  w = clipWidth;
@@ -219,6 +222,12 @@ void Sprite::setMirror(bool reflect){
 }
 bool Sprite::checkMirror(){
   return mirror;
+}
+void Sprite::setBackground(bool back){
+  background = back;
+}
+bool Sprite::checkBackground(){
+  return background;
 }
 
 int Sprite::getIndexX(){

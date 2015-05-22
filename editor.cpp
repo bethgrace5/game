@@ -187,7 +187,7 @@ void makePlatform(int x, int y) {
   cout << "Make Ground \n";
   //storeIn.grounds[storeIn.grounds_length] = new Platform();
   storeIn.grounds[storeIn.grounds_length]
-    .insert("./images/DigitFont2.ppm", 7, 6);
+    .insert("./images/megaLevel.ppm", 10, 36);
 
   int width  = storeIn.grounds[storeIn.grounds_length].getClipWidth();
   int height = storeIn.grounds[storeIn.grounds_length].getClipHeight();
@@ -199,6 +199,7 @@ void makePlatform(int x, int y) {
   std::cout << "What is " << storeIn.grounds[storeIn.grounds_length].getID() <<
     std::endl;
   storeIn.grounds[storeIn.grounds_length].setIndexXY(0, 0);
+  storeIn.grounds[storeIn.grounds_length].setBackground(1);
   storeIn.grounds_length++;
 }
 void setRow(int size){
