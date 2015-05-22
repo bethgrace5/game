@@ -1,9 +1,10 @@
 # cs335 game
 CFLAGS	= -I ./include
+LIB 	= ./lib/fmod/libfmodex64.so
 
 all: game tool script
 
-game: main.cpp ppm.cpp
+game: main.cpp ppm.cpp fmod.c
 	g++ $(CFLAGS) main.cpp ppm.cpp -Wall -o game -lX11 -lGL -lGLU -lm -I/usr/X11R6/include -L/usr/X11R6/lib -lX11
 
 tool: editor.cpp ppm.cpp
