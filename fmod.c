@@ -12,9 +12,11 @@ See other sample programs in the fmod /examples directory
 //
 //#include "../../api/inc/fmod.h"
 //#include "../../api/inc/fmod_errors.h"
-#include <FMOD/fmod.h>
-#include <FMOD/fmod_errors.h>
+#include "./include/FMOD/fmod.h"
+#include "./include/FMOD/fmod_errors.h"
+#include "./include/FMOD/fmod_errors.h"
 #include <stdio.h>
+#include "fmod.h"
 
 //local global variables are defined here
 #define MAX_SOUNDS 32

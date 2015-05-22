@@ -17,8 +17,8 @@
 #include <algorithm>
 #include <fstream>
 
-#include "include/FMOD/fmod.h"
-#include "include/FMOD/wincompat.h"
+#include "./include/FMOD/fmod.h"
+#include "./include/FMOD/wincompat.h"
 #include "fmod.h"
 
 //#include "Sprite.cpp"
