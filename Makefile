@@ -1,5 +1,6 @@
 # cs335 game
 CFLAGS	= -I ./include
+LIB 	= ./lib/fmod/libfmodex64.so
 
 all: game tool script
 

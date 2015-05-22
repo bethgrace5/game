@@ -17,6 +17,10 @@
 #include <algorithm>
 #include <fstream>
 
+#include "include/FMOD/fmod.h"
+#include "include/FMOD/wincompat.h"
+#include "fmod.h"
+
 //#include "Sprite.cpp"
 #include "bethanyA.cpp"
 
@@ -80,18 +84,6 @@ struct Bullet {
   }
 };
 
-/*
-   int diff_ms (timeval t1, timeval t2) {
-   return (((t1.tv_sec - t2.tv_sec) * 1000000) + (t1.tv_usec - t2.tv_usec))/1000;
-   }
-
-   template <typename T>
-   string itos (T Number) {
-   stringstream ss;
-   ss << Number;
-   return (ss.str());
-   }
-   */
 //X Windows variables
 Display *dpy; Window win; GLXContext glc;
 
@@ -138,6 +130,7 @@ GLuint computerScreenTextures[32];
 //Function prototypes
 void initXWindows(void);
 void init_opengl(void);
+void init_sounds(void);
 void cleanupXWindows(void);
 void check_mouse(XEvent *e);
 int  check_keys (XEvent *e);
@@ -170,7 +163,7 @@ bool inWindow(Object &obj) {
 }
 
 int main(void) {
-  initXWindows(); init_opengl();
+  initXWindows(); init_opengl(); init_sounds();
 
   //declare hero object
   hero = new Object(46, 48, HERO_START_X, HERO_START_Y);
@@ -443,6 +436,24 @@ void init_opengl (void) {
   makeEnemy(37, 80, grounds[4], 1);
 
 }
+void init_sounds() {
+    //FMOD_RESULT result;
+    if (fmod_init()) {
+        std::cout << "ERROR - fmod_init()\n" << std::endl;
+        return;
+    }
+    if (fmod_createsound((char *)"./sounds/tick.wav", 0)) {
+        std::cout << "ERROR - fmod_createsound()\n" << std::endl;
+        return;
+    }
+    if (fmod_createsound((char *)"./sounds/drip.wav", 1)) {
+        std::cout << "ERROR - fmod_createsound()\n" << std::endl;
+        return;
+    }
+    fmod_setmode(0,FMOD_LOOP_OFF);
+    //fmod_playsound(0);
+    //fmod_systemupdate();
+}
 
 void makePlatform(int w, int h, int x, int y) {
   grounds[grounds_length] = new Platform();
@@ -535,9 +546,9 @@ int check_keys (XEvent *e) {
           level = 1;
         }
       }
-      // cycle through screens for debugging
+      // play sounds for debugging
       if (key == XK_t) {
-        frameIndex++;
+          fmod_playsound(0);
       }
     }
     if(level ==0) {
@@ -880,7 +891,7 @@ void movement() {
     // loop through frames
     if (diff_ms(frameStart, frameEnd) > frameTime) {
         frameIndex++;
-    	  gettimeofday(&frameEnd, NULL);
+          gettimeofday(&frameEnd, NULL);
     }
 
     if (frameIndex == 26) {
