@@ -527,17 +527,6 @@ void quickLoad(){
       dfs.read((char *)&storeIn, sizeof(storeIn));
 }
 
-void checkLoadFile(std::string filename){
-  int size = filename.size();
-  char cWords[size];
-  //strcpy(cWords, words.c_str());
-  //for(int i = 0; i < size; i++){
-  
-  //}
-  
-  
-
-}
 //=====================================================================
 //  Window Setup
 //=====================================================================
