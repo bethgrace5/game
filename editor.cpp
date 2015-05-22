@@ -33,7 +33,6 @@
 #include <fstream>
 //#include "Sprite.cpp"
 #include "bethanyA.cpp"
-
 //#include "fastFont.h"
 #include "tedP.cpp"
 #include "Player.h"
@@ -207,6 +206,8 @@ void setRow(int size){
   int changeBy = 1; if(size < 0) changeBy = -1;
   int spriteWidth = storeIn.grounds[saveID].getClipWidth() * changeBy;
   int currentWidth = storeIn.grounds[saveID].getWidth();
+
+  if(changeBy == -1 && currentWidth <= -(spriteWidth)) return;
   storeIn.grounds[saveID].setWidth(currentWidth + spriteWidth);
   storeIn.grounds[saveID].setupTile();
 }
@@ -216,6 +217,8 @@ void setColumn(int size){
   int changeBy = 1; if(size < 0) changeBy = -1;
   int spriteHeight  = storeIn.grounds[saveID].getClipHeight() * changeBy;
   int currentHeight = storeIn.grounds[saveID].getHeight();
+
+  if(changeBy == -1 && currentHeight <= -(spriteHeight))  return;
   storeIn.grounds[saveID].setHeight(spriteHeight + currentHeight);
   storeIn.grounds[saveID].setupTile();
 }
