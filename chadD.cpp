@@ -101,7 +101,8 @@ void Platform::drawRow(int x, int y) {
       if (i == 0) glTranslatef(lineSpaceX,0 , 0); 
       else        glTranslatef(lineSpaceX + lineSpaceX ,0 , 0); 
 
-      Sprite::drawTile(x,y);
+      //Sprite::drawTile(x,y);
+      Sprite::drawTile(Sprite::getIndexX(),Sprite::getIndexY());
     }
     glPopMatrix();
   } 

@@ -4,4 +4,4 @@ struct data{
   Platform grounds[MAX_GROUNDS];
   int grounds_length;
   int heroAtX, heroAtY;
-} storeIn;
+} storeIn, storeBack;

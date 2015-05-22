@@ -160,8 +160,8 @@ void Player::autoState(){
 }
 
 void Player::drawBox(){
-  int w = Object::getWidth();
-  int h = Object::getHeight();
+  //int w = Object::getWidth();
+  //int h = Object::getHeight();
   glPushMatrix();
   glTranslatef(Object::getCenterX(), Object::getCenterY(), 0);
 /*

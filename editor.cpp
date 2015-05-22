@@ -9,6 +9,7 @@
   Key Check           |
   Physics             |
   Drawing             |
+  Storage Editor      |
   Window Setup        |
 ======================+
 */
@@ -62,6 +63,8 @@
 #define HERO_START_X 150
 #define HERO_START_Y 350
 
+#define OPTIONAL_STORAGE 1 //If 1, you can write the name of the save file
+
 using namespace std;
 
 typedef double Vec[3];
@@ -80,12 +83,14 @@ int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 int quit=0;
 
+bool saving;
+bool loading;
+
 bool create = 0;
 bool selecter = 0;
 int  holdID = -1;
 int saveID = -1;
 int id = 0;
-
 //------------------------------
 //Function Prototype
 //------------------------------
@@ -97,12 +102,17 @@ void init_opengl(void);
 void cleanupXWindows(void);
 void moveWindow(void);
 
+void save();
+void load();
+
 void check_mouse(XEvent *e);
 int  check_keys (XEvent *e);
 
-void makePlatform(int w, int h, int x, int y); 
-void incRow();
-void incColumn();
+void makePlatform(int x, int y); 
+void setRow(int size);
+void setColumn(int size);
+void changeTileX();
+void changeTileY();
 
 void renderHero(int x, int y);
 
@@ -114,6 +124,9 @@ void deleteEnemy(int ind);
 void render(void);
 void renderEnemies(int x, int y);
 void renderGrounds(int x, int y);
+void renderSave();
+void renderLoad();
+void renderBox();
 
 void movement(void);
 bool detectCollide(Object *obj, Object *ground);
@@ -170,29 +183,56 @@ void init_opengl (void) {
 //=====================================================================
 //  Platform Editor
 //=====================================================================
-void makePlatform(int w, int h, int x, int y) {
+void makePlatform(int x, int y) {
   cout << "Make Ground \n";
   //storeIn.grounds[storeIn.grounds_length] = new Platform();
-  storeIn.grounds[storeIn.grounds_length].insert("./images/level.ppm", 1, 1);
-  storeIn.grounds[storeIn.grounds_length].init(w, h, x, y);
+  storeIn.grounds[storeIn.grounds_length]
+    .insert("./images/DigitFont2.ppm", 7, 6);
+
+  int width  = storeIn.grounds[storeIn.grounds_length].getClipWidth();
+  int height = storeIn.grounds[storeIn.grounds_length].getClipHeight();
+
+  storeIn.grounds[storeIn.grounds_length].init(width, height, x, y);
   storeIn.grounds[storeIn.grounds_length].setupTile();
   storeIn.grounds[storeIn.grounds_length].setID(id);
   id++;
   std::cout << "What is " << storeIn.grounds[storeIn.grounds_length].getID() <<
     std::endl;
+  storeIn.grounds[storeIn.grounds_length].setIndexXY(0, 0);
   storeIn.grounds_length++;
 }
-void incRow(){
+void setRow(int size){
   if(saveID < 0) return;
-  storeIn.grounds[saveID].init(storeIn.grounds[saveID].getWidth()+30,
-                               storeIn.grounds[saveID].getHeight());
+  int changeBy = 1; if(size < 0) changeBy = -1;
+  int spriteWidth = storeIn.grounds[saveID].getClipWidth() * changeBy;
+  int currentWidth = storeIn.grounds[saveID].getWidth();
+  storeIn.grounds[saveID].setWidth(currentWidth + spriteWidth);
   storeIn.grounds[saveID].setupTile();
 }
-void incColumn(){
+
+void setColumn(int size){
   if(saveID < 0) return;
-  storeIn.grounds[saveID].init(storeIn.grounds[saveID].getWidth(),
-                               storeIn.grounds[saveID].getHeight()+30);
+  int changeBy = 1; if(size < 0) changeBy = -1;
+  int spriteHeight  = storeIn.grounds[saveID].getClipHeight() * changeBy;
+  int currentHeight = storeIn.grounds[saveID].getHeight();
+  storeIn.grounds[saveID].setHeight(spriteHeight + currentHeight);
   storeIn.grounds[saveID].setupTile();
+}
+
+void changeTileX(){ 
+  if(saveID < 0) return;
+  std::cout << "Swap X\n";
+  int x = storeIn.grounds[saveID].getIndexX(); 
+  int y = storeIn.grounds[saveID].getIndexY();
+  storeIn.grounds[saveID].setIndexXY(x+1,y);
+}
+
+void changeTileY(){
+  if(saveID < 0) return;
+  std::cout << "Swap Y\n";
+  int x = storeIn.grounds[saveID].getIndexX(); 
+  int y = storeIn.grounds[saveID].getIndexY();
+  storeIn.grounds[saveID].setIndexXY(x,y+1);
 }
 //=====================================================================
 //  Enemy Editor
@@ -252,7 +292,7 @@ void check_mouse (XEvent *e) {
     if (e->xbutton.button==1) { //Left button was pressed
       if(create == 1){
         std::cout << " x " << savex << ", y " << savey << "\n";
-        makePlatform(30, 30, savex, savey);
+        makePlatform(savex, savey);
         return;
       }
       if(selecter == 1){
@@ -308,37 +348,27 @@ int check_keys (XEvent *e) {
   int key = XLookupKeysym(&e->xkey, 0);
   if (e->type == KeyPress) {
     if (key == XK_Escape or key == XK_q) return 1;
-    if( key == XK_s){
-      std::cout << "Saving \n";
-      ofstream dfs("test.ros", ios::binary); 
-      dfs.write((char *)&storeIn, sizeof(storeIn));
-    }
-    if( key == XK_l){
-      std::cout << "Loading \n";  
-      ifstream dfs("test.ros", ios::binary);
-      std::cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
-      dfs.read((char *)&storeIn, sizeof(storeIn));
-    }
-    if( key == XK_y){
-      for(int i = 0; i < storeIn.grounds_length; i++){
-        storeIn.grounds[i].reInitSprite(); 
-      } 
-    }
+    if( key == XK_s) save(); 
+    if( key == XK_l) load(); 
+    if(key == XK_r) setRow(1);  
+    if(key == XK_t) setColumn(1); 
+    if(key == XK_y) setRow(-1);
+    if(key == XK_u) setColumn(-1);
+    if(key == XK_j) changeTileX();
+    if(key == XK_k) changeTileY();
+
+
+        
+    if(key == XK_a) roomX -= 50;
+    if(key == XK_d) roomX += 50;
+
     if(key == XK_c){
       create = 1; selecter = 0; 
     }
     if(key == XK_v){
       create = 0; selecter = 1;  
     }
-    if(key == XK_r){
-      incRow();  
-    }
-    if(key == XK_t){
-      incColumn(); 
-    }
 
-    if(key == XK_a) roomX -= 50;
-    if(key == XK_d) roomX += 50;
   }
 
   else if (e->type == KeyRelease) {
@@ -367,6 +397,35 @@ bool detectCollide (Object *obj, Object *ground) {
 //=====================================================================
 //  Drawing
 //=====================================================================
+void renderOptions(){
+  if(create == 1) writeWords("Create Mode", 25, 25);
+  if(selecter == 1) writeWords("Select Mode", 25, 25);
+}
+
+void renderBox(){
+  glPushMatrix();
+  glColor3f(0,0,0);
+  glTranslatef(50, 275, 0); glBegin(GL_QUADS);
+  glVertex2i(-500,-100); glVertex2i(-500, 100);
+  glVertex2i(700, 100); glVertex2i(700, -100);
+  glEnd();
+  glPopMatrix();
+}
+
+void renderSave(){
+  renderBox(); 
+  writeWords("Please Check Your Terminal", 50, 275);
+  writeWords("And Write Name of Saved File", 50, 250); 
+  glXSwapBuffers(dpy, win);
+}
+
+void renderLoad(){
+  renderBox(); 
+  writeWords("Please Check Your Terminal", 50, 275);
+  writeWords("And Write Name Loaded File", 50, 250); 
+  glXSwapBuffers(dpy, win);
+}
+
 void renderGrounds (int x, int y) {
   // render grounds
   for (i=0;i<storeIn.grounds_length;i++) {
@@ -407,10 +466,80 @@ void render () {
   renderGrounds(x, y);
   renderEnemies(0, 0);
   renderHero(x, y);
+  renderOptions();
 }
 
 //=====================================================================
-//Window Setup
+//  Storage Editor
+//=====================================================================
+void save(){
+  std::cout << "Saving \n";
+  ofstream dfs("test.ros", ios::binary); 
+  dfs.write((char *)&storeIn, sizeof(storeIn));
+
+  if(OPTIONAL_STORAGE != 1) return;
+  renderSave();
+
+  std::cout << "Save File As: ";
+  string fileName;
+  cin >> fileName; fileName.append(".ros");
+  char charFileName[40];
+  strcpy(charFileName, fileName.c_str());
+  ofstream saveFileAs(charFileName, ios::binary); 
+
+  saveFileAs.write((char *)&storeIn, sizeof(storeIn));
+}
+
+void quickSave(){
+  std::cout << "Saving \n";
+  ofstream dfs("test.ros", ios::binary); 
+  dfs.write((char *)&storeIn, sizeof(storeIn));
+}
+
+void load(){
+      renderLoad();
+      string fileName;
+      std::cout << "Load in: ";  
+      cin >> fileName;
+
+      if (fileName.find(".ros") != std::string::npos) {
+        std::cout << "File Exist, Will Load\n";
+      }else{
+        std::cout << "! Will Only take .ros files !\n";
+        return;
+      }
+      char charFileName[40];
+      strcpy(charFileName, fileName.c_str());
+
+      ifstream dfs(charFileName, ios::binary);
+      std::cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
+      dfs.read((char *)&storeIn, sizeof(storeIn));
+
+      for(int i = 0; i < storeIn.grounds_length; i++){
+        storeIn.grounds[i].reInitSprite(); 
+      } 
+}
+
+void quickLoad(){
+      std::cout << "Load in \n";  
+      ifstream dfs("test.ros", ios::binary);
+      std::cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
+      dfs.read((char *)&storeIn, sizeof(storeIn));
+}
+
+void checkLoadFile(std::string filename){
+  int size = filename.size();
+  char cWords[size];
+  //strcpy(cWords, words.c_str());
+  //for(int i = 0; i < size; i++){
+  
+  //}
+  
+  
+
+}
+//=====================================================================
+//  Window Setup
 //=====================================================================
 void set_title (void) { //Set the window title bar.
   XMapWindow(dpy, win); XStoreName(dpy, win, "Revenge of the Code");

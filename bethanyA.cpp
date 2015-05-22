@@ -21,6 +21,7 @@ Sprite::Sprite(){
   imageHeight = 0;
   imageWidth = 0;
   tileAt = 0;
+  indexX = indexY = 0;
 }
 
 void Sprite::setIndex(int ind){
@@ -83,7 +84,6 @@ void Sprite::initSprite(){
   imageHeight = image->height;
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
   delete [] silhouetteData;
-  strImageName = imageName;
 }
 
 void Sprite::reInitSprite(){
@@ -231,10 +231,12 @@ int Sprite::getIndexAt(){
   return indexAt;
 }
 void Sprite::setIndexAt(int ind){
+  if(ind < (row*column)) ind = 0;
   indexAt = ind; 
 }
 void Sprite::setIndexXY(int x, int y){
+  if(x > row) x = 0;
+  if(y > column) y = 0;
   indexX = x;
   indexY = y;
 }
-
