@@ -84,7 +84,6 @@ void Sprite::initSprite(){
   imageHeight = image->height;
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
   delete [] silhouetteData;
-  strImageName = imageName;
 }
 
 void Sprite::reInitSprite(){

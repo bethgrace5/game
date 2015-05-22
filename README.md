@@ -15,6 +15,8 @@
     *  `t` - increase column size of selected object
     *  `s` - save level as created
     *  `l` - revert back to last saved state
+    *  `j` - change tile right/left
+    *  'h' - change tile down/up
     *  
 *  Notes:
     *  There must be at least 7 objects, or segmentation fault is thrown

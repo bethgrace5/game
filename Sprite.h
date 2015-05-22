@@ -26,7 +26,6 @@ class Sprite{
   //Global Access-------------------------------------------------------
   private:
     const char *imageName;
-    std::string strImageName;
     char save[40];
     int column;
     int row;
