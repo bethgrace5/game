@@ -108,9 +108,11 @@ void load();
 void check_mouse(XEvent *e);
 int  check_keys (XEvent *e);
 
-void makePlatform(int w, int h, int x, int y); 
+void makePlatform(int x, int y); 
 void setRow(int size);
 void setColumn(int size);
+void changeTileX();
+void changeTileY();
 
 void renderHero(int x, int y);
 
@@ -181,17 +183,22 @@ void init_opengl (void) {
 //=====================================================================
 //  Platform Editor
 //=====================================================================
-void makePlatform(int w, int h, int x, int y) {
+void makePlatform(int x, int y) {
   cout << "Make Ground \n";
   //storeIn.grounds[storeIn.grounds_length] = new Platform();
-  storeIn.grounds[storeIn.grounds_length].insert("./images/level.ppm", 1, 1);
-  storeIn.grounds[storeIn.grounds_length].init(w, h, x, y);
-  //The Above Function is whats casuing it but
+  storeIn.grounds[storeIn.grounds_length]
+    .insert("./images/DigitFont2.ppm", 7, 6);
+
+  int width  = storeIn.grounds[storeIn.grounds_length].getClipWidth();
+  int height = storeIn.grounds[storeIn.grounds_length].getClipHeight();
+
+  storeIn.grounds[storeIn.grounds_length].init(width, height, x, y);
   storeIn.grounds[storeIn.grounds_length].setupTile();
   storeIn.grounds[storeIn.grounds_length].setID(id);
   id++;
   std::cout << "What is " << storeIn.grounds[storeIn.grounds_length].getID() <<
     std::endl;
+  storeIn.grounds[storeIn.grounds_length].setIndexXY(0, 0);
   storeIn.grounds_length++;
 }
 void setRow(int size){
@@ -210,6 +217,22 @@ void setColumn(int size){
   int currentHeight = storeIn.grounds[saveID].getHeight();
   storeIn.grounds[saveID].setHeight(spriteHeight + currentHeight);
   storeIn.grounds[saveID].setupTile();
+}
+
+void changeTileX(){ 
+  if(saveID < 0) return;
+  std::cout << "Swap X\n";
+  int x = storeIn.grounds[saveID].getIndexX(); 
+  int y = storeIn.grounds[saveID].getIndexY();
+  storeIn.grounds[saveID].setIndexXY(x+1,y);
+}
+
+void changeTileY(){
+  if(saveID < 0) return;
+  std::cout << "Swap Y\n";
+  int x = storeIn.grounds[saveID].getIndexX(); 
+  int y = storeIn.grounds[saveID].getIndexY();
+  storeIn.grounds[saveID].setIndexXY(x,y+1);
 }
 //=====================================================================
 //  Enemy Editor
@@ -269,7 +292,7 @@ void check_mouse (XEvent *e) {
     if (e->xbutton.button==1) { //Left button was pressed
       if(create == 1){
         std::cout << " x " << savex << ", y " << savey << "\n";
-        makePlatform(30, 30, savex, savey);
+        makePlatform(savex, savey);
         return;
       }
       if(selecter == 1){
@@ -325,29 +348,27 @@ int check_keys (XEvent *e) {
   int key = XLookupKeysym(&e->xkey, 0);
   if (e->type == KeyPress) {
     if (key == XK_Escape or key == XK_q) return 1;
-    if( key == XK_s){
-      save();
-    }
-    if( key == XK_l){
-      load();
-    }
-    if( key == XK_y){
-    }
+    if( key == XK_s) save(); 
+    if( key == XK_l) load(); 
+    if(key == XK_r) setRow(1);  
+    if(key == XK_t) setColumn(1); 
+    if(key == XK_y) setRow(-1);
+    if(key == XK_u) setColumn(-1);
+    if(key == XK_j) changeTileX();
+    if(key == XK_k) changeTileY();
+
+
+        
+    if(key == XK_a) roomX -= 50;
+    if(key == XK_d) roomX += 50;
+
     if(key == XK_c){
       create = 1; selecter = 0; 
     }
     if(key == XK_v){
       create = 0; selecter = 1;  
     }
-    if(key == XK_r){
-      setRow(1);  
-    }
-    if(key == XK_t){
-      setColumn(1); 
-    }
 
-    if(key == XK_a) roomX -= 50;
-    if(key == XK_d) roomX += 50;
   }
 
   else if (e->type == KeyRelease) {
