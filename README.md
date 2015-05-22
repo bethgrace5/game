@@ -12,6 +12,7 @@
     *  `c` - create mode -> click to place objects
     *  `v` - select mode -> select created objects
     *  `r` - increase row size of selected object
+    *  `t` - increase column size of selected object
     *  `s` - save level as created
     *  `l` - revert back to last saved state
     *  
