@@ -1,6 +1,11 @@
 #include "definitions.h"
 #include "Sprite.h"
 
+#ifdef USE_SOUND
+#include "fmod.c"
+#include "sounds.cpp"
+#endif
+
 #ifndef PLAYER_H
 #define PLAYER_H
 //=====================================================================
@@ -69,9 +74,9 @@ void Player::moveLeft(){
 void Player::jump(){
   if(jumps < jumpLimit){ 
       Object::setVelocityY(jumpPower); 
-#ifdef USE_SOUND
-
-#endif
+      #ifdef USE_SOUND
+      fmod_playsound(marioJump);
+      #endif
       jumps++;
   }
 }

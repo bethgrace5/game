@@ -19,9 +19,6 @@
 #include "chadD.cpp" //Platforms/Grounds
 #include "definitions.h"
 #include "functions.h"
-#ifdef USE_SOUND
-#include "fmod.c"
-#endif
 #include "Object.cpp"
 #include "Player.h"
 #include "ppm.h"
@@ -60,71 +57,57 @@ struct Bullet {
 Display *dpy; Window win; GLXContext glc;
 
 //Hero Globals
-int didJump=0;
-int lives=3;
-int life=100;
-// last facing 0 means facing forward(right), 1 means backward(left)
-int lastFacing=0;
+int didJump=0, lives=3, life=100, lastFacing=0;
 double h_right, h_left, h_top, h_bottom;
 timeval seqStart, seqEnd; // hero's sprite index
 timeval fireStart, fireEnd; // hero's fire rate timer
-timeval frameStart, frameEnd; // menu
-int frameIndex=0;
-int menuSelection = 0;
 
 //Game Globals
-string str = "";
 bgBit *bitHead = NULL;
-Bullet *bhead = NULL;
+Bullet *bulletHead = NULL;
 Enemy *enemies[MAX_ENEMIES];
 Object *hero; // Class Player
 Player *testHero;
 Platform *grounds[MAX_GROUNDS];
-int bg, bullets, grounds_length, enemies_length,  i, j, level=0;
+double g_left, g_right, g_top, g_bottom;
+int bg, bullets, grounds_length, enemies_length, i, j, level=0, fail=0, quit=0;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
-int fail=0;
-int interval=120;
-double g_left, g_right, g_top, g_bottom;
-int quit=0;
-int showInvalid=0;
+
+// menu rendering and selection Globals
+int showInvalid=0, frameIndex=0, menuSelection = 0;
+timeval frameStart, frameEnd;
 
 //Images and Textures
 Ppmimage *heroImage=NULL, *initImages[32], *computerScreenImages[32];
 GLuint heroTexture, initTextures[65], computerScreenTextures[32];
 
 //Function prototypes
-void initXWindows(void);
-void init_opengl(void);
-void cleanupXWindows(void);
-void check_mouse(XEvent *e);
+Object createAI( int w, int h, Object *ground);
+bool bulletCollide(Bullet *b, Object *obj);
+bool detectCollide(Object *obj, Object *ground);
 int  check_keys (XEvent *e);
-void movement(void);
-void render(void);
-void moveWindow(void);
-void renderBackground(void);
+void check_mouse(XEvent *e);
+void cleanupXWindows(void);
 void cleanup_background(void);
-void renderGrounds(int x, int y);
-void renderBullets(int x, int y);
 void deleteBullet(Bullet *node);
 void deleteEnemy(int ind);
+void groundCollide(Object *obj, Object *ground);
+void initXWindows(void);
+void init_opengl(void);
+void makeEnemy(int w, int h, Object *ground, int type); 
+void makePlatform(int w, int h, int x, int y); 
+void moveWindow(void);
+void movement(void);
+void render(void);
+void renderBackground(void);
+void renderBullets(int x, int y);
+void renderComputerScreenMenu();
 void renderEnemies(int x, int y);
+void renderGrounds(int x, int y);
 void renderHero(int x, int y);
 void renderInitMenu();
-void renderComputerScreenMenu();
-void makePlatform(int w, int h, int x, int y); 
-void makeEnemy(int w, int h, Object *ground, int type); 
-Object createAI( int w, int h, Object *ground);
-void groundCollide(Object *obj, Object *ground);
-bool detectCollide(Object *obj, Object *ground);
-bool bulletCollide(Bullet *b, Object *obj);
 
-bool inWindow(Object &obj) {
-  return ((obj.getLeft() < (roomX+(WINDOW_HALF_WIDTH)) and
-        obj.getLeft() > (roomX-(WINDOW_HALF_WIDTH))) or
-      (obj.getRight() > (roomX-(WINDOW_HALF_WIDTH)) and
-       obj.getRight() < (roomX+(WINDOW_HALF_WIDTH))));
-}
 
 int main(void) {
   initXWindows(); init_opengl(); 
@@ -144,8 +127,7 @@ int main(void) {
   testHero->insert("./images/hero.ppm", 13, 1);
   testHero->setSize(44,48);
 
-  frameIndex = 0;
-
+  // skip menu and go straight to level 1
   if(QUICK_LOAD_TIME) {
     level = 1;
   }
@@ -158,7 +140,6 @@ int main(void) {
     if (level == -1) {
       renderInitMenu();
     }
-
     else if (level == 0) {
       renderComputerScreenMenu();
     }
@@ -170,8 +151,7 @@ int main(void) {
     glXSwapBuffers(dpy, win);
   }
   cleanupXWindows(); return 0;
-  //glDeleteTextures(1, &heroTexture);
-  //glDeleteTextures(1, &menuTexture);
+  fmod_cleanup();
 }
 
 void set_title (void) { //Set the window title bar.
@@ -229,7 +209,6 @@ void init_opengl (void) {
   initFastFont();
 
   //Load images into ppm structure.
-  //Hero image
   heroImage = ppm6GetImage("./images/hero.ppm");
   //Create texture elements
   glGenTextures(1, &heroTexture);
@@ -272,7 +251,6 @@ void init_opengl (void) {
 
     // repeat blinking dot for several frames
     // frame 30 has no dot, frame 31 has a dot
-
     initTextures[32] = initTextures[30];
     initTextures[33] = initTextures[30];
 
@@ -325,13 +303,10 @@ void init_opengl (void) {
       for(int i = 0; i < storeIn.grounds_length; i++){
         grounds[i] = &storeIn.grounds[i];
         grounds[i]->reInitSprite();
-        //storeIn.grounds[i].reInitSprite();
         grounds_length++;
       }
   }
-  // don't use the tools, use pre defined objects
   else {
-  //storeIn.grounds_length = 0;
      makePlatform(20, 1000, -16, 600);
      makePlatform(400, 16, 400, 70);
      makePlatform(200, 16, 900, 200);
@@ -353,10 +328,7 @@ void init_opengl (void) {
      makePlatform(20, 1000, -16, 600);
   }
 
-  //for (i=0;i<=100;i++){
-
-     makeEnemy(37, 80, grounds[2], 1);
-  //}
+  makeEnemy(37, 80, grounds[2], 1);
   makeEnemy(37, 80, grounds[2], 1);
   makeEnemy(37, 80, grounds[2], 1);
   makeEnemy(37, 80, grounds[2], 1);
@@ -403,46 +375,13 @@ void init_opengl (void) {
   makeEnemy(37, 80, grounds[4], 1);
   makeEnemy(37, 80, grounds[4], 1);
 
-}
-
-void makePlatform(int w, int h, int x, int y) {
-  grounds[grounds_length] = new Platform();
-  grounds[grounds_length]->insert("./images/level.ppm", 1, 1);
-  grounds[grounds_length]->init(w, h, x, y);
-  grounds[grounds_length]->setupTile();
-  grounds_length++;
-}
-
-void makeEnemy(int w, int h, Object *ground, int type) {
-  if (enemies_length<MAX_ENEMIES){
-    switch (type){
-      case 1:
-        enemies[enemies_length] = new Enemy(w, h, ground); 
-        enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
-        enemies[enemies_length]->setBottom(-44);
-        enemies[enemies_length]->setLeft(-24);
-        enemies[enemies_length]->setRight(24);
-        enemies[enemies_length]->setTop(24);
-        enemies[enemies_length]->setHeight(25);
-        break;
-    }
-    enemies_length++;
-  }
-  else{
-    cout << "Enemies array full!!!!" << endl;
-  }
-}
-void highlightBox(int x, int y) {
-  cout << "x: " << x << "y: " << y <<endl;
 }
 
 void check_mouse (XEvent *e) {
   static int savex = 0, savey = 0;
-  //static int n = 0;
   if (e->type == ButtonRelease) { return;}
   if (e->type == ButtonPress) {
     if (e->xbutton.button==1) { //Left button was pressed
-      //int y = WINDOW_HEIGHT - e->xbutton.y;
       return;
     }
     if (e->xbutton.button==3) { //Right button was pressed
@@ -468,9 +407,6 @@ int check_keys (XEvent *e) {
       // Jump
       if ((key == XK_w || key == XK_Up)) {
         testHero->jump();
-        #ifdef USE_SOUND
-        fmod_playsound(marioJump);
-        #endif
       }
       // move character left
       if (key == XK_a || key == XK_Left) {
@@ -489,6 +425,10 @@ int check_keys (XEvent *e) {
       if (key == XK_y) {
         testHero->setHealth(0);
         life-=1000;
+        #ifdef USE_SOUND
+        fmod_playsound(dunDunDun);
+        #endif
+
 
       }
       // toggle start menu
@@ -635,6 +575,34 @@ int check_keys (XEvent *e) {
   return 0;
 }
 
+void makePlatform(int w, int h, int x, int y) {
+  grounds[grounds_length] = new Platform();
+  grounds[grounds_length]->insert("./images/level.ppm", 1, 1);
+  grounds[grounds_length]->init(w, h, x, y);
+  grounds[grounds_length]->setupTile();
+  grounds_length++;
+}
+
+void makeEnemy(int w, int h, Object *ground, int type) {
+  if (enemies_length<MAX_ENEMIES){
+    switch (type){
+      case 1:
+        enemies[enemies_length] = new Enemy(w, h, ground); 
+        enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
+        enemies[enemies_length]->setBottom(-44);
+        enemies[enemies_length]->setLeft(-24);
+        enemies[enemies_length]->setRight(24);
+        enemies[enemies_length]->setTop(24);
+        enemies[enemies_length]->setHeight(25);
+        break;
+    }
+    enemies_length++;
+  }
+  else{
+    cout << "Enemies array full!" << endl;
+  }
+}
+
 bool detectCollide (Object *obj, Object *ground) {
   //Gets (Moving Object, Static Object)
   //Reture True if Moving Object Collides with Static Object
@@ -768,6 +736,9 @@ void movement() {
       testHero->isDying=1;
       gettimeofday(&seqStart, NULL);
       fail=100;
+      #ifdef USE_SOUND
+      fmod_playsound(dunDunDun);
+      #endif
     }
     else{
       gettimeofday(&seqEnd, NULL);
@@ -804,16 +775,16 @@ void movement() {
       b->color[0] = 1.0f;
       b->color[1] = 1.0f;
       b->color[2] = 1.0f;
-      b->next = bhead;
-      if (bhead != NULL)
-        bhead->prev = b;
-      bhead = b;
+      b->next = bulletHead;
+      if (bulletHead != NULL)
+        bulletHead->prev = b;
+      bulletHead = b;
       bullets++;
     }
     }
 
     //bullet collisions against grounds
-    b = bhead;
+    b = bulletHead;
     while (b) {
       //move the bullet
       b->pos[0] += b->vel[0];
@@ -835,7 +806,7 @@ void movement() {
       enemies[i]->enemyAI(testHero); //Where does enemy go?
       //enemyAI(enemies[i]);
       //bullets
-      b = bhead;
+      b = bulletHead;
       while (b) {
         if (bulletCollide(b,enemies[i])){
           deleteBullet(b);
@@ -851,6 +822,128 @@ void movement() {
       if ((enemies[i]->isDead) or enemies[i]->getCenterY()<0){
         deleteEnemy(i);
       }
+    }
+  }
+  Object createAI (int w, int h, Object *ground) {
+    Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
+    return newEnemy;
+
+  }
+
+  bool inWindow(Object &obj) {
+    return ((obj.getLeft() < (roomX+(WINDOW_HALF_WIDTH)) and
+             obj.getLeft() > (roomX-(WINDOW_HALF_WIDTH))) or
+            (obj.getRight() > (roomX-(WINDOW_HALF_WIDTH)) and
+             obj.getRight() < (roomX+(WINDOW_HALF_WIDTH))));
+   }
+
+  void moveWindow () {
+    double heroWinPosX = testHero->getCenterX();
+    double heroWinPosY = testHero->getCenterY();
+    int interval=120;
+
+    //move window forward
+    if ((heroWinPosX > roomX + interval) && ((roomX+WINDOW_HALF_WIDTH)<LEVEL_WIDTH-6)) {
+      roomX+=7;
+    }
+    //move window backward (fast move if hero is far away)
+    else if ((heroWinPosX < roomX - interval) && roomX>(WINDOW_HALF_WIDTH+6)) {
+      roomX-=7;
+      if (heroWinPosX < (roomX - interval - 400)) {
+        roomX-=20;
+      }
+      if (heroWinPosX < (roomX - interval - 800)) {
+        roomX-=50;
+      }
+    }
+    //move window up
+    if ((heroWinPosY > roomY + interval) && ((roomY+6)<(MAX_HEIGHT-WINDOW_HALF_HEIGHT))) {
+      roomY+=6;
+    }
+    //move window down
+    else if ((heroWinPosY < roomY - interval) && (roomY-6)>(WINDOW_HALF_HEIGHT)) {
+      i = hero->getVelocityY();
+      if (i>-6)
+        i=-6;
+      roomY+=i;
+    }
+  }
+
+  void render () {
+    int x = roomX - WINDOW_HALF_WIDTH;
+    int y = roomY - WINDOW_HALF_HEIGHT;
+    glClear(GL_COLOR_BUFFER_BIT);
+    // Draw Background Falling Bits
+    renderBackground();
+    renderBullets(x, y);
+    renderGrounds(x, y);
+    renderEnemies(x, y);
+    renderHero(x, y);
+
+    if (fail>0) {
+      writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 200, WINDOW_HEIGHT/2);
+      fail--;
+    }
+    writeWords("Lives:", WINDOW_WIDTH/2- 400, WINDOW_HEIGHT/2- 250);
+  }
+
+  void renderGrounds (int x, int y) {
+    // render grounds
+    for (i=0;i<grounds_length;i++) {
+      if (inWindow(*(grounds[i]))) {
+        //Platform
+        glPushMatrix();
+        glTranslatef(- x, - y, 0);
+        grounds[i]->drawRow(0,0);
+        glEnd(); glPopMatrix();
+      }
+    }
+    for (i=0;i< storeIn.grounds_length ;i++) {
+        glPushMatrix();
+        glTranslatef(- x, - y, 0);
+        storeIn.grounds[i].drawRow(0,0);
+        glEnd(); glPopMatrix();
+    }
+  }
+
+  void renderEnemies (int x, int y) {
+    for (int i=0;i<enemies_length;i++) {
+      if (inWindow(*(enemies[i]))){
+        glPushMatrix();
+        glTranslatef(- x, - y, 0);
+        enemies[i]->draw();
+        glEnd(); glPopMatrix();
+      }
+    }
+  }
+
+  void renderHero (int x, int y) {
+    //Easy Drawing
+    glPushMatrix();
+    glTranslatef(-x, -y, 0);
+    testHero->drawBox();
+    glPopMatrix();
+  }
+
+  void renderBullets (int x, int y) {
+    //Draw the bullets
+    Bullet *b = bulletHead;
+    while (b) {
+      //Log("draw bullet...\n");
+      glColor3f(1.0, 1.0, 1.0);
+      glBegin(GL_POINTS);
+      glVertex2f(b->pos[0]-x, b->pos[1]-y);
+      glVertex2f(b->pos[0]-1.0f-x, b->pos[1]-y);
+      glVertex2f(b->pos[0]+1.0f-x, b->pos[1]-y);
+      glVertex2f(b->pos[0]-x, b->pos[1]-1.0f-y);
+      glVertex2f(b->pos[0]-x, b->pos[1]+1.0f-y);
+      glColor3f(0.8, 0.8, 0.8);
+      glVertex2f(b->pos[0]-1.0f-x, b->pos[1]-1.0f-y);
+      glVertex2f(b->pos[0]-1.0f-x, b->pos[1]+1.0f-y);
+      glVertex2f(b->pos[0]+1.0f-x, b->pos[1]-1.0f-y);
+      glVertex2f(b->pos[0]+1.0f-x, b->pos[1]+1.0f-y);
+      glEnd();
+      b = b->next;
     }
   }
 
@@ -892,12 +985,13 @@ void movement() {
     glEnd(); glPopMatrix();
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
-
-
   }
+
   void renderComputerScreenMenu () {
     gettimeofday(&frameStart, NULL);
     int frameTime = 190;
+    int WHW = WINDOW_HALF_WIDTH;
+    int WHH = WINDOW_HALF_HEIGHT;
 
     // loop through frames
     if (diff_ms(frameStart, frameEnd) > frameTime) {
@@ -913,30 +1007,23 @@ void movement() {
     glPushMatrix();
     glClear(GL_COLOR_BUFFER_BIT);
     glClearColor(0.0, 0.0, 0.0, 1.0);
-    glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
+    glTranslatef(WHW, WHH, 0);
     glColor3ub(0,100,40);
 
-    int WHW = WINDOW_HALF_WIDTH;
-
-    //draw sequence of computer images
-   // glEnable(GL_ALPHA_TEST);
+    //draw back sequence of computer images
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, computerScreenTextures[frameIndex]);
-//    glAlphaFunc(GL_GREATER, 0.0f);
     glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
-
-    glTexCoord2f(0, 1) ; glVertex2i(-WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
-    glTexCoord2f(0, 0) ; glVertex2i(-WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
-    glTexCoord2f(1, 0) ; glVertex2i( WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
-    glTexCoord2f(1, 1) ; glVertex2i( WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
-
-    glEnd(); //glPopMatrix();
+    glTexCoord2f(0, 1) ; glVertex2i(-WHW,-WHH);
+    glTexCoord2f(0, 0) ; glVertex2i(-WHW, WHH);
+    glTexCoord2f(1, 0) ; glVertex2i( WHW, WHH);
+    glTexCoord2f(1, 1) ; glVertex2i( WHW,-WHH);
+    glEnd(); 
     glDisable(GL_TEXTURE_2D);
-   // glDisable(GL_ALPHA_TEST);
 
+    // draw highlighted box next based on current menu selection
     glColor3ub(120,200,100);
-    // draw highlighted portion of menu based on current selection
     glBegin(GL_QUADS);
     switch(menuSelection) {
       case 0:
@@ -975,19 +1062,20 @@ void movement() {
         glVertex2i( WHW, 50);
         break;
     }
-    glEnd(); //glPopMatrix();
+    glEnd();
 
-    //draw sequence of computer images
+    //draw top sequence of computer images, filtering out green to show
+    //highlighted box through
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_TEXTURE_2D);
     glAlphaFunc(GL_LESS, 0.2f);
     glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
 
-    glTexCoord2f(0, 1) ; glVertex2i(-WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
-    glTexCoord2f(0, 0) ; glVertex2i(-WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
-    glTexCoord2f(1, 0) ; glVertex2i( WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
-    glTexCoord2f(1, 1) ; glVertex2i( WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+    glTexCoord2f(0, 1) ; glVertex2i(-WHW,-WHH);
+    glTexCoord2f(0, 0) ; glVertex2i(-WHW, WHH);
+    glTexCoord2f(1, 0) ; glVertex2i( WHW, WHH);
+    glTexCoord2f(1, 1) ; glVertex2i( WHW,-WHH);
 
     glEnd(); glPopMatrix();
     glDisable(GL_TEXTURE_2D);
@@ -1013,128 +1101,13 @@ void movement() {
             break;
     }
 
+    // user tried to select a level that was not yet unlocked
     if(showInvalid) {
       writeWords("error requires ram!", WINDOW_WIDTH/2- 205, WINDOW_HEIGHT/2 + 190);
     }
 
   }
-  void renderGrounds (int x, int y) {
-    // render grounds
-    for (i=0;i<grounds_length;i++) {
-      if (inWindow(*(grounds[i]))) {
-        //Platform
-        glPushMatrix();
-        glTranslatef(- x, - y, 0);
-        grounds[i]->drawRow(0,0);
-        glEnd(); glPopMatrix();
-      }
-    }
-    for (i=0;i< storeIn.grounds_length ;i++) {
-      //if (inWindow(*(storeIn.grounds[i]))) {
-        //Platform
-        glPushMatrix();
-        glTranslatef(- x, - y, 0);
-        storeIn.grounds[i].drawRow(0,0);
-        glEnd(); glPopMatrix();
-      //}
-    }
 
-  }
-
-  void renderEnemies (int x, int y) {
-    for (int i=0;i<enemies_length;i++) {
-      if (inWindow(*(enemies[i]))){
-        glPushMatrix();
-        glTranslatef(- x, - y, 0);
-        enemies[i]->draw();
-        glEnd(); glPopMatrix();
-      }
-    }
-  }
-
-  void renderHero (int x, int y) {
-    //Easy Drawing
-    glPushMatrix();
-    glTranslatef(-x, -y, 0);
-    testHero->drawBox();
-    glPopMatrix();
-  }
-  void renderBullets (int x, int y) {
-    //Draw the bullets
-    Bullet *b = bhead;
-    while (b) {
-      //Log("draw bullet...\n");
-      glColor3f(1.0, 1.0, 1.0);
-      glBegin(GL_POINTS);
-      glVertex2f(b->pos[0]-x, b->pos[1]-y);
-      glVertex2f(b->pos[0]-1.0f-x, b->pos[1]-y);
-      glVertex2f(b->pos[0]+1.0f-x, b->pos[1]-y);
-      glVertex2f(b->pos[0]-x, b->pos[1]-1.0f-y);
-      glVertex2f(b->pos[0]-x, b->pos[1]+1.0f-y);
-      glColor3f(0.8, 0.8, 0.8);
-      glVertex2f(b->pos[0]-1.0f-x, b->pos[1]-1.0f-y);
-      glVertex2f(b->pos[0]-1.0f-x, b->pos[1]+1.0f-y);
-      glVertex2f(b->pos[0]+1.0f-x, b->pos[1]-1.0f-y);
-      glVertex2f(b->pos[0]+1.0f-x, b->pos[1]+1.0f-y);
-      glEnd();
-      b = b->next;
-    }
-  }
-
-  void render () {
-    int x = roomX - WINDOW_HALF_WIDTH;
-    int y = roomY - WINDOW_HALF_HEIGHT;
-    glClear(GL_COLOR_BUFFER_BIT);
-    // Draw Background Falling Bits
-    renderBackground();
-    renderBullets(x, y);
-    renderGrounds(x, y);
-    renderEnemies(x, y);
-    renderHero(x, y);
-
-    //stringstream strs;
-    //strs << i;
-    //string temp_str = strs.str();
-    //char* char_type = (char*) temp_str.c_str();
-
-    if (fail>0) {
-      writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 200, WINDOW_HEIGHT/2);
-      fail--;
-    }
-    writeWords("Lives:", WINDOW_WIDTH/2- 400, WINDOW_HEIGHT/2- 250);
-
-  }
-
-  void moveWindow () {
-    double heroWinPosX = testHero->getCenterX();
-    double heroWinPosY = testHero->getCenterY();
-
-    //move window forward
-    if ((heroWinPosX > roomX + interval) && ((roomX+WINDOW_HALF_WIDTH)<LEVEL_WIDTH-6)) {
-      roomX+=7;
-    }
-    //move window backward (fast move if hero is far away)
-    else if ((heroWinPosX < roomX - interval) && roomX>(WINDOW_HALF_WIDTH+6)) {
-      roomX-=7;
-      if (heroWinPosX < (roomX - interval - 400)) {
-        roomX-=20;
-      }
-      if (heroWinPosX < (roomX - interval - 800)) {
-        roomX-=50;
-      }
-    }
-    //move window up
-    if ((heroWinPosY > roomY + interval) && ((roomY+6)<(MAX_HEIGHT-WINDOW_HALF_HEIGHT))) {
-      roomY+=6;
-    }
-    //move window down
-    else if ((heroWinPosY < roomY - interval) && (roomY-6)>(WINDOW_HALF_HEIGHT)) {
-      i = hero->getVelocityY();
-      if (i>-6)
-        i=-6;
-      roomY+=i;
-    }
-  }
   void renderBackground () {
     if (bg < MAX_BACKGROUND_BITS) {
       // Create bit
@@ -1211,10 +1184,10 @@ void movement() {
     //remove a node from linked list
     if (node->prev == NULL) {
       if (node->next == NULL) {
-        bhead = NULL;
+        bulletHead = NULL;
       } else {
         node->next->prev = NULL;
-        bhead = node->next;
+        bulletHead = node->next;
       }
     } else {
       if (node->next == NULL) {
@@ -1234,15 +1207,6 @@ void movement() {
     delete enemies[i];
     enemies[i] = enemies[enemies_length];
     enemies[enemies_length]=NULL;
-
-    /*
-       for (i=ind;i<enemies_length;i++){
-       enemies[i]=(i==(MAX_ENEMIES-1)?NULL:enemies[i+1]);
-       cout << "e[" << i << "] = " << (i==(MAX_ENEMIES-1)?NULL:enemies[i+1]);
-       } 
-       enemies_length--;
-       cout << "deleted enemy, count : " << enemies_length << endl;
-       */
   }
 
   void cleanup_background(void) {
@@ -1253,11 +1217,5 @@ void movement() {
       bitHead = s;
     }
     bitHead = NULL;
-  }
-
-  Object createAI (int w, int h, Object *ground) {
-    Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
-    return newEnemy;
-
   }
 

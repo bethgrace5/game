@@ -1,8 +1,6 @@
-#ifndef MY_FMOD_H
-#define MY_FMOD_H
 
-// comment line out to ignore sounds
-#define USE_SOUND
+#ifndef FMOD_H
+#define FMOD_H
 
 #ifdef USE_SOUND
 #define NSOUNDS 3
@@ -17,5 +15,5 @@ extern int fmod_systemupdate(void);
 extern int fmod_getchannelsplaying(int *channelsplaying);
 #endif
 
-#endif //MY_FMOD_H
+#endif //FMOD_H
 
