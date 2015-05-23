@@ -14,8 +14,7 @@ See other sample programs in the fmod /examples directory
 //#include "../../api/inc/fmod_errors.h"
 
 
-// comment line out to ignore sounds
-#define USE_SOUND
+#include "definitions.h"
 
 #ifdef USE_SOUND
 #include "./include/FMOD/fmod.h"

@@ -6,6 +6,9 @@
 #include "./include/FMOD/wincompat.h"
 #include "fmod.h"
 
+#ifndef SOUNDS_CPP
+#define SOUNDS_CPP
+
 void init_sounds(void);
 
 enum sound_t {
@@ -186,4 +189,5 @@ void init_sounds() {
         return;
     }
 }
+#endif
 #endif
