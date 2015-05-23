@@ -18,7 +18,7 @@
 #include <fstream>
 
 // comment this line to ignore sound use
-//#define USE_SOUND
+#define USE_SOUND
 
 #ifdef USE_SOUND
 #include "./include/FMOD/fmod.h"
@@ -462,6 +462,10 @@ void init_sounds() {
         std::cout << "ERROR - fmod_createsound()\n" << std::endl;
         return;
     }
+    if (fmod_createsound((char *)"./sounds/click.wav", 2)) {
+        std::cout << "ERROR - fmod_createsound()\n" << std::endl;
+        return;
+    }
     fmod_setmode(0,FMOD_LOOP_OFF);
     //fmod_playsound(0);
     //fmod_systemupdate();
@@ -572,6 +576,8 @@ int check_keys (XEvent *e) {
           lastFacing = 0;
         }
         if(menuSelection==1 or menuSelection==2 or menuSelection==4)
+        //TODO: play sound for enter selection
+        // fmod_playsound(0);
           showInvalid = 1;
         if(menuSelection==3) {
           showInvalid = 0;
@@ -580,27 +586,44 @@ int check_keys (XEvent *e) {
       }
       if ( key == XK_Down){
         showInvalid = 0;
-        if(menuSelection ==0)
+        if(menuSelection ==0) {
+          fmod_playsound(0);
           menuSelection =1;
-        else if(menuSelection ==1)
+        }
+        else if(menuSelection ==1) {
+          fmod_playsound(0);
           menuSelection =0;
-        else if(menuSelection ==3)
+        }
+        else if(menuSelection ==3) {
+          fmod_playsound(0);
           menuSelection = 4;
-        else if(menuSelection ==4)
+        }
+        else if(menuSelection ==4) {
+          fmod_playsound(0);
           menuSelection = 3;
+        }
       }
       if ( key == XK_Up){
         showInvalid = 0;
-        if(menuSelection ==0)
+        if(menuSelection ==0) {
+          fmod_playsound(0);
           menuSelection =1;
-        else if(menuSelection ==4)
+        }
+        else if(menuSelection ==4) {
+          fmod_playsound(0);
           menuSelection = 3;
-        else if(menuSelection ==1)
+        }
+        else if(menuSelection ==1) {
+          fmod_playsound(0);
           menuSelection =0;
-        else if(menuSelection ==3)
+        }
+        else if(menuSelection ==3) {
+          fmod_playsound(0);
           menuSelection = 4;
+        }
       }
       if ( key == XK_Right){
+        fmod_playsound(0);
         showInvalid = 0;
         if(menuSelection ==0)
           menuSelection = 4;
@@ -614,6 +637,7 @@ int check_keys (XEvent *e) {
           menuSelection=0;
       }
       if ( key == XK_Left){
+        fmod_playsound(0);
         showInvalid = 0;
         if(menuSelection ==0)
           menuSelection = 4;
