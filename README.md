@@ -16,12 +16,21 @@
     *  `s` - save level as created
     *  `l` - revert back to last saved state
     *  `j` - change tile right/left
-    *  'h' - change tile down/up
+    *  `h` - change tile down/up
     *  
 *  Notes:
     *  There must be at least 7 objects, or segmentation fault is thrown
 *  TODO:
     *  put usage instructions on level editor
+
+### Adding Sound Effects
+* add wav file to `sounds/` directory
+* add a corresponding `fmod_createsound()` line in `sounds.cpp` to import the sound, incrementing to the next sound number.
+* add line to enumeration in `sounds.cpp` so we can call that sound by a name, and not it's number
+* call sound where you need the sound made by `fmod_playsound(soundName);`
+* be sure to wrap each sound call in `#ifdef USE_SOUND` and `#endif`, so those of us with macs can develop without sounds.
+
+
 
 ### Collaborators
 * Bethany Armitage
