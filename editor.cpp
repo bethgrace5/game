@@ -51,7 +51,6 @@ bool create = 0;
 bool selecter = 0;
 int  holdID = -1;
 int saveID = -1;
-int id = 0;
 //------------------------------
 //Function Prototype
 //------------------------------
@@ -156,8 +155,8 @@ void makePlatform(int x, int y) {
 
   grounds[grounds_length]->init(width, height, x, y);
   grounds[grounds_length]->setupTile();
-  grounds[grounds_length]->setID(id);
-  id++;
+  grounds[grounds_length]->setID(grounds_length);
+
   std::cout << "What is " << grounds[grounds_length]->getID() <<
     std::endl;
   grounds[grounds_length]->setIndexXY(0, 0);
@@ -185,13 +184,12 @@ void setColumn(int size){
   int currentHeight = grounds[saveID]->getHeight();
 
   if(changeBy == -1 && currentHeight <= -(spriteHeight))  return;
-    grounds[saveID]->setHeight(spriteHeight + currentHeight);
-    grounds[saveID]->setupTile();
+  grounds[saveID]->setHeight(spriteHeight + currentHeight);
+  grounds[saveID]->setupTile();
 }
 
 void changeTileX(){ 
   if(saveID < 0) return;
-  std::cout << "Swap X\n";
   int x = grounds[saveID]->getIndexX(); 
   int y = grounds[saveID]->getIndexY();
   grounds[saveID]->setIndexXY(x+1,y);
@@ -199,11 +197,38 @@ void changeTileX(){
 
 void changeTileY(){
   if(saveID < 0) return;
-  std::cout << "Swap Y\n";
   int x = grounds[saveID]->getIndexX(); 
   int y = grounds[saveID]->getIndexY();
   grounds[saveID]->setIndexXY(x,y+1);
 }
+
+void deleteLastPlatform(){
+  if(grounds_length <= 0) return;
+
+  grounds[grounds_length-1] = new Platform();
+  delete grounds[grounds_length-1];
+  grounds_length--;
+  std::cout << "What is Grounds Length " << grounds_length << std::endl;
+
+}
+void deletePlatform(){
+  if(grounds_length <= 0) return;
+  if(saveID < 0) return;
+ 
+  grounds[saveID] = new Platform();
+  delete grounds[saveID];
+
+  for(int i = saveID; i < grounds_length-1; i++){
+    grounds[i] = grounds[i + 1];
+    grounds[i]->setID(grounds[i]->getID()-1); 
+  }
+  grounds[grounds_length-1] = new Platform();
+  delete grounds[grounds_length-1];
+
+  grounds_length--;
+  std::cout << "What is Grounds Length " << grounds_length << std::endl;
+}
+
 //=====================================================================
 //  Enemy Editor
 //=====================================================================
@@ -326,6 +351,8 @@ int check_keys (XEvent *e) {
     if(key == XK_u) setColumn(-1);
     if(key == XK_j) changeTileX();
     if(key == XK_k) changeTileY();
+    if(key == XK_b) deleteLastPlatform();
+    if(key == XK_n) deletePlatform();
 
 
         
@@ -491,7 +518,9 @@ void load(){
       dfs.read((char *)&storeIn, sizeof(storeIn));
 
       for(int i = 0; i < storeIn.grounds_length; i++){
-        storeIn.grounds[i].reInitSprite(); 
+        grounds[i] = &storeIn.grounds[i];
+        grounds[i]->reInitSprite();
+        grounds_length++;
       } 
 }
 
