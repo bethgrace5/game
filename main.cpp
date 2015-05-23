@@ -16,15 +16,10 @@
 #include <sstream>
 #include <algorithm>
 #include <fstream>
+#include "sounds.cpp"
 
 // comment this line to ignore sound use
 #define USE_SOUND
-
-#ifdef USE_SOUND
-#include "./include/FMOD/fmod.h"
-#include "./include/FMOD/wincompat.h"
-#include "fmod.h"
-#endif
 
 //#include "Sprite.cpp"
 #include "bethanyA.cpp"
@@ -136,9 +131,6 @@ GLuint computerScreenTextures[32];
 //Function prototypes
 void initXWindows(void);
 void init_opengl(void);
-#ifdef USE_SOUND
-void init_sounds(void);
-#endif
 void cleanupXWindows(void);
 void check_mouse(XEvent *e);
 int  check_keys (XEvent *e);
@@ -158,7 +150,6 @@ void renderComputerScreenMenu();
 void makePlatform(int w, int h, int x, int y); 
 void makeEnemy(int w, int h, Object *ground, int type); 
 Object createAI( int w, int h, Object *ground);
-
 void groundCollide(Object *obj, Object *ground);
 bool detectCollide(Object *obj, Object *ground);
 bool bulletCollide(Bullet *b, Object *obj);
@@ -447,30 +438,6 @@ void init_opengl (void) {
   makeEnemy(37, 80, grounds[4], 1);
 
 }
-#ifdef USE_SOUND
-void init_sounds() {
-    //FMOD_RESULT result;
-    if (fmod_init()) {
-        std::cout << "ERROR - fmod_init()\n" << std::endl;
-        return;
-    }
-    if (fmod_createsound((char *)"./sounds/tick.wav", 0)) {
-        std::cout << "ERROR - fmod_createsound()\n" << std::endl;
-        return;
-    }
-    if (fmod_createsound((char *)"./sounds/megamanTheme.wav", 1)) {
-        std::cout << "ERROR - fmod_createsound()\n" << std::endl;
-        return;
-    }
-    if (fmod_createsound((char *)"./sounds/click.wav", 2)) {
-        std::cout << "ERROR - fmod_createsound()\n" << std::endl;
-        return;
-    }
-    fmod_setmode(0,FMOD_LOOP_OFF);
-    //fmod_playsound(0);
-    //fmod_systemupdate();
-}
-#endif
 
 void makePlatform(int w, int h, int x, int y) {
   grounds[grounds_length] = new Platform();
@@ -535,6 +502,7 @@ int check_keys (XEvent *e) {
       // Jump
       if ((key == XK_w || key == XK_Up)) {
         testHero->jump();
+        //fmod_playsound(16);
       }
       // move character left
       if (key == XK_a || key == XK_Left) {
@@ -572,13 +540,19 @@ int check_keys (XEvent *e) {
       // menu selection
       if (key == XK_Return) {
         if(menuSelection==0) {
+      #ifdef USE_SOUND
+          fmod_playsound(button3);
+          //fmod_playsound(electronicNoise);
+#endif
           level=-1;
           lastFacing = 0;
         }
-        if(menuSelection==1 or menuSelection==2 or menuSelection==4)
-        //TODO: play sound for enter selection
-        // fmod_playsound(0);
+        if(menuSelection==1 or menuSelection==2 or menuSelection==2 or menuSelection==4) {
+      #ifdef USE_SOUND
+          fmod_playsound(bleep);
+#endif
           showInvalid = 1;
+        }
         if(menuSelection==3) {
           showInvalid = 0;
           return 1;
@@ -587,43 +561,61 @@ int check_keys (XEvent *e) {
       if ( key == XK_Down){
         showInvalid = 0;
         if(menuSelection ==0) {
-          fmod_playsound(0);
+      #ifdef USE_SOUND
+          fmod_playsound(tick);
+#endif
           menuSelection =1;
         }
         else if(menuSelection ==1) {
-          fmod_playsound(0);
+      #ifdef USE_SOUND
+          fmod_playsound(tick);
+#endif
           menuSelection =0;
         }
         else if(menuSelection ==3) {
-          fmod_playsound(0);
+      #ifdef USE_SOUND
+          fmod_playsound(tick);
+#endif
           menuSelection = 4;
         }
         else if(menuSelection ==4) {
-          fmod_playsound(0);
+      #ifdef USE_SOUND
+          fmod_playsound(tick);
+#endif
           menuSelection = 3;
         }
       }
       if ( key == XK_Up){
         showInvalid = 0;
         if(menuSelection ==0) {
-          fmod_playsound(0);
+      #ifdef USE_SOUND
+          fmod_playsound(tick);
+#endif
           menuSelection =1;
         }
         else if(menuSelection ==4) {
-          fmod_playsound(0);
+      #ifdef USE_SOUND
+          fmod_playsound(tick);
+#endif
           menuSelection = 3;
         }
         else if(menuSelection ==1) {
-          fmod_playsound(0);
+      #ifdef USE_SOUND
+          fmod_playsound(tick);
+#endif
           menuSelection =0;
         }
         else if(menuSelection ==3) {
-          fmod_playsound(0);
+      #ifdef USE_SOUND
+          fmod_playsound(tick);
+#endif
           menuSelection = 4;
         }
       }
       if ( key == XK_Right){
-        fmod_playsound(0);
+      #ifdef USE_SOUND
+        fmod_playsound(tick);
+#endif
         showInvalid = 0;
         if(menuSelection ==0)
           menuSelection = 4;
@@ -637,7 +629,9 @@ int check_keys (XEvent *e) {
           menuSelection=0;
       }
       if ( key == XK_Left){
-        fmod_playsound(0);
+      #ifdef USE_SOUND
+        fmod_playsound(tick);
+#endif
         showInvalid = 0;
         if(menuSelection ==0)
           menuSelection = 4;
@@ -822,7 +816,7 @@ void movement() {
       b->pos[0] = testHero->getCenterX();
       b->pos[1] = testHero->getCenterY()+15;
 #ifdef USE_SOUND
-      fmod_playsound(0);
+      fmod_playsound(gunShotMarvin);
 #endif
       //if (lastFacing or testHero->getVelocityX()<0) {
       //    b->vel[0] = -18;
@@ -897,7 +891,7 @@ void movement() {
 
     if (frameIndex == 65) {
       #ifdef USE_SOUND
-      fmod_playsound(1);
+      //fmod_playsound(megamanTheme);
       #endif
       frameIndex = 0;
       level = 1;
