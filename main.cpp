@@ -151,6 +151,7 @@ int main(void) {
     glXSwapBuffers(dpy, win);
   }
   cleanupXWindows(); return 0;
+  fmod_cleanup();
 }
 
 void set_title (void) { //Set the window title bar.
@@ -424,6 +425,10 @@ int check_keys (XEvent *e) {
       if (key == XK_y) {
         testHero->setHealth(0);
         life-=1000;
+        #ifdef USE_SOUND
+        fmod_playsound(dunDunDun);
+        #endif
+
 
       }
       // toggle start menu
@@ -731,6 +736,9 @@ void movement() {
       testHero->isDying=1;
       gettimeofday(&seqStart, NULL);
       fail=100;
+      #ifdef USE_SOUND
+      fmod_playsound(dunDunDun);
+      #endif
     }
     else{
       gettimeofday(&seqEnd, NULL);
