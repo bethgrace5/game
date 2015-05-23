@@ -151,7 +151,10 @@ int main(void) {
     glXSwapBuffers(dpy, win);
   }
   cleanupXWindows(); return 0;
+
+  #ifdef USE_SOUND
   fmod_cleanup();
+  #endif
 }
 
 void set_title (void) { //Set the window title bar.
