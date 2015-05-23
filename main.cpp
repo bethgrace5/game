@@ -47,10 +47,13 @@
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 
 // 1 for quick load, 0 for slow load with menu images
-#define QUICK_LOAD_TIME 1
+#define QUICK_LOAD_TIME 0
 
 // 1 to use tool editor, 0 to use pre-defined objects
 #define USE_TOOLS 0
+
+// comment this line to ignore sound use
+#define USE_SOUND
 
 #define MAX_BACKGROUND_BITS 6000
 #define HERO_START_X 150
@@ -130,7 +133,9 @@ GLuint computerScreenTextures[32];
 //Function prototypes
 void initXWindows(void);
 void init_opengl(void);
+#ifdef USE_SOUND
 void init_sounds(void);
+#endif
 void cleanupXWindows(void);
 void check_mouse(XEvent *e);
 int  check_keys (XEvent *e);
@@ -163,7 +168,10 @@ bool inWindow(Object &obj) {
 }
 
 int main(void) {
-  initXWindows(); init_opengl(); init_sounds();
+  initXWindows(); init_opengl(); 
+  #ifdef USE_SOUND
+  init_sounds();
+  #endif
 
   //declare hero object
   hero = new Object(46, 48, HERO_START_X, HERO_START_Y);
@@ -436,6 +444,7 @@ void init_opengl (void) {
   makeEnemy(37, 80, grounds[4], 1);
 
 }
+#ifdef USE_SOUND
 void init_sounds() {
     //FMOD_RESULT result;
     if (fmod_init()) {
@@ -446,7 +455,7 @@ void init_sounds() {
         std::cout << "ERROR - fmod_createsound()\n" << std::endl;
         return;
     }
-    if (fmod_createsound((char *)"./sounds/drip.wav", 1)) {
+    if (fmod_createsound((char *)"./sounds/megamanTheme.wav", 1)) {
         std::cout << "ERROR - fmod_createsound()\n" << std::endl;
         return;
     }
@@ -454,6 +463,7 @@ void init_sounds() {
     //fmod_playsound(0);
     //fmod_systemupdate();
 }
+#endif
 
 void makePlatform(int w, int h, int x, int y) {
   grounds[grounds_length] = new Platform();
@@ -536,6 +546,7 @@ int check_keys (XEvent *e) {
       if (key == XK_y) {
         testHero->setHealth(0);
         life-=1000;
+
       }
       // toggle start menu
       if (key == XK_m) {
@@ -548,7 +559,6 @@ int check_keys (XEvent *e) {
       }
       // play sounds for debugging
       if (key == XK_t) {
-          fmod_playsound(0);
       }
     }
     if(level ==0) {
@@ -784,7 +794,9 @@ void movement() {
       b = new Bullet;
       b->pos[0] = testHero->getCenterX();
       b->pos[1] = testHero->getCenterY()+15;
+#ifdef USE_SOUND
       fmod_playsound(0);
+#endif
       //if (lastFacing or testHero->getVelocityX()<0) {
       //    b->vel[0] = -18;
       //} else {
@@ -857,6 +869,9 @@ void movement() {
     }
 
     if (frameIndex == 65) {
+      #ifdef USE_SOUND
+      fmod_playsound(1);
+      #endif
       frameIndex = 0;
       level = 1;
       return;
