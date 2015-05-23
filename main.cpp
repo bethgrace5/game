@@ -87,14 +87,8 @@ int quit=0;
 int showInvalid=0;
 
 //Images and Textures
-Ppmimage *heroImage=NULL;
-GLuint heroTexture;
-
-Ppmimage *initImages[32];
-GLuint initTextures[65];
-
-Ppmimage *computerScreenImages[32];
-GLuint computerScreenTextures[32];
+Ppmimage *heroImage=NULL, *initImages[32], *computerScreenImages[32];
+GLuint heroTexture, initTextures[65], computerScreenTextures[32];
 
 //Function prototypes
 void initXWindows(void);
@@ -133,6 +127,7 @@ int main(void) {
   initXWindows(); init_opengl(); 
   #ifdef USE_SOUND
   init_sounds();
+  fmod_playsound(scaryAmbience);
   #endif
 
   //declare hero object
@@ -470,7 +465,9 @@ int check_keys (XEvent *e) {
       // Jump
       if ((key == XK_w || key == XK_Up)) {
         testHero->jump();
+        #ifndef USE_SOUND
         fmod_playsound(marioJump);
+        #endif
       }
       // move character left
       if (key == XK_a || key == XK_Left) {
@@ -508,20 +505,26 @@ int check_keys (XEvent *e) {
       // menu selection
       if (key == XK_Return) {
         if(menuSelection==0) {
-      #ifdef USE_SOUND
+          // play sound for menu selection then for init sequence
+          #ifdef USE_SOUND
           fmod_playsound(button3);
-          //fmod_playsound(electronicNoise);
-#endif
+          fmod_playsound(electronicNoise);
+          #endif
+          // make sure hero is not shooting immediately
+          hero->isShooting=0;
           level=-1;
           lastFacing = 0;
         }
         if(menuSelection==1 or menuSelection==2 or menuSelection==2 or menuSelection==4) {
-      #ifdef USE_SOUND
+          #ifdef USE_SOUND
           fmod_playsound(bleep);
-#endif
+          #endif
           showInvalid = 1;
         }
         if(menuSelection==3) {
+          #ifdef USE_SOUND
+          fmod_playsound(bleep);
+          #endif
           showInvalid = 0;
           return 1;
         }
@@ -529,61 +532,61 @@ int check_keys (XEvent *e) {
       if ( key == XK_Down){
         showInvalid = 0;
         if(menuSelection ==0) {
-      #ifdef USE_SOUND
+          #ifdef USE_SOUND
           fmod_playsound(tick);
-#endif
+          #endif
           menuSelection =1;
         }
         else if(menuSelection ==1) {
-      #ifdef USE_SOUND
+          #ifdef USE_SOUND
           fmod_playsound(tick);
-#endif
+          #endif
           menuSelection =0;
         }
         else if(menuSelection ==3) {
-      #ifdef USE_SOUND
+          #ifdef USE_SOUND
           fmod_playsound(tick);
-#endif
+          #endif
           menuSelection = 4;
         }
         else if(menuSelection ==4) {
-      #ifdef USE_SOUND
+          #ifdef USE_SOUND
           fmod_playsound(tick);
-#endif
+          #endif
           menuSelection = 3;
         }
       }
       if ( key == XK_Up){
         showInvalid = 0;
         if(menuSelection ==0) {
-      #ifdef USE_SOUND
+          #ifdef USE_SOUND
           fmod_playsound(tick);
-#endif
+          #endif
           menuSelection =1;
         }
         else if(menuSelection ==4) {
-      #ifdef USE_SOUND
+          #ifdef USE_SOUND
           fmod_playsound(tick);
-#endif
+          #endif
           menuSelection = 3;
         }
         else if(menuSelection ==1) {
-      #ifdef USE_SOUND
+          #ifdef USE_SOUND
           fmod_playsound(tick);
-#endif
+          #endif
           menuSelection =0;
         }
         else if(menuSelection ==3) {
-      #ifdef USE_SOUND
+          #ifdef USE_SOUND
           fmod_playsound(tick);
-#endif
+          #endif
           menuSelection = 4;
         }
       }
       if ( key == XK_Right){
-      #ifdef USE_SOUND
+        #ifdef USE_SOUND
         fmod_playsound(tick);
-#endif
+        #endif
         showInvalid = 0;
         if(menuSelection ==0)
           menuSelection = 4;
@@ -597,9 +600,9 @@ int check_keys (XEvent *e) {
           menuSelection=0;
       }
       if ( key == XK_Left){
-      #ifdef USE_SOUND
+        #ifdef USE_SOUND
         fmod_playsound(tick);
-#endif
+        #endif
         showInvalid = 0;
         if(menuSelection ==0)
           menuSelection = 4;
@@ -783,9 +786,9 @@ void movement() {
       b = new Bullet;
       b->pos[0] = testHero->getCenterX();
       b->pos[1] = testHero->getCenterY()+15;
-#ifdef USE_SOUND
+      #ifdef USE_SOUND
       fmod_playsound(mvalSingle);
-#endif
+      #endif
       //if (lastFacing or testHero->getVelocityX()<0) {
       //    b->vel[0] = -18;
       //} else {
@@ -856,10 +859,10 @@ void movement() {
     if (diff_ms(frameStart, frameEnd) > frameTime) { frameIndex++;
       gettimeofday(&frameEnd, NULL);
     }
-
+    // transition to render level 1
     if (frameIndex == 65) {
       #ifdef USE_SOUND
-      //fmod_playsound(megamanTheme);
+      fmod_playsound(megamanTheme);
       #endif
       frameIndex = 0;
       level = 1;
