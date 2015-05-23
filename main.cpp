@@ -19,6 +19,9 @@
 #include "chadD.cpp" //Platforms/Grounds
 #include "definitions.h"
 #include "functions.h"
+#ifdef USE_SOUND
+#include "fmod.c"
+#endif
 #include "Object.cpp"
 #include "Player.h"
 #include "ppm.h"
@@ -466,7 +469,7 @@ int check_keys (XEvent *e) {
       if ((key == XK_w || key == XK_Up)) {
         testHero->jump();
         #ifdef USE_SOUND
-        fmo_playsound(marioJump);
+        fmod_playsound(marioJump);
         #endif
       }
       // move character left
