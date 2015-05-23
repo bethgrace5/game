@@ -12,6 +12,12 @@ See other sample programs in the fmod /examples directory
 //
 //#include "../../api/inc/fmod.h"
 //#include "../../api/inc/fmod_errors.h"
+
+
+// comment line out to ignore sounds
+//#define USE_SOUND
+
+#ifdef USE_SOUND
 #include "./include/FMOD/fmod.h"
 #include "./include/FMOD/fmod_errors.h"
 #include "./include/FMOD/fmod_errors.h"
@@ -132,3 +138,4 @@ int fmod_cleanup(void)
 	return 0;
 }
 
+#endif

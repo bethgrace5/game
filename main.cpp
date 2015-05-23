@@ -17,9 +17,14 @@
 #include <algorithm>
 #include <fstream>
 
+// comment this line to ignore sound use
+//#define USE_SOUND
+
+#ifdef USE_SOUND
 #include "./include/FMOD/fmod.h"
 #include "./include/FMOD/wincompat.h"
 #include "fmod.h"
+#endif
 
 //#include "Sprite.cpp"
 #include "bethanyA.cpp"
@@ -52,8 +57,6 @@
 // 1 to use tool editor, 0 to use pre-defined objects
 #define USE_TOOLS 0
 
-// comment this line to ignore sound use
-#define USE_SOUND
 
 #define MAX_BACKGROUND_BITS 6000
 #define HERO_START_X 150
