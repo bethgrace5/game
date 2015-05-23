@@ -18,7 +18,7 @@
 #include <fstream>
 
 // comment this line to ignore sound use
-//#define USE_SOUND
+#define USE_SOUND
 
 #ifdef USE_SOUND
 #include "./include/FMOD/fmod.h"
