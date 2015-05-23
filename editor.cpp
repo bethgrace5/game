@@ -75,7 +75,8 @@ Display *dpy; Window win; GLXContext glc;
 //------------------------------
 Player *testHero;
 Enemy *enemies[MAX_ENEMIES];
-int grounds_length, enemies_length;
+Platform *grounds[MAX_GROUNDS];
+int grounds_length = 0, enemies_length;
 int i, j;
 
 int roomX=WINDOW_HALF_WIDTH;
@@ -185,58 +186,62 @@ void init_opengl (void) {
 void makePlatform(int x, int y) {
   cout << "Make Ground \n";
   //storeIn.grounds[storeIn.grounds_length] = new Platform();
-  storeIn.grounds[storeIn.grounds_length]
-    .insert("./images/megaLevel.ppm", 10, 36);
+  grounds[grounds_length] = new Platform();
+  grounds[grounds_length]
+    ->insert("./images/megaLevel.ppm", 10, 36);
 
-  int width  = storeIn.grounds[storeIn.grounds_length].getClipWidth();
-  int height = storeIn.grounds[storeIn.grounds_length].getClipHeight();
+  int width  = grounds[grounds_length]->getClipWidth();
+  int height = grounds[grounds_length]->getClipHeight();
 
-  storeIn.grounds[storeIn.grounds_length].init(width, height, x, y);
-  storeIn.grounds[storeIn.grounds_length].setupTile();
-  storeIn.grounds[storeIn.grounds_length].setID(id);
+  grounds[grounds_length]->init(width, height, x, y);
+  grounds[grounds_length]->setupTile();
+  grounds[grounds_length]->setID(id);
   id++;
-  std::cout << "What is " << storeIn.grounds[storeIn.grounds_length].getID() <<
+  std::cout << "What is " << grounds[grounds_length]->getID() <<
     std::endl;
-  storeIn.grounds[storeIn.grounds_length].setIndexXY(0, 0);
-  storeIn.grounds[storeIn.grounds_length].setBackground(1);
-  storeIn.grounds_length++;
+  grounds[grounds_length]->setIndexXY(0, 0);
+  grounds[grounds_length]->setBackground(1);
+  grounds_length++;
+
+  //grounds[saveID] = storeIn.grounds[saveID];
+  //storeIn.grounds[saveID] = *grounds[saveID];
 }
 void setRow(int size){
   if(saveID < 0) return;
   int changeBy = 1; if(size < 0) changeBy = -1;
-  int spriteWidth = storeIn.grounds[saveID].getClipWidth() * changeBy;
-  int currentWidth = storeIn.grounds[saveID].getWidth();
+  int spriteWidth = grounds[saveID]->getClipWidth() * changeBy;
+  int currentWidth = grounds[saveID]->getWidth();
 
   if(changeBy == -1 && currentWidth <= -(spriteWidth)) return;
-  storeIn.grounds[saveID].setWidth(currentWidth + spriteWidth);
-  storeIn.grounds[saveID].setupTile();
+  grounds[saveID]->setWidth(currentWidth + spriteWidth);
+  grounds[saveID]->setupTile();
 }
 
 void setColumn(int size){
   if(saveID < 0) return;
   int changeBy = 1; if(size < 0) changeBy = -1;
-  int spriteHeight  = storeIn.grounds[saveID].getClipHeight() * changeBy;
-  int currentHeight = storeIn.grounds[saveID].getHeight();
+  int spriteHeight  = grounds[saveID]->getClipHeight() * changeBy;
+  int currentHeight = grounds[saveID]->getHeight();
 
   if(changeBy == -1 && currentHeight <= -(spriteHeight))  return;
-  storeIn.grounds[saveID].setHeight(spriteHeight + currentHeight);
-  storeIn.grounds[saveID].setupTile();
+    grounds[saveID]->setHeight(spriteHeight + currentHeight);
+    grounds[saveID]->setupTile();
 }
 
 void changeTileX(){ 
   if(saveID < 0) return;
   std::cout << "Swap X\n";
-  int x = storeIn.grounds[saveID].getIndexX(); 
-  int y = storeIn.grounds[saveID].getIndexY();
-  storeIn.grounds[saveID].setIndexXY(x+1,y);
+  int x = grounds[saveID]->getIndexX(); 
+  int y = grounds[saveID]->getIndexY();
+  grounds[saveID]->setIndexXY(x+1,y);
 }
 
 void changeTileY(){
   if(saveID < 0) return;
   std::cout << "Swap Y\n";
-  int x = storeIn.grounds[saveID].getIndexX(); 
-  int y = storeIn.grounds[saveID].getIndexY();
-  storeIn.grounds[saveID].setIndexXY(x,y+1);
+  int x = grounds[saveID]->getIndexX(); 
+  int y = grounds[saveID]->getIndexY();
+  grounds[saveID]->setIndexXY(x,y+1);
 }
 //=====================================================================
 //  Enemy Editor
@@ -329,12 +334,12 @@ void check_mouse (XEvent *e) {
 }
 
 int clickObject(int x, int y){
-  for(int i = 0; i < storeIn.grounds_length; i++){
-    if(storeIn.grounds[i].getRight()  > x &&
-        storeIn.grounds[i].getLeft()   < x &&
-        storeIn.grounds[i].getBottom() < y &&
-        storeIn.grounds[i].getTop()    > y){
-      return storeIn.grounds[i].getID(); 
+  for(int i = 0; i < grounds_length; i++){
+    if(grounds[i]->getRight()  > x &&
+        grounds[i]->getLeft()   < x &&
+        grounds[i]->getBottom() < y &&
+        grounds[i]->getTop()    > y){
+      return grounds[i]->getID(); 
     }
   }
   return -1;
@@ -342,7 +347,7 @@ int clickObject(int x, int y){
 
 void draging(int x, int y){
   if(holdID < 0) return;
-  storeIn.grounds[holdID].setCenter(x, y);
+  grounds[holdID]->setCenter(x, y);
 }
 //=====================================================================
 //  Key Check
@@ -432,12 +437,12 @@ void renderLoad(){
 
 void renderGrounds (int x, int y) {
   // render grounds
-  for (i=0;i<storeIn.grounds_length;i++) {
+  for (i=0;i<grounds_length;i++) {
     //if (inWindow(*(storeIn.grounds[i]))) {
     //Platform
     glPushMatrix();
     glTranslatef(- x, - y, 0);
-    storeIn.grounds[i].drawRow(0,0);
+    grounds[i]->drawRow(0,0);
     glEnd(); glPopMatrix();
     //}
   }
@@ -477,6 +482,11 @@ void render () {
 //  Storage Editor
 //=====================================================================
 void save(){
+
+  for(int i = 0; i < grounds_length; i++){
+    storeIn.grounds[i] = *grounds[i];  
+  }
+  storeIn.grounds_length = grounds_length;
   std::cout << "Saving \n";
   ofstream dfs("test.ros", ios::binary); 
   dfs.write((char *)&storeIn, sizeof(storeIn));
