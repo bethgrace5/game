@@ -465,8 +465,8 @@ int check_keys (XEvent *e) {
       // Jump
       if ((key == XK_w || key == XK_Up)) {
         testHero->jump();
-        #ifndef USE_SOUND
-        fmod_playsound(marioJump);
+        #ifdef USE_SOUND
+        fmo_playsound(marioJump);
         #endif
       }
       // move character left
