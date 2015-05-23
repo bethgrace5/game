@@ -7,12 +7,10 @@
 #include <cstring>
 #include <string>
 #include <sstream>
+#include "ppm.h"
 
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
-#define rnd()(float)rand() /(float)(RAND_MAX)
-#define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
-#define GRAVITY 0.2
 
 using namespace std;
 

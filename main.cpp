@@ -1,64 +1,32 @@
-#include <iomanip>
-#include <iostream>
+#include <algorithm>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+#include <fstream>
+#include <GL/glx.h>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
 #include <sys/time.h>
 #include <unistd.h>
-#include <cstring>
-#include <string>
-#include <cmath>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
-#include <GL/glx.h>
-#include "Object.cpp"
-#include "ppm.h"
+
+#include "bethanyA.cpp" //#include "Sprite.cpp"
+#include "brianS.cpp" //Enemies
+#include "chadD.cpp" //Platforms/Grounds
+#include "definitions.h"
 #include "functions.h"
-#include <sstream>
-#include <algorithm>
-#include <fstream>
-#include "sounds.cpp"
-
-// comment this line to ignore sound use
-#define USE_SOUND
-
-//#include "Sprite.cpp"
-#include "bethanyA.cpp"
-
-//#include "fastFont.h"
-#include "tedP.cpp"
+#include "Object.cpp"
 #include "Player.h"
-
-//Platforms/Grounds
-#include "chadD.cpp"
-
-//Enemies
-#include "brianS.cpp"
-
+#include "ppm.h"
+#include "sounds.cpp"
 #include "Storage.cpp"
-
-#define WINDOW_WIDTH 900
-#define WINDOW_HEIGHT 600
-#define WINDOW_HALF_WIDTH  WINDOW_WIDTH/2
-#define WINDOW_HALF_HEIGHT WINDOW_HEIGHT/2
-#define LEVEL_WIDTH 10000
-#define MAX_HEIGHT 1200
-#define MAX_GROUNDS 100
-#define MAX_ENEMIES 100
-#define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
-
-// 1 for quick load, 0 for slow load with menu images
-#define QUICK_LOAD_TIME 0
-
-// 1 to use tool editor, 0 to use pre-defined objects
-#define USE_TOOLS 0
-
-
-#define MAX_BACKGROUND_BITS 6000
-#define HERO_START_X 150
-#define HERO_START_Y 350
+#include "tedP.cpp" //#include "fastFont.h"
 
 using namespace std;
-
 typedef double Vec[3];
 
 // background bits
@@ -502,7 +470,7 @@ int check_keys (XEvent *e) {
       // Jump
       if ((key == XK_w || key == XK_Up)) {
         testHero->jump();
-        //fmod_playsound(16);
+        fmod_playsound(marioJump);
       }
       // move character left
       if (key == XK_a || key == XK_Left) {
@@ -816,7 +784,7 @@ void movement() {
       b->pos[0] = testHero->getCenterX();
       b->pos[1] = testHero->getCenterY()+15;
 #ifdef USE_SOUND
-      fmod_playsound(gunShotMarvin);
+      fmod_playsound(mvalSingle);
 #endif
       //if (lastFacing or testHero->getVelocityX()<0) {
       //    b->vel[0] = -18;

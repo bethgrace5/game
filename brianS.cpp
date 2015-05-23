@@ -3,6 +3,7 @@
 #include "ppm.h"
 #include "Object.h"
 #include "Sprite.h"
+#include "definitions.h"
 
 //=====================================================================
 //  Enemies

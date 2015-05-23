@@ -13,57 +13,18 @@
   Window Setup        |
 ======================+
 */
-#include <iomanip>
-#include <iostream>
-#include <cstdio>
-#include <cstdlib>
-#include <sys/time.h>
-#include <unistd.h>
-#include <cstring>
-#include <string>
-#include <cmath>
-#include <X11/Xlib.h>
-#include <X11/keysym.h>
 #include <GL/glx.h>
-#include "Object.cpp"
-#include "ppm.h"
-#include "functions.h"
-#include <sstream>
-#include <algorithm>
 #include <fstream>
-//#include "Sprite.cpp"
-#include "bethanyA.cpp"
 
-//#include "fastFont.h"
-#include "tedP.cpp"
+#include "Object.cpp"
+#include "bethanyA.cpp" //#include "Sprite.cpp"
+#include "tedP.cpp" //#include "fastFont.h"
 #include "Player.h"
-
-//Platforms/Grounds
-#include "chadD.cpp"
-
-//Enemies
-#include "brianS.cpp"
-
+#include "chadD.cpp" //Platforms/Grounds
+#include "brianS.cpp" //Enemies
 #include "Storage.cpp"
+#include "definitions.h"
 
-#define WINDOW_WIDTH 900
-#define WINDOW_HEIGHT 600
-#define WINDOW_HALF_WIDTH  WINDOW_WIDTH/2
-#define WINDOW_HALF_HEIGHT WINDOW_HEIGHT/2
-#define LEVEL_WIDTH 10000
-#define MAX_HEIGHT 1200
-#define MAX_GROUNDS 100
-#define MAX_ENEMIES 100
-#define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
-
-// 1 for quick load, 0 for slow load with menu images
-#define QUICK_LOAD_TIME 1
-
-#define MAX_BACKGROUND_BITS 6000
-#define HERO_START_X 150
-#define HERO_START_Y 350
-
-#define OPTIONAL_STORAGE 1 //If 1, you can write the name of the save file
 
 using namespace std;
 

@@ -1,3 +1,4 @@
+#include "definitions.h"
 #include "Sprite.h"
 
 #ifndef PLAYER_H
@@ -68,6 +69,9 @@ void Player::moveLeft(){
 void Player::jump(){
   if(jumps < jumpLimit){ 
       Object::setVelocityY(jumpPower); 
+#ifdef USE_SOUND
+
+#endif
       jumps++;
   }
 }
