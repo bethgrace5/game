@@ -15,7 +15,6 @@
 */
 #include <GL/glx.h>
 #include <fstream>
-
 #include "Object.cpp"
 #include "bethanyA.cpp" //#include "Sprite.cpp"
 #include "tedP.cpp" //#include "fastFont.h"
@@ -148,7 +147,7 @@ void makePlatform(int x, int y) {
   cout << "Make Ground \n";
   //storeIn.grounds[storeIn.grounds_length] = new Platform();
   storeIn.grounds[storeIn.grounds_length]
-    .insert("./images/DigitFont2.ppm", 7, 6);
+    .insert("./images/megaLevel.ppm", 10, 36);
 
   int width  = storeIn.grounds[storeIn.grounds_length].getClipWidth();
   int height = storeIn.grounds[storeIn.grounds_length].getClipHeight();
@@ -160,6 +159,7 @@ void makePlatform(int x, int y) {
   std::cout << "What is " << storeIn.grounds[storeIn.grounds_length].getID() <<
     std::endl;
   storeIn.grounds[storeIn.grounds_length].setIndexXY(0, 0);
+  storeIn.grounds[storeIn.grounds_length].setBackground(1);
   storeIn.grounds_length++;
 }
 void setRow(int size){
@@ -167,6 +167,8 @@ void setRow(int size){
   int changeBy = 1; if(size < 0) changeBy = -1;
   int spriteWidth = storeIn.grounds[saveID].getClipWidth() * changeBy;
   int currentWidth = storeIn.grounds[saveID].getWidth();
+
+  if(changeBy == -1 && currentWidth <= -(spriteWidth)) return;
   storeIn.grounds[saveID].setWidth(currentWidth + spriteWidth);
   storeIn.grounds[saveID].setupTile();
 }
@@ -176,6 +178,8 @@ void setColumn(int size){
   int changeBy = 1; if(size < 0) changeBy = -1;
   int spriteHeight  = storeIn.grounds[saveID].getClipHeight() * changeBy;
   int currentHeight = storeIn.grounds[saveID].getHeight();
+
+  if(changeBy == -1 && currentHeight <= -(spriteHeight))  return;
   storeIn.grounds[saveID].setHeight(spriteHeight + currentHeight);
   storeIn.grounds[saveID].setupTile();
 }

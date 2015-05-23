@@ -39,6 +39,7 @@ class Sprite{
     float clipY;
     int index;
     bool mirror;
+    bool background;
 
     Ppmimage *image;
     GLuint texture;
@@ -80,6 +81,8 @@ class Sprite{
 
     void setMirror(bool reflect);
     bool checkMirror();
+    void setBackground(bool back);
+    bool checkBackground();
 
     void setIndexXY(int x, int y);
     void setIndexAt(int ind);
