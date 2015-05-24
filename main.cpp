@@ -643,53 +643,6 @@ void groundCollide (Object *obj, Object *ground) {
   }
 }
 
-bool detectCollide2 (Object *obj, Object ground) {
-  //Gets (Moving Object, Static Object)
-  //Reture True if Moving Object Collides with Static Object
-  return (obj->getRight() > ground.getLeft() &&
-      obj->getLeft()   < ground.getRight() &&
-      obj->getBottom() < ground.getTop()  &&
-      obj->getTop()    > ground.getBottom());
-}
-
-void groundCollide2 (Object *obj, Object ground) {
-  //(Moving Object, Static Object)
-  //Detects Which boundaries the Moving Object is around the Static Object
-  //top,down,left,right
-  if (detectCollide2(obj, ground)) {
-    h_right=obj->getRight();
-    h_left=obj->getLeft();
-    h_top=obj->getTop();
-    h_bottom=obj->getBottom();
-    g_right=ground.getRight();
-    g_bottom=ground.getBottom();
-    g_top=ground.getTop();
-    g_left=ground.getLeft();
-    //If moving object is on top of the static object
-    if (!(obj->getOldBottom() < g_top) && !(h_bottom >= g_top) && (obj->getVelocityY() < 0)) {
-      obj->setVelocityY(0);
-      obj->setCenter(obj->getCenterX(), g_top+(obj->getCenterY()-h_bottom));
-      //obj->setFloor(ground);
-    }
-    //If moving object is at the bottom of static object
-    if (!(obj->getOldTop() > g_bottom) && !(h_top <= g_bottom)) {
-      obj->setVelocityY(-0.51);
-      obj->setCenter(obj->getCenterX(), g_bottom-(h_top-obj->getCenterY()));
-    }
-    //If moving object is at the l-eft side of static object
-    if (!(obj->getOldRight() > g_left ) && !(h_right <= g_left)) {
-      obj->setVelocityX(-0.51); obj->setCenter(g_left-(h_right-obj->getCenterX()), obj->getCenterY()
-          );
-    }
-    //If moving object is at the right side of static object
-    if (!(obj->getOldLeft() < g_right ) && !(h_left >= g_right)) {
-      obj->setVelocityX(0.51);
-      obj->setCenter(g_right+(obj->getCenterX()-h_left), obj->getCenterY());
-    }
-  }
-}
-
-
 void movement() {
   // Hero Apply Velocity, Add Gravity
 
@@ -701,9 +654,6 @@ void movement() {
   for (i=0; i<grounds_length; i++) {
     groundCollide(hero, grounds[i]);
   } 
-  for (i=0; i<storeIn.grounds_length; i++) {
-    groundCollide2(hero, storeIn.grounds[i]);
-  }
 
   hero->jumpRefresh();
   hero->cycleAnimations();
