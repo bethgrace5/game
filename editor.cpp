@@ -80,7 +80,6 @@ void makeEnemy(int w, int h, Object *ground, int type);
 Object createAI( int w, int h, Object *ground);
 void deleteEnemy(int ind);
 
-
 void render(void);
 void renderEnemies(int x, int y);
 void renderGrounds(int x, int y);
@@ -162,10 +161,8 @@ void makePlatform(int x, int y) {
   grounds[grounds_length]->setIndexXY(0, 0);
   grounds[grounds_length]->setBackground(1);
   grounds_length++;
-
-  //grounds[saveID] = storeIn.grounds[saveID];
-  //storeIn.grounds[saveID] = *grounds[saveID];
 }
+
 void setRow(int size){
   if(saveID < 0) return;
   int changeBy = 1; if(size < 0) changeBy = -1;
@@ -257,16 +254,8 @@ void deleteEnemy(int ind){
   delete enemies[i];
   enemies[i] = enemies[enemies_length];
   enemies[enemies_length]=NULL;
-
-  /*
-     for (i=ind;i<enemies_length;i++){
-     enemies[i]=(i==(MAX_ENEMIES-1)?NULL:enemies[i+1]);
-     cout << "e[" << i << "] = " << (i==(MAX_ENEMIES-1)?NULL:enemies[i+1]);
-     } 
-     enemies_length--;
-     cout << "deleted enemy, count : " << enemies_length << endl;
-     */
 }
+
 Object createAI (int w, int h, Object *ground) {
   Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
   return newEnemy;
@@ -312,10 +301,10 @@ void check_mouse (XEvent *e) {
   //Did the mouse move?
   if (savex != e->xbutton.x || savey != e->xbutton.y) {
     int x = roomX - WINDOW_HALF_WIDTH;
-    //int y = roomY - WINDOW_HALF_HEIGHT;
+    int y = roomY - WINDOW_HALF_HEIGHT;
     //int y = WINDOW_HEIGHT - e->xbutton.y;
     savex = e->xbutton.x + x; //xpast = savex;
-    savey  = WINDOW_HEIGHT - e->xbutton.y;
+    savey  = WINDOW_HEIGHT - e->xbutton.y + y;
   }
 }
 
@@ -353,11 +342,13 @@ int check_keys (XEvent *e) {
     if(key == XK_k) changeTileY();
     if(key == XK_b) deleteLastPlatform();
     if(key == XK_n) deletePlatform();
-
-
-        
+  
     if(key == XK_a) roomX -= 50;
     if(key == XK_d) roomX += 50;
+    if(key == XK_Up) roomY += 50;
+    if(key == XK_Down) roomY -= 50;
+    if(key == XK_Left) roomX -=50;
+    if(key == XK_Right) roomX +=50;
 
     if(key == XK_c){
       create = 1; selecter = 0; 
@@ -365,7 +356,6 @@ int check_keys (XEvent *e) {
     if(key == XK_v){
       create = 0; selecter = 1;  
     }
-
   }
 
   else if (e->type == KeyRelease) {

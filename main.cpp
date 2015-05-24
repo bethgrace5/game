@@ -66,8 +66,7 @@ timeval fireStart, fireEnd; // hero's fire rate timer
 bgBit *bitHead = NULL;
 Bullet *bulletHead = NULL;
 Enemy *enemies[MAX_ENEMIES];
-Object *hero; // Class Player
-Player *testHero;
+Player *hero;
 Platform *grounds[MAX_GROUNDS];
 double g_left, g_right, g_top, g_bottom;
 int bg, bullets, grounds_length, enemies_length, i, j, level=0, fail=0, quit=0;
@@ -79,8 +78,8 @@ int showInvalid=0, frameIndex=0, menuSelection = 0;
 timeval frameStart, frameEnd;
 
 //Images and Textures
-Ppmimage *heroImage=NULL, *initImages[32], *computerScreenImages[32];
-GLuint heroTexture, initTextures[65], computerScreenTextures[32];
+Ppmimage *initImages[32], *computerScreenImages[32];
+GLuint initTextures[65], computerScreenTextures[32];
 
 //Function prototypes
 Object createAI( int w, int h, Object *ground);
@@ -117,15 +116,10 @@ int main(void) {
   #endif
 
   //declare hero object
-  hero = new Object(46, 48, HERO_START_X, HERO_START_Y);
-  hero->setTop(40);
-  hero->setBottom(-44);
-  hero->setLeft(-26);
-  hero->setRight(26);
 
-  testHero = new Player();
-  testHero->insert("./images/hero.ppm", 13, 1);
-  testHero->setSize(44,48);
+  hero = new Player();
+  hero->insert("./images/hero.ppm", 13, 1);
+  hero->setSize(44,48);
 
   // skip menu and go straight to level 1
   if(QUICK_LOAD_TIME) {
@@ -212,19 +206,9 @@ void init_opengl (void) {
   initFastFont();
 
   //Load images into ppm structure.
-  heroImage = ppm6GetImage("./images/hero.ppm");
   //Create texture elements
-  glGenTextures(1, &heroTexture);
-  int w = heroImage->width;
-  int h = heroImage->height;
-  glBindTexture(GL_TEXTURE_2D, heroTexture);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-  //build a new set of data...
-  unsigned char *silhouetteData = buildAlphaData(heroImage);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
-      GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
-  delete [] silhouetteData;
+  int w;
+  int h;
 
   gettimeofday(&fireStart, NULL);
 
@@ -409,24 +393,23 @@ int check_keys (XEvent *e) {
       }
       // Jump
       if ((key == XK_w || key == XK_Up)) {
-        testHero->jump();
+        hero->jump();
       }
       // move character left
       if (key == XK_a || key == XK_Left) {
-        testHero->moveLeft();
+        hero->moveLeft();
       }
       // move character right
       if (key == XK_d || key == XK_Right){
-        testHero->moveRight();
+        hero->moveRight();
       }
       // shooting
       if (key == XK_space) {
-        testHero->setShooting(true);
-        hero->isShooting=1;
+        hero->setShooting(true);
       }
       // debug death
       if (key == XK_y) {
-        testHero->setHealth(0);
+        hero->setHealth(0);
         life-=1000;
         #ifdef USE_SOUND
         fmod_playsound(dunDunDun);
@@ -457,7 +440,6 @@ int check_keys (XEvent *e) {
           fmod_playsound(electronicNoise);
           #endif
           // make sure hero is not shooting immediately
-          hero->isShooting=0;
           level=-1;
           lastFacing = 0;
         }
@@ -564,14 +546,14 @@ int check_keys (XEvent *e) {
     }
   }
   else if (e->type == KeyRelease) {
-    if ((key == XK_a || key == XK_Left) && !(hero->isDying)) {
-      testHero->stop();
+    if ((key == XK_a || key == XK_Left)) {
+      hero->stop();
     }
-    if ((key == XK_d || key == XK_Right) && !(hero->isDying)) {
-      testHero->stop();
+    if ((key == XK_d || key == XK_Right)) {
+      hero->stop();
     }
     if (key == XK_space) {
-      testHero->setShooting(false);
+      hero->setShooting(false);
     }
   }
 
@@ -711,32 +693,31 @@ void groundCollide2 (Object *obj, Object ground) {
 void movement() {
   // Hero Apply Velocity, Add Gravity
 
-  testHero->setOldCenter();
-  testHero->autoSet();
-  if(testHero->getHealth() <= 0) testHero->stop();  
+  hero->setOldCenter();
+  hero->autoSet();
+  if(hero->getHealth() <= 0) hero->stop();  
 
   //Detect Collisions
   for (i=0; i<grounds_length; i++) {
     groundCollide(hero, grounds[i]);
-    groundCollide(testHero, grounds[i]);
   } 
   for (i=0; i<storeIn.grounds_length; i++) {
-    groundCollide2(testHero, storeIn.grounds[i]);
+    groundCollide2(hero, storeIn.grounds[i]);
   }
 
-  testHero->jumpRefresh();
-  testHero->cycleAnimations();
-  testHero->autoState();//This set the isStuff like isWalking, tmp fix
-  testHero->setVelocityY( testHero->getVelocityY() - GRAVITY);
+  hero->jumpRefresh();
+  hero->cycleAnimations();
+  hero->autoState();//This set the isStuff like isWalking, tmp fix
+  hero->setVelocityY( hero->getVelocityY() - GRAVITY);
 
   // Cycle through hero index sequences
 
-  if (testHero->getCenterY() < 0){ life = 0; testHero->setHealth(0);}
+  if (hero->getCenterY() < 0){ life = 0; hero->setHealth(0);}
 
   if (life<=0) {//Going to try to Mimic The Death Function. Heres a tmp fix though
-    testHero->stop();
-    if (!(testHero->isDying)) {
-      testHero->isDying=1;
+    hero->stop();
+    if (!(hero->isDying)) {
+      hero->isDying=1;
       gettimeofday(&seqStart, NULL);
       fail=100;
       #ifdef USE_SOUND
@@ -746,30 +727,30 @@ void movement() {
     else{
       gettimeofday(&seqEnd, NULL);
       if (((diff_ms(seqEnd, seqStart)) > 1000)) {
-        testHero->setCenter(HERO_START_X, HERO_START_Y);
+        hero->setCenter(HERO_START_X, HERO_START_Y);
 
-        testHero->isDying=0;
-        testHero->setHealth(100); life=100; lives--;
+        hero->isDying=0;
+        hero->setHealth(100); life=100; lives--;
       }
     }
   }
 
   //Bullet creation
   Bullet *b;
-  if (testHero->checkShooting()){
+  if (hero->checkShooting()){
     gettimeofday(&fireEnd, NULL);
     if (((diff_ms(fireEnd, fireStart)) > 250)) { //Fire rate 250ms
       gettimeofday(&fireStart, NULL); //Reset firing rate timer
       b = new Bullet;
-      b->pos[0] = testHero->getCenterX();
-      b->pos[1] = testHero->getCenterY()+15;
+      b->pos[0] = hero->getCenterX();
+      b->pos[1] = hero->getCenterY()+15;
       #ifdef USE_SOUND
       fmod_playsound(mvalSingle);
       #endif
-      //if (lastFacing or testHero->getVelocityX()<0) {
+      //if (lastFacing or hero->getVelocityX()<0) {
       //    b->vel[0] = -18;
       //} else {
-      if (testHero->checkMirror()){
+      if (hero->checkMirror()){
         b->vel[0] = -18;
       } else {
         b->vel[0] = 18;
@@ -806,7 +787,7 @@ void movement() {
 
     // Enemy movement, enemy ai
     for (i=0;i<enemies_length;i++) {
-      enemies[i]->enemyAI(testHero); //Where does enemy go?
+      enemies[i]->enemyAI(hero); //Where does enemy go?
       //enemyAI(enemies[i]);
       //bullets
       b = bulletHead;
@@ -841,8 +822,8 @@ void movement() {
    }
 
   void moveWindow () {
-    double heroWinPosX = testHero->getCenterX();
-    double heroWinPosY = testHero->getCenterY();
+    double heroWinPosX = hero->getCenterX();
+    double heroWinPosY = hero->getCenterY();
     int interval=120;
 
     //move window forward
@@ -924,7 +905,7 @@ void movement() {
     //Easy Drawing
     glPushMatrix();
     glTranslatef(-x, -y, 0);
-    testHero->drawBox();
+    hero->drawBox();
     glPopMatrix();
   }
 
@@ -955,7 +936,9 @@ void movement() {
     int frameTime = 70;
 
     // loop through frames
-    if (diff_ms(frameStart, frameEnd) > frameTime) { frameIndex++;
+    if (diff_ms(frameStart, frameEnd) > frameTime) { 
+      frameIndex++;
+      std::cout << "Index At: " << frameIndex << std::endl;
       gettimeofday(&frameEnd, NULL);
     }
     // transition to render level 1
