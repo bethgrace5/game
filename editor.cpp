@@ -24,7 +24,6 @@
 #include "Storage.cpp"
 #include "definitions.h"
 
-
 using namespace std;
 
 typedef double Vec[3];
@@ -35,7 +34,7 @@ Display *dpy; Window win; GLXContext glc;
 //Game Globals
 //------------------------------
 Player *testHero;
-Enemy *enemies[MAX_ENEMIES];
+//Enemy *enemies[MAX_ENEMIES];
 Platform *grounds[MAX_GROUNDS];
 int grounds_length = 0, enemies_length;
 int i, j;
@@ -102,9 +101,10 @@ bool inWindow(Object &obj) {
 //====================================================================
 int main(void) {
   initXWindows(); init_opengl();
-
+  
   //declare hero object
   testHero = new Player();
+  std::cout << "It didn't pass here\n";
   testHero->insert("./images/hero.ppm", 13, 1);
   testHero->setSize(44,48);
 
@@ -230,7 +230,7 @@ void deletePlatform(){
 //  Enemy Editor
 //=====================================================================
 void makeEnemy(int w, int h, Object *ground, int type) {
-  if (enemies_length<MAX_ENEMIES){
+  /*if (enemies_length<MAX_ENEMIES){
     switch (type){
       case 1:
         enemies[enemies_length] = new Enemy(w, h, ground); 
@@ -246,14 +246,16 @@ void makeEnemy(int w, int h, Object *ground, int type) {
   }
   else{
     cout << "Enemies array full!!!!" << endl;
-  }
+  }*/
 }
 
 void deleteEnemy(int ind){
+  /*
   enemies_length--;
   delete enemies[i];
   enemies[i] = enemies[enemies_length];
   enemies[enemies_length]=NULL;
+  */
 }
 
 Object createAI (int w, int h, Object *ground) {
@@ -331,9 +333,9 @@ int check_keys (XEvent *e) {
   //handle input from the keyboard
   int key = XLookupKeysym(&e->xkey, 0);
   if (e->type == KeyPress) {
-    if (key == XK_Escape or key == XK_q) return 1;
-    if( key == XK_s) save(); 
-    if( key == XK_l) load(); 
+    if(key == XK_Escape or key == XK_q) return 1;
+    if(key == XK_s) save(); 
+    if(key == XK_l) load(); 
     if(key == XK_r) setRow(1);  
     if(key == XK_t) setColumn(1); 
     if(key == XK_y) setRow(-1);
@@ -364,7 +366,6 @@ int check_keys (XEvent *e) {
   }
   return 0;
 }
-
 //=====================================================================
 //  Physics
 //=====================================================================
@@ -380,7 +381,6 @@ bool detectCollide (Object *obj, Object *ground) {
       obj->getBottom() < ground->getTop()  &&
       obj->getTop()    > ground->getBottom());
 }
-
 //=====================================================================
 //  Drawing
 //=====================================================================
@@ -427,6 +427,7 @@ void renderGrounds (int x, int y) {
 }
 
 void renderEnemies (int x, int y) {
+  /*
   for (int i=0;i<enemies_length;i++) {
     if (inWindow(*(enemies[i]))){
       glPushMatrix();
@@ -435,6 +436,7 @@ void renderEnemies (int x, int y) {
       glEnd(); glPopMatrix();
     }
   }
+  */
 }
 
 void renderHero (int x, int y) {
@@ -460,7 +462,6 @@ void render () {
 //  Storage Editor
 //=====================================================================
 void save(){
-
   for(int i = 0; i < grounds_length; i++){
     storeIn.grounds[i] = *grounds[i];  
   }
@@ -471,12 +472,13 @@ void save(){
 
   if(OPTIONAL_STORAGE != 1) return;
   renderSave();
-
   std::cout << "Save File As: ";
-  string fileName;
-  cin >> fileName; fileName.append(".ros");
-  char charFileName[40];
-  strcpy(charFileName, fileName.c_str());
+  string fileName; cin >> fileName; fileName.append(".ros");
+
+  string folder = "./data/"; folder.append(fileName);
+
+  char charFileName[50]; strcpy(charFileName, folder.c_str());
+
   ofstream saveFileAs(charFileName, ios::binary); 
 
   saveFileAs.write((char *)&storeIn, sizeof(storeIn));
@@ -493,25 +495,27 @@ void load(){
       string fileName;
       std::cout << "Load in: ";  
       cin >> fileName;
+      string folder = "./data/"; folder.append(fileName);
 
-      if (fileName.find(".ros") != std::string::npos) {
+      if (folder.find(".ros") != std::string::npos) {
         std::cout << "File Exist, Will Load\n";
       }else{
-        std::cout << "! Will Only take .ros files !\n";
-        return;
+        std::cout << "! Will Only take .ros files !\n"; return;
       }
-      char charFileName[40];
-      strcpy(charFileName, fileName.c_str());
+      char charFileName[50];
+      strcpy(charFileName, folder.c_str());
 
       ifstream dfs(charFileName, ios::binary);
       std::cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
       dfs.read((char *)&storeIn, sizeof(storeIn));
 
+      std::cout << "Loading \n";
       for(int i = 0; i < storeIn.grounds_length; i++){
         grounds[i] = &storeIn.grounds[i];
         grounds[i]->reInitSprite();
         grounds_length++;
       } 
+      std::cout << "Loading Finished \n";
 }
 
 void quickLoad(){
