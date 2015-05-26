@@ -46,7 +46,6 @@ void Sprite::setFile(const char *filename){
   //Change the imageName to ppm file. imageName is used in the initSprite();
   imageName = filename; 
   strcpy(save, imageName);
-  //std::cout << "Setting File image" << save << std::endl;
 }
 
 void Sprite::setClip(int x, int y){
@@ -55,15 +54,12 @@ void Sprite::setClip(int x, int y){
   row = x; column = y; 
   if(x > 0) clipX = (float)1/row;
   if(y > 0) clipY = (float)1/column;
-  //std::cout << "give me CLIPX: " << clipX << std::endl;
-  //std::cout << "give me CLIPY: " << clipY << std::endl;
 }
 
 void Sprite::setSize(int x, int y){
   //Sets the size of sprite shown
   clipWidth = x;
   clipHeight = y;
-  //std::cout << "what is x " << x << "\n what is y " << y << std::endl;
 }
 
 void Sprite::initSprite(){
@@ -89,8 +85,6 @@ void Sprite::initSprite(){
 
 void Sprite::reInitSprite(){
   //Refresh the new Sprite Image
-  //std::cout << "Setting File image" << save << std::endl;
-  //imageName = strImageName.c_str();
   imageName = &save[0];
   image = ppm6GetImage(imageName);
   glGenTextures(1, &texture);
@@ -122,6 +116,9 @@ void Sprite::replaceTexture(GLuint take){
 //   2 # # # #
 //   3 # # # #
 //
+void Sprite::drawTile(){
+  drawTile(getIndexX(), getIndexY());
+}
 void Sprite::drawTile(int row, int column){
   //Need to check if 0;
   int atX = row; int atY = column;

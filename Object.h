@@ -80,6 +80,8 @@ class Object{
         int obj_id;;
         int jump;
         bool aggro;
+        bool hostile;
+        bool interactive;
         Vec velocity;
         Vec center;
         Vec oldCenter;

@@ -25,7 +25,6 @@
 #include "definitions.h"
 
 using namespace std;
-
 typedef double Vec[3];
 
 //X Windows variables
@@ -34,6 +33,7 @@ Display *dpy; Window win; GLXContext glc;
 //Game Globals
 //------------------------------
 Player *testHero;
+Sprite currentTile;
 //Enemy *enemies[MAX_ENEMIES];
 Platform *grounds[MAX_GROUNDS];
 int grounds_length = 0, enemies_length;
@@ -95,7 +95,6 @@ bool inWindow(Object &obj) {
       (obj.getRight() > (roomX-(WINDOW_HALF_WIDTH)) and
        obj.getRight() < (roomX+(WINDOW_HALF_WIDTH))));
 }
-
 //====================================================================
 //    Main Center
 //====================================================================
@@ -104,7 +103,9 @@ int main(void) {
   
   //declare hero object
   testHero = new Player();
-  std::cout << "It didn't pass here\n";
+  currentTile.insert("./images/megaLevel.ppm", 1, 1);
+  currentTile.setSize(300, 300);
+
   testHero->insert("./images/hero.ppm", 13, 1);
   testHero->setSize(44,48);
 
@@ -387,6 +388,11 @@ bool detectCollide (Object *obj, Object *ground) {
 void renderOptions(){
   if(create == 1) writeWords("Create Mode", 25, 25);
   if(selecter == 1) writeWords("Select Mode", 25, 25);
+  if(create == 1){
+    glPushMatrix(); glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
+    //currentTile.drawTile(0,0);
+    glPopMatrix();
+  }
 }
 
 void renderBox(){

@@ -6,7 +6,6 @@
 #include "ppm.h"
 #include "Object.h"
 #include "Sprite.h"
-
 //=====================================================================
 //  Platform
 //=====================================================================
@@ -42,8 +41,7 @@ class Platform : public Sprite, public Object {
 };
 
 Platform::Platform() : Sprite(), Object(260, 200, 350, 400) {
-    //Just An Intializer
-    //this will set up Boundaries of the object and set Sprite to 0/NULL
+  lineSpaceX = lineSpaceY = 0;
 }
 
 void Platform::setupTile() {
@@ -73,8 +71,7 @@ void Platform::drawRow(int x, int y) {
   //Draws Tiles for a box
   //This is To Test The Boundaries Of The Platform
   //you will see a colored box 
-  //float w, h;
-  /*
+  /*float w, h; 
   glPushMatrix();
   glTranslatef(Object::getCenterX(), Object::getCenterY(), 0); 
   w = Object::getWidth();
@@ -92,7 +89,6 @@ void Platform::drawRow(int x, int y) {
   //This Will Draw The TileSet based on the Boundaries of Object
   glPushMatrix();
   glTranslatef(Object::getLeft(), Object::getTop(), 0);
-  //glTranslatef(Object::getLeft(), 0, 0); 
   for(int j = 0; j < Object::getHeight()/lineSpaceY; j++){
     if (j == 0) glTranslatef(0, -lineSpaceY , 0); 
     else        glTranslatef(0, -(lineSpaceY + lineSpaceY), 0); 
@@ -103,8 +99,7 @@ void Platform::drawRow(int x, int y) {
       if (i == 0) glTranslatef(lineSpaceX,0 , 0); 
       else        glTranslatef(lineSpaceX + lineSpaceX ,0 , 0); 
 
-      //Sprite::drawTile(x,y);
-      Sprite::drawTile(Sprite::getIndexX(),Sprite::getIndexY());
+      drawTile();
     }
     glPopMatrix();
   } 

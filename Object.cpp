@@ -29,6 +29,8 @@ void Object::init( double w, double h, double x, double y ) {
     isFalling=0;
     isWalking=0;
     isShooting=0;
+    hostile = 0;
+    interactive = 0;
     isDying=0;
     isDead=0;
 }
@@ -40,6 +42,8 @@ void Object::init( double w, double h ) {
     bottom=h*-1;
     right=w;
     top=h;
+    hostile = 0;
+    interactive = 0;
 }
 
 void Object::autoSet(){
