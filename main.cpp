@@ -211,6 +211,7 @@ void init_opengl (void) {
   int h;
 
   gettimeofday(&fireStart, NULL);
+  gettimeofday(&frameStart, NULL);
 
   if (!QUICK_LOAD_TIME) {
     // load initialization screens
@@ -882,14 +883,13 @@ void movement() {
   }
 
   void renderInitMenu () {
-    gettimeofday(&frameStart, NULL);
     int frameTime = 70;
+    gettimeofday(&frameEnd, NULL);
 
     // loop through frames
-    if (diff_ms(frameStart, frameEnd) > frameTime) { 
+    if (diff_ms(frameEnd, frameStart) > frameTime) { 
+      gettimeofday(&frameStart, NULL);
       frameIndex++;
-      std::cout << "Index At: " << frameIndex << std::endl;
-      gettimeofday(&frameEnd, NULL);
     }
     // transition to render level 1
     if (frameIndex == 65) {
@@ -924,19 +924,19 @@ void movement() {
   }
 
   void renderComputerScreenMenu () {
-    gettimeofday(&frameStart, NULL);
+    gettimeofday(&frameEnd, NULL);
     int frameTime = 190;
     int WHW = WINDOW_HALF_WIDTH;
     int WHH = WINDOW_HALF_HEIGHT;
 
     // loop through frames
-    if (diff_ms(frameStart, frameEnd) > frameTime) {
+    if (diff_ms(frameEnd, frameStart) > frameTime) {
+        gettimeofday(&frameStart, NULL);
         frameIndex++;
-          gettimeofday(&frameEnd, NULL);
     }
 
+    //reset frame sequence
     if (frameIndex == 26) {
-      //reset frame sequence
       frameIndex = 0;
     }
 
