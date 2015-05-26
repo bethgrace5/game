@@ -13,7 +13,7 @@
 //=====================================================================
 class Player: public Object, public Sprite{
   private:
-    int lives, health;
+    int lives, health, maxHealth;
     int jumps, jumpLimit, jumpPower;
     int maxSpeed, speed;
 
@@ -34,8 +34,10 @@ class Player: public Object, public Sprite{
     void stop();
     void jumpRefresh();
 
-    void setHealth(int take);
     int getHealth();
+    void setHealth(int take);
+    void reduceHealth(int take);
+    void repairHealth(int take);
 
     bool checkShooting();
     void setShooting(bool take);
@@ -53,9 +55,10 @@ class Player: public Object, public Sprite{
 //==============================================
 Player::Player() : Object(26, 44, 250, 250), Sprite(){
   //Set The Default stats
-  lives = 3; health = 3;
+  lives = 3; 
+  health =  maxHealth = 100;
 
-  jumps = 1; jumpLimit = 2; jumpPower = 7;
+  jumps = 0; jumpLimit = 2; jumpPower = 7;
   speed = 0; maxSpeed  = 7;
 
   indexp = 0; once = 0;
@@ -95,6 +98,13 @@ void Player::setHealth(int take){
 int Player::getHealth(){
   return health;
 }
+void Player::reduceHealth(int take){
+  health -= take;
+}
+void Player::repairHealth(int take){
+  health += take;
+  if(health > maxHealth) health = 100;
+}
 
 bool Player::checkShooting(){
   return triggerShooting;
@@ -118,7 +128,6 @@ void Player::cycleAnimations(){
   if(once == 0){ gettimeofday(&seqStartA, NULL); once = 1 ;}
   gettimeofday(&seqEndA, NULL);//This Can Be Universal For All Stuff so Maybe Make This
                                //Global in main.cpp
-
   //The Earilier Animations States gets first priority
 
   //Death
@@ -151,7 +160,6 @@ void Player::cycleAnimations(){
   }
   //Standing
   else indexp = 6; 
-
   //std::cout << "Index: " << indexp << endl;
   Sprite::setIndexAt(indexp);
 }

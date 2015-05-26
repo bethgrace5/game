@@ -410,8 +410,7 @@ int check_keys (XEvent *e) {
       }
       // debug death
       if (key == XK_y) {
-        hero->setHealth(0);
-        life-=1000;
+        hero->reduceHealth(100);
         #ifdef USE_SOUND
         fmod_playsound(dunDunDun);
         #endif
@@ -665,7 +664,7 @@ void movement() {
 
   if (hero->getCenterY() < 0){ life = 0; hero->setHealth(0);}
 
-  if (life<=0) {//Going to try to Mimic The Death Function. Heres a tmp fix though
+  if (hero->getHealth()<=0) {//Going to try to Mimic The Death Function. Heres a tmp fix though
     hero->stop();
     if (!(hero->isDying)) {
       hero->isDying=1;
@@ -679,9 +678,8 @@ void movement() {
       gettimeofday(&seqEnd, NULL);
       if (((diff_ms(seqEnd, seqStart)) > 1000)) {
         hero->setCenter(HERO_START_X, HERO_START_Y);
-
         hero->isDying=0;
-        hero->setHealth(100); life=100; lives--;
+        hero->repairHealth(100); lives--;
       }
     }
   }
