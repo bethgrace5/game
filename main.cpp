@@ -78,8 +78,8 @@ int showInvalid=0, frameIndex=0, menuSelection = 0;
 timeval frameStart, frameEnd;
 
 //Images and Textures
-Ppmimage *initImages[32], *computerScreenImages[32], *healthBarImages[3], *lifeImage[1];
-GLuint initTextures[65], computerScreenTextures[32], healthBarTextures[3], lifeTexture[1];
+Ppmimage *initImages[32], *computerScreenImages[32], *healthBarImage[1], *lifeImage[1];
+GLuint initTextures[65], computerScreenTextures[32], healthBarTexture[1], lifeTexture[1];
 
 //Function prototypes
 Object createAI( int w, int h, Object *ground);
@@ -295,27 +295,17 @@ void init_opengl (void) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, lifeData);
     delete [] lifeData;
 
-    /*
-    // load health bar images
-    unsigned char *healthData;
-    glGenTextures(3, healthBarTextures);
-    fileName = "";
-    for (int q=0; q<3; q++) {
-      fileName = "./images/healthBar";
-      fileName += itos(q);
-      fileName += ".ppm";
-      cout << "loading file: " <<fileName <<endl;
-      healthBarImages[q] = ppm6GetImage(fileName.c_str());
-      glBindTexture(GL_TEXTURE_2D, healthBarTextures[q]);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      healthData = buildAlphaData(healthBarImages[q]);
-      w = healthBarImages[q]->width;
-      h = healthBarImages[q]->height;
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, healthData);
-    }
+    // load health bar image
+    glGenTextures(1, healthBarTexture);
+    healthBarImage[0] = ppm6GetImage("./images/healthBar.ppm");
+    glBindTexture(GL_TEXTURE_2D, healthBarTexture[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    unsigned char *healthData = buildAlphaData(healthBarImage[0]);
+    w = healthBarImage[0]->width;
+    h = healthBarImage[0]->height;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, healthData);
     delete [] healthData;
-    */
 
 
   if( USE_TOOLS ){
@@ -857,7 +847,7 @@ void movement() {
     renderEnemies(x, y);
     renderHero(x, y);
     renderLives();
-    //renderHealthBar();
+    renderHealthBar();
 
     if (fail>0) {
       writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 200, WINDOW_HEIGHT/2);
@@ -971,9 +961,6 @@ void movement() {
 
     // prepare opengl
     glPushMatrix();
-    //glClear(GL_COLOR_BUFFER_BIT);
-    //glClearColor(0.0, 0.0, 0.0, 1.0);
-    //glTranslatef(WHW, WHH, 0);
     glColor3ub(0,100,40);
 
     glEnable(GL_TEXTURE_2D);
@@ -1004,35 +991,39 @@ void movement() {
   }
 
   void renderHealthBar () {
-    //TODO: set health bar texture to render based on current health.
-    int bar = 0;
-
-    int WHW = WINDOW_HALF_WIDTH;
-    int WHH = WINDOW_HALF_HEIGHT;
+    int WW = WINDOW_WIDTH;
+    int WH = WINDOW_HEIGHT;
+    //int w = 50;
+    //int h = 50;
 
     // prepare opengl
     glPushMatrix();
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glTranslatef(WHW, WHH, 0);
     glColor3ub(0,100,40);
 
-    //glEnable(GL_TEXTURE_2D);
-    //glEnable(GL_ALPHA_TEST);
-    //glAlphaFunc(GL_LESS, 0.2f);
-    //glBindTexture(GL_TEXTURE_2D, healthBarTextures[bar]);
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_ALPHA_TEST);
+    // remove GL_GREATER function to have black background
+    // glAlphaFunc(GL_GREATER, 0.1f);
+    glBindTexture(GL_TEXTURE_2D, healthBarTexture[0]);
     glColor4ub(255,255,255,255);
 
-    glBegin(GL_QUADS);
-    glTexCoord2f(0, 1) ; glVertex2i(-WHW,-WHH);
-    glTexCoord2f(0, 0) ; glVertex2i(-WHW, WHH);
-    glTexCoord2f(1, 0) ; glVertex2i( WHW, WHH);
-    glTexCoord2f(1, 1) ; glVertex2i( WHW,-WHH);
-    glEnd(); glPopMatrix();
+    // player begins with 3 lives, but has opportunities to earn 
+    // up to 2 extra lives, so may have 5 total at one point
 
-    //glDisable(GL_TEXTURE_2D);
-    //glDisable(GL_ALPHA_TEST);
+    int lives = hero->getLives();
 
+    for(int k=0; k<lives; k++) {
+        glBegin(GL_QUADS);
+        glTexCoord2f(0, 1) ; glVertex2i(0,   WH-90);
+        glTexCoord2f(0, 0) ; glVertex2i(0,   WH);
+        glTexCoord2f(1, 0) ; glVertex2i(200, WH);
+        glTexCoord2f(1, 1) ; glVertex2i(200, WH-90);
+        glEnd();
+    }
+    glPopMatrix();
+
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
   }
 
   void renderComputerScreenMenu () {
