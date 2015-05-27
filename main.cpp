@@ -57,7 +57,7 @@ struct Bullet {
 Display *dpy; Window win; GLXContext glc;
 
 //Hero Globals
-int didJump=0, lives=3, life=100, lastFacing=0;
+int didJump=0, life=100, lastFacing=0;
 double h_right, h_left, h_top, h_bottom;
 timeval seqStart, seqEnd; // hero's sprite index
 timeval fireStart, fireEnd; // hero's fire rate timer
@@ -78,8 +78,8 @@ int showInvalid=0, frameIndex=0, menuSelection = 0;
 timeval frameStart, frameEnd;
 
 //Images and Textures
-Ppmimage *initImages[32], *computerScreenImages[32];
-GLuint initTextures[65], computerScreenTextures[32];
+Ppmimage *initImages[32], *computerScreenImages[32], *healthBarImages[3], *lifeImage[1];
+GLuint initTextures[65], computerScreenTextures[32], healthBarTextures[3], lifeTexture[1];
 
 //Function prototypes
 Object createAI( int w, int h, Object *ground);
@@ -106,6 +106,8 @@ void renderEnemies(int x, int y);
 void renderGrounds(int x, int y);
 void renderHero(int x, int y);
 void renderInitMenu();
+void renderHealthBar();
+void renderLives();
 
 
 int main(void) {
@@ -213,11 +215,12 @@ void init_opengl (void) {
   gettimeofday(&fireStart, NULL);
   gettimeofday(&frameStart, NULL);
 
+  string fileName;
+
   if (!QUICK_LOAD_TIME) {
     // load initialization screens
     unsigned char *menuData;
     glGenTextures(65, initTextures);
-    string fileName;
 
     for (int q=0; q<32; q++) {
 
@@ -262,14 +265,12 @@ void init_opengl (void) {
     unsigned char *computerData;
     glGenTextures(26, computerScreenTextures);
     fileName = "";
-
     for (int q=0; q<26; q++) {
       fileName = "./images/cs/cs";
       fileName += itos(q);
       fileName += ".ppm";
       cout << "loading file: " <<fileName <<endl;
       computerScreenImages[q] = ppm6GetImage(fileName.c_str());
-
       glBindTexture(GL_TEXTURE_2D, computerScreenTextures[q]);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -280,6 +281,42 @@ void init_opengl (void) {
     }
     delete [] computerData;
   }
+
+    // load life image
+    unsigned char *lifeData;
+    glGenTextures(1, lifeTexture);
+    lifeImage[0] = ppm6GetImage("./images/life.ppm");
+    glBindTexture(GL_TEXTURE_2D, lifeTexture[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    lifeData = buildAlphaData(lifeImage[0]);
+    w = lifeImage[0]->width;
+    h = lifeImage[0]->height;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, lifeData);
+    delete [] lifeData;
+
+    /*
+    // load health bar images
+    unsigned char *healthData;
+    glGenTextures(3, healthBarTextures);
+    fileName = "";
+    for (int q=0; q<3; q++) {
+      fileName = "./images/healthBar";
+      fileName += itos(q);
+      fileName += ".ppm";
+      cout << "loading file: " <<fileName <<endl;
+      healthBarImages[q] = ppm6GetImage(fileName.c_str());
+      glBindTexture(GL_TEXTURE_2D, healthBarTextures[q]);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      healthData = buildAlphaData(healthBarImages[q]);
+      w = healthBarImages[q]->width;
+      h = healthBarImages[q]->height;
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, healthData);
+    }
+    delete [] healthData;
+    */
+
 
   if( USE_TOOLS ){
       // loads platform objects from file
@@ -410,7 +447,9 @@ int check_keys (XEvent *e) {
       }
       // debug death
       if (key == XK_y) {
-        hero->reduceHealth(100);
+        // cycleAnimations() checks for 0 or less health
+        // to show dying sequence
+        hero->decrementLives();
         #ifdef USE_SOUND
         fmod_playsound(dunDunDun);
         #endif
@@ -662,14 +701,19 @@ void movement() {
 
   // Cycle through hero index sequences
 
-  if (hero->getCenterY() < 0){ life = 0; hero->setHealth(0);}
+  // remove a life when the hero falls off platform
+  if (hero->getCenterY() < 0){
+    if (!(hero->isDying)) {
+        hero->decrementLives();
+    }
+      hero->setHealth(0);
+  }
 
   if (hero->getHealth()<=0) {//Going to try to Mimic The Death Function. Heres a tmp fix though
     hero->stop();
     if (!(hero->isDying)) {
       hero->isDying=1;
       gettimeofday(&seqStart, NULL);
-      fail=100;
       #ifdef USE_SOUND
       fmod_playsound(dunDunDun);
       #endif
@@ -679,7 +723,7 @@ void movement() {
       if (((diff_ms(seqEnd, seqStart)) > 1000)) {
         hero->setCenter(HERO_START_X, HERO_START_Y);
         hero->isDying=0;
-        hero->repairHealth(100); lives--;
+        hero->repairHealth(100); 
       }
     }
   }
@@ -714,7 +758,7 @@ void movement() {
       bulletHead = b;
       bullets++;
     }
-    }
+  }
 
     //bullet collisions against grounds
     b = bulletHead;
@@ -812,12 +856,13 @@ void movement() {
     renderGrounds(x, y);
     renderEnemies(x, y);
     renderHero(x, y);
+    renderLives();
+    //renderHealthBar();
 
     if (fail>0) {
       writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 200, WINDOW_HEIGHT/2);
       fail--;
     }
-    writeWords("Lives:", WINDOW_WIDTH/2- 400, WINDOW_HEIGHT/2- 250);
   }
 
   void renderGrounds (int x, int y) {
@@ -919,6 +964,75 @@ void movement() {
     glEnd(); glPopMatrix();
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
+  }
+  void renderLives () {
+    int w = 50;
+    int h = 50;
+
+    // prepare opengl
+    glPushMatrix();
+    //glClear(GL_COLOR_BUFFER_BIT);
+    //glClearColor(0.0, 0.0, 0.0, 1.0);
+    //glTranslatef(WHW, WHH, 0);
+    glColor3ub(0,100,40);
+
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_ALPHA_TEST);
+    // remove GL_GREATER function to have black background
+    glAlphaFunc(GL_GREATER, 0.1f);
+    glBindTexture(GL_TEXTURE_2D, lifeTexture[0]);
+    glColor4ub(255,255,255,255);
+
+    // player begins with 3 lives, but has opportunities to earn 
+    // up to 2 extra lives, so may have 5 total at one point
+
+    int lives = hero->getLives();
+
+    for(int k=0; k<lives; k++) {
+        glBegin(GL_QUADS);
+        glTexCoord2f(0, 1) ; glVertex2i( k*w,    0);
+        glTexCoord2f(0, 0) ; glVertex2i( k*w,    h);
+        glTexCoord2f(1, 0) ; glVertex2i((k+1)*w, h);
+        glTexCoord2f(1, 1) ; glVertex2i((k+1)*w, 0);
+        glEnd();
+    }
+    glPopMatrix();
+
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
+
+  }
+
+  void renderHealthBar () {
+    //TODO: set health bar texture to render based on current health.
+    int bar = 0;
+
+    int WHW = WINDOW_HALF_WIDTH;
+    int WHH = WINDOW_HALF_HEIGHT;
+
+    // prepare opengl
+    glPushMatrix();
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glTranslatef(WHW, WHH, 0);
+    glColor3ub(0,100,40);
+
+    //glEnable(GL_TEXTURE_2D);
+    //glEnable(GL_ALPHA_TEST);
+    //glAlphaFunc(GL_LESS, 0.2f);
+    //glBindTexture(GL_TEXTURE_2D, healthBarTextures[bar]);
+    glColor4ub(255,255,255,255);
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 1) ; glVertex2i(-WHW,-WHH);
+    glTexCoord2f(0, 0) ; glVertex2i(-WHW, WHH);
+    glTexCoord2f(1, 0) ; glVertex2i( WHW, WHH);
+    glTexCoord2f(1, 1) ; glVertex2i( WHW,-WHH);
+    glEnd(); glPopMatrix();
+
+    //glDisable(GL_TEXTURE_2D);
+    //glDisable(GL_ALPHA_TEST);
+
   }
 
   void renderComputerScreenMenu () {

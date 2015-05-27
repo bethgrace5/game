@@ -41,6 +41,9 @@ class Player: public Object, public Sprite{
 
     bool checkShooting();
     void setShooting(bool take);
+    int getLives();
+    void incrementLives();
+    void decrementLives();
 
     void drawBox();
     void cycleAnimations();
@@ -112,6 +115,22 @@ bool Player::checkShooting(){
 void Player::setShooting(bool take){ 
   triggerShooting = take;
 }
+
+int Player::getLives(){
+  return lives;
+}
+void Player::incrementLives(){ 
+    lives++;
+}
+void Player::decrementLives(){ 
+    lives--;
+    // cycleAnimations() checks for 0 or less health
+    // to show dying sequence
+    if(lives < 0) {
+        health =0;
+    }
+}
+
 //===============================================
 //Drawing Functions
 //===============================================/
@@ -132,8 +151,14 @@ void Player::cycleAnimations(){
 
   //Death
   if(getHealth() <=0){
+
     if(diff_ms(seqEndA, seqStartA) > 180){
-      if(indexp == 12) return;
+      if(indexp == 12) {
+          if (lives < 0) {
+              lives = 3;
+          }
+          return;
+      }
       if(indexp < 7) indexp = 7;
       indexp++; once = 0;
     }
