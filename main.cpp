@@ -61,6 +61,7 @@ int didJump=0, life=100, lastFacing=0;
 double h_right, h_left, h_top, h_bottom;
 timeval seqStart, seqEnd; // hero's sprite index
 timeval fireStart, fireEnd; // hero's fire rate timer
+float healthIndex = 0;
 
 //Game Globals
 bgBit *bitHead = NULL;
@@ -443,8 +444,9 @@ int check_keys (XEvent *e) {
         #ifdef USE_SOUND
         fmod_playsound(dunDunDun);
         #endif
-
-
+      }
+      if (key == XK_h) {
+          healthIndex--;
       }
       // toggle start menu
       if (key == XK_m) {
@@ -995,7 +997,7 @@ void movement() {
     int WH = WINDOW_HEIGHT;
     int h = 30;
     int w = 200;
-    int tile_height = 0.2;
+    float row_size = 0.2;
 
     // prepare opengl
     glPushMatrix();
@@ -1008,19 +1010,15 @@ void movement() {
     glBindTexture(GL_TEXTURE_2D, healthBarTexture[0]);
     glColor4ub(255,255,255,255);
 
-    // player begins with 3 lives, but has opportunities to earn 
-    // up to 2 extra lives, so may have 5 total at one point
+    // tile index ranges from 1 to 5
+    float index = healthIndex;
 
-    int lives = hero->getLives();
-
-    for(int k=0; k<lives; k++) {
-        glBegin(GL_QUADS);
-        glTexCoord2f(0, 0.2) ; glVertex2i(0,   WH-h);
-        glTexCoord2f(0, 0) ; glVertex2i(0,   WH-10);
-        glTexCoord2f(1, 0) ; glVertex2i(w, WH-10);
-        glTexCoord2f(1, 0.2) ; glVertex2i(w, WH-h);
-        glEnd();
-    }
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, row_size*index);          glVertex2i(0, WH-h);
+    glTexCoord2f(0, row_size*index-row_size); glVertex2i(0, WH-10);
+    glTexCoord2f(1, row_size*index-row_size); glVertex2i(w, WH-10);
+    glTexCoord2f(1, row_size*index);          glVertex2i(w, WH-h);
+    glEnd();
     glPopMatrix();
 
     glDisable(GL_TEXTURE_2D);
