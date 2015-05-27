@@ -701,7 +701,7 @@ void movement() {
 
   // Cycle through hero index sequences
 
-  // remove a life when the hero falls off platform
+  // remove a life when the hero falls off cliff
   if (hero->getCenterY() < 0){
     if (!(hero->isDying)) {
         hero->decrementLives();
