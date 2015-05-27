@@ -993,8 +993,9 @@ void movement() {
   void renderHealthBar () {
     int WW = WINDOW_WIDTH;
     int WH = WINDOW_HEIGHT;
-    //int w = 50;
-    //int h = 50;
+    int h = 30;
+    int w = 200;
+    int tile_height = 0.2;
 
     // prepare opengl
     glPushMatrix();
@@ -1014,10 +1015,10 @@ void movement() {
 
     for(int k=0; k<lives; k++) {
         glBegin(GL_QUADS);
-        glTexCoord2f(0, 1) ; glVertex2i(0,   WH-90);
-        glTexCoord2f(0, 0) ; glVertex2i(0,   WH);
-        glTexCoord2f(1, 0) ; glVertex2i(200, WH);
-        glTexCoord2f(1, 1) ; glVertex2i(200, WH-90);
+        glTexCoord2f(0, 0.2) ; glVertex2i(0,   WH-h);
+        glTexCoord2f(0, 0) ; glVertex2i(0,   WH-10);
+        glTexCoord2f(1, 0) ; glVertex2i(w, WH-10);
+        glTexCoord2f(1, 0.2) ; glVertex2i(w, WH-h);
         glEnd();
     }
     glPopMatrix();
