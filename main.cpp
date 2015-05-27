@@ -25,6 +25,7 @@
 #include "sounds.cpp"
 #include "Storage.cpp"
 #include "tedP.cpp" //#include "fastFont.h"
+#include "Animate.h"
 
 using namespace std;
 typedef double Vec[3];
@@ -41,6 +42,8 @@ struct bgBit {
 
 // time difference in milliseconds
 Sprite bulletImage;
+Animate explode;
+int animateOn = 0;
 struct Bullet {
   Vec pos;
   Vec vel;
@@ -107,9 +110,11 @@ void renderComputerScreenMenu();
 void renderEnemies(int x, int y);
 void renderGrounds(int x, int y);
 void renderHero(int x, int y);
+void renderAnimations(int x, int y);
 void renderInitMenu();
 void renderHealthBar();
 void renderLives();
+
 
 
 int main(void) {
@@ -128,6 +133,8 @@ int main(void) {
   bulletImage.insert("./images/hero.ppm",13, 1);
   bulletImage.setSize(20, 20);
 
+  explode.insert("./images/fireBomb2.ppm", 4, 2);
+  explode.setSize(400,400);
   // skip menu and go straight to level 1
   if(QUICK_LOAD_TIME) {
     level = 1;
@@ -463,6 +470,10 @@ int check_keys (XEvent *e) {
       }
       // play sounds for debugging
       if (key == XK_t) {
+      }
+      if (key == XK_u){
+        animateOn = 1;
+      
       }
     }
     if(level ==0) {
@@ -852,6 +863,7 @@ void movement() {
     renderGrounds(x, y);
     renderEnemies(x, y);
     renderHero(x, y);
+    renderAnimations(x, y);
     renderLives();
     renderHealthBar();
 
@@ -859,6 +871,18 @@ void movement() {
       writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 200, WINDOW_HEIGHT/2);
       fail--;
     }
+  }
+
+  void renderAnimations(int x, int y){
+    if(animateOn == 0) return;
+
+    glPushMatrix();
+    glTranslatef(- x + 350, - y + 350, 0);
+    explode.cycleAnimations();
+    explode.drawBox();
+
+
+    glEnd(); glPopMatrix(); 
   }
 
   void renderGrounds (int x, int y) {
