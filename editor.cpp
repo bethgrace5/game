@@ -37,6 +37,7 @@ Sprite currentTile;
 //Enemy *enemies[MAX_ENEMIES];
 Platform *grounds[MAX_GROUNDS];
 int grounds_length = 0, enemies_length;
+int level = 0;
 int i, j;
 
 int roomX=WINDOW_HALF_WIDTH;

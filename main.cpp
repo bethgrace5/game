@@ -40,6 +40,7 @@ struct bgBit {
 };
 
 // time difference in milliseconds
+Sprite bulletImage;
 struct Bullet {
   Vec pos;
   Vec vel;
@@ -123,6 +124,9 @@ int main(void) {
   hero = new Player();
   hero->insert("./images/hero.ppm", 13, 1);
   hero->setSize(44,48);
+
+  bulletImage.insert("./images/hero.ppm",13, 1);
+  bulletImage.setSize(20, 20);
 
   // skip menu and go straight to level 1
   if(QUICK_LOAD_TIME) {
@@ -913,6 +917,12 @@ void movement() {
       glVertex2f(b->pos[0]+1.0f-x, b->pos[1]-1.0f-y);
       glVertex2f(b->pos[0]+1.0f-x, b->pos[1]+1.0f-y);
       glEnd();
+
+      glPushMatrix();
+      glTranslatef(b->pos[0]-x, b->pos[1]-y, 0);
+      bulletImage.drawTile(0,0);
+      glPopMatrix();
+
       b = b->next;
     }
   }
