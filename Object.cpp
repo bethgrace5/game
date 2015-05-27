@@ -1,4 +1,5 @@
 #include "Object.h"
+#include <iostream>
 
 Object::Object( double w, double h, double x, double y ) {
   init(w,h,x,y);

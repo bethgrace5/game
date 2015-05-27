@@ -20,6 +20,7 @@
 #include "tedP.cpp" //#include "fastFont.h"
 #include "Player.h"
 #include "chadD.cpp" //Platforms/Grounds
+#include "Platform.cpp"
 #include "brianS.cpp" //Enemies
 #include "Storage.cpp"
 #include "definitions.h"
@@ -36,6 +37,8 @@ Player *testHero;
 Sprite currentTile;
 //Enemy *enemies[MAX_ENEMIES];
 Platform *grounds[MAX_GROUNDS];
+Platform2 test;
+Sprite fake;
 int grounds_length = 0, enemies_length;
 int i, j;
 
@@ -99,12 +102,25 @@ bool inWindow(Object &obj) {
 //    Main Center
 //====================================================================
 int main(void) {
-  initXWindows(); init_opengl();
-  
+  initXWindows(); init_opengl(); 
   //declare hero object
   testHero = new Player();
+  
   currentTile.insert("./images/megaLevel.ppm", 1, 1);
   currentTile.setSize(300, 300);
+
+  //Default Insert
+  boxA.spriteSheet[0].insert("./images/megaLevel.ppm", 10, 36);
+  boxA.spriteSheet_length++;
+  fake.insert("./images/megaLevel.ppm", 10, 36);
+  fake.setSize(100,100);
+/*
+  test.targetSprite->insert("./images/megaLevel.ppm", 10, 36);
+  int width  = test.targetSprite->getClipWidth();
+  int height = test.targetSprite->getClipHeight();
+  test.init(width+100, height+100, 100, 100); 
+  test.setupTile();
+  */
 
   testHero->insert("./images/hero.ppm", 13, 1);
   testHero->setSize(44,48);
@@ -139,17 +155,40 @@ void init_opengl (void) {
   glEnable(GL_TEXTURE_2D);
   initFastFont();
 }
-
 //=====================================================================
 //  Platform Editor
 //=====================================================================
+void insertPlatformSprite(int x, int y){
+  int i = boxA.grounds_length;
+
+  boxA.grounds[i].setSprite(fake);
+  boxA.grounds[i].setSpriteID(0);
+
+ // int pWidth  = boxA.spriteSheet[0].getClipWidth();
+ // int pHeight = boxA.spriteSheet[0].getClipHeight();
+ int pWidth = fake.getClipWidth();
+ int pHeight = fake.getClipHeight();
+
+  std::cout << "What is pWidth  " << pWidth << std::endl;
+  std::cout << "What is pHeight " << pHeight << std::endl;
+
+  boxA.grounds[i].init(pWidth + 100, pHeight, x, y);
+  boxA.grounds[i].setupTile();
+  boxA.grounds[i].setID(i);
+
+  boxA.grounds_length++;
+}
+
 void makePlatform(int x, int y) {
   cout << "Make Ground \n";
   //storeIn.grounds[storeIn.grounds_length] = new Platform();
+
+  //Inserting New Platform
   grounds[grounds_length] = new Platform();
   grounds[grounds_length]
     ->insert("./images/megaLevel.ppm", 10, 36);
 
+    //Inserting The 
   int width  = grounds[grounds_length]->getClipWidth();
   int height = grounds[grounds_length]->getClipHeight();
 
@@ -157,11 +196,14 @@ void makePlatform(int x, int y) {
   grounds[grounds_length]->setupTile();
   grounds[grounds_length]->setID(grounds_length);
 
+  //Refresh and ReCheck
   std::cout << "What is " << grounds[grounds_length]->getID() <<
     std::endl;
   grounds[grounds_length]->setIndexXY(0, 0);
   grounds[grounds_length]->setBackground(1);
   grounds_length++;
+
+  insertPlatformSprite(x, y);
 }
 
 void setRow(int size){
@@ -389,8 +431,10 @@ void renderOptions(){
   if(create == 1) writeWords("Create Mode", 25, 25);
   if(selecter == 1) writeWords("Select Mode", 25, 25);
   if(create == 1){
-    glPushMatrix(); glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
+    glPushMatrix();
+    //glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
     //currentTile.drawTile(0,0);
+    //test.drawRow(0, 0); 
     glPopMatrix();
   }
 }
@@ -421,6 +465,7 @@ void renderLoad(){
 
 void renderGrounds (int x, int y) {
   // render grounds
+  /*
   for (i=0;i<grounds_length;i++) {
     //if (inWindow(*(storeIn.grounds[i]))) {
     //Platform
@@ -429,6 +474,18 @@ void renderGrounds (int x, int y) {
     grounds[i]->drawRow(0,0);
     glEnd(); glPopMatrix();
     //}
+  }*/ 
+  glPushMatrix();
+
+  glTranslatef(350, 350, 0);
+  boxA.spriteSheet[0].drawTile(0,0);
+
+  glPopMatrix();
+  for(i = 0; i < boxA.grounds_length; i++){
+    glPushMatrix();
+    glTranslatef(- x, - y, 0);
+    boxA.grounds[i].drawRow(0,0);
+    glEnd(); glPopMatrix(); 
   }
 }
 

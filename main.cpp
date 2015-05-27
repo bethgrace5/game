@@ -17,6 +17,7 @@
 #include "bethanyA.cpp" //#include "Sprite.cpp"
 #include "brianS.cpp" //Enemies
 #include "chadD.cpp" //Platforms/Grounds
+#include "Platform.cpp"
 #include "definitions.h"
 #include "functions.h"
 #include "Object.cpp"
