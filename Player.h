@@ -2,7 +2,6 @@
 #include "Sprite.h"
 
 #ifdef USE_SOUND
-#include "fmod.c"
 #include "sounds.cpp"
 #endif
 
