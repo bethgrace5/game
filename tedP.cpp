@@ -1,247 +1,683 @@
-//Program: Homework 3 
+//Program: Lab 9, Indivual Files, Editor Files
 //Author: Ted Pascua
-//Purpose: 
-//           Make a function so you can easily write down words 
-//           base on a ppm imaage.
+//Purpose: To Make it Easy to add any types of objects inside the game
+//      Run Executive ./tool
 //
-//           Note: Some of the functions and add stuff are someone elses
-//           I will not take credit for them
+//    !IMPORTANT!
+//        In Definition.h USE_TOOLS Must be Set to 1 in order to USE THIS
+//        You Need to At Least Make 7 Objects Because in main.cpp, 
+//        Enemy Constructor are currently platform depedant.
+//
+//    //Instructions
+//        To Use Please, Enter Create Mode( press C and make blocks)
+//
+//        Press S to save the files in. It will save as a test.ros in
+//        the same directory but will ask you to save a file in the
+//        terminal. That file will go into the data folder.
+//
+//        Read the README.md for more instructions
+//
+//    //Future Updates
+//        Easily Place Enemies
+//        Easily Place Items
 
-//=================+
-//  Directory      |
-//=================+
-//Global Access    |all the variables
-//Setup            |setting up the variables for making fonts
-//Core Function    |making fonts
-//=================+
-
-void initFastFont();
-void drawFont(int atSet);
-void writeWords(std::string words, float x, float y);
-void getFont(char letter);
-
-void writePixel(int p, float x, float y);
-void drawPixel(int pix);
-
-//=====================================================================
-//  Global Access
-//=====================================================================
-unsigned char *buildAlphaData2(Ppmimage *img);
-float clipX = 0.142857;//7 in a row
-float clipY = 0.166666;//6 in a Collumn
-//7 letters in a row, and a total of 6 rows
-Ppmimage *alphabetImage = NULL;
-GLuint alphabetTexture;
-float alphabetHeight, alphabetWidth;
-
-Ppmimage *pixelImage = NULL;
-GLuint pixelTexture;
-float pixelHeight, pixelWidth;
-
-//=====================================================================
-//  Setup
-//=====================================================================
-void initFastFont(){
-  alphabetImage = ppm6GetImage("./images/DigitFont2.ppm");
-  glGenTextures(2, &alphabetTexture);
-  glBindTexture(GL_TEXTURE_2D, alphabetTexture);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  unsigned char *silhouetteData = buildAlphaData2(alphabetImage);
-  int w = alphabetWidth  = alphabetImage->width;
-  int h = alphabetHeight = alphabetImage->height;
-
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
-  delete [] silhouetteData;
-
-  pixelImage = ppm6GetImage("./images/backgroundPixels.ppm");
-  glGenTextures(2, &pixelTexture);
-  glBindTexture(GL_TEXTURE_2D, pixelTexture);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  unsigned char *pixData = buildAlphaData2(pixelImage);
-  w = pixelWidth  = pixelImage->width;
-  h = pixelHeight = pixelImage->height;
-
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixData);
-  delete [] pixData;
-}
-
-unsigned char *buildAlphaData2(Ppmimage *img){
-  //add 4th component to RGB stream...
-  int a,b,c;
-  unsigned char *newdata, *ptr;
-  unsigned char *data = (unsigned char *)img->data;
-  //newdata = (unsigned char *)malloc(img->width * img->height * 4);
-  newdata = new unsigned char[img->width * img->height * 4];
-  ptr = newdata;
-  for (int i=0; i<img->width * img->height * 3; i+=3) {
-    a = *(data+0);
-    b = *(data+1);
-    c = *(data+2);
-    *(ptr+0) = a;
-    *(ptr+1) = b;
-    *(ptr+2) = c;
-    //get the alpha value
-    *(ptr+3) = (a|b|c);
-    ptr += 4;
-    data += 3;
-  }
-  return newdata;
-}
-//=====================================================================
-//  Core Functions
-//=====================================================================
-void drawFont(int atSet){
-  int atX = atSet, atY = 0;
-  //This is use to set the Y and X to the right places of each letter
-  //  -- Since there are 7 letters in each row. Make sure to reset 
-  if(atSet < 7);//nothing happen at this set
-  else if(atSet < 14){ atX = atSet - 7 ; atY = 1;}
-  else if(atSet < 21){ atX = atSet - 14; atY = 2;}
-  else if(atSet < 28){ atX = atSet - 21; atY = 3;}
-  else if(atSet < 35){ atX = atSet - 28; atY = 4;}
-  else if(atSet < 42){ atX = atSet - 35; atY = 5;}
-  else if(atSet < 49){ atX = atSet - 42; atY = 6;}
-
-  glPushMatrix();
-  //glTranslatef(500, 300, 0);
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, alphabetTexture);
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_LESS, 1.0f);
-  glColor4ub(255,255,255,255);
-  glBegin(GL_QUADS);
-  float w = alphabetWidth/32;
-  float h = alphabetHeight/32;
-
-  glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
-  glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
-  glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
-  glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
 /*
-  glTexCoord2f(0*clipX, 1.0f)        ; glVertex2i(-w,-h);
-  glTexCoord2f(0*clipX, 0.0f)        ; glVertex2i(-w,h);
-  glTexCoord2f((0*clipX)+clipX, 0.0f); glVertex2i(w,h);
-  glTexCoord2f((0*clipX)+clipX, 1.0f); glVertex2i(w,-h);
+======================+
+    Tool Editor       |
+======================+
+  Main Center         |
+  Platform Editor     |
+  Enemy Editor        |
+  Mouse Check         |
+  Key Check           |
+  Physics             |
+  Drawing             |
+  Storage Editor      |
+  Window Setup        |
+======================+
 */
-  glEnd(); glPopMatrix();
-  glDisable(GL_TEXTURE_2D);
-  glDisable(GL_ALPHA_TEST);
+
+#include <GL/glx.h>
+#include <fstream>
+#include "Object.cpp"
+#include "bethanyA.cpp" //#include "Sprite.cpp"
+#include "fastFont.cpp" //#include "fastFont.h"
+#include "Player.h"
+#include "chadD.cpp" //Platforms/Grounds
+//#include "brianS.cpp" //Enemies
+#include "Storage.cpp"
+#include "definitions.h"
+#include <cmath>
+
+using namespace std;
+typedef double Vec[3];
+
+//X Windows variables
+Display *dpy;
+Window win;
+GLXContext glc;
+//------------------------------
+//Game Globals
+//------------------------------
+//Player *testHero;
+Sprite currentTile;
+//Enemy *enemies[MAX_ENEMIES];
+Platform *grounds[MAX_GROUNDS];
+int grounds_length = 0;
+int enemies_length = 0;
+int level = 0;
+int i, j;
+
+int roomX=WINDOW_HALF_WIDTH;
+int roomY=WINDOW_HALF_HEIGHT;
+int quit=0;
+
+bool saving;
+bool loading;
+
+bool create = 0;
+bool tileMode = 0;
+bool selecter = 0;
+int  holdID = -1;
+int saveID = -1;
+//------------------------------
+//Function Prototype
+//------------------------------
+int clickObject(int x, int y);
+void draging(int x, int y);
+
+void initXWindows(void);
+void init_opengl(void);
+void cleanupXWindows(void);
+void moveWindow(void);
+
+void save();
+void load();
+
+void check_mouse(XEvent *e);
+int  check_keys (XEvent *e);
+
+void makePlatform(int x, int y); 
+void setRow(int size);
+void setColumn(int size);
+void changeTileX();
+void changeTileY();
+void pickTile(int x, int y);
+
+void renderHero(int x, int y);
+
+void makeEnemy(int w, int h, Object *ground, int type); 
+Object createAI( int w, int h, Object *ground);
+void deleteEnemy(int ind);
+
+void render(void);
+void renderEnemies(int x, int y);
+void renderGrounds(int x, int y);
+void renderSave();
+void renderLoad();
+void renderBox();
+
+void movement(void);
+bool detectCollide(Object *obj, Object *ground);
+
+bool inWindow(Object &obj) {
+  return ((obj.getLeft() < (roomX+(WINDOW_HALF_WIDTH)) and
+        obj.getLeft() > (roomX-(WINDOW_HALF_WIDTH))) or
+      (obj.getRight() > (roomX-(WINDOW_HALF_WIDTH)) and
+       obj.getRight() < (roomX+(WINDOW_HALF_WIDTH))));
+}
+//====================================================================
+//    Main Center
+//====================================================================
+int main(void) {
+  initXWindows(); init_opengl();
+  
+  //declare hero object
+  //testHero = new Player();
+
+  currentTile.insert("./images/megaLevel.ppm", 1, 1);
+  currentTile.setSize(WINDOW_HALF_WIDTH/2, WINDOW_HALF_HEIGHT);
+
+  //testHero->insert("./images/hero.ppm", 13, 1);
+  //testHero->setSize(44,48);
+
+  while (!quit) { //Staring Animation
+    while (XPending(dpy)) {
+      //Player User Interfaces
+      XEvent e; XNextEvent(dpy, &e);
+      check_mouse(&e);
+      quit = check_keys(&e);
+    }
+    movement(); render(); 
+    glXSwapBuffers(dpy, win);
+  }
+  cleanupXWindows(); return 0;
 }
 
-void drawPixel(int pix){
-
-  glPushMatrix();
-  //glTranslatef(500, 300, 0);
-  glBindTexture(GL_TEXTURE_2D, pixelTexture);
-  glEnable(GL_ALPHA_TEST);
+void init_opengl (void) {
+  //OpenGL initialization
+  glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+  //Initialize matrices
+  glMatrixMode(GL_PROJECTION); glLoadIdentity();
+  glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+  //Set 2D mode (no perspective)
+  glOrtho(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT, -1, 1);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_FOG);
+  glDisable(GL_CULL_FACE);
+  //Set the screen background color
+  glClearColor(0.0, 0.0, 0.0, 1.0);
   glEnable(GL_TEXTURE_2D);
-  glAlphaFunc(GL_GREATER, 0.0f);
-  //glAlphaFunc(GL_LESS, 1.0f);
-  glColor4ub(255,255,255,255);
-  glBegin(GL_QUADS);
-  float w = pixelWidth/4;
-  float h = pixelHeight/2;
+  initFastFont();
+}
+//=====================================================================
+//  Platform Editor
+//=====================================================================
+void makePlatform(int x, int y) {
+  cout << "Make Ground \n";
+  //storeIn.grounds[storeIn.grounds_length] = new Platform();
+  grounds[grounds_length] = new Platform();
+  grounds[grounds_length]->insert("./images/megaLevel.ppm", 10, 36);
 
-  if (pix == 0) {
-      // draw 0
-      glTexCoord2f(0  , 1) ; glVertex2i(-w,-h);
-      glTexCoord2f(0  , 0) ; glVertex2i(-w,h);
-      glTexCoord2f(0.5, 0) ; glVertex2i(w,h);
-      glTexCoord2f(0.5, 1) ; glVertex2i(w,-h);
-  }
-  else {
+  int width  = grounds[grounds_length]->getClipWidth();
+  int height = grounds[grounds_length]->getClipHeight();
 
-      // draw 1
-      glTexCoord2f(0.5, 1) ; glVertex2i(-w,-h);
-      glTexCoord2f(0.5, 0) ; glVertex2i(-w,h);
-      glTexCoord2f(1 , 0)  ; glVertex2i(w,h);
-      glTexCoord2f(1 , 1)  ; glVertex2i(w,-h);
-  }
+  grounds[grounds_length]->init(width, height, x, y);
+  grounds[grounds_length]->setupTile();
+  grounds[grounds_length]->setID(grounds_length);
 
-  glEnd(); glPopMatrix();
-  glDisable(GL_TEXTURE_2D);
-  glDisable(GL_ALPHA_TEST);
+  std::cout << "What is " << grounds[grounds_length]->getID() << std::endl;
+  grounds[grounds_length]->setIndexXY(0, 0);
+  grounds[grounds_length]->setBackground(1);
+  grounds_length++;
 }
 
-//This Functions Gets A single letter base on the letter its given 
-//it wiill call writeFont(letter) with the corresponding letter.
-void getFont(char letter){
-  //putchar(toupper(letter));
-  switch(toupper(letter)){
-    case 'A': drawFont(0); break;
-    case 'B': drawFont(1); break;
-    case 'C': drawFont(2); break;
-    case 'D': drawFont(3); break;
-    case 'E': drawFont(4); break;
-    case 'F': drawFont(5); break;
-    case 'G': drawFont(6); break;
-    case 'H': drawFont(7); break;
-    case 'I': drawFont(8); break;
-    case 'J': drawFont(9); break;
-    case 'K': drawFont(10); break;
-    case 'L': drawFont(11); break;
-    case 'M': drawFont(12); break;
-    case 'N': drawFont(13); break;
-    case 'O': drawFont(14); break;
-    case 'P': drawFont(15); break;
-    case 'Q': drawFont(16); break;
-    case 'R': drawFont(17); break;
-    case 'S': drawFont(18); break;
-    case 'T': drawFont(19); break;
-    case 'U': drawFont(20); break;
-    case 'V': drawFont(21); break;
-    case 'W': drawFont(22); break;
-    case 'X': drawFont(23); break;
-    case 'Y': drawFont(24); break;
-    case 'Z': drawFont(25); break;
-    case '!': drawFont(26); break;
-    case '?': drawFont(27); break;
-    case '1': drawFont(28); break;
-    case '2': drawFont(29); break;
-    case '3': drawFont(30); break;
-    case '4': drawFont(31); break;
-    case '5': drawFont(32); break;
-    case '6': drawFont(33); break;
-    case '7': drawFont(34); break;
-    case '8': drawFont(35); break;
-    case '9': drawFont(36); break;
-    case '0': drawFont(37); break;
-    case '+': drawFont(38); break;
-    case '-': drawFont(39); break;
-    case 'x': drawFont(40); break;
-    case '/': drawFont(41); break; 
-    default: break;
+void setRow(int size){
+  if(saveID < 0)
+    return;
+  int changeBy = 1;
+  if(size < 0)
+    changeBy = -1;
+
+  int spriteWidth = grounds[saveID]->getClipWidth() * changeBy;
+  int currentWidth = grounds[saveID]->getWidth();
+
+  if(changeBy == -1 && currentWidth <= -(spriteWidth)) 
+    return;
+
+  grounds[saveID]->setWidth(currentWidth + spriteWidth);
+  grounds[saveID]->setupTile();
+}
+
+void setColumn(int size){
+  if(saveID < 0) 
+    return;
+
+  int changeBy = 1;
+  if(size < 0)
+    changeBy = -1;
+  int spriteHeight  = grounds[saveID]->getClipHeight() * changeBy;
+  int currentHeight = grounds[saveID]->getHeight();
+
+  if(changeBy == -1 && currentHeight <= -(spriteHeight))
+    return;
+
+  grounds[saveID]->setHeight(spriteHeight + currentHeight);
+  grounds[saveID]->setupTile();
+}
+
+void changeTileX(){ 
+  if(saveID < 0) 
+    return;
+
+  int x = grounds[saveID]->getIndexX(); 
+  int y = grounds[saveID]->getIndexY();
+  grounds[saveID]->setIndexXY(x+1,y);
+}
+
+void changeTileY(){
+  if(saveID < 0)
+    return;
+
+  int x = grounds[saveID]->getIndexX(); 
+  int y = grounds[saveID]->getIndexY();
+  grounds[saveID]->setIndexXY(x,y+1);
+}
+
+void pickTile(int x, int y){
+  if(saveID < 0)
+    return;
+  if(!tileMode) 
+    return;
+
+  std::cout << "What is Point X " << x << std::endl;
+  std::cout << "What is Point Y " << y << std::endl;
+
+  int tileWidth = int(WINDOW_HALF_WIDTH/10);
+
+  //int amountY = currentTile.getRow();
+  int tileHeight = int(WINDOW_HEIGHT/36);
+
+  int tileX = int(ceil(x/tileWidth))  % 10 ;
+  int tileY = int(ceil(y/tileHeight)) % 36;
+  tileY = 36 - tileY;
+ 
+  std::cout << "What is TileX " << tileX << std::endl;
+  std::cout << "What is TileY " << tileY << std::endl;
+
+  grounds[saveID]->setIndexXY(tileX, tileY);
+}
+
+void deleteLastPlatform(){
+  if(grounds_length <= 0)
+    return;
+
+  grounds[grounds_length-1] = new Platform();
+  delete grounds[grounds_length-1];
+  grounds_length--;
+  std::cout << "What is Grounds Length " << grounds_length << std::endl;
+
+}
+void deletePlatform(){
+  if(grounds_length <= 0)
+    return;
+  if(saveID < 0)
+    return;
+ 
+  grounds[saveID] = new Platform();
+  delete grounds[saveID];
+
+  for(int i = saveID; i < grounds_length-1; i++){
+    grounds[i] = grounds[i + 1];
+    grounds[i]->setID(grounds[i]->getID()-1); 
+  }
+  grounds[grounds_length-1] = new Platform();
+  delete grounds[grounds_length-1];
+
+  grounds_length--;
+  std::cout << "What is Grounds Length " << grounds_length << std::endl;
+}
+
+//=====================================================================
+//  Enemy Editor
+//=====================================================================
+void makeEnemy(int w, int h, Object *ground, int type) {
+  /*if (enemies_length<MAX_ENEMIES){
+    switch (type){
+      case 1:
+        enemies[enemies_length] = new Enemy(w, h, ground); 
+        enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
+        enemies[enemies_length]->setBottom(-44);
+        enemies[enemies_length]->setLeft(-24);
+        enemies[enemies_length]->setRight(24);
+        enemies[enemies_length]->setTop(24);
+        enemies[enemies_length]->setHeight(25);
+        break;
+    }
+    enemies_length++;
+  }
+  else{
+    cout << "Enemies array full!!!!" << endl;
+  }*/
+}
+
+void deleteEnemy(int ind){
+  /*
+  enemies_length--;
+  delete enemies[i];
+  enemies[i] = enemies[enemies_length];
+  enemies[enemies_length]=NULL;
+  */
+}
+
+//Object createAI (int w, int h, Object *ground) {
+  //Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
+  //return newEnemy;
+  //return 0;
+//}
+//=====================================================================
+//  Mouse Check
+//=====================================================================
+static int savex = 0, savey = 0;
+void check_mouse (XEvent *e) {
+  //static int n = 0;
+  if (e->type == ButtonRelease) { 
+    std::cout << " Release\n";
+    holdID = -1;
+    return;
+  }
+
+  int take;
+  if (e->type == ButtonPress) {
+    if (e->xbutton.button==1) { //Left button was pressed
+      if(create == 1){
+        std::cout << " x " << savex << ", y " << savey << "\n";
+        makePlatform(savex, savey);
+        return;
+      }
+      if(selecter == 1){
+        take = clickObject(savex, savey); 
+        std::cout << "The Id is: " << take << "\n";
+        saveID = holdID = take;
+      }
+    }
+    if (e->xbutton.button==2) {
+      pickTile(e->xbutton.x, WINDOW_HEIGHT - e->xbutton.y);
+      return;
+    }
+    if (e->xbutton.button==3) {
+      pickTile(e->xbutton.x, WINDOW_HEIGHT - e->xbutton.y);
+      return;
+    }
+  }
+  if (e->xbutton.button==3) {
+    return;
+  }
+
+  //Did the mouse move?
+  if (savex != e->xbutton.x || savey != e->xbutton.y) {
+    int x = roomX - WINDOW_HALF_WIDTH;
+    int y = roomY - WINDOW_HALF_HEIGHT;
+    //int y = WINDOW_HEIGHT - e->xbutton.y;
+    savex = e->xbutton.x + x; //xpast = savex;
+    savey  = WINDOW_HEIGHT - e->xbutton.y + y;
   }
 }
 
-//This Functions will get each letter of the words then calls getFont(letter)
-//so.. this reads in every letter of the word. Each letter will have space
-//between...
-void writeWords(std::string words, float x, float y){
+int clickObject(int x, int y){
+  for(int i = 0; i < grounds_length; i++){
+    if(grounds[i]->getRight()  > x &&
+        grounds[i]->getLeft()   < x &&
+        grounds[i]->getBottom() < y &&
+        grounds[i]->getTop()    > y){
+      return grounds[i]->getID(); 
+    }
+  }
+  return -1;
+}
 
-  int size = words.size(); 
-  char cWords[size];
-  strcpy(cWords, words.c_str());
+void draging(int x, int y){
+  if(holdID < 0)
+    return;
+  grounds[holdID]->setCenter(x, y);
+}
+//=====================================================================
+//  Key Check
+//=====================================================================
+int check_keys (XEvent *e) {
+  //handle input from the keyboard
+  int key = XLookupKeysym(&e->xkey, 0);
+  if (e->type == KeyPress) {
+    if(key == XK_Escape or key == XK_q){
+      return 1;
+    }
+    if(key == XK_s){
+      save(); 
+    }
+    if(key == XK_l){
+      load(); 
+    }
+    if(key == XK_r){
+      setRow(1);  
+    }
+    if(key == XK_t){
+      setColumn(1); 
+    }
+    if(key == XK_y){
+      setRow(-1);
+    }
+    if(key == XK_u){
+      setColumn(-1);
+    }
+    if(key == XK_j){
+      changeTileX();
+    }
+    if(key == XK_k){
+      changeTileY();
+    }
+    if(key == XK_b){
+      deleteLastPlatform();
+    }
+    if(key == XK_n){
+      deletePlatform();
+    } 
+    if(key == XK_a){
+      roomX -= 50;
+    }
+    if(key == XK_d){
+      roomX += 50;
+    }
+    if(key == XK_Up){
+      roomY += 50;
+    }
+    if(key == XK_Down){
+      roomY -= 50;
+    }
+    if(key == XK_Left){
+      roomX -=50;
+    }
+    if(key == XK_Right){
+      roomX +=50;
+    }
+    if(key == XK_c){
+      create = 1; selecter = 0; 
+    }
+    if(key == XK_x){
+      tileMode = !tileMode;
+    }
+    if(key == XK_v){
+      create = 0; selecter = 1;  
+    }
+  }
+  else if (e->type == KeyRelease) {
+    
+  
+  }
+  return 0;
+}
+//=====================================================================
+//  Physics
+//=====================================================================
+void movement() {
+  draging(savex, savey);
+}
+
+bool detectCollide (Object *obj, Object *ground) {
+  //Gets (Moving Object, Static Object)
+  //Reture True if Moving Object Collides with Static Object
+  return (obj->getRight() > ground->getLeft() &&
+      obj->getLeft()   < ground->getRight() &&
+      obj->getBottom() < ground->getTop()  &&
+      obj->getTop()    > ground->getBottom());
+}
+//=====================================================================
+//  Drawing
+//=====================================================================
+void renderOptions(){
+  if(create == 1) 
+    writeWords("Create Mode", 25, 25);
+  if(selecter == 1)
+    writeWords("Select Mode", 25, 25);
+
+  if(tileMode == 1){
+    glPushMatrix(); glTranslatef(WINDOW_HALF_WIDTH/2, WINDOW_HALF_HEIGHT, 0);
+    currentTile.drawTile(0,0);
+    glPopMatrix();
+  }
+}
+
+void renderBox(){
   glPushMatrix();
-
-  glTranslatef(x, y, 0);
-  //glTranslatef(500, 300, 0);
-
-  for(int i = 0; i < size; i++){
-    glTranslatef(22, 0, 0);
-    getFont(cWords[i]);
-  }//Note Need To Add Spacing Between Each Letter
+  glColor3f(0,0,0);
+  glTranslatef(50, 275, 0); glBegin(GL_QUADS);
+  glVertex2i(-500,-100); glVertex2i(-500, 100);
+  glVertex2i(700, 100); glVertex2i(700, -100);
+  glEnd();
   glPopMatrix();
-
 }
-void writePixel(int p, float x, float y){
 
+void renderSave(){
+  renderBox(); 
+  writeWords("Please Check Your Terminal", 50, 275);
+  writeWords("And Write Name of Saved File", 50, 250); 
+  glXSwapBuffers(dpy, win);
+}
+
+void renderLoad(){
+  renderBox(); 
+  writeWords("Please Check Your Terminal", 50, 275);
+  writeWords("And Write Name Loaded File", 50, 250); 
+  glXSwapBuffers(dpy, win);
+}
+
+void renderGrounds (int x, int y) {
+  // render grounds
+  for (i=0;i<grounds_length;i++) {
+    //if (inWindow(*(storeIn.grounds[i]))) {
+    //Platform
+    glPushMatrix();
+    glTranslatef(- x, - y, 0);
+    grounds[i]->drawRow(0,0);
+    glEnd(); glPopMatrix();
+    //}
+  }
+}
+
+void renderEnemies (int x, int y) {
+  /*
+  for (int i=0;i<enemies_length;i++) {
+    if (inWindow(*(enemies[i]))){
+      glPushMatrix();
+      glTranslatef(- x, - y, 0);
+      enemies[i]->draw();
+      glEnd(); glPopMatrix();
+    }
+  }
+  */
+}
+
+void renderHero (int x, int y) {
+  //Easy Drawing
   glPushMatrix();
-  glTranslatef(x, y, 0);
-  glTranslatef(20, 0, 0);
-  drawPixel(p);
+  glTranslatef(-x, -y, 0);
+  //testHero->drawBox();
   glPopMatrix();
+}
 
+void render () {
+  int x = roomX - WINDOW_HALF_WIDTH;
+  int y = roomY - WINDOW_HALF_HEIGHT;
+  glClear(GL_COLOR_BUFFER_BIT);
+  // Draw Background Falling Bits
+  renderGrounds(x, y);
+  renderEnemies(0, 0);
+  renderHero(x, y);
+  renderOptions();
+}
+
+//=====================================================================
+//  Storage Editor
+//=====================================================================
+void save(){
+  for(int i = 0; i < grounds_length; i++){
+    storeIn.grounds[i] = *grounds[i];  
+  }
+  storeIn.grounds_length = grounds_length;
+  std::cout << "Saving \n";
+  ofstream dfs("test.ros", ios::binary); 
+  dfs.write((char *)&storeIn, sizeof(storeIn));
+
+  if(OPTIONAL_STORAGE != 1) return;
+  renderSave();
+  std::cout << "Save File As: ";
+  string fileName; cin >> fileName; fileName.append(".ros");
+
+  string folder = "./data/"; folder.append(fileName);
+
+  char charFileName[50]; strcpy(charFileName, folder.c_str());
+
+  ofstream saveFileAs(charFileName, ios::binary); 
+
+  saveFileAs.write((char *)&storeIn, sizeof(storeIn));
+}
+
+void quickSave(){
+  std::cout << "Saving \n";
+  ofstream dfs("test.ros", ios::binary); 
+  dfs.write((char *)&storeIn, sizeof(storeIn));
+}
+
+void load(){
+      renderLoad();
+      string fileName;
+      std::cout << "Load in: ";  
+      cin >> fileName;
+      string folder = "./data/"; folder.append(fileName);
+
+      if (folder.find(".ros") != std::string::npos) {
+        std::cout << "File Exist, Will Load\n";
+      }else{
+        std::cout << "! Will Only take .ros files !\n"; return;
+      }
+      char charFileName[50];
+      strcpy(charFileName, folder.c_str());
+
+      ifstream dfs(charFileName, ios::binary);
+      std::cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
+      dfs.read((char *)&storeIn, sizeof(storeIn));
+
+      std::cout << "Loading \n";
+      for(int i = 0; i < storeIn.grounds_length; i++){
+        grounds[i] = &storeIn.grounds[i];
+        grounds[i]->reInitSprite();
+        grounds_length++;
+      } 
+      std::cout << "Loading Finished \n";
+}
+
+void quickLoad(){
+      std::cout << "Load in \n";  
+      ifstream dfs("test.ros", ios::binary);
+      std::cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
+      dfs.read((char *)&storeIn, sizeof(storeIn));
+}
+
+//=====================================================================
+//  Window Setup
+//=====================================================================
+void set_title (void) { //Set the window title bar.
+  XMapWindow(dpy, win); XStoreName(dpy, win, "Revenge of the Code");
+}
+
+void cleanupXWindows (void) { //do not change
+  XDestroyWindow(dpy, win); XCloseDisplay(dpy);
+}
+
+void initXWindows (void) { //do not change
+  GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
+  int w=WINDOW_WIDTH, h=WINDOW_HEIGHT;
+  dpy = XOpenDisplay(NULL);
+  if (dpy == NULL) {
+    cout << "\n\tcannot connect to X server\n" << endl;
+    exit(EXIT_FAILURE);
+  }
+  Window root = DefaultRootWindow(dpy);
+  XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
+  if (vi == NULL) {
+    cout << "\n\tno appropriate visual found\n" << endl;
+    exit(EXIT_FAILURE);
+  }
+  Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
+  XSetWindowAttributes swa;
+  swa.colormap = cmap;
+  swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
+    ButtonPress | ButtonReleaseMask |
+    PointerMotionMask |
+    StructureNotifyMask | SubstructureNotifyMask;
+  win = XCreateWindow(dpy, root, 0, 0, w, h, 0, vi->depth,
+      InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
+  set_title();
+  glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
+  glXMakeCurrent(dpy, win, glc);
 }

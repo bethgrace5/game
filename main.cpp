@@ -24,7 +24,7 @@
 #include "ppm.h"
 #include "sounds.cpp"
 #include "Storage.cpp"
-#include "tedP.cpp" //#include "fastFont.h"
+#include "fastFont.cpp" //#include "fastFont.h"
 //#include "Animate.h"
 
 using namespace std;
