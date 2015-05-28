@@ -104,7 +104,7 @@ int main(void) {
   
   //declare hero object
   testHero = new Player();
-  currentTile.insert("./images/megaLevel.ppm", 1, 1);
+  currentTile.insert("./images/megalevel.ppm", 1, 1);
   currentTile.setSize(300, 300);
 
   testHero->insert("./images/hero.ppm", 13, 1);
@@ -149,7 +149,7 @@ void makePlatform(int x, int y) {
   //storeIn.grounds[storeIn.grounds_length] = new Platform();
   grounds[grounds_length] = new Platform();
   grounds[grounds_length]
-    ->insert("./images/megaLevel.ppm", 10, 36);
+    ->insert("./images/megalevel.ppm", 10, 36);
 
   int width  = grounds[grounds_length]->getClipWidth();
   int height = grounds[grounds_length]->getClipHeight();

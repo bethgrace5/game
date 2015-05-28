@@ -6,6 +6,7 @@
 #include "ppm.h"
 #include "Object.h"
 #include "Sprite.h"
+#include "Player.h"
 //=====================================================================
 //  Platform
 //=====================================================================
@@ -62,7 +63,7 @@ void Platform::setupTile() {
   saveLineSpace();
 }
 
-void Platform::saveLineSpace(){
+void Platform::saveLineSpace() {
   lineSpaceX = Sprite::getClipWidth();
   lineSpaceY = Sprite::getClipHeight();
 }
@@ -89,7 +90,7 @@ void Platform::drawRow(int x, int y) {
   //This Will Draw The TileSet based on the Boundaries of Object
   glPushMatrix();
   glTranslatef(Object::getLeft(), Object::getTop(), 0);
-  for(int j = 0; j < Object::getHeight()/lineSpaceY; j++){
+  for(int j = 0; j < Object::getHeight()/lineSpaceY; j++) {
     if (j == 0) glTranslatef(0, -lineSpaceY , 0); 
     else        glTranslatef(0, -(lineSpaceY + lineSpaceY), 0); 
 
@@ -100,8 +101,38 @@ void Platform::drawRow(int x, int y) {
       else        glTranslatef(lineSpaceX + lineSpaceX ,0 , 0); 
 
       drawTile();
+
     }
     glPopMatrix();
   } 
   glPopMatrix(); 
 }
+
+
+class Item : public Sprite, public Object {
+    private: 
+      int effect;
+    public:
+      Item();
+      void causeEffect(Player *hero);
+      void drawBox();
+
+ };
+
+Item::Item() : Sprite(), Object(20, 20, 350, 350) {effect=1;}
+void Item::causeEffect(Player *hero) {
+    switch (effect) {
+	case 1: hero->reduceHealth(100);
+            break;
+    }
+}
+
+void Item::drawBox() {
+    glPushMatrix();
+    glTranslatef(Object::getCenterX(), Object::getCenterY(), 0);
+    Sprite::drawTile(0,0);
+    glPopMatrix();
+
+}
+
+

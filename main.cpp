@@ -25,7 +25,7 @@
 #include "sounds.cpp"
 #include "Storage.cpp"
 #include "tedP.cpp" //#include "fastFont.h"
-#include "Animate.h"
+//#include "Animate.h"
 
 using namespace std;
 typedef double Vec[3];
@@ -42,7 +42,7 @@ struct bgBit {
 
 // time difference in milliseconds
 Sprite bulletImage;
-Animate explode;
+//Animate explode;
 int animateOn = 0;
 struct Bullet {
   Vec pos;
@@ -73,6 +73,9 @@ Bullet *bulletHead = NULL;
 Enemy *enemies[MAX_ENEMIES];
 Player *hero;
 Platform *grounds[MAX_GROUNDS];
+Item *items;
+Item *itemsHold[10];
+int items_length = 0;
 double g_left, g_right, g_top, g_bottom;
 int bg, bullets, grounds_length, enemies_length, i, j, level=0, fail=0, quit=0;
 int roomX=WINDOW_HALF_WIDTH;
@@ -90,6 +93,7 @@ GLuint initTextures[65], computerScreenTextures[32], healthBarTexture[1], lifeTe
 Object createAI( int w, int h, Object *ground);
 bool bulletCollide(Bullet *b, Object *obj);
 bool detectCollide(Object *obj, Object *ground);
+bool detectItem (Object *obj, Item *targetItem);
 int  check_keys (XEvent *e);
 void check_mouse(XEvent *e);
 void cleanupXWindows(void);
@@ -100,7 +104,8 @@ void groundCollide(Object *obj, Object *ground);
 void initXWindows(void);
 void init_opengl(void);
 void makeEnemy(int w, int h, Object *ground, int type); 
-void makePlatform(int w, int h, int x, int y); 
+void makePlatform(int w, int h, int x, int y);
+void makeItems(int w, int h, int x, int y);
 void moveWindow(void);
 void movement(void);
 void render(void);
@@ -111,6 +116,7 @@ void renderEnemies(int x, int y);
 void renderGrounds(int x, int y);
 void renderHero(int x, int y);
 void renderAnimations(int x, int y);
+void renderItems(int x, int y);
 void renderInitMenu();
 void renderHealthBar();
 void renderLives();
@@ -133,9 +139,16 @@ int main(void) {
   bulletImage.insert("./images/hero.ppm",13, 1);
   bulletImage.setSize(20, 20);
 
-  explode.insert("./images/fireBomb2.ppm", 4, 2);
-  explode.setSize(400,400);
+  //explode.insert("./images/hero.ppm", 4, 2);
+  //explode.setSize(400,400);
   // skip menu and go straight to level 1
+
+  // Item test
+  items = new Item();
+  items->insert("./images/level2.ppm", 1, 1);
+  items->setSize(20,20);
+  //end test
+
   if(QUICK_LOAD_TIME) {
     level = 1;
   }
@@ -353,6 +366,10 @@ void init_opengl (void) {
      makePlatform(200, 16, 9700, 360);
      makePlatform(200, 16, 300, 200);
      makePlatform(20, 1000, -16, 600);
+
+     makeItems(16, 20, 375, 232);
+     makeItems(16, 20, 975, 232);
+
   }
 
   makeEnemy(37, 80, grounds[2], 1);
@@ -614,6 +631,32 @@ void makePlatform(int w, int h, int x, int y) {
   grounds_length++;
 }
 
+void makeItems(int w, int h, int x, int y) {
+  itemsHold[items_length] = new Item();
+  itemsHold[items_length]->setID(items_length);
+  itemsHold[items_length]->insert("./images/firemon.ppm", 1, 1);
+  itemsHold[items_length]->setSize(16, 20);
+  itemsHold[items_length]->init(16, 20, x, y);
+  items_length++;
+}
+
+void deleteItem(int id) {
+    if (items_length <= 0) return;
+    if (id < 0) return;
+
+    itemsHold[id] = new Item();
+    delete itemsHold[id];
+
+    for (int i = id; i < items_length-1; i++) {
+      itemsHold[i] = itemsHold[i + 1];
+      itemsHold[i]->setID(itemsHold[i]->getID()-1);
+    }
+    itemsHold[items_length-1] = new Item();
+    delete itemsHold[items_length-1];
+
+    items_length--;
+}
+
 void makeEnemy(int w, int h, Object *ground, int type) {
   if (enemies_length<MAX_ENEMIES){
     switch (type){
@@ -642,6 +685,22 @@ bool detectCollide (Object *obj, Object *ground) {
       obj->getBottom() < ground->getTop()  &&
       obj->getTop()    > ground->getBottom());
 }
+
+bool detectItem (Object *obj, Item *targetItem) {
+  //Gets (Moving Object, Static Object)
+  //Reture True if Moving Object Collides with Static Object
+  if (obj->getRight() > targetItem->getLeft() &&
+      obj->getLeft()   < targetItem->getRight() &&
+      obj->getBottom() < targetItem->getTop()  &&
+      obj->getTop()    > targetItem->getBottom()) {
+      cout << "Item touched\n";
+      targetItem->causeEffect(hero);
+      deleteItem(obj->getID());
+      return true;
+  }
+  return false;
+}
+
 
 bool bulletCollide (Bullet *b, Object *obj) {
   //Gets (Bullet, Object)
@@ -733,6 +792,11 @@ void movement() {
         hero->repairHealth(100); 
       }
     }
+  }
+
+  //Detect Item
+  for (j=0; j < items_length; j++) {
+    detectItem(hero, itemsHold[j]);
   }
 
   //Bullet creation
@@ -864,6 +928,7 @@ void movement() {
     renderEnemies(x, y);
     renderHero(x, y);
     renderAnimations(x, y);
+    renderItems(x, y);
     renderLives();
     renderHealthBar();
 
@@ -878,12 +943,26 @@ void movement() {
 
     glPushMatrix();
     glTranslatef(- x + 350, - y + 350, 0);
-    explode.cycleAnimations();
-    explode.drawBox();
+    //explode.cycleAnimations();
+    //explode.drawBox();
 
 
     glEnd(); glPopMatrix(); 
   }
+
+  void renderItems(int x, int y){
+    for (i=0;i<items_length;i++) {
+      if (inWindow(*(itemsHold[i]))) {
+    	glPushMatrix();
+    	glTranslatef(- x, - y, 0);
+   	//items->drawBox();
+	itemsHold[i]->drawBox();
+    	glEnd(); glPopMatrix(); 
+      }
+    }
+  }
+
+
 
   void renderGrounds (int x, int y) {
     // render grounds
