@@ -221,7 +221,7 @@ void pickTile(int x, int y){
   //std::cout << "Full Width       "  << fullWidth << std::endl;
   //std::cout << "What is tileWidth " << tileWidth << std::endl;
 
-  int amountY = currentTile.getRow();
+  //int amountY = currentTile.getRow(); // not used warning
   //int fullHeight = currentTile.getClipHeight();
   //int tileHeight = int(currentTile.getClipHeight()/currentTile.getRow());
   int tileHeight = int(WINDOW_HEIGHT/36);

@@ -373,6 +373,7 @@ void init_opengl (void) {
   }
 
   makeEnemy(37, 80, grounds[2], 1);
+  
   makeEnemy(37, 80, grounds[2], 1);
   makeEnemy(37, 80, grounds[2], 1);
   makeEnemy(37, 80, grounds[2], 1);
@@ -729,6 +730,7 @@ void groundCollide (Object *obj, Object *ground) {
       obj->setVelocityY(0);
       obj->setCenter(obj->getCenterX(), g_top+(obj->getCenterY()-h_bottom));
       obj->setFloor(ground);
+      cout << "set ground" << obj << endl;
     }
     //If moving object is at the bottom of static object
     if (!(obj->getOldTop() > g_bottom) && !(h_top <= g_bottom)) {
@@ -851,6 +853,7 @@ void movement() {
 
     // Enemy movement, enemy ai
     for (i=0;i<enemies_length;i++) {
+      enemies[i]->setOldCenter();
       enemies[i]->enemyAI(hero); //Where does enemy go?
       //enemyAI(enemies[i]);
       //bullets
@@ -1106,7 +1109,7 @@ void movement() {
   }
 
   void renderHealthBar () {
-    int WW = WINDOW_WIDTH;
+    //int WW = WINDOW_WIDTH; // not used warning
     int WH = WINDOW_HEIGHT;
     int h = 30;
     int w = 200;

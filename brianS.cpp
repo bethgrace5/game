@@ -117,29 +117,9 @@ void Enemy::enemyAI (Object *hero) {
                                 }
                             }
                             else{ // gap
-                                if ((e_fl-h_fr)<(e_ft-h_ft)) { // just run off
                                     Object::setVelocityX(-6);
                                     str += "move left!";
                                     Object::setFloor(NULL);
-                                }
-                                else if (h_fr>(e_fl-640)) {
-                                    if ((h_cx+250)<e_cx) {
-                                        Object::setVelocityX(-6);// Jump over
-                                    }
-                                    else{
-                                        Object::setVelocityX(((h_fr-e_fl)/59)*-1);// Jump over
-                                        if (Object::getVelocityX()<-6)
-                                            Object::setVelocityX(-6);
-                                    }
-                                    Object::setVelocityY(6);
-                                    str += "jump over!";
-                                    Object::setJump();
-                                    str += "jump #" + itos(Object::getJump()) + " ";
-                                    Object::setFloor(NULL);
-                                }
-                                else{
-                                    str += " gap too large to jump!";
-                                }
                             }
                         }
                         break;
@@ -162,29 +142,9 @@ void Enemy::enemyAI (Object *hero) {
                                 }
                             }
                             else{ // gap
-                                if ((h_fl-e_fr)<(e_ft-h_ft)) { // just run off
                                     Object::setVelocityX(6);
                                     str += "move right!";
                                     Object::setFloor(NULL);
-                                }
-                                else if (h_fl<(e_fr+640)) {
-                                    if ((h_cx-250)>e_cx) {
-                                        Object::setVelocityX(6);// Jump over
-                                    }
-                                    else{
-                                        Object::setVelocityX(((e_fr-h_fl)/59)*-1);// Jump over
-                                        if (Object::getVelocityX()>6)
-                                            Object::setVelocityX(6);
-                                    }
-                                    Object::setVelocityY(6);
-                                    str += "jump over!";
-                                    Object::setJump();
-                                    str += "jump #" + itos(Object::getJump()) + " ";
-                                    Object::setFloor(NULL);
-                                }
-                                else{
-                                    str += " gap too large to jump!";
-                                }
                             }
                         }
                         break;
@@ -192,17 +152,17 @@ void Enemy::enemyAI (Object *hero) {
                         //hero's ground is above enemy's ground
                         if (h_ft>e_ft && h_ft<(e_ft+220)) {
                             if (h_fr>e_fl) { // grounds are overlapping
-                                if ((Object::getLeft()-6)<h_fr) {
+                                if ((Object::getLeft())<h_fr) {
                                     Object::setVelocityX(6);
                                     str += "move right";
                                 }
-                                else if ((Object::getLeft()-14)>h_fr) {
+                                else if ((Object::getLeft()-6)>h_fr) {
                                     Object::setVelocityX(-6);
                                     str += "move left";
                                 }
                                 else{
                                     Object::setVelocityX(0);
-                                    Object::setVelocityY(7);
+                                    Object::setVelocityY(2);
                                     Object::setJump();
                                     str += "jump #" + itos(Object::getJump()) + " ";
                                     Object::setFloor(NULL);
@@ -215,7 +175,8 @@ void Enemy::enemyAI (Object *hero) {
                                     str += "move left";
                                 }
                                 else{
-                                    Object::setVelocityY(7);
+                                    Object::setVelocityX(-6);
+                                    Object::setVelocityY(2);
                                     Object::setJump();
                                     str += "jump #" + itos(Object::getJump()) + " ";
                                     Object::setFloor(NULL);
@@ -241,12 +202,7 @@ void Enemy::enemyAI (Object *hero) {
                                     if ((h_cx+250)<e_cx) {
                                         Object::setVelocityX(-6);// Jump over
                                     }
-                                    else{
-                                        Object::setVelocityX(((h_fr-e_fl)/59)*-1);// Jump over
-                                        if (Object::getVelocityX()<-6)
-                                            Object::setVelocityX(-6);
-                                    }
-                                    Object::setVelocityY(6);
+                                    Object::setVelocityY(2);
                                     str += "jump over!";
                                     Object::setJump();
                                     str += "jump #" + itos(Object::getJump()) + " ";
@@ -262,18 +218,18 @@ void Enemy::enemyAI (Object *hero) {
                         //hero's ground is above enemy's ground
                         if (h_ft>e_ft && h_ft<(e_ft+220)) {
                             if (h_fl<e_fr) {
-                                if ((Object::getRight()+6)>h_fl) {
+                                if ((Object::getRight())>h_fl) {
                                     Object::setVelocityX(-6);
                                     str += "move left";
                                 }
-                                else if ((Object::getRight()+14)<h_fl) {
+                                else if ((Object::getRight()+6)<h_fl) {
                                     Object::setVelocityX(6);
                                     str += "move right";
                                 }
                                 else{
                                     Object::setVelocityX(0);
                                     str += "stop, ";
-                                    Object::setVelocityY(7);
+                                    Object::setVelocityY(2);
                                     Object::setJump();
                                     str += "jump #" + itos(Object::getJump()) + " ";
                                     Object::setFloor(NULL);
@@ -286,7 +242,8 @@ void Enemy::enemyAI (Object *hero) {
                                     str += "move left";
                                 }
                                 else{
-                                    Object::setVelocityY(7);
+                                    Object::setVelocityX(6);
+                                    Object::setVelocityY(2);
                                     Object::setJump();
                                     str += "jump #" + itos(Object::getJump()) + " ";
                                     Object::setFloor(NULL);
@@ -317,7 +274,7 @@ void Enemy::enemyAI (Object *hero) {
                                         if (Object::getVelocityX()>6)
                                             Object::setVelocityX(6);
                                     }
-                                    Object::setVelocityY(6);
+                                    Object::setVelocityY(2);
                                     str += "jump over!";
                                     Object::setJump();
                                     str += "jump #" + itos(Object::getJump()) + " ";
@@ -376,74 +333,26 @@ void Enemy::enemyAI (Object *hero) {
             }
         }
     }
-    else if (h_f && Object::getAggro()) { // enemy is mid jump
-        if (e_vx==0) {
-            if ((e_vy > -0.5) &&
-                    (e_vy <= 0)) {
-                if (Object::getBottom() < h_ft) { // enemy needs to double jump
-                    if (Object::getJump()<2) {
-                        Object::setVelocityY(7);
-                        Object::setJump();
-                        str += "jump #" + itos(Object::getJump()) + " ";
+    else if (h_f && Object::getAggro()) { // enemy is in the air
+                if (Object::getBottom() < h_ft) { // enemy needs to go up
+		    if ((e_cx>h_fr) or (e_cx<h_fl)){
+		    	str += "Enemy's bottom: " + itos(Object::getBottom()) + ", h_ft: " + itos(h_ft);
+                        Object::setVelocityY(2);
+                        str += "; jump #" + itos(Object::getJump()) + " ";
                     }
                 }
-                else if (Object::getBottom() > h_ft) {
-                    if (e_cx<h_cx) {
-                        if (e_cx>(h_cx-100)) {
-                            Object::setVelocityX(1);
-                        }
-                        else if (e_cx>(h_cx-250)) {
-                            Object::setVelocityX(3);// Jump over
-                        }
-                        else{
+                else {
+                	if (e_cx<h_cx) {
                             Object::setVelocityX(6);
-                        }
-                    }
-                    else{
-                        if (e_cx<(h_cx+100)) {
-                            Object::setVelocityX(-1);
-                        }
-                        else if (e_cx<(h_cx+250)) {
-                            Object::setVelocityX(-3);// Jump over
-                        }
-                        else{
+                	}
+                	else{
                             Object::setVelocityX(-6);
                         }
-                    }
-                    str += "move";
+                
+                str += "move in air, vel y: " + itos(Object::getVelocityY());
                 }
-            }
-        }
-        else{ //enemy is moving left or right
-            e_vx=Object::getVelocityX();
-            e_vy=Object::getVelocityY();
-            if (e_cx>h_cx && e_vx>0) {
-                Object::setVelocityX(0);
-            }
-            else if (e_cx<h_cx && e_vx<0) {
-                Object::setVelocityX(0);
-            }
-            if ((e_vy > -0.5) && (e_vy <= 0)) { // check if enemy needs to double jump
-                if (((e_vx > 0) && (e_cy < (h_ft+360)) && (e_cx < (h_fl-180))) or
-                        ((e_vx < 0) && (e_cy > (h_ft+360)) && (e_cx > (h_fr+180)))) {
-                    // enemy double jump to lower ground object
-                    if (Object::getJump()<2) {
-                        Object::setVelocityY(7);
-                        Object::setJump();
-                        str += "jump #" + itos(Object::getJump()) + " ";
-                    }
-                }
-                else{
-                    str += "too far? my x,y:" + itos(e_cx) + "," + itos(e_cy) + ";" + "ground's x,y:";
-                    if (e_vx>0)
-                        str += itos(h_fl) + "," + itos(h_ft);
-                    else
-                        str += itos(h_fr) + "," + itos(h_ft);
-                }
-            }
-        }
     }
-    //cout << str << endl;
+    cout << str << endl;
     if (Object::life<=0 && !(Object::isDying)){
         Object::isDying=1;
         Sprite::setIndex(21);
