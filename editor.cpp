@@ -13,6 +13,7 @@
   Window Setup        |
 ======================+
 */
+
 #include <GL/glx.h>
 #include <fstream>
 #include "Object.cpp"
@@ -23,6 +24,7 @@
 #include "brianS.cpp" //Enemies
 #include "Storage.cpp"
 #include "definitions.h"
+#include <cmath>
 
 using namespace std;
 typedef double Vec[3];
@@ -48,6 +50,7 @@ bool saving;
 bool loading;
 
 bool create = 0;
+bool tileMode = 0;
 bool selecter = 0;
 int  holdID = -1;
 int saveID = -1;
@@ -73,6 +76,8 @@ void setRow(int size);
 void setColumn(int size);
 void changeTileX();
 void changeTileY();
+void pickTile(int x, int y);
+
 
 void renderHero(int x, int y);
 
@@ -105,7 +110,7 @@ int main(void) {
   //declare hero object
   testHero = new Player();
   currentTile.insert("./images/megaLevel.ppm", 1, 1);
-  currentTile.setSize(300, 300);
+  currentTile.setSize(WINDOW_HALF_WIDTH/2, WINDOW_HALF_HEIGHT);
 
   testHero->insert("./images/hero.ppm", 13, 1);
   testHero->setSize(44,48);
@@ -140,7 +145,6 @@ void init_opengl (void) {
   glEnable(GL_TEXTURE_2D);
   initFastFont();
 }
-
 //=====================================================================
 //  Platform Editor
 //=====================================================================
@@ -199,6 +203,36 @@ void changeTileY(){
   int x = grounds[saveID]->getIndexX(); 
   int y = grounds[saveID]->getIndexY();
   grounds[saveID]->setIndexXY(x,y+1);
+}
+
+void pickTile(int x, int y){
+  if(saveID < 0) return;
+  if(!tileMode) return;
+
+  std::cout << "What is Point X " << x << std::endl;
+  std::cout << "What is Point Y " << y << std::endl;
+
+  //int amountX  = currentTile.getColumn();
+  //int fullWidth  = currentTile.getClipWidth();
+  //int tileWidth = int(currentTile.getClipWidth()/currentTile.getColumn());
+  int tileWidth = int(WINDOW_HALF_WIDTH/10);
+  //std::cout << "Amount of Column "  << amountX << std::endl;;
+  //std::cout << "Full Width       "  << fullWidth << std::endl;
+  //std::cout << "What is tileWidth " << tileWidth << std::endl;
+
+  int amountY = currentTile.getRow();
+  //int fullHeight = currentTile.getClipHeight();
+  //int tileHeight = int(currentTile.getClipHeight()/currentTile.getRow());
+  int tileHeight = int(WINDOW_HEIGHT/36);
+
+  int tileX = int(ceil(x/tileWidth))  % 10 ;
+  int tileY = int(ceil(y/tileHeight)) % 36;
+  tileY = 36 - tileY;
+ 
+  std::cout << "What is TileX " << tileX << std::endl;
+  std::cout << "What is TileY " << tileY << std::endl;
+
+  grounds[saveID]->setIndexXY(tileX, tileY);
 }
 
 void deleteLastPlatform(){
@@ -290,6 +324,7 @@ void check_mouse (XEvent *e) {
       }
     }
     if (e->xbutton.button==2) {
+      pickTile(e->xbutton.x, WINDOW_HEIGHT - e->xbutton.y);
 
       return;
     }
@@ -357,6 +392,9 @@ int check_keys (XEvent *e) {
     if(key == XK_c){
       create = 1; selecter = 0; 
     }
+    if(key == XK_x){
+      tileMode = !tileMode;
+    }
     if(key == XK_v){
       create = 0; selecter = 1;  
     }
@@ -389,9 +427,9 @@ bool detectCollide (Object *obj, Object *ground) {
 void renderOptions(){
   if(create == 1) writeWords("Create Mode", 25, 25);
   if(selecter == 1) writeWords("Select Mode", 25, 25);
-  if(create == 1){
-    glPushMatrix(); glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
-    //currentTile.drawTile(0,0);
+  if(tileMode == 1){
+    glPushMatrix(); glTranslatef(WINDOW_HALF_WIDTH/2, WINDOW_HALF_HEIGHT, 0);
+    currentTile.drawTile(0,0);
     glPopMatrix();
   }
 }

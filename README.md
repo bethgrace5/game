@@ -13,13 +13,19 @@
     *  `v` - select mode -> select created objects
     *  `r` - increase row size of selected object
     *  `t` - increase column size of selected object
+    *  `y` - decrease row size of selected object
+    *  `u` - decrease column size of selected object
     *  `s` - save level as created
     *  `l` - revert back to last saved state
     *  `j` - change tile right/left
     *  `h` - change tile down/up
-    *  
+    *  `x` - access to click tile mode. Press the middle mouse button 
+    *  `n` - delete holding or last hold object.
+    *  `b` - delete last object put
 *  Notes:
     *  There must be at least 7 objects, or segmentation fault is thrown
+    *  Theres A bug on the click y axis while in click tile mode. Y position may
+    *  not be right. It will usally click the tile lower than you click
 *  TODO:
     *  put usage instructions on level editor
 
