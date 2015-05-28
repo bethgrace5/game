@@ -4,7 +4,7 @@
 //Development Controls
 
 // comment to ignore sound use
-//#define USE_SOUND
+#define USE_SOUND
 
 // 1 for quick load, 0 for slow load with menu images
 #define QUICK_LOAD_TIME 1
@@ -13,7 +13,7 @@
 #define USE_TOOLS 1
 
 //If 1, you can write the name of the save file
-#define OPTIONAL_STORAGE 0
+#define OPTIONAL_STORAGE 1
 
 #define GRAVITY 0.2
 #define HERO_START_X 150
