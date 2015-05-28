@@ -178,7 +178,7 @@ void makePlatform(int x, int y) {
   cout << "Make Ground \n";
   //storeIn.grounds[storeIn.grounds_length] = new Platform();
   grounds[grounds_length] = new Platform();
-  grounds[grounds_length]->insert("./images/megalevel.ppm", 10, 36);
+  grounds[grounds_length]->insert("./images/megaLevel.ppm", 10, 36);
 
   int width  = grounds[grounds_length]->getClipWidth();
   int height = grounds[grounds_length]->getClipHeight();
