@@ -3,6 +3,8 @@
 
 # ignore executable
 game
+tool
+*.ros
 
 # Vim swapfiles
 *.swp

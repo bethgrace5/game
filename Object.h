@@ -55,6 +55,9 @@ class Object{
         void setIndex(int ind);
         int getIndex();
 
+        void setID(int objID);
+        int getID();
+
         void setFloor(Object *obj);
         Object *getFloor();
         
@@ -62,6 +65,7 @@ class Object{
 
         Object( double w, double h, double x, double y);
         void init(double w, double h, double x, double y);
+        void init(double w, double h);
         // TODO: create destructor
         //~Object(){ delete [] ground;}
 
@@ -73,12 +77,16 @@ class Object{
         // from windowCenter
         
         int index;
+        int obj_id;;
         int jump;
         bool aggro;
+        bool hostile;
+        bool interactive;
         Vec velocity;
         Vec center;
         Vec oldCenter;
         Object *floor;
+        
 };
 
 #endif

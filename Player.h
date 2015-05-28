@@ -1,20 +1,29 @@
+#include "definitions.h"
+#include "Sprite.h"
 
+#ifdef USE_SOUND
+#include "fmod.c"
+#include "sounds.cpp"
+#endif
 
 #ifndef PLAYER_H
 #define PLAYER_H
 //=====================================================================
 //Player
 //=====================================================================
+extern int level;
 class Player: public Object, public Sprite{
   private:
-    int lives, health;
+    int lives, health, maxHealth;
     int jumps, jumpLimit, jumpPower;
     int maxSpeed, speed;
 
-    int index;
+    int indexp;
     int once;
 
-    timeval seqStart, seqEnd;
+    bool triggerShooting;
+
+    timeval seqStartA, seqEndA;
 
   public:
     Player();
@@ -26,26 +35,37 @@ class Player: public Object, public Sprite{
     void stop();
     void jumpRefresh();
 
-    void setHealth(int take);
     int getHealth();
+    void setHealth(int take);
+    void reduceHealth(int take);
+    void repairHealth(int take);
+
+    bool checkShooting();
+    void setShooting(bool take);
+    int getLives();
+    void incrementLives();
+    void decrementLives();
 
     void drawBox();
     void cycleAnimations();
     void setOnGround(bool take);
+    void autoState();
 
     int diff_ms (timeval t1, timeval t2);
+
 };
 //==============================================
 //Setup
 //==============================================
 Player::Player() : Object(26, 44, 250, 250), Sprite(){
   //Set The Default stats
-  lives = 3; health = 3;
+  lives = 3; 
+  health =  maxHealth = 100;
 
-  jumps = 1; jumpLimit = 2; jumpPower = 7;
+  jumps = 0; jumpLimit = 2; jumpPower = 7;
   speed = 0; maxSpeed  = 7;
 
-  index = 0; once = 0;
+  indexp = 0; once = 0;
 }
 //===============================================
 //Movement Functions
@@ -61,6 +81,9 @@ void Player::moveLeft(){
 void Player::jump(){
   if(jumps < jumpLimit){ 
       Object::setVelocityY(jumpPower); 
+      #ifdef USE_SOUND
+      fmod_playsound(marioJump);
+      #endif
       jumps++;
   }
 }
@@ -79,6 +102,36 @@ void Player::setHealth(int take){
 int Player::getHealth(){
   return health;
 }
+void Player::reduceHealth(int take){
+  health -= take;
+}
+void Player::repairHealth(int take){
+  health += take;
+  if(health > maxHealth) health = 100;
+}
+
+bool Player::checkShooting(){
+  return triggerShooting;
+}
+void Player::setShooting(bool take){ 
+  triggerShooting = take;
+}
+
+int Player::getLives(){
+  return lives;
+}
+void Player::incrementLives(){ 
+    lives++;
+}
+void Player::decrementLives(){ 
+    lives--;
+    // cycleAnimations() checks for 0 or less health
+    // to show dying sequence
+    if(lives < 0) {
+        health =0;
+    }
+}
+
 //===============================================
 //Drawing Functions
 //===============================================/
@@ -88,45 +141,69 @@ int Player::getHealth(){
 //
 //       Right Now There Are 13 sprites in 1 sheet
 void Player::cycleAnimations(){
-  //int tmpColumn = Sprite::getColumn();
+  //int tmpColumn = Sprite::getColumn();//
   //int tmpRow = Sprite::getRow();
 
   //Start Timer
-  if(once == 0){ gettimeofday(&seqStart, NULL); once = 1 ;}
-  gettimeofday(&seqEnd, NULL);//This Can Be Universal For All Stuff
+  if(once == 0){ gettimeofday(&seqStartA, NULL); once = 1 ;}
+  gettimeofday(&seqEndA, NULL);//This Can Be Universal For All Stuff so Maybe Make This
+                               //Global in main.cpp
+  //The Earilier Animations States gets first priority
 
   //Death
-  if(getHealth() == 0){
-    if(diff_ms(seqEnd, seqStart) > 180){
-      if(index == 12) return;
-      if(index < 7) index = 7;
-      index++; once = 0;
+  if(getHealth() <=0){
+
+    if(diff_ms(seqEndA, seqStartA) > 180){
+      if(indexp == 12) {
+          if (lives < 0) {
+              //reset lives
+              lives = 3;
+
+              //kick user back to menu
+              level = 0;
+          }
+          return;
+      }
+      if(indexp < 7) indexp = 7;
+      indexp++; once = 0;
     }
   }
   //Jumping
   else if(Object::getVelocityY() > 0){
       if(jumps==2) {
-          index=0;
+          indexp=0;
       }
       else {
-        index = 1;
+        indexp = 1;
       }
   }
   //Falling
   else if(Object::getVelocityY() < 0){
-    index = 0;
+    indexp = 0;
   }
   //Walking/Running
   else if(Object::getVelocityX() != 0){
-    if(diff_ms(seqEnd, seqStart) > 80){
-      index = (index + 1) % 6;
+    if(diff_ms(seqEndA, seqStartA) > 80){
+      indexp = (indexp + 1) % 6;
       once = 0;
     }
   }
   //Standing
-  else index = 6; 
+  else indexp = 6; 
+  //std::cout << "Index: " << indexp << endl;
+  Sprite::setIndexAt(indexp);
+}
 
-  Sprite::setIndexAt(index);
+void Player::autoState(){
+  //This Is a Temporary Fix. For The Enemy AI
+  if(getVelocityY() < 0) Object::isJumping = 1;
+  else Object::isJumping = 0;
+
+  if(getVelocityX() < 0) Object::isWalking = 1;
+  else Object::isWalking = 0;
+
+  if(getVelocityY() > 0) Object::isFalling = 1;
+  else Object::isFalling = 0;
 }
 
 void Player::drawBox(){
@@ -134,15 +211,16 @@ void Player::drawBox(){
   //int h = Object::getHeight();
   glPushMatrix();
   glTranslatef(Object::getCenterX(), Object::getCenterY(), 0);
-
-  /*glBegin(GL_QUADS);
+/*
+  glBegin(GL_QUADS);
   glVertex2i(-w, -h);
   glVertex2i(-w,  h);
   glVertex2i( w,  h);
   glVertex2i( w, -h);
   glEnd();*/
 
-  Sprite::drawTile(Sprite::getIndexAt());
+  //Sprite::drawTile(Sprite::getIndexAt());
+  Sprite::drawTile(indexp, 1);
 
   glPopMatrix();
 }

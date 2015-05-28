@@ -3,6 +3,7 @@
 #include "ppm.h"
 #include "Object.h"
 #include "Sprite.h"
+#include "definitions.h"
 
 //=====================================================================
 //  Enemies
@@ -18,12 +19,12 @@ using namespace std;
 class Enemy : public Sprite, public Object {
 
     private:
-        int speed;
-        int type; // 0: enemy 1, 1: enemy 2, 2: boss
+        //int speed;
+        //int type; // 0: enemy 1, 1: enemy 2, 2: boss
         int fire_rate; //ms between shooting
         int frame_rate; //ms between sprite indexes
         timeval fStart, fEnd;
-        timeval sStart, sEnd;
+        //timeval sStart, sEnd;
 
     public:
         Enemy(int w, int h, Object *ground);

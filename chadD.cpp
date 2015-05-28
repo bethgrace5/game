@@ -6,6 +6,7 @@
 #include "ppm.h"
 #include "Object.h"
 #include "Sprite.h"
+#include "Player.h"
 //=====================================================================
 //  Platform
 //=====================================================================
@@ -41,16 +42,11 @@ class Platform : public Sprite, public Object {
 };
 
 Platform::Platform() : Sprite(), Object(260, 200, 350, 400) {
-    //Just An Intializer
-    //this will set up Boundaries of the object and set Sprite to 0/NULL
+  lineSpaceX = lineSpaceY = 0;
 }
 
 void Platform::setupTile() {
   //Setup Object to match with tile rows
-  //std::cout << "===================================================\n";
-  //std::cout << "Platform Size = " << Object::getWidth() << " , "
-  //  << Object::getHeight() << "\n"; 
-
   //The Object Will Allocate to fit with the tile
   int widthSize;
   int heightSize;
@@ -64,52 +60,10 @@ void Platform::setupTile() {
 
   Object::init(widthSize, heightSize, Object::getCenterX(), Object::getCenterY());  
 
-  //std::cout << "Clip Size = " << Sprite::getClipWidth() << " , " 
-  //  << Sprite::getClipHeight() << "\n";
-
-  //std::cout << "Platform Size = " << Object::getWidth() << " , "
-  //  << Object::getHeight() << "\n"; 
-
-  //std::cout << "Total tiles inside that fit side "
-  //  << Object::getWidth()/Sprite::getClipWidth()  << std::endl;
-
   saveLineSpace();
 }
 
-void Platform::drawRow() {
-  //Draws Tiles for a box
-  //This is To Test The Boundaries Of The Platform
-  //you will see a colored box
-  
-  float w, h;
-  glPushMatrix();
-  glTranslatef(Object::getCenterX(), Object::getCenterY(), 0); 
-  w = Object::getWidth();
-  h = Object::getHeight();
-
-  glBegin(GL_QUADS);
-  glVertex2i(-w, -h);
-  glVertex2i(-w, h);
-  glVertex2i( w, h);
-  glVertex2i( w,-h);
-  glEnd();
-  glPopMatrix();
-
-  //This Will Draw The TileSet based on the Boundaries of Object
-  glPushMatrix();
-  glTranslatef(Object::getLeft(), Object::getCenterY(), 0); 
-  
-  for (int i = 0; i < Object::getWidth()/Sprite::getClipWidth(); i++) {
-
-    if (i == 0) glTranslatef(Sprite::getClipWidth(),0 , 0); 
-    else        glTranslatef(Sprite::getClipWidth() + Sprite::getClipWidth() ,0 , 0); 
-
-    Sprite::drawTile(0,0);
-  } 
-  glPopMatrix(); 
-}
-
-void Platform::saveLineSpace(){
+void Platform::saveLineSpace() {
   lineSpaceX = Sprite::getClipWidth();
   lineSpaceY = Sprite::getClipHeight();
 }
@@ -118,7 +72,7 @@ void Platform::drawRow(int x, int y) {
   //Draws Tiles for a box
   //This is To Test The Boundaries Of The Platform
   //you will see a colored box 
-  float w, h;
+  /*float w, h; 
   glPushMatrix();
   glTranslatef(Object::getCenterX(), Object::getCenterY(), 0); 
   w = Object::getWidth();
@@ -131,51 +85,54 @@ void Platform::drawRow(int x, int y) {
   glVertex2i( w,-h);
   glEnd();
   glPopMatrix();
+  */
 
   //This Will Draw The TileSet based on the Boundaries of Object
   glPushMatrix();
-  glTranslatef(Object::getLeft(), Object::getCenterY(), 0); 
-  
-  for (int i = 0; i < Object::getWidth()/lineSpaceX; i++) {
+  glTranslatef(Object::getLeft(), Object::getTop(), 0);
+  for(int j = 0; j < Object::getHeight()/lineSpaceY; j++) {
+    if (j == 0) glTranslatef(0, -lineSpaceY , 0); 
+    else        glTranslatef(0, -(lineSpaceY + lineSpaceY), 0); 
 
-    if (i == 0) glTranslatef(lineSpaceX,0 , 0); 
-    else        glTranslatef(lineSpaceX + lineSpaceX ,0 , 0); 
+    glPushMatrix();
+    for (int i = 0; i < Object::getWidth()/lineSpaceX; i++) {
 
-    Sprite::drawTile(x,y);
+      if (i == 0) glTranslatef(lineSpaceX,0 , 0); 
+      else        glTranslatef(lineSpaceX + lineSpaceX ,0 , 0); 
+
+      drawTile();
+
+    }
+    glPopMatrix();
   } 
   glPopMatrix(); 
 }
 
-/*
-void Platform::drawColumn(int x, int y) {
-  //Draws Tiles for a box
-  //This is To Test The Boundaries Of The Platform
-  //you will see a colored box 
-  float w, h;
-  glPushMatrix();
-  glTranslatef(Object::getCenterX(), Object::getCenterY(), 0); 
-  w = Object::getWidth();
-  h = Object::getHeight();
 
-  glBegin(GL_QUADS);
-  glVertex2i(-w, -h);
-  glVertex2i(-w, h);
-  glVertex2i( w, h);
-  glVertex2i( w,-h);
-  glEnd();
-  glPopMatrix();
+class Item : public Sprite, public Object {
+    private: 
+      int effect;
+    public:
+      Item();
+      void causeEffect(Player *hero);
+      void drawBox();
 
-  //This Will Draw The TileSet based on the Boundaries of Object
-  glPushMatrix();
-  glTranslatef(Object::getLeft(), Object::getCenterY(), 0); 
-  
-  for (int i = 0; i < Object::getWidth()/lineSpaceX; i++) {
+ };
 
-    if (i == 0) glTranslatef(lineSpaceX,0 , 0); 
-    else        glTranslatef(lineSpaceX + lineSpaceX ,0 , 0); 
-
-    Sprite::drawTile(x,y);
-  } 
-  glPopMatrix(); 
+Item::Item() : Sprite(), Object(20, 20, 350, 350) {effect=1;}
+void Item::causeEffect(Player *hero) {
+    switch (effect) {
+	case 1: hero->reduceHealth(100);
+            break;
+    }
 }
-*/
+
+void Item::drawBox() {
+    glPushMatrix();
+    glTranslatef(Object::getCenterX(), Object::getCenterY(), 0);
+    Sprite::drawTile(0,0);
+    glPopMatrix();
+
+}
+
+

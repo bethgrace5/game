@@ -29,8 +29,21 @@ void Object::init( double w, double h, double x, double y ) {
     isFalling=0;
     isWalking=0;
     isShooting=0;
+    hostile = 0;
+    interactive = 0;
     isDying=0;
     isDead=0;
+}
+
+void Object::init( double w, double h ) {
+    width  = w;
+    height = h;
+    left=w*-1;
+    bottom=h*-1;
+    right=w;
+    top=h;
+    hostile = 0;
+    interactive = 0;
 }
 
 void Object::autoSet(){
@@ -143,6 +156,12 @@ void Object::setIndex(int ind){
 }
 int Object::getIndex() {
     return index;
+}
+void Object::setID(int ind){
+  obj_id = ind;
+}
+int Object::getID() {
+    return obj_id;
 }
 void Object::setFloor(Object *obj){
   floor = obj;

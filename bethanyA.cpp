@@ -21,6 +21,8 @@ Sprite::Sprite(){
   imageHeight = 0;
   imageWidth = 0;
   tileAt = 0;
+  indexX = indexY = 0;
+  background = 0;
 }
 
 void Sprite::setIndex(int ind){
@@ -43,24 +45,21 @@ void Sprite::insert(const char *filename, int x, int y){
 void Sprite::setFile(const char *filename){
   //Change the imageName to ppm file. imageName is used in the initSprite();
   imageName = filename; 
+  strcpy(save, imageName);
 }
 
 void Sprite::setClip(int x, int y){
   //User defined row and column. The images must evenly split apart from each
   //other. ClipX and ClipY determines where to cut parts in the image.
   row = x; column = y; 
-  //std::cout << "What is (x,y): (" << row << "," << column << ")\n";
   if(x > 0) clipX = (float)1/row;
-  //std::cout << "give me CLIPX: " << clipX << std::endl;
   if(y > 0) clipY = (float)1/column;
-  //std::cout << "give me CLIPY: " << clipY << std::endl;
 }
 
 void Sprite::setSize(int x, int y){
   //Sets the size of sprite shown
   clipWidth = x;
   clipHeight = y;
-  //std::cout << "what is x " << x << "\n what is y " << y << std::endl;
 }
 
 void Sprite::initSprite(){
@@ -84,6 +83,20 @@ void Sprite::initSprite(){
   delete [] silhouetteData;
 }
 
+void Sprite::reInitSprite(){
+  //Refresh the new Sprite Image
+  imageName = &save[0];
+  image = ppm6GetImage(imageName);
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  unsigned char *silhouetteData = buildAlphaData(image);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+  delete [] silhouetteData;
+}
+
 void Sprite::replaceTexture(GLuint take){
   //It replaces the texture with the texture it got
   //... but this function is not well defined yet
@@ -103,6 +116,9 @@ void Sprite::replaceTexture(GLuint take){
 //   2 # # # #
 //   3 # # # #
 //
+void Sprite::drawTile(){
+  drawTile(getIndexX(), getIndexY());
+}
 void Sprite::drawTile(int row, int column){
   //Need to check if 0;
   int atX = row; int atY = column;
@@ -112,17 +128,24 @@ void Sprite::drawTile(int row, int column){
 
   glBindTexture(GL_TEXTURE_2D, texture);
   glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_GREATER, 0.0f);
+  if(background == 0) glAlphaFunc(GL_GREATER, 0.0f);
+  else glAlphaFunc(GL_LESS, 1.0f);
+
   glColor4ub(255,255,255,255);
   glBegin(GL_QUADS);
   int  w = clipWidth;
   int h = clipHeight;
-
-  glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
-  glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
-  glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
-  glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
-
+  if(!checkMirror()){
+    glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
+    glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
+    glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
+    glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
+  }else{
+    glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(-w,-h);
+    glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(-w,h);
+    glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(w,h);
+    glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(w,-h);
+  }
   glEnd(); glPopMatrix();
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_ALPHA_TEST);
@@ -160,22 +183,7 @@ void Sprite::drawTile(int atSet){
   atX = atSet % row;
   atY = (int)(atSet/row);
 
-  glPushMatrix();
-  glBindTexture(GL_TEXTURE_2D, texture);
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_LESS, 1.0f);
-  glColor4ub(255,255,255,255);
-  glBegin(GL_QUADS);
-  int w = clipWidth;
-  int h = clipHeight;
-
-  glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
-  glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
-  glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
-  glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
-
-  glEnd(); glPopMatrix();
-  glDisable(GL_ALPHA_TEST);
+  drawTile(atX, atY);
 }
 
 //This will use the drawTile(int atSet)
@@ -212,6 +220,12 @@ void Sprite::setMirror(bool reflect){
 bool Sprite::checkMirror(){
   return mirror;
 }
+void Sprite::setBackground(bool back){
+  background = back;
+}
+bool Sprite::checkBackground(){
+  return background;
+}
 
 int Sprite::getIndexX(){
   return indexX;
@@ -223,10 +237,12 @@ int Sprite::getIndexAt(){
   return indexAt;
 }
 void Sprite::setIndexAt(int ind){
+  if(ind < (row*column)) ind = 0;
   indexAt = ind; 
 }
 void Sprite::setIndexXY(int x, int y){
+  if(x > row) x = 0;
+  if(y > column) y = 0;
   indexX = x;
   indexY = y;
 }
-
