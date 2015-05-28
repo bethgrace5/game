@@ -24,7 +24,7 @@
 #include "ppm.h"
 #include "sounds.cpp"
 #include "Storage.cpp"
-#include "tedP.cpp" //#include "fastFont.h"
+#include "fastFont.cpp" //#include "fastFont.h"
 //#include "Animate.h"
 
 using namespace std;
@@ -1106,7 +1106,7 @@ void movement() {
   }
 
   void renderHealthBar () {
-    int WW = WINDOW_WIDTH;
+    //int WW = WINDOW_WIDTH;
     int WH = WINDOW_HEIGHT;
     int h = 30;
     int w = 200;
