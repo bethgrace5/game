@@ -367,6 +367,7 @@ void check_mouse (XEvent *e) {
       return;
     }
     if (e->xbutton.button==3) {
+      pickTile(e->xbutton.x, WINDOW_HEIGHT - e->xbutton.y);
       return;
     }
   }
