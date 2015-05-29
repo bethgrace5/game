@@ -8,7 +8,7 @@
 #include "Object.h"
 
 #ifdef USE_SOUND
-#include "sounds.cpp"
+#include "sounds.h"
 #endif
 
 //=====================================================================

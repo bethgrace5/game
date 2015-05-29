@@ -5,7 +5,7 @@
 #include <sstream>
 #include "ppm.h"
 #include "definitions.h"
-void makeBullet(int x, int y, int v_x, int t);
+void makeBullet(int x, int y, int v_x, int dmg, int t);
 extern int bullets;
 typedef double Vec[3];
 
@@ -19,6 +19,7 @@ int diff_ms (timeval t1, timeval t2);
 
 struct Bullet {
     int type; //0 = boss, 1 = enemy 2, 2 = hero, 3 = enemy 1
+    int damage;
     Vec pos;
     Vec vel;
     float color[3];

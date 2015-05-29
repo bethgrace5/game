@@ -101,9 +101,9 @@ void Enemy::enemyAI (Object *hero) {
                 gettimeofday(&sEnd, NULL);
                 if (diff_ms(sEnd, sStart)>fire_rate){
                     if (type==1){
-                        makeBullet(e_cx, e_cy+11, (h_right?17:-17), 3);
+                        makeBullet(e_cx, e_cy+11, (h_right?17:-17), 8, 3);
                     } else if (type==2) {
-                        makeBullet(e_cx, e_cy+7, (h_right?7:-7), 1);
+                        makeBullet(e_cx, e_cy+7, (h_right?7:-7), 20, 1);
                         Sprite::setIndex(6);
                         gettimeofday(&fStart, NULL);
                     }
