@@ -1,8 +1,9 @@
 
 #include <sstream>
+#include <iostream>
 #include "ppm.h"
 #include "functions.h"
-
+using namespace std;
 
 unsigned char *buildAlphaData (Ppmimage *img) {
     //add 4th component to RGB stream...
@@ -29,5 +30,21 @@ unsigned char *buildAlphaData (Ppmimage *img) {
 
 int diff_ms (timeval t1, timeval t2) {
     return (((t1.tv_sec - t2.tv_sec) * 1000000) + (t1.tv_usec - t2.tv_usec))/1000;
+}
+
+void makeBullet(int x, int y, int v_x, int t){
+    //cout << "bullets: " << bullets << endl;
+    Bullet *b = new Bullet;
+    b->pos[0] = x;
+    b->pos[1] = y;
+    b->vel[0] = v_x;
+    b->vel[1] = 0;
+    b->type=t;
+    b->next = bulletHead;
+    if (bulletHead != NULL)
+        bulletHead->prev = b;
+    bulletHead = b;
+    bullets++;
+    //cout << "created bullet, bullets: " << bullets << endl;
 }
 

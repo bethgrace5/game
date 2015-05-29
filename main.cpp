@@ -19,6 +19,7 @@
 #include "Player.h"
 #include "Platform.h"
 #include "definitions.h"
+#include "functions.h"
 #include "Object.h"
 #include "sounds.cpp"
 #include "Storage.cpp"
@@ -26,7 +27,7 @@
 //#include "Animate.h"
 
 using namespace std;
-typedef double Vec[3];
+//typedef double Vec[3];
 
 // background bits
 struct bgBit {
@@ -42,7 +43,7 @@ struct bgBit {
 Sprite bulletImage;
 //Animate explode;
 int animateOn = 0;
-struct Bullet {
+/*struct Bullet {
     int type; //0 = boss, 1 = enemy 2, 2 = hero, 3 = enemy 1
     Vec pos;
     Vec vel;
@@ -55,7 +56,7 @@ struct Bullet {
         next = NULL;
     }
 };
-
+*/
 //X Windows variables
 Display *dpy; Window win; GLXContext glc;
 
@@ -739,7 +740,7 @@ void groundCollide (Object *obj, Object *ground) {
             obj->setVelocityY(0);
             obj->setCenter(obj->getCenterX(), g_top+(obj->getCenterY()-h_bottom));
             obj->setFloor(ground);
-            cout << "set ground" << obj << endl;
+            //cout << "set ground" << obj << endl;
         }
         //If moving object is at the bottom of static object
         if (!(obj->getOldTop() > g_bottom) && !(h_top <= g_bottom)) {
@@ -816,12 +817,15 @@ void movement() {
         gettimeofday(&fireEnd, NULL);
         if (((diff_ms(fireEnd, fireStart)) > 250)) { //Fire rate 250ms
             gettimeofday(&fireStart, NULL); //Reset firing rate timer
-            b = new Bullet;
+            makeBullet(hero->getCenterX(), hero->getCenterY()+15, (hero->checkMirror()?-18:18), 2);
+            /*b = new Bullet;
             b->pos[0] = hero->getCenterX();
             b->pos[1] = hero->getCenterY()+15;
+            */
 #ifdef USE_SOUND
             fmod_playsound(mvalSingle);
 #endif
+            /*
             //if (lastFacing or hero->getVelocityX()<0) {
             //    b->vel[0] = -18;
             //} else {
@@ -840,7 +844,9 @@ void movement() {
                 bulletHead->prev = b;
             bulletHead = b;
             bullets++;
+            */
         }
+        
         }
 
         //bullet collisions against grounds
@@ -851,14 +857,17 @@ void movement() {
             b->pos[1] += b->vel[1];
 
             for (i=0;i<grounds_length;i++){
-                if (bulletCollide(b,grounds[i]))
+                if (bulletCollide(b,grounds[i])){
                     deleteBullet(b);
+                    break;
+                }
             }
             //Check for collision with window edges
             if (b->pos[0] > WINDOW_WIDTH+roomX or b->pos[0] < roomX-WINDOW_WIDTH) {
-                deleteBullet(b);
+                    deleteBullet(b);
             }
-            b = b->next;
+            if (b)
+                b = b->next;
         }
 
         // Enemy movement, enemy ai
@@ -1349,6 +1358,11 @@ void movement() {
 
     void deleteBullet(Bullet *node) {
         //remove a node from linked list
+        //cout << "deleting bullet..." << endl;
+        if (!node){
+            //cout << "NULL BULLET!!!" << endl;
+            return;
+        }
         if (node->prev == NULL) {
             if (node->next == NULL) {
                 bulletHead = NULL;

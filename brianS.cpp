@@ -17,19 +17,19 @@ Enemy::Enemy(int w, int h, Object *ground, int t) : Sprite(), Object (w, h, grou
     switch (t){
         case 1: // enemy 1
             life=100;
-            fire_rate=220;
+            fire_rate=500;
             frame_rate=100;
             speed = 6;
             break;
         case 2: // enemy 2
             life=245;
-            fire_rate=400;
+            fire_rate=1200;
             frame_rate=160;
             speed = 2;
             break;
     }
     gettimeofday(&fStart, NULL);
-
+    gettimeofday(&sStart, NULL);
 }
 
 void Enemy::enemyAI (Object *hero) {
@@ -97,7 +97,15 @@ void Enemy::enemyAI (Object *hero) {
                     Object::setAggro(true);
                 Object::setVelocityX(0);
                 str += "attack!";
-                //fall through?
+                //shoot
+                gettimeofday(&sEnd, NULL);
+                if (diff_ms(sEnd, sStart)>fire_rate){
+                    if (type==1)
+                        makeBullet(e_cx, e_cy+10, -17, 3);
+                    else if (type==2)
+                        makeBullet(e_cx, e_cy+5, -7, 1);
+                    gettimeofday(&sStart, NULL);
+                }
                 break;
             case 1: // follow hero
                 if (!Object::getAggro())
@@ -369,7 +377,7 @@ void Enemy::enemyAI (Object *hero) {
                 str += "move in air, vel y: " + itos(Object::getVelocityY());
                 }
     }
-    std::cout << str << std::endl;
+    //std::cout << str << std::endl;
     if (Object::life<=0 && !(Object::isDying)){
         Object::isDying=1;
         if (type==1)

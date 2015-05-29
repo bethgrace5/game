@@ -71,7 +71,8 @@ Platform *grounds[MAX_GROUNDS];
 int grounds_length = 0;
 int enemies_length = 0;
 int level = 0;
-int i, j;
+int i, j, bullets;
+Bullet *bulletHead;
 
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
