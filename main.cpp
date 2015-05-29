@@ -134,8 +134,8 @@ int main(void) {
   hero->insert("./images/hero.ppm", 13, 1);
   hero->setSize(44,48);
 
-  bulletImage.insert("./images/hero.ppm",13, 1);
-  bulletImage.setSize(20, 20);
+  bulletImage.insert("./images/bullets.ppm",4, 1);
+  bulletImage.setSize(22, 10);
 
   //explode.insert("./images/hero.ppm", 4, 2);
   //explode.setSize(400,400);
@@ -1024,7 +1024,7 @@ void movement() {
 
       glPushMatrix();
       glTranslatef(b->pos[0]-x, b->pos[1]-y, 0);
-      bulletImage.drawTile(0,0);
+      bulletImage.drawTile(2,0);
       glPopMatrix();
 
       b = b->next;
