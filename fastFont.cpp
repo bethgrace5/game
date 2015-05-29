@@ -1,3 +1,5 @@
+#include "Platform.h"
+#include "ppm.h"
 //Program: Homework 3 
 //Author: Ted Pascua
 //Purpose: 

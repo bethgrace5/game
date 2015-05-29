@@ -1,7 +1,11 @@
-#include "ppm.h"
-
 #ifndef SPRITE_H
 #define SPRITE_H
+
+#include <GL/glx.h>
+
+#include "functions.h"
+#include "ppm.h"
+
 //=====================================================================
 //Sprite
 //=====================================================================

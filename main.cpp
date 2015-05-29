@@ -14,17 +14,15 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 
-#include "bethanyA.cpp" //#include "Sprite.cpp"
-#include "brianS.cpp" //Enemies
-#include "chadD.cpp" //Platforms/Grounds
-#include "definitions.h"
-#include "functions.h"
-#include "Object.cpp"
+#include "Enemy.h"
+#include "Item.h"
 #include "Player.h"
-#include "ppm.h"
+#include "Platform.h"
+#include "definitions.h"
+#include "Object.h"
 #include "sounds.cpp"
 #include "Storage.cpp"
-#include "fastFont.cpp" //#include "fastFont.h"
+#include "fastFont.cpp"
 //#include "Animate.h"
 
 using namespace std;

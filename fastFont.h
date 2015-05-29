@@ -1,5 +1,5 @@
-#ifndef FASTFONTS_H
-#define FASTFONTS_H
+#ifndef FASTFONT_H
+#define FASTFONT_H
 //=================+
 //  Directory      |
 //=================+

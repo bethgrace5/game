@@ -1,8 +1,5 @@
-
-#include <GL/glx.h>
-
-#include "Sprite.h"
-#include "functions.h"
+#ifndef BETHANYA_H
+#define BETHANYA_H
 
 //====================================================================
 //
@@ -249,3 +246,4 @@ void Sprite::setIndexXY(int x, int y){
   indexX = x;
   indexY = y;
 }
+#endif

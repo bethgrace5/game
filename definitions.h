@@ -4,7 +4,7 @@
 //Development Controls
 
 // comment to ignore sound use
-#define USE_SOUND
+//#define USE_SOUND
 
 // 1 for quick load, 0 for slow load with menu images
 #define QUICK_LOAD_TIME 1
@@ -32,6 +32,5 @@
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 
 #endif
-#define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 
 

@@ -1,5 +1,5 @@
-#ifndef _PPM_H_
-#define _PPM_H_
+#ifndef PPM_H
+#define PPM_H
 //ppm.h
 //Read and write PPM files. Plain format.
 //#include <sys/types.h>

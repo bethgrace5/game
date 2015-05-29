@@ -1,3 +1,6 @@
+#ifndef ANIMATE_H
+#define ANIMATE_H
+
 #include "definitions.h"
 #include "Sprite.h"
 
@@ -5,9 +8,6 @@
 #include "fmod.c"
 #include "sounds.cpp"
 #endif
-
-#ifndef Animate_H
-#define Animate_H
 
 #define FRAMEMAX 25
 //=====================================================================

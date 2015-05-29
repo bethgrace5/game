@@ -1,37 +1,16 @@
+#include <string.h>
+#include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+#include <GL/glx.h>
+#include <sys/time.h>
 #include <iostream>
-#include "functions.h"
 #include "ppm.h"
 #include "Object.h"
 #include "Sprite.h"
 #include "definitions.h"
+#include "Enemy.h"
 
-//=====================================================================
-//  Enemies
-//=====================================================================
-//How To Use...
-//
-////Global
-//  enemies_length;
-//  enemies[];
-//
-using namespace std;
-
-class Enemy : public Sprite, public Object {
-
-    private:
-        //int speed;
-        //int type; // 0: enemy 1, 1: enemy 2, 2: boss
-        int fire_rate; //ms between shooting
-        int frame_rate; //ms between sprite indexes
-        timeval fStart, fEnd;
-        //timeval sStart, sEnd;
-
-    public:
-        Enemy(int w, int h, Object *ground);
-        void enemyAI(Object *hero);
-        void draw();
-
-};
 
 Enemy::Enemy(int w, int h, Object *ground) : Sprite(), Object (w, h, ground->getCenterX()+rnd() * ground->getWidth() * (rnd()>.5?-1:1), ground->getCenterY() + ground->getHeight() + h) {
     life=100;
@@ -44,7 +23,7 @@ Enemy::Enemy(int w, int h, Object *ground) : Sprite(), Object (w, h, ground->get
 void Enemy::enemyAI (Object *hero) {
     Object *e_f = Object::getFloor();
     Object *h_f = hero->getFloor();
-    string str = "";
+    std::string str = "";
     if (!h_f){
         return;
     }
@@ -352,7 +331,7 @@ void Enemy::enemyAI (Object *hero) {
                 str += "move in air, vel y: " + itos(Object::getVelocityY());
                 }
     }
-    cout << str << endl;
+    std::cout << str << std::endl;
     if (Object::life<=0 && !(Object::isDying)){
         Object::isDying=1;
         Sprite::setIndex(21);

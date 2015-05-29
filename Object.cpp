@@ -1,3 +1,6 @@
+
+#include <cstdlib>
+
 #include "Object.h"
 
 Object::Object( double w, double h, double x, double y ) {

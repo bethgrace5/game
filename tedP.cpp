@@ -37,16 +37,21 @@
 ======================+
 */
 
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <cstdio>
+#include <cstdlib>
+#include <string.h>
 #include <GL/glx.h>
 #include <fstream>
-#include "Object.cpp"
-#include "bethanyA.cpp" //#include "Sprite.cpp"
 #include "fastFont.cpp" //#include "fastFont.h"
 #include "Player.h"
-#include "chadD.cpp" //Platforms/Grounds
-//#include "brianS.cpp" //Enemies
 #include "Storage.cpp"
 #include "definitions.h"
+#include "functions.h"
+#include "Platform.h"
+#include "ppm.h"
 #include <cmath>
 
 using namespace std;
@@ -187,7 +192,7 @@ void makePlatform(int x, int y) {
   grounds[grounds_length]->setupTile();
   grounds[grounds_length]->setID(grounds_length);
 
-  std::cout << "What is " << grounds[grounds_length]->getID() << std::endl;
+  cout << "What is " << grounds[grounds_length]->getID() << endl;
   grounds[grounds_length]->setIndexXY(0, 0);
   grounds[grounds_length]->setBackground(1);
   grounds_length++;
@@ -251,8 +256,8 @@ void pickTile(int x, int y){
   if(!tileMode) 
     return;
 
-  std::cout << "What is Point X " << x << std::endl;
-  std::cout << "What is Point Y " << y << std::endl;
+  cout << "What is Point X " << x << endl;
+  cout << "What is Point Y " << y << endl;
 
   int tileWidth = int(WINDOW_HALF_WIDTH/10);
 
@@ -263,8 +268,8 @@ void pickTile(int x, int y){
   int tileY = int(ceil(y/tileHeight)) % 36;
   tileY = 36 - tileY;
  
-  std::cout << "What is TileX " << tileX << std::endl;
-  std::cout << "What is TileY " << tileY << std::endl;
+  cout << "What is TileX " << tileX << endl;
+  cout << "What is TileY " << tileY << endl;
 
   grounds[saveID]->setIndexXY(tileX, tileY);
 }
@@ -276,7 +281,7 @@ void deleteLastPlatform(){
   grounds[grounds_length-1] = new Platform();
   delete grounds[grounds_length-1];
   grounds_length--;
-  std::cout << "What is Grounds Length " << grounds_length << std::endl;
+  cout << "What is Grounds Length " << grounds_length << endl;
 
 }
 void deletePlatform(){
@@ -296,7 +301,7 @@ void deletePlatform(){
   delete grounds[grounds_length-1];
 
   grounds_length--;
-  std::cout << "What is Grounds Length " << grounds_length << std::endl;
+  cout << "What is Grounds Length " << grounds_length << endl;
 }
 
 //=====================================================================
@@ -343,7 +348,7 @@ static int savex = 0, savey = 0;
 void check_mouse (XEvent *e) {
   //static int n = 0;
   if (e->type == ButtonRelease) { 
-    std::cout << " Release\n";
+    cout << " Release\n";
     holdID = -1;
     return;
   }
@@ -352,13 +357,13 @@ void check_mouse (XEvent *e) {
   if (e->type == ButtonPress) {
     if (e->xbutton.button==1) { //Left button was pressed
       if(create == 1){
-        std::cout << " x " << savex << ", y " << savey << "\n";
+        cout << " x " << savex << ", y " << savey << "\n";
         makePlatform(savex, savey);
         return;
       }
       if(selecter == 1){
         take = clickObject(savex, savey); 
-        std::cout << "The Id is: " << take << "\n";
+        cout << "The Id is: " << take << "\n";
         saveID = holdID = take;
       }
     }
@@ -584,13 +589,13 @@ void save(){
     storeIn.grounds[i] = *grounds[i];  
   }
   storeIn.grounds_length = grounds_length;
-  std::cout << "Saving \n";
+  cout << "Saving \n";
   ofstream dfs("test.ros", ios::binary); 
   dfs.write((char *)&storeIn, sizeof(storeIn));
 
   if(OPTIONAL_STORAGE != 1) return;
   renderSave();
-  std::cout << "Save File As: ";
+  cout << "Save File As: ";
   string fileName; cin >> fileName; fileName.append(".ros");
 
   string folder = "./data/"; folder.append(fileName);
@@ -603,7 +608,7 @@ void save(){
 }
 
 void quickSave(){
-  std::cout << "Saving \n";
+  cout << "Saving \n";
   ofstream dfs("test.ros", ios::binary); 
   dfs.write((char *)&storeIn, sizeof(storeIn));
 }
@@ -611,35 +616,35 @@ void quickSave(){
 void load(){
       renderLoad();
       string fileName;
-      std::cout << "Load in: ";  
+      cout << "Load in: ";  
       cin >> fileName;
       string folder = "./data/"; folder.append(fileName);
 
-      if (folder.find(".ros") != std::string::npos) {
-        std::cout << "File Exist, Will Load\n";
+      if (folder.find(".ros") != string::npos) {
+        cout << "File Exist, Will Load\n";
       }else{
-        std::cout << "! Will Only take .ros files !\n"; return;
+        cout << "! Will Only take .ros files !\n"; return;
       }
       char charFileName[50];
       strcpy(charFileName, folder.c_str());
 
       ifstream dfs(charFileName, ios::binary);
-      std::cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
+      cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
       dfs.read((char *)&storeIn, sizeof(storeIn));
 
-      std::cout << "Loading \n";
+      cout << "Loading \n";
       for(int i = 0; i < storeIn.grounds_length; i++){
         grounds[i] = &storeIn.grounds[i];
         grounds[i]->reInitSprite();
         grounds_length++;
       } 
-      std::cout << "Loading Finished \n";
+      cout << "Loading Finished \n";
 }
 
 void quickLoad(){
-      std::cout << "Load in \n";  
+      cout << "Load in \n";  
       ifstream dfs("test.ros", ios::binary);
-      std::cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
+      cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
       dfs.read((char *)&storeIn, sizeof(storeIn));
 }
 

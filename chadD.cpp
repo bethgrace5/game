@@ -3,43 +3,15 @@
 //HW3 
 //05-11-15
 
+#include <GL/glx.h>
+
 #include "ppm.h"
 #include "Object.h"
 #include "Sprite.h"
 #include "Player.h"
-//=====================================================================
-//  Platform
-//=====================================================================
-//How To Use...
-//
-////Global
-//  Platform var1; //This Sets Up The Platform Varaible
-//
-//  within init_opengl function // in main.cpp
-//    add
-//    var1.insert("./images/"ppm file"", columns, rows);
-//    var1.init(width, height, x-cord, y-cord);
-//    var1.setupTile();
-//
-//  within the movement function
-//    groundCollide(hero, &var1);
-//
-//  within the render function
-//    var1.drawRow(0,0);
-//
-class Platform : public Sprite, public Object {
+#include "Platform.h"
+#include "Item.h"
 
-  private:
-    int lineSpaceX;
-    int lineSpaceY;
-
-  public:
-    Platform();
-    void setupTile();
-    void drawRow();
-    void saveLineSpace();
-    void drawRow(int x, int y);
-};
 
 Platform::Platform() : Sprite(), Object(260, 200, 350, 400) {
   lineSpaceX = lineSpaceY = 0;
@@ -106,33 +78,6 @@ void Platform::drawRow(int x, int y) {
     glPopMatrix();
   } 
   glPopMatrix(); 
-}
-
-
-class Item : public Sprite, public Object {
-    private: 
-      int effect;
-    public:
-      Item();
-      void causeEffect(Player *hero);
-      void drawBox();
-
- };
-
-Item::Item() : Sprite(), Object(20, 20, 350, 350) {effect=1;}
-void Item::causeEffect(Player *hero) {
-    switch (effect) {
-	case 1: hero->reduceHealth(100);
-            break;
-    }
-}
-
-void Item::drawBox() {
-    glPushMatrix();
-    glTranslatef(Object::getCenterX(), Object::getCenterY(), 0);
-    Sprite::drawTile(0,0);
-    glPopMatrix();
-
 }
 
 
