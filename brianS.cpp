@@ -10,7 +10,7 @@
 #include "Sprite.h"
 #include "definitions.h"
 #include "Enemy.h"
-
+using namespace std;
 
 Enemy::Enemy(int w, int h, Object *ground, int t) : Sprite(), Object (w, h, ground->getCenterX()+rnd() * ground->getWidth() * (rnd()>.5?-1:1), ground->getCenterY() + ground->getHeight() + h) {
     type = t;
@@ -24,8 +24,8 @@ Enemy::Enemy(int w, int h, Object *ground, int t) : Sprite(), Object (w, h, grou
         case 2: // enemy 2
             life=245;
             fire_rate=1200;
-            frame_rate=160;
-            speed = 2;
+            frame_rate=150;
+            speed = 1;
             break;
     }
     gettimeofday(&fStart, NULL);
@@ -100,11 +100,20 @@ void Enemy::enemyAI (Object *hero) {
                 //shoot
                 gettimeofday(&sEnd, NULL);
                 if (diff_ms(sEnd, sStart)>fire_rate){
-                    if (type==1)
-                        makeBullet(e_cx, e_cy+10, -17, 3);
-                    else if (type==2)
-                        makeBullet(e_cx, e_cy+5, -7, 1);
+                    if (type==1){
+                        makeBullet(e_cx, e_cy+11, (h_right?17:-17), 3);
+                    } else if (type==2) {
+                        makeBullet(e_cx, e_cy+7, (h_right?7:-7), 1);
+                        Sprite::setIndex(6);
+                        gettimeofday(&fStart, NULL);
+                    }
                     gettimeofday(&sStart, NULL);
+                } else {
+                    gettimeofday(&fEnd, NULL);
+                    if (type==2 && diff_ms(fEnd, fStart)>frame_rate){
+                        Sprite::setIndex(7);
+                        gettimeofday(&fStart, NULL);
+                    }
                 }
                 break;
             case 1: // follow hero
@@ -305,6 +314,12 @@ void Enemy::enemyAI (Object *hero) {
                         if ((Object::getLeft())>e_fl) {
                             Object::setVelocityX(speed*-1);//move to edge
                             str += "move right";
+                            if (type==2){
+                                if (diff_ms(fEnd, fStart)>frame_rate){
+                                    Sprite::setIndex(((Sprite::getIndex()+1)%16)+11);
+                                    gettimeofday(&fStart, NULL);
+                                }
+                            }
                         }
                         else{
                             Object::setVelocityX(0);//move to edge
@@ -315,6 +330,12 @@ void Enemy::enemyAI (Object *hero) {
                         if ((Object::getRight())<e_fr) {
                             Object::setVelocityX(speed);//move to edge
                             str += "move right";
+                            if (type==2){
+                                if (diff_ms(fEnd, fStart)>frame_rate){
+                                    Sprite::setIndex(((Sprite::getIndex()+1)%16)+11);
+                                    gettimeofday(&fStart, NULL);
+                                }
+                            }
                         }
                         else{
                             Object::setVelocityX(0);//move to edge
@@ -411,12 +432,12 @@ void Enemy::enemyAI (Object *hero) {
                 gettimeofday(&fStart, NULL);
             }
         }
-        else if (type==2){
+        /*else if (type==2){
             if (diff_ms(fEnd, fStart)>frame_rate){
                 Sprite::setIndex(((Sprite::getIndex()+1)%16)+11);
                 gettimeofday(&fStart, NULL);
             }
-        }
+        }*/
     }
 }
 

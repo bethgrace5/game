@@ -1,5 +1,6 @@
 
 #include <cstdlib>
+#include <iostream>
 
 #include "Object.h"
 
@@ -156,6 +157,7 @@ double Object::getOldLeft(){
 
 void Object::setIndex(int ind){
   index = ind;
+  std::cout << "set" << std::endl;
 }
 int Object::getIndex() {
     return index;

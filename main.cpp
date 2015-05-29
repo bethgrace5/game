@@ -419,7 +419,6 @@ void init_opengl (void) {
     makeEnemy(37, 80, grounds[4], 1);
     makeEnemy(37, 80, grounds[4], 1);
     makeEnemy(37, 80, grounds[4], 1);
-
 }
 
 void check_mouse (XEvent *e) {
@@ -813,6 +812,7 @@ void movement() {
 
     //Bullet creation
     Bullet *b;
+    Bullet *tmp;
     if (hero->checkShooting()){
         gettimeofday(&fireEnd, NULL);
         if (((diff_ms(fireEnd, fireStart)) > 250)) { //Fire rate 250ms
@@ -858,13 +858,17 @@ void movement() {
 
             for (i=0;i<grounds_length;i++){
                 if (bulletCollide(b,grounds[i])){
+                    tmp=b->next;
                     deleteBullet(b);
+                    b=tmp;
                     break;
                 }
             }
             //Check for collision with window edges
             if (b->pos[0] > WINDOW_WIDTH+roomX or b->pos[0] < roomX-WINDOW_WIDTH) {
+                    tmp=b->next;
                     deleteBullet(b);
+                    b=tmp;
             }
             if (b)
                 b = b->next;
@@ -879,7 +883,9 @@ void movement() {
             b = bulletHead;
             while (b) {
                 if ((b->type==2) && (bulletCollide(b,enemies[i]))){
+                    tmp=b->next;
                     deleteBullet(b);
+                    b=tmp;
                     enemies[i]->life-=20;
                     enemies[i]->setAggro(true);
                 }
@@ -1285,6 +1291,26 @@ void movement() {
     }
 
     void renderBackground () {
+        if (bg < 1){ 
+            for (i=0;i<=MAX_BACKGROUND_BITS/4;i++){
+                // Fill screen (init)
+                bgBit *bit = new bgBit;
+                if (bit == NULL) {
+                    exit(EXIT_FAILURE);
+                }
+                bit->pos[0] = (rnd() * ((float)LEVEL_WIDTH + (roomX-(WINDOW_WIDTH/2)) - 1000));
+                bit->pos[1] = rnd() * (100.0f + MAX_HEIGHT);
+                bit->pos[2] = 0.8 + (rnd() * 0.4);
+                bit->vel[0] = 0.0f;
+                bit->vel[1] = -0.8f;
+                bit->vel[2] = (rnd());
+                bit->next = bitHead;
+                if (bitHead != NULL)
+                    bitHead->prev = bit;
+                bitHead = bit;
+                bg++;
+            }
+        }
         if (bg < MAX_BACKGROUND_BITS) {
             // Create bit
             bgBit *bit = new bgBit;
@@ -1310,7 +1336,6 @@ void movement() {
             VecCopy(bit->pos, bit->lastpos);
             if (bit->pos[1] > 0) {
                 bit->pos[1] += bit->vel[1];
-
             }
             else{
                 bgBit *savebit = bit->next;
@@ -1334,7 +1359,8 @@ void movement() {
                 bg--;
                 continue;
             }
-            int center = (bit->pos[0]-((roomX-WINDOW_HALF_WIDTH)*bit->pos[2]));
+            int c_x = (bit->pos[0]-((roomX-WINDOW_HALF_WIDTH)*bit->pos[2]));
+            int c_y = (bit->pos[1]-((roomY-WINDOW_HALF_HEIGHT)*bit->pos[2]));
             int j = bit->pos[2];
             if (bit->pos[1]>(WINDOW_HEIGHT*0.7)) {
                 i=255;
@@ -1345,11 +1371,11 @@ void movement() {
             }
 
             if (j>=1) {
-                writePixel(1, center, bit->pos[1]);
+                writePixel(1, c_x, c_y);
             } else if (j>0.9) {
-                writePixel(0, center, bit->pos[1]);
+                writePixel(0, c_x, c_y);
             } else {
-                writePixel(0, center, bit->pos[1]);
+                writePixel(0/*atoi(bit->n)*/, c_x, c_y);
             }
             bit = bit->next;
         }
