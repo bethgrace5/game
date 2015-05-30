@@ -22,9 +22,9 @@
 #include "functions.h"
 #include "Object.h"
 
-
 #ifdef USE_SOUND
 #include "sounds.h"
+#include "fmod.h"
 #endif
 
 #include "Storage.cpp"
@@ -70,6 +70,8 @@ int didJump=0, life=100, lastFacing=0;
 double h_right, h_left, h_top, h_bottom;
 timeval seqStart, seqEnd; // hero's sprite index
 timeval fireStart, fireEnd; // hero's fire rate timer
+timeval fpsStart, fpsEnd; // fps timer
+int fps, fps_counter;
 //float healthIndex = 0;
 
 //Game Globals
@@ -127,6 +129,7 @@ void renderAnimations(int x, int y);
 void renderItems(int x, int y);
 void renderInitMenu();
 void renderHealthBar();
+void renderDebugInfo();
 void renderLives();
 
 
@@ -255,6 +258,7 @@ void init_opengl (void) {
 
     gettimeofday(&fireStart, NULL);
     gettimeofday(&frameStart, NULL);
+    gettimeofday(&fpsStart, NULL);
 
     string fileName;
 
@@ -388,10 +392,10 @@ void init_opengl (void) {
 
         makeEnemy(37, 80, grounds[2], 1);
         makeEnemy(37, 80, grounds[2], 1);
-        makeEnemy(43, 42, grounds[1], 2);
+        makeEnemy(38, 37, grounds[1], 2);
         makeEnemy(37, 80, grounds[4], 1);
         makeEnemy(100, 100, 300, 500, 3);
-        makeEnemy(43, 42, grounds[1], 2);
+        makeEnemy(38, 37, grounds[1], 2);
         makeEnemy(37, 80, grounds[4], 1);
     }
 }
@@ -629,15 +633,15 @@ void deleteItem(int id) {
     if (items_length <= 0) return;
     if (id < 0) return;
 
-    itemsHold[id] = new Item();
+    //itemsHold[id] = new Item();
     delete itemsHold[id];
 
     for (int i = id; i < items_length-1; i++) {
         itemsHold[i] = itemsHold[i + 1];
         itemsHold[i]->setID(itemsHold[i]->getID()-1);
     }
-    itemsHold[items_length-1] = new Item();
-    delete itemsHold[items_length-1];
+    //itemsHold[items_length-1] = new Item();
+    //delete itemsHold[items_length-1];
 
     items_length--;
 }
@@ -895,7 +899,10 @@ void movement() {
         enemies[i]->setOldCenter();
         enemies[i]->enemyAI(hero); //Where does enemy go?
         if (enemies[i]->type==3 && enemies[i]->isShooting){
-            makeEnemy(37, 80, enemies[i]->getCenterX(), enemies[i]->getCenterY(), 1);
+            if (rnd()<0.3)
+                makeEnemy(38, 37, enemies[i]->getCenterX(), enemies[i]->getCenterY(), 2);
+            else
+                makeEnemy(37, 80, enemies[i]->getCenterX(), enemies[i]->getCenterY(), 1);
             enemies[i]->isShooting=false;
         }
         //bullets
@@ -988,6 +995,7 @@ void render () {
     renderAttacks(x,y);
     renderLives();
     renderHealthBar();
+    renderDebugInfo();
 
     if (fail>0) {
         writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 200, WINDOW_HEIGHT/2);
@@ -1210,6 +1218,51 @@ void renderHealthBar () {
     glDisable(GL_ALPHA_TEST);
 }
 
+void renderDebugInfo () {
+    //int WHW = WINDOW_HALF_WIDTH;
+    int WH = WINDOW_HEIGHT;
+    //int h = 56;
+    //int w = 200;
+    //float row_size = 0.5;
+
+    writeWords("FPS", 0, WH-20);
+    writeWords("BULLETS", 0, WH-50);
+    fps_counter++;
+    gettimeofday(&fpsEnd, NULL);
+    if (((diff_ms(fpsEnd, fpsStart)) > 1000)) {
+        gettimeofday(&fpsStart, NULL);
+        fps=fps_counter;
+        fps_counter=0;
+    }
+    writeWords(itos(fps), 88, WH-20);
+    writeWords(itos(bullets), 176, WH-50);
+    //glEnable(GL_TEXTURE_2D);
+    //glEnable(GL_ALPHA_TEST);
+    // prepare opengl
+    //glAlphaFunc(GL_GREATER, 0.0f);
+    //glBindTexture(GL_TEXTURE_2D, healthBarTexture[0]);
+/*
+    glPushMatrix();
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0.5); glVertex2i(WHW-(w/2)+((100-life)/10), WH-h-10);
+    glTexCoord2f(0, 1.0); glVertex2i(WHW-(w/2)+((100-life)/10), WH-10);
+    glTexCoord2f(1, 1.0); glVertex2i(WHW+(w/2)-((97-life)*2), WH-10);
+    glTexCoord2f(1, 0.5); glVertex2i(WHW+(w/2)-((97-life)*2), WH-h-10);
+    glEnd();
+    glPopMatrix();
+    glPushMatrix();
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0.0); glVertex2i(WHW-(w/2), WH-h-10);
+    glTexCoord2f(0, 0.5); glVertex2i(WHW-(w/2), WH-10);
+    glTexCoord2f(1, 0.5); glVertex2i(WHW+(w/2), WH-10);
+    glTexCoord2f(1, 0.0); glVertex2i(WHW+(w/2), WH-h-10);
+    glEnd();
+    glPopMatrix();
+*/
+//    glDisable(GL_TEXTURE_2D);
+  //  glDisable(GL_ALPHA_TEST);
+}
+
 void renderComputerScreenMenu () {
     gettimeofday(&frameEnd, NULL);
     int frameTime = 190;
@@ -1304,29 +1357,30 @@ void renderComputerScreenMenu () {
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
 
-    writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 205, WINDOW_HEIGHT/2 + 230);
-    writeWords("--- selection ---", WINDOW_WIDTH/2- 205, WINDOW_HEIGHT/2 + 130);
+    writeWords("   revenge of   ", WINDOW_WIDTH/2- 196, WINDOW_HEIGHT/2 + 235);
+    writeWords("    the code    ", WINDOW_WIDTH/2- 196, WINDOW_HEIGHT/2 + 205);
+    writeWords("--- selection ---", WINDOW_WIDTH/2- 207, WINDOW_HEIGHT/2 + 115);
     switch(menuSelection) {
         case 0:
-            writeWords("       RAM", WINDOW_WIDTH/2- 205, WINDOW_HEIGHT/2 + 95);
+            writeWords("       RAM", WINDOW_WIDTH/2- 207, WINDOW_HEIGHT/2 + 85);
             break;
         case 1:
-            writeWords("       CPU", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+            writeWords("       CPU", WINDOW_WIDTH/2- 207, WINDOW_HEIGHT/2 + 85);
             break;
         case 2:
-            writeWords("  MOTHER BOARD", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+            writeWords("  MOTHER BOARD", WINDOW_WIDTH/2- 196, WINDOW_HEIGHT/2 + 85);
             break;
         case 3:
-            writeWords("  /EXIT SYSTEM/", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+            writeWords("  /EXIT SYSTEM/", WINDOW_WIDTH/2- 207, WINDOW_HEIGHT/2 + 85);
             break;
         case 4:
-            writeWords("   HARD DRIVE", WINDOW_WIDTH/2- 190, WINDOW_HEIGHT/2 + 95);
+            writeWords("   HARD DRIVE", WINDOW_WIDTH/2- 196, WINDOW_HEIGHT/2 + 85);
             break;
     }
 
     // user tried to select a level that was not yet unlocked
     if(showInvalid) {
-        writeWords("error requires ram!", WINDOW_WIDTH/2- 205, WINDOW_HEIGHT/2 + 190);
+        writeWords("err requires ram!", WINDOW_WIDTH/2- 207, WINDOW_HEIGHT/2 + 145);
     }
 
 }

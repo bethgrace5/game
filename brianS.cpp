@@ -155,7 +155,7 @@ void Enemy::enemyAI (Object *hero) {
                     if (type==1){
 #ifdef USE_SOUND
                         //if (rnd()<.2)
-                        fmod_playsound(alienMachineGun); // laser
+                        fmod_playsound(laser); // laser
 #endif
                         makeBullet(e_cx, e_cy+11, (h_right?17:-17), 8, 3);
                     } else if (type==2) {
