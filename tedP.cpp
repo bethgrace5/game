@@ -454,10 +454,6 @@ void draging(int x, int y){
 //=====================================================================
 //  Key Check
 //=====================================================================
-void enemy_editor(int key){
-
-}
-
 int check_keys (XEvent *e) {
   //handle input from the keyboard
   int key = XLookupKeysym(&e->xkey, 0);
@@ -506,6 +502,9 @@ int check_keys (XEvent *e) {
       convertLoad();
     }
     #endif
+    if(key == XK_f ){
+      enemyEditor = !enemyEditor; 
+    }
 
     if(key == XK_a){
       roomX -= 50;
@@ -576,10 +575,12 @@ bool detectCollide (Object *obj, Object *ground) {
 //  Drawing
 //=====================================================================
 void renderOptions(){
-  if(create == 1) 
-    writeWords("Create Mode", 25, 25);
-  if(selecter == 1)
-    writeWords("Select Mode", 25, 25);
+  if(enemyEditor == 1) writeWords("Enemy Editor Mode", 25, 55);
+  else writeWords("Platform Editor Mode", 25, 55);
+
+  if(create == 1) writeWords("Create Mode", 25, 25);
+
+  if(selecter == 1) writeWords("Select Mode", 25, 25);
 
   if(tileMode == 1){
     glPushMatrix(); glTranslatef(WINDOW_HALF_WIDTH/2, WINDOW_HALF_HEIGHT, 0);
@@ -657,7 +658,7 @@ void render () {
   // Draw Background Falling Bits
   renderRuler();
   renderGrounds(x, y);
-  renderEnemies(0, 0);
+  renderEnemies(x, y);
   renderHero(x, y);
   renderOptions();
 }
@@ -697,9 +698,11 @@ void save(){
     storeIn.grounds[i] = *grounds[i];  
   }
   for(int i =0; i < enemies_length; i++){
-    //storeIn.enemies[i] = *enemies[i];  
+    storeIn.enemies[i] = *enemies[i];  
   }
   storeIn.grounds_length = grounds_length;
+  storeIn.enemies_length = enemies_length;
+
   cout << "Saving \n";
   ofstream dfs("test.ros", ios::binary); 
   dfs.write((char *)&storeIn, sizeof(storeIn));

@@ -13,6 +13,11 @@
 #include "Enemy.h"
 using namespace std;
 
+
+Enemy::Enemy() : Sprite(), Object(0,0,0,0) {
+
+}
+
 Enemy::Enemy(int w, int h, Object *ground, int t) : Sprite(), Object (w, h, ground->getCenterX()+rnd() * ground->getWidth() * (rnd()>.5?-1:1), ground->getCenterY() + ground->getHeight() + h) {
     type = t;
     switch (t){
@@ -163,6 +168,10 @@ void Enemy::enemyAI (Object *hero) {
                         fmod_playsound(gunShotMarvin);
 #endif
                         makeBullet(e_cx, e_cy+7, (h_right?7:-7), 20, 1);
+                            if (h_right)
+                                Sprite::setMirror(0);
+                            else
+                                Sprite::setMirror(1);
                         Sprite::setIndex(6);
                         gettimeofday(&fStart, NULL);
                     } else if (type==3) {
@@ -552,7 +561,7 @@ void Enemy::enemyAI (Object *hero) {
         else if (type==2){
           if (Object::getVelocityX()<0){
             Sprite::setMirror(true);
-          } else {
+          } else if (Object::getVelocityX()>0) {
             Sprite::setMirror(false);
           }
         }
