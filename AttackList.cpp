@@ -4,13 +4,15 @@
 //  Attack Storage
 //====================================================================
 extern Player *hero;
+#define MAX_ATTACKS 25
+#define MAX_CURRENTS 5
 
 struct attack_list{
-  Sprite  sprite_sheet[25];
-  Attack attacks[25];
+  Sprite  sprite_sheet[MAX_ATTACKS];
+  Attack attacks[MAX_ATTACKS];
   int attacks_length;
 
-  Attack *currents[15];
+  Attack *currents[MAX_CURRENTS];
   int currents_length;
 
   void makeAttacks();
@@ -42,6 +44,8 @@ void attack_list::deleteAttack(int id){
 }
 
 void attack_list::copyAttack(int tId){
+  if(currents_length >= MAX_CURRENTS) return;
+
   currents[currents_length] = new Attack(attacks[tId]);
   currents[currents_length]->setCenter(hero->getCenterX(),
       hero->getCenterY());
@@ -76,7 +80,6 @@ bool detectAttack (Object *obj, Attack *targetAttack) {
       obj->getLeft()   < targetAttack->getRight() &&
       obj->getBottom() < targetAttack->getTop()  &&
       obj->getTop()    > targetAttack->getBottom()) {
-    std::cout << "Hiting\n";
     //targetAttack->causeEffect(hero);
     //deleteAttack(obj->getID());
     return true;

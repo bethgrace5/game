@@ -295,7 +295,6 @@ void init_opengl (void) {
         }
         initTextures[31] = initTextures[30];
 
-
         // load blinking computer screens
         unsigned char *computerData;
         glGenTextures(26, computerScreenTextures);
@@ -366,6 +365,11 @@ void init_opengl (void) {
             grounds[i] = &storeIn.grounds[i];
             grounds[i]->reInitSprite();
             grounds_length++;
+        }
+        for(int i = 0; i < storeIn.enemies_length; i++){
+            enemies[i] = &storeIn.enemies[i];
+            enemies[i]->reInitSprite();
+            enemies_length++;
         }
     }
     else {
@@ -843,8 +847,6 @@ void movement() {
       for(j = 0; j < enemies_length; j++){
         if(detectAttack(enemies[j], boxA.currents[i])){
                 enemies[j]->life-=100;
-                std::cout << "Wheres my Life: " << enemies[j]->life  <<
-                  std::endl;
         }
       } 
     }
@@ -1026,8 +1028,6 @@ void renderItems(int x, int y){
         }
     }
 }
-
-
 
 void renderGrounds (int x, int y) {
     // render grounds
