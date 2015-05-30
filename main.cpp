@@ -831,13 +831,7 @@ void movement() {
     for (j=0; j < items_length; j++) {
         detectItem(hero, itemsHold[j]);
     }
-
-    //Detect Item
-    for (j=0; j < items_length; j++) {
-        detectItem(hero, itemsHold[j]);
-    }
     //Attack Collisions
-    //Animates
     for(i = 0; i < boxA.currents_length; i++){
         detectAttack(hero, boxA.currents[i]); 
     }
@@ -845,6 +839,16 @@ void movement() {
     for(i = 0; i < boxA.currents_length; i++){
         if(boxA.currents[i]->checkStop())
             boxA.deleteAttack(boxA.currents[i]->getID());
+    }
+
+    for(i = 0; i < boxA.currents_length; i++){
+      for(j = 0; j < enemies_length; j++){
+        if(detectAttack(enemies[j], boxA.currents[i])){
+                enemies[i]->life-=100;
+                std::cout << "Wheres my Life: " << enemies[i]->life  <<
+                  std::endl;
+        }
+      } 
     }
 
     //Bullet creation
@@ -1181,7 +1185,6 @@ void gameTimer () {
 
     long unsigned int seconds = ((int)currentTime/1000)%60;
 
-    printf("%d\n", seconds);
 }
 
 void renderHealthBar () {

@@ -131,6 +131,9 @@ void moveWindow(void);
 
 void save();
 void load();
+void copyToNew();
+void convertSave();
+void convertLoad();
 
 void check_mouse(XEvent *e);
 int  check_keys (XEvent *e);
@@ -234,6 +237,13 @@ void makePlatform(int x, int y) {
   grounds[grounds_length]->setIndexXY(0, 0);
   grounds[grounds_length]->setBackground(1);
   grounds_length++;
+}
+
+void copyToNew(){
+  futureBox.grounds_length = grounds_length;
+  for(int i = 0; i < grounds_length; i++){
+    futureBox.grounds[i] = *grounds[i];  
+  }
 }
 
 void setRow(int size){
@@ -485,6 +495,17 @@ int check_keys (XEvent *e) {
     if(key == XK_n){
       deletePlatform();
     } 
+
+    if(key == XK_p){
+      copyToNew(); 
+    }
+    if(key == XK_o){
+      convertSave();
+    }
+    if(key == XK_i){
+      convertLoad();
+    }
+
     if(key == XK_a){
       roomX -= 50;
     }
@@ -646,6 +667,26 @@ void render () {
 //=====================================================================
 //  Storage Editor
 //=====================================================================
+//
+void convertSave(){
+  copyToNew();
+  cout << "Convert Saving \n";
+  ofstream dfs("backup.ros", ios::binary); 
+  dfs.write((char *)&futureBox, sizeof(futureBox));
+}
+
+void convertLoad(){
+  ifstream dfs("backup.ros", ios::binary);
+  dfs.read((char *)&futureBox, sizeof(futureBox));
+
+  cout << "Convert Loading \n";
+  for(int i = 0; i < futureBox.grounds_length; i++){
+    grounds[i] = &futureBox.grounds[i];
+    grounds[i]->reInitSprite();
+    grounds_length++;
+  } 
+}
+
 void save(){
   for(int i = 0; i < grounds_length; i++){
     storeIn.grounds[i] = *grounds[i];  
@@ -654,6 +695,8 @@ void save(){
   cout << "Saving \n";
   ofstream dfs("test.ros", ios::binary); 
   dfs.write((char *)&storeIn, sizeof(storeIn));
+
+  //convertSave();
 
   if(OPTIONAL_STORAGE != 1) return;
   renderSave();
@@ -676,38 +719,38 @@ void quickSave(){
 }
 
 void load(){
-      renderLoad();
-      string fileName;
-      cout << "Load in: ";  
-      cin >> fileName;
-      string folder = "./data/"; folder.append(fileName);
+  renderLoad();
+  string fileName;
+  cout << "Load in: ";  
+  cin >> fileName;
+  string folder = "./data/"; folder.append(fileName);
 
-      if (folder.find(".ros") != string::npos) {
-        cout << "File Exist, Will Load\n";
-      }else{
-        cout << "! Will Only take .ros files !\n"; return;
-      }
-      char charFileName[50];
-      strcpy(charFileName, folder.c_str());
+  if (folder.find(".ros") != string::npos) {
+    cout << "File Exist, Will Load\n";
+  }else{
+    cout << "! Will Only take .ros files !\n"; return;
+  }
+  char charFileName[50];
+  strcpy(charFileName, folder.c_str());
 
-      ifstream dfs(charFileName, ios::binary);
-      cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
-      dfs.read((char *)&storeIn, sizeof(storeIn));
+  ifstream dfs(charFileName, ios::binary);
+  cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
+  dfs.read((char *)&storeIn, sizeof(storeIn));
 
-      cout << "Loading \n";
-      for(int i = 0; i < storeIn.grounds_length; i++){
-        grounds[i] = &storeIn.grounds[i];
-        grounds[i]->reInitSprite();
-        grounds_length++;
-      } 
-      cout << "Loading Finished \n";
+  cout << "Loading \n";
+  for(int i = 0; i < storeIn.grounds_length; i++){
+    grounds[i] = &storeIn.grounds[i];
+    grounds[i]->reInitSprite();
+    grounds_length++;
+  } 
+  cout << "Loading Finished \n";
 }
 
 void quickLoad(){
-      cout << "Load in \n";  
-      ifstream dfs("test.ros", ios::binary);
-      cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
-      dfs.read((char *)&storeIn, sizeof(storeIn));
+  cout << "Load in \n";  
+  ifstream dfs("test.ros", ios::binary);
+  cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
+  dfs.read((char *)&storeIn, sizeof(storeIn));
 }
 
 //=====================================================================
