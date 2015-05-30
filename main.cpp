@@ -46,27 +46,15 @@ struct bgBit {
 
 // time difference in milliseconds
 Sprite bulletImage;
+
 //Animate explode;
 int animateOn = 0;
-/*struct Bullet {
-  int type; //0 = boss, 1 = enemy 2, 2 = hero, 3 = enemy 1
-  Vec pos;
-  Vec vel;
-  float color[3];
-  struct timespec time;
-  struct Bullet *prev;
-  struct Bullet *next;
-  Bullet() {
-  prev = NULL;
-  next = NULL;
-  }
-  };
-  */
+
 //X Windows variables
 Display *dpy; Window win; GLXContext glc;
 
 //Hero Globals
-int didJump=0, life=100, lastFacing=0;
+int didJump=0, lastFacing=0;
 double h_right, h_left, h_top, h_bottom;
 timeval seqStart, seqEnd; // hero's sprite index
 timeval fireStart, fireEnd; // hero's fire rate timer
@@ -632,18 +620,11 @@ void makeItems(int w, int h, int x, int y) {
 void deleteItem(int id) {
     if (items_length <= 0) return;
     if (id < 0) return;
-
-    //itemsHold[id] = new Item();
-    delete itemsHold[id];
-
-    for (int i = id; i < items_length-1; i++) {
-        itemsHold[i] = itemsHold[i + 1];
-        itemsHold[i]->setID(itemsHold[i]->getID()-1);
-    }
-    //itemsHold[items_length-1] = new Item();
-    //delete itemsHold[items_length-1];
-
     items_length--;
+    delete itemsHold[id];
+    itemsHold[id] = itemsHold[items_length];
+    itemsHold[id]->setID(itemsHold[id]->getID()+(items_length-id));
+    itemsHold[items_length]=NULL;
 }
 
 void makeEnemy(int w, int h, Object *ground, int type) {
@@ -803,7 +784,7 @@ void movement() {
 
     // remove a life when the hero falls off cliff
     if (hero->getCenterY() < 0){
-        hero->setHealth(-1);
+        hero->setHealth(0);
     }
 
     if (hero->getHealth()<=0) {//Going to try to Mimic The Death Function. Heres a tmp fix though
@@ -856,7 +837,7 @@ void movement() {
         gettimeofday(&fireEnd, NULL);
         if (((diff_ms(fireEnd, fireStart)) > 250)) { //Fire rate 250ms
             gettimeofday(&fireStart, NULL); //Reset firing rate timer
-            makeBullet(hero->getCenterX(), hero->getCenterY()+15, (hero->checkMirror()?-18:18), 18, 2);
+            makeBullet(hero->getCenterX(), hero->getCenterY()+15, (hero->checkMirror()?-18:18), 38, 2);
 #ifdef USE_SOUND
             fmod_playsound(mvalSingle);
 #endif
@@ -934,9 +915,7 @@ void movement() {
     while (b) {
         if (!(b->type==2) && (bulletCollide(b,hero))){
             tmp=b->next;
-            life-=b->damage;
-            if (life<0)
-                life=0;
+            hero->reduceHealth(b->damage);
             deleteBullet(b);
             b=tmp;
         }
@@ -1192,6 +1171,7 @@ void renderHealthBar () {
     int WH = WINDOW_HEIGHT;
     int h = 56;
     int w = 200;
+    int health = hero->getHealth();
     //float row_size = 0.5;
 
     glEnable(GL_TEXTURE_2D);
@@ -1202,10 +1182,10 @@ void renderHealthBar () {
 
     glPushMatrix();
     glBegin(GL_QUADS);
-    glTexCoord2f(0, 0.5); glVertex2i(WHW-(w/2)+((100-life)/10), WH-h-10);
-    glTexCoord2f(0, 1.0); glVertex2i(WHW-(w/2)+((100-life)/10), WH-10);
-    glTexCoord2f(1, 1.0); glVertex2i(WHW+(w/2)-((97-life)*2), WH-10);
-    glTexCoord2f(1, 0.5); glVertex2i(WHW+(w/2)-((97-life)*2), WH-h-10);
+    glTexCoord2f(0, 0.5); glVertex2i(WHW-(w/2)+((100-health)/10), WH-h-10);
+    glTexCoord2f(0, 1.0); glVertex2i(WHW-(w/2)+((100-health)/10), WH-10);
+    glTexCoord2f(1, 1.0); glVertex2i(WHW+(w/2)-((97-health)*2), WH-10);
+    glTexCoord2f(1, 0.5); glVertex2i(WHW+(w/2)-((97-health)*2), WH-h-10);
     glEnd();
     glPopMatrix();
     glPushMatrix();
@@ -1222,11 +1202,7 @@ void renderHealthBar () {
 }
 
 void renderDebugInfo () {
-    //int WHW = WINDOW_HALF_WIDTH;
     int WH = WINDOW_HEIGHT;
-    //int h = 56;
-    //int w = 200;
-    //float row_size = 0.5;
 
     writeWords("FPS", 0, WH-20);
     writeWords("BULLETS", 0, WH-50);
@@ -1239,31 +1215,6 @@ void renderDebugInfo () {
     }
     writeWords(itos(fps), 88, WH-20);
     writeWords(itos(bullets), 176, WH-50);
-    //glEnable(GL_TEXTURE_2D);
-    //glEnable(GL_ALPHA_TEST);
-    // prepare opengl
-    //glAlphaFunc(GL_GREATER, 0.0f);
-    //glBindTexture(GL_TEXTURE_2D, healthBarTexture[0]);
-/*
-    glPushMatrix();
-    glBegin(GL_QUADS);
-    glTexCoord2f(0, 0.5); glVertex2i(WHW-(w/2)+((100-life)/10), WH-h-10);
-    glTexCoord2f(0, 1.0); glVertex2i(WHW-(w/2)+((100-life)/10), WH-10);
-    glTexCoord2f(1, 1.0); glVertex2i(WHW+(w/2)-((97-life)*2), WH-10);
-    glTexCoord2f(1, 0.5); glVertex2i(WHW+(w/2)-((97-life)*2), WH-h-10);
-    glEnd();
-    glPopMatrix();
-    glPushMatrix();
-    glBegin(GL_QUADS);
-    glTexCoord2f(0, 0.0); glVertex2i(WHW-(w/2), WH-h-10);
-    glTexCoord2f(0, 0.5); glVertex2i(WHW-(w/2), WH-10);
-    glTexCoord2f(1, 0.5); glVertex2i(WHW+(w/2), WH-10);
-    glTexCoord2f(1, 0.0); glVertex2i(WHW+(w/2), WH-h-10);
-    glEnd();
-    glPopMatrix();
-*/
-//    glDisable(GL_TEXTURE_2D);
-  //  glDisable(GL_ALPHA_TEST);
 }
 
 void renderComputerScreenMenu () {

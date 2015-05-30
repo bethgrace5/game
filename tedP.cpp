@@ -37,23 +37,6 @@
 ======================+
 */
 #define EDITOR_MODE
-/*
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <cstdio>
-#include <cstdlib>
-#include <string.h>
-#include <GL/glx.h>
-#include <fstream>
-#include "fastFont.cpp" //#include "fastFont.h"
-#include "Player.h"
-#include "Attack2.cpp"
-#include "definitions.h"
-#include "functions.h"
-#include "Platform.h"
-#include "ppm.h"
-#include <cmath>*/
 
 #include <algorithm>
 #include <cmath>
@@ -131,9 +114,11 @@ void moveWindow(void);
 
 void save();
 void load();
+#ifdef BACKUP
 void copyToNew();
 void convertSave();
 void convertLoad();
+#endif
 
 void check_mouse(XEvent *e);
 int  check_keys (XEvent *e);
@@ -239,12 +224,6 @@ void makePlatform(int x, int y) {
   grounds_length++;
 }
 
-void copyToNew(){
-  futureBox.grounds_length = grounds_length;
-  for(int i = 0; i < grounds_length; i++){
-    futureBox.grounds[i] = *grounds[i];  
-  }
-}
 
 void setRow(int size){
   if(saveID < 0)
@@ -495,7 +474,7 @@ int check_keys (XEvent *e) {
     if(key == XK_n){
       deletePlatform();
     } 
-
+    #ifdef BACKUP
     if(key == XK_p){
       copyToNew(); 
     }
@@ -505,6 +484,7 @@ int check_keys (XEvent *e) {
     if(key == XK_i){
       convertLoad();
     }
+    #endif
 
     if(key == XK_a){
       roomX -= 50;
@@ -667,7 +647,7 @@ void render () {
 //=====================================================================
 //  Storage Editor
 //=====================================================================
-//
+#ifdef BACKUP
 void convertSave(){
   copyToNew();
   cout << "Convert Saving \n";
@@ -684,8 +664,15 @@ void convertLoad(){
     grounds[i] = &futureBox.grounds[i];
     grounds[i]->reInitSprite();
     grounds_length++;
-  } 
+  }
 }
+void copyToNew(){
+  futureBox.grounds_length = grounds_length;
+  for(int i = 0; i < grounds_length; i++){
+    futureBox.grounds[i] = *grounds[i];  
+  }
+}
+#endif
 
 void save(){
   for(int i = 0; i < grounds_length; i++){
