@@ -1,5 +1,5 @@
 
-//#ifdef USE_SOUND
+#ifdef USE_SOUND
 #include "definitions.h"
 #include "sounds.h"
 
@@ -8,8 +8,8 @@
 #include "fmod.h"
 #include <iostream>
 
-//#ifndef SOUNDS_CPP
-//#define SOUNDS_CPP
+#ifndef SOUNDS_CPP
+#define SOUNDS_CPP
 
 //void init_sounds(void);
 /*
@@ -195,5 +195,5 @@ void init_sounds() {
         return;
     }
 }
-//#endif
-//#endif
+#endif
+#endif
