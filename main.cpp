@@ -82,8 +82,10 @@ int showInvalid=0, frameIndex=0, menuSelection = 0;
 timeval frameStart, frameEnd;
 
 //Images and Textures
-Ppmimage *initImages[32], *computerScreenImages[32], *healthBarImage[1], *lifeImage[1];
-GLuint initTextures[65], computerScreenTextures[32], healthBarTexture[1], lifeTexture[1];
+Ppmimage *initImages[32], *computerScreenImages[32], *healthBarImage[1], *lifeImage[1],
+         *backgroundImage[1];
+GLuint initTextures[65], computerScreenTextures[32], healthBarTexture[1], lifeTexture[1],
+       backgroundTexture[1];
 
 //Function prototypes
 //Object createAI( int w, int h, Object *ground);
@@ -328,6 +330,18 @@ void init_opengl (void) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, lifeData);
     delete [] lifeData;
 
+    //background image
+    glGenTextures(1, backgroundTexture);
+    backgroundImage[0] = ppm6GetImage("./images/background.ppm");
+    glBindTexture(GL_TEXTURE_2D, backgroundTexture[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    unsigned char *backgroundData = buildAlphaData(backgroundImage[0]);
+    w = backgroundImage[0]->width;
+    h = backgroundImage[0]->height;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, backgroundData);
+    delete [] backgroundData;
+
     // load health bar image
     glGenTextures(1, healthBarTexture);
     healthBarImage[0] = ppm6GetImage("./images/healthBar.ppm");
@@ -412,8 +426,11 @@ int check_keys (XEvent *e) {
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
         if (level==1) {
-            if (key == XK_Escape or key == XK_q) {
+            if (key == XK_Escape) {
                 return 1;
+            }
+            if (key == XK_q) {
+                hero->setVelocityY(10);
             }
             // Jump
             if ((key == XK_w || key == XK_Up)) {
@@ -1340,6 +1357,43 @@ void renderComputerScreenMenu () {
 }
 
 void renderBackground () {
+
+    int x = roomX - WINDOW_HALF_WIDTH;
+    int y = roomY - WINDOW_HALF_HEIGHT;
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, backgroundTexture[0]);
+
+    glPushMatrix();
+    glTranslatef(-x, -y, 0);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0); glVertex2i(0/*(roomX-WINDOW_HALF_WIDTH)*/, 2400);
+    glTexCoord2f(0, 1); glVertex2i(0/*(roomX-WINDOW_HALF_WIDTH)*/, 0);
+    glTexCoord2f(1, 1); glVertex2i(4500/*(roomX-WINDOW_HALF_WIDTH+4500)*/, 0);
+    glTexCoord2f(1, 0); glVertex2i(4500/*(roomX-WINDOW_HALF_WIDTH+4500)*/, 2400);
+    glEnd();
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(-x, -y, 0);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0); glVertex2i(4500/*(roomX-WINDOW_HALF_WIDTH)*/, 2400);
+    glTexCoord2f(0, 1); glVertex2i(4500/*(roomX-WINDOW_HALF_WIDTH)*/, 0);
+    glTexCoord2f(1, 1); glVertex2i(9000/*(roomX-WINDOW_HALF_WIDTH+4500)*/, 0);
+    glTexCoord2f(1, 0); glVertex2i(9000/*(roomX-WINDOW_HALF_WIDTH+4500)*/, 2400);
+    glEnd();
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(-x, -y, 0);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0); glVertex2i(9000/*(roomX-WINDOW_HALF_WIDTH)*/, 2400);
+    glTexCoord2f(0, 1); glVertex2i(9000/*(roomX-WINDOW_HALF_WIDTH)*/, 0);
+    glTexCoord2f(1, 1); glVertex2i(13500/*(roomX-WINDOW_HALF_WIDTH+4500)*/, 0);
+    glTexCoord2f(1, 0); glVertex2i(13500/*(roomX-WINDOW_HALF_WIDTH+4500)*/, 2400);
+    glEnd();
+    glPopMatrix();
+
+    glDisable(GL_TEXTURE_2D);
+
+
     if (bg < 1){ 
         for (i=0;i<=MAX_BACKGROUND_BITS/4;i++){
             // Fill screen (init)
