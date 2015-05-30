@@ -87,6 +87,8 @@ class Attack: public Object {
     void checkDuration();
     bool checkStop();
 
+    void autoState();
+
     void causeEffect(Player *hero);
     void causeEffect(Enemy *Enemy);
 

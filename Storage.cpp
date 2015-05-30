@@ -7,6 +7,10 @@
 struct data{
   Platform grounds[MAX_GROUNDS];
   int grounds_length;
+  
+  Enemy enemies[MAX_ENEMIES];
+  int enemies_length;
+
   int heroAtX, heroAtY;
 } storeIn, storeBack;
 
