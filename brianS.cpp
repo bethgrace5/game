@@ -469,6 +469,7 @@ void Enemy::enemyAI (Object *hero) {
                 str += "; jump #" + itos(Object::getJump()) + " ";
             }
             else {
+                Object::setVelocityY(speed);
                 if (h_cx<e_cx)
                     Object::setVelocityX(-speed);
                 else

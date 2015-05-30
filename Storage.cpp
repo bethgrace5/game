@@ -1,6 +1,6 @@
 //Storage
-//#include Attack
-#define MAX_GROUNDS 500
+#include "definitions.h"
+//#define MAX_GROUNDS 500
 //====================================================================
 //Platform Storage
 //====================================================================
