@@ -1181,7 +1181,6 @@ void gameTimer () {
 
     long unsigned int seconds = ((int)currentTime/1000)%60;
 
-    printf("%d\n", seconds);
 }
 
 void renderHealthBar () {
