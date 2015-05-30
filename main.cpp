@@ -21,9 +21,10 @@
 #include "definitions.h"
 #include "Object.h"
 #include "sounds.cpp"
+
+//#include "Attack.cpp"
 #include "Storage.cpp"
 #include "fastFont.cpp"
-//#include "Animate.h"
 
 using namespace std;
 typedef double Vec[3];
@@ -136,6 +137,9 @@ int main(void) {
 
   bulletImage.insert("./images/hero.ppm",13, 1);
   bulletImage.setSize(20, 20);
+
+  boxA.sprite_sheet[0].insert("./images/fireBomb2.ppm", 4, 2);
+  boxA.sprite_sheet[0].setSize(20,20);
 
   //explode.insert("./images/hero.ppm", 4, 2);
   //explode.setSize(400,400);
@@ -472,6 +476,9 @@ int check_keys (XEvent *e) {
         fmod_playsound(dunDunDun);
         #endif
       }
+      if(key == XK_f){
+        boxA.copyAttack(0,0);
+      }
       if (key == XK_h) {
           healthIndex--;
       }
@@ -798,6 +805,14 @@ void movement() {
   for (j=0; j < items_length; j++) {
     detectItem(hero, itemsHold[j]);
   }
+  //Attack Collisions
+  for(i = 0; i < boxA.currents_length; i++){
+    detectAttack(hero, boxA.currents[i]); 
+  }
+  for(i = 0; i < boxA.currents_length; i++){
+    if(boxA.currents[i]->checkStop())
+      boxA.deleteAttack(boxA.currents[i]->getID());
+  }
 
   //Bullet creation
   Bullet *b;
@@ -930,6 +945,7 @@ void movement() {
     renderHero(x, y);
     renderAnimations(x, y);
     renderItems(x, y);
+    renderAttacks(x,y);
     renderLives();
     renderHealthBar();
 

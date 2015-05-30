@@ -30,6 +30,8 @@
 
 #include "Sprite.h"
 #include "Object.h"
+#include "Enemy.h"
+#include <iostream>
 
 class Platform : public Sprite, public Object {
 
@@ -43,6 +45,56 @@ class Platform : public Sprite, public Object {
     void drawRow();
     void saveLineSpace();
     void drawRow(int x, int y);
+};
+
+class Attack: public Object {
+  private:
+    int spriteID;
+    int rowAt;
+    int columnAt;
+  
+    int timer;
+    int frameRate;
+    int duration;
+    int once;
+    int cycle;
+    int onceOnly;
+
+    bool stop;
+    bool start; 
+    bool timeBase; //If This Is On | Attack Will Last on its Duration
+    bool cycleBase;//If This is On | Attack Will Last until the 
+                   // end of the sprite sheet
+                   //
+    int indexp;  
+
+    int damage;
+    bool hurtOnce;
+
+    timeval seqStartA, seqEndA;
+    timeval timeIn, timeOut;
+
+  public:  
+    Attack();
+
+    Object *Clone(){ return new Attack(*this); }
+
+    void referenceTo(Sprite take, int id);
+    void fakeCopy(Attack * other);
+
+    void changeRate(int take);
+    void changeDuration(int take);
+    void checkDuration();
+    bool checkStop();
+
+    void causeEffect(Player *hero);
+    void causeEffect(Enemy *Enemy);
+
+    void cycleAnimations();
+
+    void drawBox(Sprite targetSprite);
+    
+    int diff_ms (timeval t1, timeval t2);
 };
 
 #endif
