@@ -25,7 +25,7 @@ class Player: public Object, public Sprite{
     int indexp;
     int once;
 
-    bool triggerShooting;
+    //bool triggerShooting;
 
     timeval seqStartA, seqEndA;
 

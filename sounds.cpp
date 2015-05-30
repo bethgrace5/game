@@ -1,5 +1,5 @@
 
-//#ifdef USE_SOUND
+#ifdef USE_SOUND
 #include "definitions.h"
 #include "sounds.h"
 
@@ -196,4 +196,4 @@ void init_sounds() {
     }
 }
 //#endif
-//#endif
+#endif

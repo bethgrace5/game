@@ -90,7 +90,7 @@ Ppmimage *initImages[32], *computerScreenImages[32], *healthBarImage[1], *lifeIm
 GLuint initTextures[65], computerScreenTextures[32], healthBarTexture[1], lifeTexture[1];
 
 //Function prototypes
-Object createAI( int w, int h, Object *ground);
+//Object createAI( int w, int h, Object *ground);
 bool bulletCollide(Bullet *b, Object *obj);
 bool detectCollide(Object *obj, Object *ground);
 bool detectItem (Object *obj, Item *targetItem);
@@ -104,6 +104,7 @@ void groundCollide(Object *obj, Object *ground);
 void initXWindows(void);
 void init_opengl(void);
 void makeEnemy(int w, int h, Object *ground, int type); 
+void makeEnemy(int w, int h, int x, int y, int type); 
 void makePlatform(int w, int h, int x, int y);
 void makeItems(int w, int h, int x, int y);
 void moveWindow(void);
@@ -371,10 +372,11 @@ void init_opengl (void) {
         makeItems(16, 20, 975, 232);
 
     }
-    makeEnemy(37, 80, grounds[2], 1);
+    //makeEnemy(37, 80, grounds[2], 1);
 
-    makeEnemy(43, 42, grounds[1], 2);
-    makeEnemy(37, 80, grounds[4], 1);
+    //makeEnemy(43, 42, grounds[1], 2);
+    //makeEnemy(37, 80, grounds[4], 1);
+    makeEnemy(100, 100, 300, 500, 3);
 }
 
 void check_mouse (XEvent *e) {
@@ -616,9 +618,9 @@ void deleteItem(int id) {
 
 void makeEnemy(int w, int h, Object *ground, int type) {
     if (enemies_length<MAX_ENEMIES){
+        enemies[enemies_length] = new Enemy(w, h, ground, type); 
         switch (type){
             case 1:
-                enemies[enemies_length] = new Enemy(w, h, ground, type); 
                 enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
                 enemies[enemies_length]->setBottom(-44);
                 enemies[enemies_length]->setLeft(-24);
@@ -627,7 +629,6 @@ void makeEnemy(int w, int h, Object *ground, int type) {
                 enemies[enemies_length]->setHeight(25);
                 break;
             case 2:
-                enemies[enemies_length] = new Enemy(w, h, ground, type); 
                 enemies[enemies_length]->insert("./images/enemy2_1.ppm", 26, 1);
                 /*enemies[enemies_length]->setBottom(-44);
                   enemies[enemies_length]->setLeft(-24);
@@ -635,6 +636,41 @@ void makeEnemy(int w, int h, Object *ground, int type) {
                   enemies[enemies_length]->setTop(24);
                   enemies[enemies_length]->setHeight(25);
                   */
+                break;
+            case 3:
+                enemies[enemies_length]->insert("./images/boss.ppm", 1, 1);
+                break;
+        }
+        enemies_length++;
+    }
+    else{
+        cout << "Enemies array full!" << endl;
+    }
+}
+
+void makeEnemy(int w, int h, int x, int y, int type) {
+    if (enemies_length<MAX_ENEMIES){
+        enemies[enemies_length] = new Enemy(w, h, x, y, type); 
+        switch (type){
+            case 1:
+                enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
+                enemies[enemies_length]->setBottom(-44);
+                enemies[enemies_length]->setLeft(-24);
+                enemies[enemies_length]->setRight(24);
+                enemies[enemies_length]->setTop(24);
+                enemies[enemies_length]->setHeight(25);
+                break;
+            case 2:
+                enemies[enemies_length]->insert("./images/enemy2_1.ppm", 26, 1);
+                /*enemies[enemies_length]->setBottom(-44);
+                  enemies[enemies_length]->setLeft(-24);
+                  enemies[enemies_length]->setRight(24);
+                  enemies[enemies_length]->setTop(24);
+                  enemies[enemies_length]->setHeight(25);
+                  */
+                break;
+            case 3:
+                enemies[enemies_length]->insert("./images/boss.ppm", 1, 1);
                 break;
         }
         enemies_length++;
@@ -817,7 +853,10 @@ void movement() {
     for (i=0;i<enemies_length;i++) {
         enemies[i]->setOldCenter();
         enemies[i]->enemyAI(hero); //Where does enemy go?
-        //enemyAI(enemies[i]);
+        if (enemies[i]->type==3 && enemies[i]->isShooting){
+            makeEnemy(37, 80, enemies[i]->getCenterX(), enemies[i]->getCenterY(), 1);
+            enemies[i]->isShooting=false;
+        }
         //bullets
         b = bulletHead;
         while (b) {
@@ -854,11 +893,13 @@ void movement() {
     }
 
 }
-Object createAI (int w, int h, Object *ground) {
+
+
+/*Object createAI (int w, int h, Object *ground) {
     Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
     return newEnemy;
 
-}
+}*/
 
 bool inWindow(Object &obj) {
     return ((obj.getLeft() < (roomX+(WINDOW_HALF_WIDTH)) and
