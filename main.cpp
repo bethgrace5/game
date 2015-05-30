@@ -46,27 +46,15 @@ struct bgBit {
 
 // time difference in milliseconds
 Sprite bulletImage;
+
 //Animate explode;
 int animateOn = 0;
-/*struct Bullet {
-  int type; //0 = boss, 1 = enemy 2, 2 = hero, 3 = enemy 1
-  Vec pos;
-  Vec vel;
-  float color[3];
-  struct timespec time;
-  struct Bullet *prev;
-  struct Bullet *next;
-  Bullet() {
-  prev = NULL;
-  next = NULL;
-  }
-  };
-  */
+
 //X Windows variables
 Display *dpy; Window win; GLXContext glc;
 
 //Hero Globals
-int didJump=0, life=100, lastFacing=0;
+int didJump=0, lastFacing=0;
 double h_right, h_left, h_top, h_bottom;
 timeval seqStart, seqEnd; // hero's sprite index
 timeval fireStart, fireEnd; // hero's fire rate timer
@@ -803,7 +791,10 @@ void movement() {
 
     // remove a life when the hero falls off cliff
     if (hero->getCenterY() < 0){
-        hero->setHealth(-1);
+        hero->setHealth(0);
+        if(!hero->isDying){
+            //hero->decrementLives();
+        }
     }
 
     if (hero->getHealth()<=0) {//Going to try to Mimic The Death Function. Heres a tmp fix though
