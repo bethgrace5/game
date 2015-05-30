@@ -930,9 +930,7 @@ void movement() {
     while (b) {
         if (!(b->type==2) && (bulletCollide(b,hero))){
             tmp=b->next;
-            life-=b->damage;
-            if (life<0)
-                life=0;
+            hero->reduceHealth(b->damage);
             deleteBullet(b);
             b=tmp;
         }
@@ -1189,6 +1187,7 @@ void renderHealthBar () {
     int WH = WINDOW_HEIGHT;
     int h = 56;
     int w = 200;
+    int health = hero->getHealth();
     //float row_size = 0.5;
 
     glEnable(GL_TEXTURE_2D);
@@ -1199,10 +1198,10 @@ void renderHealthBar () {
 
     glPushMatrix();
     glBegin(GL_QUADS);
-    glTexCoord2f(0, 0.5); glVertex2i(WHW-(w/2)+((100-life)/10), WH-h-10);
-    glTexCoord2f(0, 1.0); glVertex2i(WHW-(w/2)+((100-life)/10), WH-10);
-    glTexCoord2f(1, 1.0); glVertex2i(WHW+(w/2)-((97-life)*2), WH-10);
-    glTexCoord2f(1, 0.5); glVertex2i(WHW+(w/2)-((97-life)*2), WH-h-10);
+    glTexCoord2f(0, 0.5); glVertex2i(WHW-(w/2)+((100-health)/10), WH-h-10);
+    glTexCoord2f(0, 1.0); glVertex2i(WHW-(w/2)+((100-health)/10), WH-10);
+    glTexCoord2f(1, 1.0); glVertex2i(WHW+(w/2)-((97-health)*2), WH-10);
+    glTexCoord2f(1, 0.5); glVertex2i(WHW+(w/2)-((97-health)*2), WH-h-10);
     glEnd();
     glPopMatrix();
     glPushMatrix();
@@ -1219,11 +1218,7 @@ void renderHealthBar () {
 }
 
 void renderDebugInfo () {
-    //int WHW = WINDOW_HALF_WIDTH;
     int WH = WINDOW_HEIGHT;
-    //int h = 56;
-    //int w = 200;
-    //float row_size = 0.5;
 
     writeWords("FPS", 0, WH-20);
     writeWords("BULLETS", 0, WH-50);
@@ -1236,31 +1231,6 @@ void renderDebugInfo () {
     }
     writeWords(itos(fps), 88, WH-20);
     writeWords(itos(bullets), 176, WH-50);
-    //glEnable(GL_TEXTURE_2D);
-    //glEnable(GL_ALPHA_TEST);
-    // prepare opengl
-    //glAlphaFunc(GL_GREATER, 0.0f);
-    //glBindTexture(GL_TEXTURE_2D, healthBarTexture[0]);
-/*
-    glPushMatrix();
-    glBegin(GL_QUADS);
-    glTexCoord2f(0, 0.5); glVertex2i(WHW-(w/2)+((100-life)/10), WH-h-10);
-    glTexCoord2f(0, 1.0); glVertex2i(WHW-(w/2)+((100-life)/10), WH-10);
-    glTexCoord2f(1, 1.0); glVertex2i(WHW+(w/2)-((97-life)*2), WH-10);
-    glTexCoord2f(1, 0.5); glVertex2i(WHW+(w/2)-((97-life)*2), WH-h-10);
-    glEnd();
-    glPopMatrix();
-    glPushMatrix();
-    glBegin(GL_QUADS);
-    glTexCoord2f(0, 0.0); glVertex2i(WHW-(w/2), WH-h-10);
-    glTexCoord2f(0, 0.5); glVertex2i(WHW-(w/2), WH-10);
-    glTexCoord2f(1, 0.5); glVertex2i(WHW+(w/2), WH-10);
-    glTexCoord2f(1, 0.0); glVertex2i(WHW+(w/2), WH-h-10);
-    glEnd();
-    glPopMatrix();
-*/
-//    glDisable(GL_TEXTURE_2D);
-  //  glDisable(GL_ALPHA_TEST);
 }
 
 void renderComputerScreenMenu () {
