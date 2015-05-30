@@ -525,7 +525,8 @@ void Enemy::enemyAI (Object *hero) {
     if (Object::isDying){
         gettimeofday(&fEnd, NULL);
         if (diff_ms(fEnd, fStart)>frame_rate){
-            int end, tmp = (Sprite::getIndex()+1);
+            int end = 0;
+            int tmp = (Sprite::getIndex()+1);
             if (type==1)
                 end = 26;
             else if (type==2)
