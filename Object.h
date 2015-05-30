@@ -68,7 +68,9 @@ class Object{
         void init(double w, double h);
         // TODO: create destructor
         //~Object(){ delete [] ground;}
-
+       
+        //virtual Object *Clone () = 0;
+ 
     private:
         int width;
         int height;
@@ -85,8 +87,7 @@ class Object{
         Vec velocity;
         Vec center;
         Vec oldCenter;
-        Object *floor;
-        
+        Object *floor;        
 };
 
 #endif

@@ -21,10 +21,15 @@
 #include "definitions.h"
 #include "functions.h"
 #include "Object.h"
+
+
+#ifdef USE_SOUND
 #include "sounds.h"
+#endif
+
 #include "Storage.cpp"
+#include "AttackList.cpp"
 #include "fastFont.cpp"
-//#include "Animate.h"
 
 using namespace std;
 //typedef double Vec[3];
@@ -137,6 +142,12 @@ int main(void) {
     hero->insert("./images/hero.ppm", 13, 1);
     hero->setSize(44,48);
 
+    boxA.makeAttacks();
+
+    //explode.insert("./images/hero.ppm", 4, 2);
+    //explode.setSize(400,400);
+
+    // skip menu and go straight to level 1
     bulletImage.insert("./images/bullets.ppm",4, 1);
     bulletImage.setSize(22, 10);
 
@@ -371,12 +382,14 @@ void init_opengl (void) {
         makeItems(16, 20, 375, 232);
         makeItems(16, 20, 975, 232);
 
+        makeEnemy(37, 80, grounds[2], 1);
+        makeEnemy(37, 80, grounds[2], 1);
+        makeEnemy(43, 42, grounds[1], 2);
+        makeEnemy(37, 80, grounds[4], 1);
+        makeEnemy(100, 100, 300, 500, 3);
+        makeEnemy(43, 42, grounds[1], 2);
+        makeEnemy(37, 80, grounds[4], 1);
     }
-    //makeEnemy(37, 80, grounds[2], 1);
-
-    //makeEnemy(43, 42, grounds[1], 2);
-    //makeEnemy(37, 80, grounds[4], 1);
-    makeEnemy(100, 100, 300, 500, 3);
 }
 
 void check_mouse (XEvent *e) {
@@ -421,6 +434,9 @@ int check_keys (XEvent *e) {
             // shooting
             if (key == XK_space) {
                 hero->setShooting(true);
+            }
+            if( key == XK_f){
+                boxA.copyAttack(0);  
             }
             // debug death
             if (key == XK_y) {
@@ -802,6 +818,21 @@ void movement() {
         detectItem(hero, itemsHold[j]);
     }
 
+    //Detect Item
+    for (j=0; j < items_length; j++) {
+        detectItem(hero, itemsHold[j]);
+    }
+    //Attack Collisions
+    //Animates
+    for(i = 0; i < boxA.currents_length; i++){
+        detectAttack(hero, boxA.currents[i]); 
+    }
+    //Check if Time or Index reach 0 then deletes itself
+    for(i = 0; i < boxA.currents_length; i++){
+        if(boxA.currents[i]->checkStop())
+            boxA.deleteAttack(boxA.currents[i]->getID());
+    }
+
     //Bullet creation
     if (hero->checkShooting()){
         gettimeofday(&fireEnd, NULL);
@@ -891,15 +922,7 @@ void movement() {
         if (b)
             b = b->next;
     }
-
 }
-
-
-/*Object createAI (int w, int h, Object *ground) {
-    Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
-    return newEnemy;
-
-}*/
 
 bool inWindow(Object &obj) {
     return ((obj.getLeft() < (roomX+(WINDOW_HALF_WIDTH)) and
@@ -952,6 +975,7 @@ void render () {
     renderHero(x, y);
     renderAnimations(x, y);
     renderItems(x, y);
+    renderAttacks(x,y);
     renderLives();
     renderHealthBar();
 

@@ -36,7 +36,8 @@
   Window Setup        |
 ======================+
 */
-
+#define EDITOR_MODE
+/*
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -47,12 +48,42 @@
 #include <fstream>
 #include "fastFont.cpp" //#include "fastFont.h"
 #include "Player.h"
-#include "Storage.cpp"
+#include "Attack2.cpp"
 #include "definitions.h"
 #include "functions.h"
 #include "Platform.h"
 #include "ppm.h"
+#include <cmath>*/
+
+#include <algorithm>
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
+#include <GL/glx.h>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <sys/time.h>
+#include <unistd.h>
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
+
+#include "Enemy.h"
+#include "Item.h"
+#include "Player.h"
+#include "Platform.h"
+#include "definitions.h"
+#include "Object.h"
+#include "sounds.cpp"
+//#include "Attack.cpp"
+#include "Storage.cpp"
+#include "AttackList.cpp"
+#include "fastFont.cpp"
+
+//#include "Storage.cpp"
 
 using namespace std;
 typedef double Vec[3];
@@ -64,7 +95,7 @@ GLXContext glc;
 //------------------------------
 //Game Globals
 //------------------------------
-//Player *testHero;
+Player *hero;
 Sprite currentTile;
 Sprite ruler;
 //Enemy *enemies[MAX_ENEMIES];

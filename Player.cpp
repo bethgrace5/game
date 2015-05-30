@@ -1,4 +1,3 @@
-
 #include <sys/time.h>
 #include <GL/glx.h>
 #include "definitions.h"

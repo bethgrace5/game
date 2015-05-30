@@ -1,4 +1,3 @@
-
 #ifdef USE_SOUND
 #include "definitions.h"
 #include "sounds.h"
