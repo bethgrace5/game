@@ -66,6 +66,7 @@ GLXContext glc;
 //------------------------------
 //Player *testHero;
 Sprite currentTile;
+Sprite ruler;
 //Enemy *enemies[MAX_ENEMIES];
 Platform *grounds[MAX_GROUNDS];
 int grounds_length = 0;
@@ -122,6 +123,7 @@ void renderGrounds(int x, int y);
 void renderSave();
 void renderLoad();
 void renderBox();
+void renderRuler();
 
 void movement(void);
 bool detectCollide(Object *obj, Object *ground);
@@ -143,6 +145,10 @@ int main(void) {
 
   currentTile.insert("./images/megaLevel.ppm", 1, 1);
   currentTile.setSize(WINDOW_HALF_WIDTH/2, WINDOW_HALF_HEIGHT);
+
+  ruler.insert("./images/ruler.ppm", 1, 1);
+  ruler.setSize(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+
 
   //testHero->insert("./images/hero.ppm", 13, 1);
   //testHero->setSize(44,48);
@@ -454,6 +460,22 @@ int check_keys (XEvent *e) {
     if(key == XK_d){
       roomX += 50;
     }
+    if(key == XK_2){
+      roomX += 900;
+    }
+    if(key == XK_0){
+      roomX = 0+WINDOW_HALF_WIDTH;
+      roomY = 0+WINDOW_HALF_HEIGHT;
+    }
+    if(key == XK_1){
+      roomX -= 900;
+    }
+    if(key == XK_4){
+      roomY += 600;
+    }
+    if(key == XK_3){
+      roomY -= 600;
+    }
     if(key == XK_Up){
       roomY += 50;
     }
@@ -523,6 +545,13 @@ void renderBox(){
   glPopMatrix();
 }
 
+void renderRuler(){
+  glPushMatrix();
+  glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
+  ruler.drawTile(0,0);
+  glPopMatrix();
+}
+
 void renderSave(){
   renderBox(); 
   writeWords("Please Check Your Terminal", 50, 275);
@@ -576,6 +605,7 @@ void render () {
   int y = roomY - WINDOW_HALF_HEIGHT;
   glClear(GL_COLOR_BUFFER_BIT);
   // Draw Background Falling Bits
+  renderRuler();
   renderGrounds(x, y);
   renderEnemies(0, 0);
   renderHero(x, y);
