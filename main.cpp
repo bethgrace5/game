@@ -825,8 +825,8 @@ void movement() {
     for(i = 0; i < boxA.currents_length; i++){
       for(j = 0; j < enemies_length; j++){
         if(detectAttack(enemies[j], boxA.currents[i])){
-                enemies[i]->life-=100;
-                std::cout << "Wheres my Life: " << enemies[i]->life  <<
+                enemies[j]->life-=100;
+                std::cout << "Wheres my Life: " << enemies[j]->life  <<
                   std::endl;
         }
       } 
