@@ -1,4 +1,3 @@
-
 #include <sys/time.h>
 #include <GL/glx.h>
 #include "definitions.h"
@@ -18,10 +17,10 @@ Player::Player() : Object(26, 44, 250, 250), Sprite(){
   //Set The Default stats
   lives = 3; 
   health =  maxHealth = 100;
-
+  isShooting=0;
   jumps = 0; jumpLimit = 2; jumpPower = 7;
   speed = 0; maxSpeed  = 7;
-
+  Sprite::setMirror(false);
   indexp = 0; once = 0;
 }
 //===============================================
@@ -68,10 +67,10 @@ void Player::repairHealth(int take){
 }
 
 bool Player::checkShooting(){
-  return triggerShooting;
+  return Object::isShooting;
 }
 void Player::setShooting(bool take){ 
-  triggerShooting = take;
+    Object::isShooting = take;
 }
 
 int Player::getLives(){

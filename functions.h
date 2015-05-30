@@ -2,15 +2,21 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
+#include <cstring>
+#include <sys/time.h>
 #include <sstream>
+#include <string>
 #include "ppm.h"
 #include "definitions.h"
+
+using namespace std;
+
 void makeBullet(int x, int y, int v_x, int dmg, int t);
 extern int bullets;
 typedef double Vec[3];
 
-template <typename T> std::string itos (T Number) {
-    std::stringstream ss;
+template <typename T> string itos (T Number) {
+    stringstream ss;
     ss << Number;
     return (ss.str());
 }
