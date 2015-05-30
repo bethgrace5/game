@@ -620,18 +620,11 @@ void makeItems(int w, int h, int x, int y) {
 void deleteItem(int id) {
     if (items_length <= 0) return;
     if (id < 0) return;
-
-    //itemsHold[id] = new Item();
-    delete itemsHold[id];
-
-    for (int i = id; i < items_length-1; i++) {
-        itemsHold[i] = itemsHold[i + 1];
-        itemsHold[i]->setID(itemsHold[i]->getID()-1);
-    }
-    //itemsHold[items_length-1] = new Item();
-    //delete itemsHold[items_length-1];
-
     items_length--;
+    delete itemsHold[id];
+    itemsHold[id] = itemsHold[items_length];
+    itemsHold[id]->setID(itemsHold[id]->getID()+(items_length-id));
+    itemsHold[items_length]=NULL;
 }
 
 void makeEnemy(int w, int h, Object *ground, int type) {
@@ -843,7 +836,7 @@ void movement() {
         gettimeofday(&fireEnd, NULL);
         if (((diff_ms(fireEnd, fireStart)) > 250)) { //Fire rate 250ms
             gettimeofday(&fireStart, NULL); //Reset firing rate timer
-            makeBullet(hero->getCenterX(), hero->getCenterY()+15, (hero->checkMirror()?-18:18), 18, 2);
+            makeBullet(hero->getCenterX(), hero->getCenterY()+15, (hero->checkMirror()?-18:18), 38, 2);
 #ifdef USE_SOUND
             fmod_playsound(mvalSingle);
 #endif
