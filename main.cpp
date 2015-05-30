@@ -85,6 +85,7 @@ double g_left, g_right, g_top, g_bottom;
 int bg, bullets, grounds_length, enemies_length, i, j, level=0, fail=0, quit=0;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
+timeval gameStart, gameEnd;
 
 // menu rendering and selection Globals
 int showInvalid=0, frameIndex=0, menuSelection = 0;
@@ -105,6 +106,7 @@ void cleanupXWindows(void);
 void cleanup_background(void);
 void deleteBullet(Bullet *node);
 void deleteEnemy(int ind);
+void gameTimer ();
 void groundCollide(Object *obj, Object *ground);
 void initXWindows(void);
 void init_opengl(void);
@@ -130,6 +132,7 @@ void renderLives();
 
 
 int main(void) {
+    gettimeofday(&gameStart, NULL);
     initXWindows(); init_opengl(); 
 #ifdef USE_SOUND
     init_sounds();
@@ -180,6 +183,7 @@ int main(void) {
             movement();
             render();
             moveWindow();
+            gameTimer ();
         }
         glXSwapBuffers(dpy, win);
     }
@@ -427,11 +431,15 @@ int check_keys (XEvent *e) {
             }
             // move character left
             if (key == XK_a || key == XK_Left) {
-                hero->moveLeft();
+                if(!hero->isDying) {
+                    hero->moveLeft();
+                }
             }
             // move character right
             if (key == XK_d || key == XK_Right){
-                hero->moveRight();
+                if(!hero->isDying) {
+                    hero->moveRight();
+                }
             }
             // shooting
             if (key == XK_space) {
@@ -1157,6 +1165,15 @@ void renderLives () {
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
 
+}
+
+void gameTimer () {
+    gettimeofday(&gameEnd, NULL);
+    double currentTime = diff_ms(gameEnd, gameStart);
+
+    long unsigned int seconds = ((int)currentTime/1000)%60;
+
+    printf("%d\n", seconds);
 }
 
 void renderHealthBar () {

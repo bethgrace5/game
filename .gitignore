@@ -1,6 +1,5 @@
 ## ignore gitignore
 .gitignore
-definitions.h
 
 # ignore executable
 game

@@ -24,7 +24,7 @@ See other sample programs in the fmod /examples directory
 #include "fmod.h"
 
 //local global variables are defined here
-#define MAX_SOUNDS 32
+#define MAX_SOUNDS 64
 FMOD_SYSTEM  *xsystem;
 FMOD_SOUND   *sound[MAX_SOUNDS];
 FMOD_CHANNEL *channel = 0;
