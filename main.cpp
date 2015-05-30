@@ -31,8 +31,7 @@
 #include "AttackList.cpp"
 #include "fastFont.cpp"
 
-using namespace std;
-//typedef double Vec[3];
+using namespace std; //typedef double Vec[3];
 
 // background bits
 struct bgBit {
@@ -54,7 +53,7 @@ int animateOn = 0;
 Display *dpy; Window win; GLXContext glc;
 
 //Hero Globals
-int didJump=0, lastFacing=0;
+int didJump=0;
 double h_right, h_left, h_top, h_bottom;
 timeval seqStart, seqEnd; // hero's sprite index
 timeval fireStart, fireEnd; // hero's fire rate timer
@@ -480,7 +479,7 @@ int check_keys (XEvent *e) {
 #endif
                     // make sure hero is not shooting immediately
                     level=-1;
-                    lastFacing = 0;
+                    hero->setMirror(0);
                     frameIndex=0;
                 }
                 if(menuSelection==1 or menuSelection==2 or menuSelection==2 or menuSelection==4) {
@@ -782,18 +781,12 @@ void movement() {
 
     // Cycle through hero index sequences
 
-    // remove a life when the hero falls off cliff
-    if (hero->getCenterY() < 0){
-        hero->setHealth(0);
-    }
-
-    if (hero->getHealth()<=0) {//Going to try to Mimic The Death Function. Heres a tmp fix though
-        hero->setHealth(0);
+    if (hero->getHealth()<=0 or hero->getCenterY() <0) {//Going to try to Mimic The Death Function. Heres a tmp fix though
         hero->stop();
         if (!(hero->isDying)) {
-            hero->decrementLives();
             hero->isDying=1;
             gettimeofday(&seqStart, NULL);
+            hero->decrementLives();
 #ifdef USE_SOUND
             fmod_playsound(dunDunDun);
 #endif
@@ -1169,6 +1162,10 @@ void renderHealthBar () {
     int w = 200;
     int health = hero->getHealth();
     //float row_size = 0.5;
+
+    if (health<=0) {
+        health = 0;
+    }
 
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_ALPHA_TEST);
