@@ -75,6 +75,8 @@ int bg, bullets, grounds_length, enemies_length, i, j, level=0, fail=0, quit=0;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 timeval gameStart, gameEnd;
+int minutes = 0;
+int updated = 0;
 
 // menu rendering and selection Globals
 int showInvalid=0, frameIndex=0, menuSelection = 0;
@@ -1154,9 +1156,30 @@ void renderLives () {
 void gameTimer () {
     gettimeofday(&gameEnd, NULL);
     double currentTime = diff_ms(gameEnd, gameStart);
+    long unsigned int seconds = 0;
 
-    long unsigned int seconds = ((int)currentTime/1000)%60;
 
+    seconds = ((int)currentTime/1000)%60;
+ 
+    if (seconds>59 && !updated) {
+        seconds = 0;
+        minutes++;
+        cout<<"minutes: " << minutes <<endl;
+        updated = 1;
+    }
+    else {
+        if(seconds==0) {
+            updated = 0;
+        }
+    }
+
+
+    string s = itos(seconds);
+    string m = itos(minutes);
+
+
+    writeWords(s, 45, WINDOW_HEIGHT-100);
+    writeWords(m, 10, WINDOW_HEIGHT-100);
 }
 
 void renderHealthBar () {
