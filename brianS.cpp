@@ -14,7 +14,7 @@
 using namespace std;
 
 
-Enemy::Enemy() : Sprite(), Object(0,0,0,0) {
+Enemy::Enemy() : Sprite(), Object(0, 0, 0, 0) {
 
 }
 
