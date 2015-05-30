@@ -826,8 +826,6 @@ void movement() {
       for(j = 0; j < enemies_length; j++){
         if(detectAttack(enemies[j], boxA.currents[i])){
                 enemies[j]->life-=100;
-                std::cout << "Wheres my Life: " << enemies[j]->life  <<
-                  std::endl;
         }
       } 
     }
@@ -1009,8 +1007,6 @@ void renderItems(int x, int y){
         }
     }
 }
-
-
 
 void renderGrounds (int x, int y) {
     // render grounds

@@ -81,7 +81,7 @@ GLXContext glc;
 Player *hero;
 Sprite currentTile;
 Sprite ruler;
-//Enemy *enemies[MAX_ENEMIES];
+Enemy *enemies[MAX_ENEMIES];
 Platform *grounds[MAX_GROUNDS];
 int grounds_length = 0;
 int enemies_length = 0;
@@ -95,6 +95,8 @@ int quit=0;
 
 bool saving;
 bool loading;
+
+bool enemyEditor = 1;
 
 bool create = 0;
 bool tileMode = 0;
@@ -133,6 +135,8 @@ void pickTile(int x, int y);
 void renderHero(int x, int y);
 
 void makeEnemy(int w, int h, Object *ground, int type); 
+void makeEnemy(int w, int h, int x, int y, int type);
+
 Object createAI( int w, int h, Object *ground);
 void deleteEnemy(int ind);
 
@@ -334,33 +338,43 @@ void deletePlatform(){
 //=====================================================================
 //  Enemy Editor
 //=====================================================================
-void makeEnemy(int w, int h, Object *ground, int type) {
-  /*if (enemies_length<MAX_ENEMIES){
-    switch (type){
-      case 1:
-        enemies[enemies_length] = new Enemy(w, h, ground); 
-        enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
-        enemies[enemies_length]->setBottom(-44);
-        enemies[enemies_length]->setLeft(-24);
-        enemies[enemies_length]->setRight(24);
-        enemies[enemies_length]->setTop(24);
-        enemies[enemies_length]->setHeight(25);
-        break;
+void makeEnemy(int w, int h, int x, int y, int type) {
+    if (enemies_length<MAX_ENEMIES){
+        enemies[enemies_length] = new Enemy(w, h, x, y, type); 
+        switch (type){
+            case 1:
+                enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
+                enemies[enemies_length]->setBottom(-44);
+                enemies[enemies_length]->setLeft(-24);
+                enemies[enemies_length]->setRight(24);
+                enemies[enemies_length]->setTop(24);
+                enemies[enemies_length]->setHeight(25);
+                break;
+            case 2:
+                enemies[enemies_length]->insert("./images/enemy2_1.ppm", 26, 1);
+                /*enemies[enemies_length]->setBottom(-44);
+                  enemies[enemies_length]->setLeft(-24);
+                  enemies[enemies_length]->setRight(24);
+                  enemies[enemies_length]->setTop(24);
+                  enemies[enemies_length]->setHeight(25);
+                  */
+                break;
+            case 3:
+                enemies[enemies_length]->insert("./images/boss.ppm", 1, 1);
+                break;
+        }
+        enemies_length++;
     }
-    enemies_length++;
-  }
-  else{
-    cout << "Enemies array full!!!!" << endl;
-  }*/
+    else{
+        cout << "Enemies array full!" << endl;
+    }
 }
 
 void deleteEnemy(int ind){
-  /*
   enemies_length--;
   delete enemies[i];
   enemies[i] = enemies[enemies_length];
   enemies[enemies_length]=NULL;
-  */
 }
 
 //Object createAI (int w, int h, Object *ground) {
@@ -383,12 +397,15 @@ void check_mouse (XEvent *e) {
   int take;
   if (e->type == ButtonPress) {
     if (e->xbutton.button==1) { //Left button was pressed
-      if(create == 1){
+      if(enemyEditor){
+        makeEnemy(100, 100, savex, savey, 3);  
+      }
+      else if(create == 1){
         cout << " x " << savex << ", y " << savey << "\n";
         makePlatform(savex, savey);
         return;
       }
-      if(selecter == 1){
+      else if(selecter == 1){
         take = clickObject(savex, savey); 
         cout << "The Id is: " << take << "\n";
         saveID = holdID = take;
@@ -437,6 +454,10 @@ void draging(int x, int y){
 //=====================================================================
 //  Key Check
 //=====================================================================
+void enemy_editor(int key){
+
+}
+
 int check_keys (XEvent *e) {
   //handle input from the keyboard
   int key = XLookupKeysym(&e->xkey, 0);
@@ -612,16 +633,13 @@ void renderGrounds (int x, int y) {
 }
 
 void renderEnemies (int x, int y) {
-  /*
   for (int i=0;i<enemies_length;i++) {
-    if (inWindow(*(enemies[i]))){
+    //if (inWindow(*(enemies[i]))){
       glPushMatrix();
       glTranslatef(- x, - y, 0);
       enemies[i]->draw();
       glEnd(); glPopMatrix();
     }
-  }
-  */
 }
 
 void renderHero (int x, int y) {
@@ -677,6 +695,9 @@ void copyToNew(){
 void save(){
   for(int i = 0; i < grounds_length; i++){
     storeIn.grounds[i] = *grounds[i];  
+  }
+  for(int i =0; i < enemies_length; i++){
+    //storeIn.enemies[i] = *enemies[i];  
   }
   storeIn.grounds_length = grounds_length;
   cout << "Saving \n";
