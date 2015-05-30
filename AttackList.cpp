@@ -5,7 +5,7 @@
 //====================================================================
 extern Player *hero;
 
-struct attack_list{ //This Is What The Storage Will Save
+struct attack_list{
   Sprite  sprite_sheet[25];
   Attack attacks[25];
   int attacks_length;
@@ -29,7 +29,7 @@ void attack_list::deleteAttack(int id){
   std::cout << " what is id" << id << std::endl;
 
   currents[id] = new Attack();
-  delete currents[id];
+  //delete currents[id];
 
   for (int i = id; i < currents_length-1; i++) {
     currents[i] = currents[i + 1];
@@ -37,7 +37,7 @@ void attack_list::deleteAttack(int id){
   }
 
   currents[currents_length-1] = new Attack();
-  delete currents[currents_length-1];
+  //delete currents[currents_length-1];
   currents_length--;
 }
 
@@ -58,7 +58,6 @@ void attack_list::makeAttacks(){
   attacks[0].init(50,50,0,0);
   attacks[0].changeRate(35);
   attacks[0].setVelocityX(4);
-
 
   //Duration Base
   boxA.sprite_sheet[1].insert("./images/fireball.ppm", 5, 5);
