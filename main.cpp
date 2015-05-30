@@ -786,7 +786,7 @@ void movement() {
     if (hero->getCenterY() < 0){
         hero->setHealth(0);
         if(!hero->isDying){
-            //hero->decrementLives();
+            hero->decrementLives();
         }
     }
 

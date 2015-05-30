@@ -5,6 +5,8 @@
 #include "functions.h"
 using namespace std;
 
+extern int level;
+
 unsigned char *buildAlphaData (Ppmimage *img) {
     //add 4th component to RGB stream...
     int a,b,c;
