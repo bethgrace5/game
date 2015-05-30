@@ -11,6 +11,8 @@
 
 using namespace std;
 
+extern int level;
+
 void makeBullet(int x, int y, int v_x, int dmg, int t);
 extern int bullets;
 typedef double Vec[3];

@@ -6,7 +6,7 @@
 Item::Item() : Sprite(), Object(20, 20, 350, 350) {effect=1;}
 void Item::causeEffect(Player *hero) {
     switch (effect) {
-	case 1: hero->reduceHealth(100);
+	case 1: hero->setHealth(0);
             break;
     }
 }
