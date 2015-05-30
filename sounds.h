@@ -48,7 +48,8 @@ enum sound_t {
     alienMachineGun,
     dryFiregun,
     gunShotMarvin,
-    mvalSingle
+    mvalSingle,
+    laser
 };
 
 void init_sounds(void);

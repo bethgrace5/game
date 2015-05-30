@@ -36,7 +36,7 @@ struct bgBit {
     Vec vel;
     struct bgBit *next;
     struct bgBit *prev;
-    const char* n;
+    int n;
 };
 
 // time difference in milliseconds
@@ -371,53 +371,9 @@ void init_opengl (void) {
         makeItems(16, 20, 975, 232);
 
     }
-
     makeEnemy(37, 80, grounds[2], 1);
 
     makeEnemy(43, 42, grounds[1], 2);
-    makeEnemy(43, 42, grounds[2], 2);
-    makeEnemy(43, 42, grounds[2], 2);
-    makeEnemy(43, 42, grounds[2], 2);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[2], 1);
-    makeEnemy(37, 80, grounds[3], 1);
-    makeEnemy(37, 80, grounds[3], 1);
-    makeEnemy(37, 80, grounds[3], 1);
-    makeEnemy(37, 80, grounds[3], 1);
-    makeEnemy(37, 80, grounds[3], 1);
-    makeEnemy(37, 80, grounds[3], 1);
-    makeEnemy(37, 80, grounds[3], 1);
-    makeEnemy(37, 80, grounds[3], 1);
-    makeEnemy(37, 80, grounds[3], 1);
-    makeEnemy(37, 80, grounds[3], 1);
-    makeEnemy(37, 80, grounds[4], 1);
-    makeEnemy(37, 80, grounds[4], 1);
-    makeEnemy(37, 80, grounds[4], 1);
-    makeEnemy(37, 80, grounds[4], 1);
-    makeEnemy(37, 80, grounds[4], 1);
-    makeEnemy(37, 80, grounds[4], 1);
-    makeEnemy(37, 80, grounds[4], 1);
-    makeEnemy(37, 80, grounds[4], 1);
-    makeEnemy(37, 80, grounds[4], 1);
-    makeEnemy(37, 80, grounds[4], 1);
-    makeEnemy(37, 80, grounds[4], 1);
-    makeEnemy(37, 80, grounds[4], 1);
     makeEnemy(37, 80, grounds[4], 1);
 }
 
@@ -505,6 +461,7 @@ int check_keys (XEvent *e) {
                     // make sure hero is not shooting immediately
                     level=-1;
                     lastFacing = 0;
+                    frameIndex=0;
                 }
                 if(menuSelection==1 or menuSelection==2 or menuSelection==2 or menuSelection==4) {
 #ifdef USE_SOUND
@@ -1301,6 +1258,7 @@ void renderBackground () {
             bit->pos[0] = (rnd() * ((float)LEVEL_WIDTH + (roomX-(WINDOW_WIDTH/2)) - 1000));
             bit->pos[1] = rnd() * (100.0f + MAX_HEIGHT);
             bit->pos[2] = 0.8 + (rnd() * 0.4);
+            bit->n = ((rnd()>.5)?1:0);
             bit->vel[0] = 0.0f;
             bit->vel[1] = -0.8f;
             bit->vel[2] = (rnd());
@@ -1311,8 +1269,9 @@ void renderBackground () {
             bg++;
         }
     }
-    if (bg < MAX_BACKGROUND_BITS) {
+    if (bg < MAX_BACKGROUND_BITS-2) {
         // Create bit
+        //for (i=0;i<=2;i++){
         bgBit *bit = new bgBit;
         if (bit == NULL) {
             exit(EXIT_FAILURE);
@@ -1321,6 +1280,7 @@ void renderBackground () {
         bit->pos[1] = rnd() * 100.0f + (float)WINDOW_HEIGHT +
             (roomY-(WINDOW_HEIGHT/2));
         bit->pos[2] = 0.8 + (rnd() * 0.4);
+        bit->n = ((rnd()>.5)?1:0);
         bit->vel[0] = 0.0f;
         bit->vel[1] = -0.8f;
         bit->vel[2] = (rnd());
@@ -1329,6 +1289,7 @@ void renderBackground () {
             bitHead->prev = bit;
         bitHead = bit;
         bg++;
+        //}
     }
     // Reset pointer to beginning to render all bits
     bgBit *bit = bitHead;
@@ -1370,12 +1331,12 @@ void renderBackground () {
                 i=0;
         }
 
-        if (j>=1) {
-            writePixel(1, c_x, c_y);
-        } else if (j>0.9) {
-            writePixel(0, c_x, c_y);
+        if (j>=0.75) {
+            writePixel(bit->n, c_x, c_y, 3);
+        } else if (j>0.5) {
+            writePixel(bit->n, c_x, c_y, 2);
         } else {
-            writePixel(0/*atoi(bit->n)*/, c_x, c_y);
+            writePixel(bit->n, c_x, c_y, 1);
         }
         bit = bit->next;
     }

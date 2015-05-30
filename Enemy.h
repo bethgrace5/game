@@ -3,6 +3,7 @@
 
 #include "Object.h"
 #include "Sprite.h"
+#include "sounds.h"
 
 //=====================================================================
 //  Enemies

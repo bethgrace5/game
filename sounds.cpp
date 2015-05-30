@@ -1,5 +1,5 @@
 
-#ifdef USE_SOUND
+//#ifdef USE_SOUND
 #include "definitions.h"
 #include "sounds.h"
 
@@ -190,6 +190,10 @@ void init_sounds() {
         std::cout << "ERROR - fmod_createsound() - mvalSingle\n" << std::endl;
         return;
     }
+    if (fmod_createsound((char *)"./sounds/laser.wav", 32)) {
+        std::cout << "ERROR - fmod_createsound() - laser\n" << std::endl;
+        return;
+    }
 }
 //#endif
-#endif
+//#endif

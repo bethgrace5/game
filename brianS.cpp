@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <iostream>
 #include "ppm.h"
+#include "sounds.h"
 #include "Object.h"
 #include "Sprite.h"
 #include "definitions.h"
@@ -65,7 +66,7 @@ void Enemy::enemyAI (Object *hero) {
         float d_y=e_cy - hero->getCenterY();
         int h_above = (d_y<0)?10:0;
         int h_right = (d_x<0)?1:0;
-        int range=(Object::getAggro())?800:400;
+        int range=(Object::getAggro())?600:300;
         int rnd_tmp = (rnd()*100)+150;
         if (type==2)
             rnd_tmp=250;
@@ -76,7 +77,9 @@ void Enemy::enemyAI (Object *hero) {
         str += "[DIR: " + itos(h_dir) + "] [" + itos(h_close) + "]";
         str += "{" + itos(Object::getAggro()) + "}";
         if (type==1 && h_close == 0 && Object::getAggro()){
-            h_close=1;//Follow if aggro'd but over 800 pixels
+            Object::setAggro(false);//Un-Aggro
+            Object::setVelocityX(0);
+            str += "Un-Aggro";
         }
         // If enemy is within 200px & not dead: 2; within 400px: 1; else: 0
         if (!(h_f==e_f) && (e_t == 2)){
@@ -101,8 +104,14 @@ void Enemy::enemyAI (Object *hero) {
                 gettimeofday(&sEnd, NULL);
                 if (diff_ms(sEnd, sStart)>fire_rate){
                     if (type==1){
+#ifdef USE_SOUND
+                        fmod_playsound(tick); // laser
+#endif
                         makeBullet(e_cx, e_cy+11, (h_right?17:-17), 8, 3);
                     } else if (type==2) {
+#ifdef USE_SOUND
+                        fmod_playsound(gunShotMarvin);
+#endif
                         makeBullet(e_cx, e_cy+7, (h_right?7:-7), 20, 1);
                         Sprite::setIndex(6);
                         gettimeofday(&fStart, NULL);
@@ -140,9 +149,9 @@ void Enemy::enemyAI (Object *hero) {
                                 }
                             }
                             else{ // gap
-                                    Object::setVelocityX(speed*-1);
-                                    str += "move left!";
-                                    Object::setFloor(NULL);
+                                Object::setVelocityX(speed*-1);
+                                str += "move left!";
+                                Object::setFloor(NULL);
                             }
                         }
                         break;
@@ -165,9 +174,9 @@ void Enemy::enemyAI (Object *hero) {
                                 }
                             }
                             else{ // gap
-                                    Object::setVelocityX(speed);
-                                    str += "move right!";
-                                    Object::setFloor(NULL);
+                                Object::setVelocityX(speed);
+                                str += "move right!";
+                                Object::setFloor(NULL);
                             }
                         }
                         break;
@@ -344,7 +353,7 @@ void Enemy::enemyAI (Object *hero) {
                 }
                 break;
             case 0:
-            // patrol
+                // patrol
                 Object::setAggro(false);
                 if (e_vx==0) {
                     Object::setVelocityX((rnd()>.5)?(-0.6):(0.6));//Patrol ground object
@@ -380,31 +389,38 @@ void Enemy::enemyAI (Object *hero) {
         }
     }
     else if (h_f && Object::getAggro()) { // enemy is in the air
-                if (Object::getBottom() < h_ft) { // enemy needs to go up
-		    if ((e_cx>h_fr) or (e_cx<h_fl)){
-		    	str += "Enemy's bottom: " + itos(Object::getBottom()) + ", h_ft: " + itos(h_ft);
-                        Object::setVelocityY(2);
-                        str += "; jump #" + itos(Object::getJump()) + " ";
-                    }
-                }
-                else {
-                	if (e_cx<h_cx) {
-                            Object::setVelocityX(speed);
-                	}
-                	else{
-                            Object::setVelocityX(speed*-1);
-                        }
-                
-                str += "move in air, vel y: " + itos(Object::getVelocityY());
-                }
+        if (Object::getBottom() < h_ft) { // enemy needs to go up
+            if ((e_cx>h_fr) or (e_cx<h_fl)){
+                str += "Enemy's bottom: " + itos(Object::getBottom()) + ", h_ft: " + itos(h_ft);
+                Object::setVelocityY(2);
+                str += "; jump #" + itos(Object::getJump()) + " ";
+            }
+        }
+        else {
+            if (e_cx<h_cx) {
+                Object::setVelocityX(speed);
+            }
+            else{
+                Object::setVelocityX(speed*-1);
+            }
+
+            str += "move in air, vel y: " + itos(Object::getVelocityY());
+        }
     }
     //std::cout << str << std::endl;
     if (Object::life<=0 && !(Object::isDying)){
         Object::isDying=1;
-        if (type==1)
+        if (type==1){
+#ifdef USE_SOUND
+            fmod_playsound(endFx);
+#endif
             Sprite::setIndex(21);
-        else if (type==2)
+        } else if (type==2) {
+#ifdef USE_SOUND
+            fmod_playsound(endFx);
+#endif
             Sprite::setIndex(8);
+        }
         gettimeofday(&fStart, NULL);
     }
     if (Object::isDying){
@@ -433,11 +449,11 @@ void Enemy::enemyAI (Object *hero) {
             }
         }
         /*else if (type==2){
-            if (diff_ms(fEnd, fStart)>frame_rate){
-                Sprite::setIndex(((Sprite::getIndex()+1)%16)+11);
-                gettimeofday(&fStart, NULL);
-            }
-        }*/
+          if (diff_ms(fEnd, fStart)>frame_rate){
+          Sprite::setIndex(((Sprite::getIndex()+1)%16)+11);
+          gettimeofday(&fStart, NULL);
+          }
+          }*/
     }
 }
 
