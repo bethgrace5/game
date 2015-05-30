@@ -1,17 +1,33 @@
 #ifndef PLAYER_H
 #define PLAYER_H
+
+#include <sys/time.h>
+#include <GL/glx.h>
+#include "definitions.h"
+#include "functions.h"
+#include "Sprite.h"
+#include "Object.h"
+
+#ifdef USE_SOUND
+#include "sounds.h"
+#endif
+
 //=====================================================================
 //Player
 //=====================================================================
-class Player: public Object{
+extern int level;
+class Player: public Object, public Sprite{
   private:
-    std::string name;
-
-    int lives, health;
-
+    int lives, health, maxHealth;
     int jumps, jumpLimit, jumpPower;
-
     int maxSpeed, speed;
+
+    int indexp;
+    int once;
+
+    //bool triggerShooting;
+
+    timeval seqStartA, seqEndA;
 
   public:
     Player();
@@ -22,62 +38,24 @@ class Player: public Object{
     void jump();
     void stop();
     void jumpRefresh();
-    void autoSet();
+
+    int getHealth();
+    void setHealth(int take);
+    void reduceHealth(int take);
+    void repairHealth(int take);
+
+    bool checkShooting();
+    void setShooting(bool take);
+    int getLives();
+    void incrementLives();
+    void decrementLives();
 
     void drawBox();
+    void cycleAnimations();
+    void setOnGround(bool take);
+    void autoState();
+
+    //int diff_ms (timeval t1, timeval t2);
+
 };
-//==============================================
-//Setup
-//==============================================
-Player::Player() : Object(26, 44, 250, 250){
-  name = "No Name";
-  //Basic Status
-  lives = 3; health = 3;
-
-  jumps = 1; jumpLimit = 3; jumpPower = 5;
-  speed = 0; maxSpeed  = 7;
-}
-//===============================================
-//Movement Functions
-//===============================================
-void Player::moveRight(){ 
-  Object::setVelocityX(maxSpeed);
-}
-void Player::moveLeft(){
-  Object::setVelocityX(-maxSpeed);
-}
-void Player::jump(){
-  Object::setVelocityY(jumpPower);
-}
-void Player::stop(){
-  Object::setVelocityX(0);
-}
-void Player::jumpRefresh(){ 
-  if(Player::getVelocityY() == 0) jumps = 0; 
-}
-
-void Player::autoSet(){
-  Object::setCenter(Object::getCenterX() + Object::getVelocityX(), 
-                    Object::getCenterY() + Object::getVelocityY() );
-
-}
-//===============================================
-//Drawing Functions
-//===============================================
-void Player::drawBox(){
-  int w = Object::getWidth();
-  int h = Object::getHeight();
-  glPushMatrix();
-  glTranslatef(Object::getCenterX(), Object::getCenterY(), 0);
-
-  glBegin(GL_QUADS);
-  glVertex2i(-w, -h);
-  glVertex2i(-w,  h);
-  glVertex2i( w,  h);
-  glVertex2i( w, -h);
-  glEnd(); 
-  //Sprite::drawTile(0);
-  glPopMatrix();
-}
-
 #endif

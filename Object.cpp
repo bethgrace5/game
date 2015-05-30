@@ -1,3 +1,7 @@
+
+#include <cstdlib>
+#include <iostream>
+
 #include "Object.h"
 
 Object::Object( double w, double h, double x, double y ) {
@@ -15,6 +19,8 @@ void Object::init( double w, double h, double x, double y ) {
     velocity.y = 0;
     velocity.z = 0;
 
+    life=100;
+
     index = 0;
     left=w*-1;
     bottom=h*-1;
@@ -23,6 +29,25 @@ void Object::init( double w, double h, double x, double y ) {
     floor=NULL;
     jump=0;
     aggro=false;
+    isJumping=0;
+    isFalling=0;
+    isWalking=0;
+    isShooting=0;
+    hostile = 0;
+    interactive = 0;
+    isDying=0;
+    isDead=0;
+}
+
+void Object::init( double w, double h ) {
+    width  = w;
+    height = h;
+    left=w*-1;
+    bottom=h*-1;
+    right=w;
+    top=h;
+    hostile = 0;
+    interactive = 0;
 }
 
 void Object::autoSet(){
@@ -132,9 +157,16 @@ double Object::getOldLeft(){
 
 void Object::setIndex(int ind){
   index = ind;
+  std::cout << "set" << std::endl;
 }
 int Object::getIndex() {
     return index;
+}
+void Object::setID(int ind){
+  obj_id = ind;
+}
+int Object::getID() {
+    return obj_id;
 }
 void Object::setFloor(Object *obj){
   floor = obj;

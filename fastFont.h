@@ -1,5 +1,5 @@
-#ifndef FASTFONTS_H
-#define FASTFONTS_H
+#ifndef FASTFONT_H
+#define FASTFONT_H
 //=================+
 //  Directory      |
 //=================+
@@ -215,7 +215,7 @@ void writeWords(std::string words, float x, float y){
   //glTranslatef(500, 300, 0);
 
   for(int i = 0; i < size; i++){
-    glTranslatef(20, 0, 0);
+    glTranslatef(22, 0, 0);
     getFont(cWords[i]);
   }//Note Need To Add Spacing Between Each Letter
   glPopMatrix();
