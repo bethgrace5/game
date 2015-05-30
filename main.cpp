@@ -785,9 +785,6 @@ void movement() {
     // remove a life when the hero falls off cliff
     if (hero->getCenterY() < 0){
         hero->setHealth(0);
-        if(!hero->isDying){
-            hero->decrementLives();
-        }
     }
 
     if (hero->getHealth()<=0) {//Going to try to Mimic The Death Function. Heres a tmp fix though
