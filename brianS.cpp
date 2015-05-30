@@ -13,6 +13,11 @@
 #include "Enemy.h"
 using namespace std;
 
+
+Enemy::Enemy() : Sprite(), Object() {
+
+}
+
 Enemy::Enemy(int w, int h, Object *ground, int t) : Sprite(), Object (w, h, ground->getCenterX()+rnd() * ground->getWidth() * (rnd()>.5?-1:1), ground->getCenterY() + ground->getHeight() + h) {
     type = t;
     switch (t){

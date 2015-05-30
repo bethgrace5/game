@@ -27,6 +27,7 @@ class Enemy : public Sprite, public Object {
 
     public:
         int type; // 1: enemy 1, 2: enemy 2, 3: boss
+        Enemy();
         Enemy(int w, int h, Object *ground, int t);
         Enemy(int w, int h, int x, int y, int t);
         void enemyAI(Object *hero);
