@@ -4,7 +4,7 @@
 //Development Controls
 
 // comment to ignore sound use
-//#define USE_SOUND
+//#define USE_SOUND 1
 
 // 1 for quick load, 0 for slow load with menu images
 #define QUICK_LOAD_TIME 1

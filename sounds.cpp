@@ -1,16 +1,17 @@
-
-#include "definitions.h"
-
 #ifdef USE_SOUND
+#include "definitions.h"
+#include "sounds.h"
+
 #include "./include/FMOD/fmod.h"
 #include "./include/FMOD/wincompat.h"
 #include "fmod.h"
+#include <iostream>
 
-#ifndef SOUNDS_CPP
-#define SOUNDS_CPP
+//#ifndef SOUNDS_CPP
+//#define SOUNDS_CPP
 
-void init_sounds(void);
-
+//void init_sounds(void);
+/*
 enum sound_t {
     // theme song
     megamanTheme = 0,
@@ -53,7 +54,7 @@ enum sound_t {
     gunShotMarvin,
     mvalSingle,
 };
-
+*/
 void init_sounds() {
     //FMOD_RESULT result;
     if (fmod_init()) {
@@ -188,6 +189,10 @@ void init_sounds() {
         std::cout << "ERROR - fmod_createsound() - mvalSingle\n" << std::endl;
         return;
     }
+    if (fmod_createsound((char *)"./sounds/laser.wav", 32)) {
+        std::cout << "ERROR - fmod_createsound() - laser\n" << std::endl;
+        return;
+    }
 }
 #endif
-#endif
+//#endif

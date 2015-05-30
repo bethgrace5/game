@@ -1,12 +1,13 @@
 #include <sys/time.h>
 #include <GL/glx.h>
 #include "definitions.h"
+#include "functions.h"
 #include "Sprite.h"
 #include "Object.h"
 #include "Player.h"
 
 #ifdef USE_SOUND
-#include "sounds.cpp"
+#include "sounds.h"
 #endif
 
 //==============================================
@@ -182,6 +183,6 @@ void Player::drawBox(){
 //==============================================
 //Helper Functions
 //==============================================
-int Player::diff_ms (timeval t1, timeval t2) {
+/*int Player::diff_ms (timeval t1, timeval t2) {
   return (((t1.tv_sec - t2.tv_sec) * 1000000) + (t1.tv_usec - t2.tv_usec))/1000;
-}
+}*/

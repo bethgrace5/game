@@ -86,7 +86,7 @@ Attack::Attack() : Object(0, 0, 0, 0){
   once = onceOnly = 0;
   timer = 1;
   indexp = 0;
-  damage = 1;
+  damage = 5;
   frameRate = 55;
   hurtOnce = 0;
   duration = 1000;
@@ -97,9 +97,8 @@ Attack::Attack() : Object(0, 0, 0, 0){
 }
 
 void Attack::referenceTo(Sprite take, int id){
-  //spriteID = take.
-  //rowAt = take.getRow();
-  //columnAt = take.getColumn();
+  rowAt = take.getRow();
+  columnAt = take.getColumn();
   spriteID = id;
 }
 
@@ -145,11 +144,12 @@ void Attack::cycleAnimations(){
 
   if(diff_ms(seqEndA, seqStartA) > frameRate){
     indexp++;
-    //if(indexp > row() * column) indexp = 0;
-    if(indexp > 8) indexp = 0;
+    if(indexp > rowAt * columnAt) indexp = 0;
+    //if(indexp > 8) indexp = 0;
 
     once = 0; start = 1;
   }
+  std::cout << "indexp " << indexp << "\n";
 
   if(cycleBase){
     if(indexp == 0 && start) stop = 1; 
@@ -168,17 +168,18 @@ void Attack::checkDuration(){
 void Attack::drawBox(Sprite targetSprite){
   if(stop == 1) return;
 
-  int w = Object::getWidth();
-  int h = Object::getHeight();
+  //int w = Object::getWidth();
+  //int h = Object::getHeight();
   glPushMatrix();
   glTranslatef(Object::getCenterX(), Object::getCenterY(), 0);
-
+/*
   glBegin(GL_QUADS);
   glVertex2i(-w, -h);
   glVertex2i(-w,  h);
   glVertex2i( w,  h);
   glVertex2i( w, -h);
   glEnd();
+  */
 
   targetSprite.drawTile(indexp);
 
@@ -187,8 +188,3 @@ void Attack::drawBox(Sprite targetSprite){
 //==============================================
 //Helper Functions
 //==============================================
-int Attack::diff_ms (timeval t1, timeval t2) {
-  return (((t1.tv_sec - t2.tv_sec) * 1000000) + (t1.tv_usec - t2.tv_usec))/1000;
-}
-
-

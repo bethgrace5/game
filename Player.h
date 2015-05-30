@@ -4,11 +4,12 @@
 #include <sys/time.h>
 #include <GL/glx.h>
 #include "definitions.h"
+#include "functions.h"
 #include "Sprite.h"
 #include "Object.h"
 
 #ifdef USE_SOUND
-#include "sounds.cpp"
+#include "sounds.h"
 #endif
 
 //=====================================================================
@@ -54,7 +55,7 @@ class Player: public Object, public Sprite{
     void setOnGround(bool take);
     void autoState();
 
-    int diff_ms (timeval t1, timeval t2);
+    //int diff_ms (timeval t1, timeval t2);
 
 };
 #endif

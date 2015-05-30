@@ -1,6 +1,6 @@
 
 #include <GL/glx.h>
-
+#include <string.h>
 #include "Sprite.h"
 #include "functions.h"
 

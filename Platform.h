@@ -93,8 +93,6 @@ class Attack: public Object {
     void cycleAnimations();
 
     void drawBox(Sprite targetSprite);
-    
-    int diff_ms (timeval t1, timeval t2);
 };
 
 #endif
