@@ -421,7 +421,9 @@ int check_keys (XEvent *e) {
             }
             // Jump
             if ((key == XK_w || key == XK_Up)) {
-                hero->jump();
+                if(!hero->isDying) {
+                    hero->jump();
+                }
             }
             // move character left
             if (key == XK_a || key == XK_Left) {
