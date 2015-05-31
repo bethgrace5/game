@@ -1182,7 +1182,7 @@ void renderPauseMenu() {
     float tileSz = 0.3333333;
 
     glPushMatrix();
-    glClear(GL_COLOR_BUFFER_BIT);
+    //glClear(GL_COLOR_BUFFER_BIT);
     //glClearColor(0.0, 0.0, 0.0, 1.0);
     glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
     glEnable(GL_TEXTURE_2D);
@@ -1311,7 +1311,7 @@ void writeScore() {
 }
 
 void renderHealthBar () {
-    int WHW = WINDOW_HALF_WIDTH;
+    //int WHW = WINDOW_HALF_WIDTH;
     int WH = WINDOW_HEIGHT;
     int h = 56;
     int w = 200;
