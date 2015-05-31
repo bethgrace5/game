@@ -89,7 +89,6 @@ int creeperScore = 0;
 
 // menu rendering and selection Globals
 int showInvalid=0, frameIndex=0, menuSelection = 0;
-int glXSwapBuffersOnce = 1;
 timeval frameStart, frameEnd;
 
 //Images and Textures
@@ -138,6 +137,7 @@ void renderPauseMenu();
 void resetLevel();
 void setupItems();
 void writeScore();
+void setupEnemies();
 
 int main(void) {
     initXWindows(); init_opengl(); 
@@ -195,10 +195,6 @@ int main(void) {
         // render "pause menu"
         else if (level == 2) {
             renderPauseMenu();
-            if(glXSwapBuffersOnce) {
-                glXSwapBuffers(dpy, win);
-                glXSwapBuffersOnce = 0;
-            }
         }
         else {
             movement();
@@ -206,9 +202,7 @@ int main(void) {
             moveWindow();
             gameTimer();
         }
-        if (level != 2 ){
-            glXSwapBuffers(dpy, win);
-        }
+        glXSwapBuffers(dpy, win);
     }
     cleanupXWindows(); return 0;
 
@@ -437,14 +431,8 @@ void init_opengl (void) {
         makePlatform(20, 1000, -16, 600);
 
         setupItems();
+        setupEnemies();
 
-        makeEnemy(37, 80, grounds[2], 1);
-        makeEnemy(37, 80, grounds[2], 1);
-        makeEnemy(38, 37, grounds[1], 2);
-        makeEnemy(37, 80, grounds[4], 1);
-        makeEnemy(100, 100, 300, 500, 3);
-        makeEnemy(38, 37, grounds[1], 2);
-        makeEnemy(37, 80, grounds[4], 1);
     }
 }
 
@@ -523,7 +511,6 @@ int check_keys (XEvent *e) {
                 savedSeconds = seconds;
                 savedMinutes = minutes;
                 menuSelection=0;
-                glXSwapBuffersOnce = 1;
                 level = 2;
             }
             // toggle start menu
@@ -719,6 +706,8 @@ void resetLevel() {
     
     cleanupItems();
     setupItems();
+
+    setupEnemies();
 }
 
 
@@ -740,7 +729,6 @@ void cleanupItems() {
     }
 }
 void makeItems(int w, int h, int x, int y) {
-    cout<<"make item"<<endl;
     itemsHold[items_length] = new Item();
     itemsHold[items_length]->setID(items_length);
     itemsHold[items_length]->insert("./images/firemon.ppm", 1, 1);
@@ -750,7 +738,6 @@ void makeItems(int w, int h, int x, int y) {
 }
 
 void deleteItem(int id) {
-    cout<<"delete item"<<endl;
     if (items_length <= 0) return;
     if (id < 0) return;
     items_length--;
@@ -791,6 +778,15 @@ void makeEnemy(int w, int h, Object *ground, int type) {
     else{
         cout << "Enemies array full!" << endl;
     }
+}
+void setupEnemies() {
+        makeEnemy(37, 80, grounds[2], 1);
+        makeEnemy(37, 80, grounds[2], 1);
+        makeEnemy(38, 37, grounds[1], 2);
+        makeEnemy(37, 80, grounds[4], 1);
+        makeEnemy(100, 100, 300, 500, 3);
+        makeEnemy(38, 37, grounds[1], 2);
+        makeEnemy(37, 80, grounds[4], 1);
 }
 
 void makeEnemy(int w, int h, int x, int y, int type) {
@@ -841,11 +837,8 @@ bool detectItem (Object *obj, Item *targetItem) {
             obj->getLeft()   < targetItem->getRight() &&
             obj->getBottom() < targetItem->getTop()  &&
             obj->getTop()    > targetItem->getBottom()) {
-        cout << "Item touched before effect\n";
         targetItem->causeEffect(hero);
-        cout << "Item touched before deleteCalled\n";
         deleteItem(obj->getID());
-        cout << "Item end of detect function\n";
         return true;
     }
     return false;
@@ -893,8 +886,10 @@ void groundCollide (Object *obj, Object *ground) {
         }
         //If moving object is at the right side of static object
         if (!(obj->getOldLeft() < g_right ) && !(h_left >= g_right)) {
-            obj->setVelocityX(0.51);
-            obj->setCenter(g_right+(obj->getCenterX()-h_left), obj->getCenterY());
+            if ((obj->getOldBottom() < g_top)) {
+                obj->setVelocityX(0.51);
+                obj->setCenter(g_right+(obj->getCenterX()-h_left), obj->getCenterY());
+            }
         }
     }
 }
@@ -1213,11 +1208,11 @@ void renderPauseMenu() {
 
     glPushMatrix();
     //glClear(GL_COLOR_BUFFER_BIT);
-    //glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
     glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, pauseMenuTexture[0]);
-    //glColor4ub(255,255,255,255);
+    glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
 
     glTexCoord2f(0, (menuSelection%3)*tileSz + tileSz) ; glVertex2i(-WINDOW_HALF_WIDTH/2,-WINDOW_HALF_HEIGHT/2);
