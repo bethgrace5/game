@@ -20,6 +20,7 @@ Player::Player() : Object(26, 44, 250, 250), Sprite(){
   isShooting=0;
   jumps = 0; jumpLimit = 2; jumpPower = 7;
   speed = 0; maxSpeed  = 7;
+  isShooting=0;
   Sprite::setMirror(false);
   indexp = 0; once = 0;
 }
@@ -86,6 +87,15 @@ void Player::decrementLives(){
     if(lives < 0) {
         health =0;
     }
+}
+void Player::reset(){ 
+  lives = 3; 
+  health =  maxHealth = 100;
+  isShooting=0;
+  lives = 3;
+  health = 100;
+  isShooting=0;
+  Sprite::setMirror(false);
 }
 
 //===============================================

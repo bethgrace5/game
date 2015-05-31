@@ -89,9 +89,9 @@ timeval frameStart, frameEnd;
 
 //Images and Textures
 Ppmimage *initImages[32], *computerScreenImages[32], *healthBarImage[1], *lifeImage[1],
-         *backgroundImage[1];
+         *backgroundImage[1], *pauseMenuImage[1];
 GLuint initTextures[65], computerScreenTextures[32], healthBarTexture[1], lifeTexture[1],
-       backgroundTexture[1];
+       backgroundTexture[1], pauseMenuTexture[1];
 
 //Function prototypes
 //Object createAI( int w, int h, Object *ground);
@@ -127,9 +127,8 @@ void renderInitMenu();
 void renderHealthBar();
 void renderDebugInfo();
 void renderLives();
+void renderPauseMenu();
 void writeScore();
-
-
 
 int main(void) {
     initXWindows(); init_opengl(); 
@@ -174,13 +173,19 @@ int main(void) {
             XEvent e; XNextEvent(dpy, &e);
             quit = check_keys(&e);
         }
+        // render "initializing sequence scene"
         if (level == -1) {
             renderInitMenu();
             //begin game timer upon level select
             gettimeofday(&gameStart, NULL);
         }
+        // render "selection menu"
         else if (level == 0) {
             renderComputerScreenMenu();
+        }
+        // render "pause menu"
+        else if (level == 2) {
+            renderPauseMenu();
         }
         else {
             movement();
@@ -351,6 +356,18 @@ void init_opengl (void) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, backgroundData);
     delete [] backgroundData;
 
+    //load pause menu image
+    glGenTextures(1, pauseMenuTexture);
+    pauseMenuImage[0] = ppm6GetImage("./images/pauseMenu.ppm");
+    glBindTexture(GL_TEXTURE_2D, pauseMenuTexture[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    unsigned char *pauseMenuData = buildAlphaData(pauseMenuImage[0]);
+    w = pauseMenuImage[0]->width;
+    h = pauseMenuImage[0]->height;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pauseMenuData);
+    delete [] pauseMenuData;
+
     // load health bar image
     glGenTextures(1, healthBarTexture);
     healthBarImage[0] = ppm6GetImage("./images/healthBar.ppm");
@@ -439,6 +456,7 @@ int check_keys (XEvent *e) {
     //handle input from the keyboard
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
+        // level 1
         if (level==1) {
             if (key == XK_Escape) {
                 return 1;
@@ -480,8 +498,10 @@ int check_keys (XEvent *e) {
                 fmod_playsound(dunDunDun);
 #endif
             }
-            if (key == XK_h) {
-                //healthIndex--;
+            // pause
+            if (key == XK_p) {
+                menuSelection=0;
+                level = 2;
             }
             // toggle start menu
             if (key == XK_m) {
@@ -614,6 +634,38 @@ int check_keys (XEvent *e) {
                     menuSelection=2;
                 else if(menuSelection ==4)
                     menuSelection=0;
+            }
+        }
+        // pause menu
+        if(level ==2) {
+            if (key == XK_Return) {
+                // continue
+                if(menuSelection==0) {
+                    level = 1;
+                }
+                // return to menu
+                if(menuSelection==1) {
+                    // go back to menu
+                    menuSelection = 0;
+                    level = 0;
+                    hero->reset();
+                }
+                // exit game
+                if(menuSelection==2) {
+                    return 1;
+                }
+            }
+            if ( key == XK_Down){
+                if (menuSelection < 2) {
+                    menuSelection++;
+                }
+                cout<<menuSelection<<endl;
+            }
+            if ( key == XK_Up){
+                if (menuSelection > 0) {
+                    menuSelection--;
+                }
+                cout<<menuSelection<<endl;
             }
         }
     }
@@ -1104,6 +1156,28 @@ void renderBullets (int x, int y) {
     }
     //cout << " . render finished " << endl;
 }
+void renderPauseMenu() {
+    float tileSz = 0.3333333;
+
+    glPushMatrix();
+    glClear(GL_COLOR_BUFFER_BIT);
+    //glClearColor(0.0, 0.0, 0.0, 1.0);
+    glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, pauseMenuTexture[0]);
+    //glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+
+    glTexCoord2f(0, (menuSelection%3)*tileSz + tileSz) ; glVertex2i(-WINDOW_HALF_WIDTH/2,-WINDOW_HALF_HEIGHT/2);
+    glTexCoord2f(0, (menuSelection%3)*tileSz         ) ; glVertex2i(-WINDOW_HALF_WIDTH/2, WINDOW_HALF_HEIGHT/2);
+    glTexCoord2f(1, (menuSelection%3)*tileSz         ) ; glVertex2i( WINDOW_HALF_WIDTH/2, WINDOW_HALF_HEIGHT/2);
+    glTexCoord2f(1, (menuSelection%3)*tileSz + tileSz) ; glVertex2i( WINDOW_HALF_WIDTH/2,-WINDOW_HALF_HEIGHT/2);
+
+    glEnd(); glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
+
+}
 
 void renderInitMenu () {
     int frameTime = 70;
@@ -1145,6 +1219,7 @@ void renderInitMenu () {
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
 }
+
 void renderLives () {
     int w = 50;
     int h = 50;
