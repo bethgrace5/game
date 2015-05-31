@@ -3,6 +3,9 @@
 //HW3 
 //05-11-15
 
+//  Platform_Functions
+//  Attack_Functions
+
 #include <GL/glx.h>
 
 #include "ppm.h"
@@ -12,9 +15,10 @@
 #include "chadD.h"
 #include "Item.h"
 
-
 using namespace std;
-
+//=====================================================================
+//  Platform_Functions
+//=====================================================================
 Platform::Platform() : Sprite(), Object(260, 200, 350, 400) {
   lineSpaceX = lineSpaceY = 0;
 }
@@ -70,19 +74,16 @@ void Platform::drawRow(int x, int y) {
 
     glPushMatrix();
     for (int i = 0; i < Object::getWidth()/lineSpaceX; i++) {
-
       if (i == 0) glTranslatef(lineSpaceX,0 , 0); 
       else        glTranslatef(lineSpaceX + lineSpaceX ,0 , 0); 
-
       drawTile();
-
     }
     glPopMatrix();
   } 
   glPopMatrix(); 
 }
 //=====================================================================
-//Attack
+//  Attack_Functions
 //=====================================================================
 Attack::Attack() : Object(0, 0, 0, 0){
   once = onceOnly = 0;
@@ -96,6 +97,7 @@ Attack::Attack() : Object(0, 0, 0, 0){
   timeBase = 0;
   stop = 0; 
   start = 0;
+  stickOn = 1;
 }
 
 void Attack::referenceTo(Sprite take, int id){
@@ -103,25 +105,18 @@ void Attack::referenceTo(Sprite take, int id){
   columnAt = take.getColumn();
   spriteID = id;
 }
-
-//void Attack::attatchTo(Player player) {
-//}
-
 //==============================================
-//Stats Functions
+//Rates Functions
 //==============================================
 void Attack::changeRate(int take){
   frameRate = take;
 }
-
 void Attack::changeDuration(int take){
   duration = take;
 }
-
 void Attack::causeEffect(Player *hero){
   hero->reduceHealth(damage);
 }
-
 bool Attack::checkStop(){
   return stop;
 }
@@ -132,14 +127,30 @@ void Attack::causeEffect(Enemy *singleEnemy){
   std::cout << "Enemy Got Hit\n";
 }
 //==============================================
-//
+// Movement Functions
 //==============================================
-void autoState(){
-  
+void Attack::autoState(){
+  if(timeBase) checkDuration();
+  if(cycleBase) if(indexp == 0 && start) stop = 1; 
+  if(stickOn) stickOnHero();
+
   //Follow Player Movement
   //Affect By Gravity
   //Directional Shots
 
+}
+
+void Attack::stickOnHero(){
+  setCenter(hero->getCenterX(), hero->getCenterY());
+}
+
+void Attack::checkDuration(){
+  if(onceOnly == 0){ gettimeofday(&timeOut, NULL); onceOnly = 1;}
+  std::cout << "test\n";
+  gettimeofday(&timeIn, NULL);
+  if(diff_ms(timeIn, timeOut) > duration){
+    stop = 1;
+  }
 }
 //===============================================
 //Drawing Functions
@@ -150,30 +161,10 @@ void Attack::cycleAnimations(){
   if(once == 0){ gettimeofday(&seqStartA, NULL); once = 1;}
   gettimeofday(&seqEndA, NULL);
 
-  //if(timeBase){
-  //  checkDuration();
-  //}
-
   if(diff_ms(seqEndA, seqStartA) > frameRate){
     indexp++;
     if(indexp > rowAt * columnAt) indexp = 0;
-    //if(indexp > 8) indexp = 0;
-
     once = 0; start = 1;
-  }
-  //std::cout << "indexp " << indexp << "\n";
-
-  if(cycleBase){
-    if(indexp == 0 && start) stop = 1; 
-  }
-}
-
-void Attack::checkDuration(){
-  if(onceOnly == 0){ gettimeofday(&timeOut, NULL); onceOnly = 1;}
-  std::cout << "test\n";
-  gettimeofday(&timeIn, NULL);
-  if(diff_ms(timeIn, timeOut) > duration){
-    stop = 1;
   }
 }
 
@@ -197,6 +188,3 @@ void Attack::drawBox(Sprite targetSprite){
 
   glPopMatrix();
 }
-//==============================================
-//Helper Functions
-//==============================================
