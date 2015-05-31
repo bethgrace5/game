@@ -80,8 +80,8 @@ timeval gameStart, gameEnd;
 int minutes = 0;
 int seconds = 0;
 int updated = 1;
-int saveMinutes;
-int saveSeconds;
+int savedMinutes = 0;
+int savedSeconds = 0;
 
 //score tally
 int creeperScore = 0;
@@ -503,6 +503,9 @@ int check_keys (XEvent *e) {
             }
             // pause
             if (key == XK_p) {
+                //save current seconds and minutes
+                savedSeconds = seconds;
+                savedMinutes = minutes;
                 menuSelection=0;
                 level = 2;
             }
@@ -643,6 +646,8 @@ int check_keys (XEvent *e) {
         if(level ==2) {
             if (key == XK_Return) {
                 // continue
+                // restart game timer
+                gettimeofday(&gameStart, NULL);
                 if(menuSelection==0) {
                     level = 1;
                 }
@@ -1259,7 +1264,8 @@ void renderLives () {
 void gameTimer () {
     gettimeofday(&gameEnd, NULL);
     double currentTime = diff_ms(gameEnd, gameStart);
-    seconds = ((int)currentTime/1000)%60;
+    seconds = ((int)currentTime/1000)%60 + savedSeconds;
+    minutes = savedMinutes;
  
     if (seconds==0 && !updated) {
         seconds = 0;
