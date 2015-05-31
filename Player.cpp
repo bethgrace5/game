@@ -89,13 +89,17 @@ void Player::decrementLives(){
     }
 }
 void Player::reset(){ 
-  lives = 3; 
   health =  maxHealth = 100;
   isShooting=0;
   lives = 3;
   health = 100;
   isShooting=0;
   Sprite::setMirror(false);
+  setVelocityX(0);
+  setVelocityY(0);
+  setCenter(200, 400);
+  lives = 3; 
+
 }
 
 //===============================================
@@ -154,7 +158,7 @@ void Player::cycleAnimations(){
     }
   }
   //Standing
-  else indexp = 6; 
+  else indexp = 6;
   //std::cout << "Index: " << indexp << endl;
   Sprite::setIndexAt(indexp);
 }

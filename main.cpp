@@ -131,6 +131,7 @@ void renderHealthBar();
 void renderDebugInfo();
 void renderLives();
 void renderPauseMenu();
+void resetLevel();
 void writeScore();
 
 int main(void) {
@@ -461,6 +462,9 @@ int check_keys (XEvent *e) {
     if (e->type == KeyPress) {
         // level 1
         if (level==1) {
+            if (key == XK_r) {
+                resetLevel();
+            }
             if (key == XK_Escape) {
                 return 1;
             }
@@ -653,12 +657,8 @@ int check_keys (XEvent *e) {
                 }
                 // return to menu
                 if(menuSelection==1) {
-                    // go back to menu
-                    menuSelection = 0;
+                    resetLevel();
                     level = 0;
-                    hero->reset();
-                    savedMinutes = 0;
-                    savedSeconds = 0;
                 }
                 // exit game
                 if(menuSelection==2) {
@@ -690,6 +690,19 @@ int check_keys (XEvent *e) {
     }
 
     return 0;
+}
+
+void resetLevel() {
+    hero->reset();
+    menuSelection = 0;
+    savedSeconds = 0;
+    savedMinutes = 0;
+    seconds = 0;
+    minutes = 0;
+    creeperScore = 0;
+    updated = 1;
+    gettimeofday(&gameEnd, NULL);
+    gettimeofday(&gameStart, NULL);
 }
 
 void makePlatform(int w, int h, int x, int y) {
@@ -1267,21 +1280,19 @@ void gameTimer () {
     gettimeofday(&gameEnd, NULL);
     double currentTime = diff_ms(gameEnd, gameStart);
     seconds = ((int)currentTime/1000)%60 + savedSeconds;
-    minutes = savedMinutes;
- 
-    if (seconds==0 && !updated) {
-        seconds = 0;
+
+    if (seconds%60==0 &&!updated) { 
         minutes++;
-        cout<<"minutes: " << minutes <<endl;
         updated = 1;
     }
-    if (seconds==30) {
-        updated=0;
+    if (seconds%60==30) { 
+        updated = 0;
     }
-    string s = itos(seconds);
+ 
+    string s = itos(seconds%60);
     string m = itos(minutes);
 
-    if (seconds<10) {
+    if (seconds%60<10) {
         s="0"+s;
     }
     if (minutes<10) {
