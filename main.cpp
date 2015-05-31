@@ -657,6 +657,8 @@ int check_keys (XEvent *e) {
                     menuSelection = 0;
                     level = 0;
                     hero->reset();
+                    savedMinutes = 0;
+                    savedSeconds = 0;
                 }
                 // exit game
                 if(menuSelection==2) {
