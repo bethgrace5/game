@@ -89,6 +89,7 @@ int creeperScore = 0;
 
 // menu rendering and selection Globals
 int showInvalid=0, frameIndex=0, menuSelection = 0;
+int glXSwapBuffersOnce = 1;
 timeval frameStart, frameEnd;
 
 //Images and Textures
@@ -191,6 +192,10 @@ int main(void) {
         // render "pause menu"
         else if (level == 2) {
             renderPauseMenu();
+            if(glXSwapBuffersOnce) {
+                glXSwapBuffers(dpy, win);
+                glXSwapBuffersOnce = 0;
+            }
         }
         else {
             movement();
@@ -198,7 +203,9 @@ int main(void) {
             moveWindow();
             gameTimer();
         }
-        glXSwapBuffers(dpy, win);
+        if (level != 2 ){
+            glXSwapBuffers(dpy, win);
+        }
     }
     cleanupXWindows(); return 0;
 
@@ -513,6 +520,7 @@ int check_keys (XEvent *e) {
                 savedSeconds = seconds;
                 savedMinutes = minutes;
                 menuSelection=0;
+                glXSwapBuffersOnce = 1;
                 level = 2;
             }
             // toggle start menu
