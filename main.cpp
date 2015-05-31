@@ -17,7 +17,7 @@
 #include "Enemy.h"
 #include "Item.h"
 #include "Player.h"
-#include "chadD.h" //#include "Platform.h"
+#include "chadD.h"
 #include "definitions.h"
 #include "functions.h"
 #include "Object.h"
@@ -71,7 +71,7 @@ Item *items;
 Item *itemsHold[10];
 int items_length = 0;
 double g_left, g_right, g_top, g_bottom;
-int bg, bullets, grounds_length, enemies_length, i, j, level=0, quit=0;
+int bg, bullets, grounds_length, enemies_length = 0, i, j, level=0, quit=0;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 
@@ -397,8 +397,9 @@ void init_opengl (void) {
             grounds[i]->reInitSprite();
             grounds_length++;
         }
+        enemies_length = 0;
         for(int i = 0; i < storeIn.enemies_length; i++){
-            enemies[i] = &storeIn.enemies[i];
+            enemies[i] = new Enemy(storeIn.enemies[i]);
             enemies[i]->reInitSprite();
             enemies_length++;
         }
