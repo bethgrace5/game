@@ -74,9 +74,14 @@ double g_left, g_right, g_top, g_bottom;
 int bg, bullets, grounds_length, enemies_length, i, j, level=0, quit=0;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
+
+//timer
 timeval gameStart, gameEnd;
 int minutes = 0;
 int updated = 1;
+
+//score tally
+int creeperScore = 0;
 
 // menu rendering and selection Globals
 int showInvalid=0, frameIndex=0, menuSelection = 0;
@@ -122,6 +127,7 @@ void renderInitMenu();
 void renderHealthBar();
 void renderDebugInfo();
 void renderLives();
+void writeScore();
 
 
 
@@ -485,6 +491,7 @@ int check_keys (XEvent *e) {
             }
             // play sounds for debugging
             if (key == XK_t) {
+                creeperScore++;
             }
             if (key == XK_u){
                 animateOn = 1;
@@ -992,6 +999,7 @@ void render () {
     renderAttacks(x,y);
     renderLives();
     renderHealthBar();
+    writeScore();
     //renderDebugInfo();
 
     if (hero->getHealth()<0) {
@@ -1182,7 +1190,6 @@ void gameTimer () {
         cout<<"minutes: " << minutes <<endl;
         updated = 1;
     }
-
     if (seconds==30) {
         updated=0;
     }
@@ -1197,10 +1204,14 @@ void gameTimer () {
         m="0"+m;
     }
 
-    writeWords(".", 37, WINDOW_HEIGHT-10);
-    writeWords(".", 37, WINDOW_HEIGHT-24);
-    writeWords(s, 60, WINDOW_HEIGHT-20);
-    writeWords(m, 10, WINDOW_HEIGHT-20);
+    writeWords(".", 47, WINDOW_HEIGHT-60);
+    writeWords(".", 47, WINDOW_HEIGHT-73);
+    writeWords(s, 70, WINDOW_HEIGHT-70);
+    writeWords(m, 20, WINDOW_HEIGHT-70);
+}
+
+void writeScore() {
+    writeWords("+"+itos(creeperScore), 800, WINDOW_HEIGHT-30);
 }
 
 void renderHealthBar () {
@@ -1221,20 +1232,23 @@ void renderHealthBar () {
     glAlphaFunc(GL_GREATER, 0.0f);
     glBindTexture(GL_TEXTURE_2D, healthBarTexture[0]);
 
+    // render health level
     glPushMatrix();
     glBegin(GL_QUADS);
-    glTexCoord2f(0, 0.5); glVertex2i(WHW-(w/2)+((100-health)/10), WH-h-10);
-    glTexCoord2f(0, 1.0); glVertex2i(WHW-(w/2)+((100-health)/10), WH-10);
-    glTexCoord2f(1, 1.0); glVertex2i(WHW+(w/2)-((97-health)*2), WH-10);
-    glTexCoord2f(1, 0.5); glVertex2i(WHW+(w/2)-((97-health)*2), WH-h-10);
+    glTexCoord2f(0, 0.5); glVertex2i(100-(w/2)+((100-health)/10), WH-h+10);
+    glTexCoord2f(0, 1.0); glVertex2i(100-(w/2)+((100-health)/10), WH-20);
+    glTexCoord2f(1, 1.0); glVertex2i(100+(w/2)-((97-health)*2), WH-20);
+    glTexCoord2f(1, 0.5); glVertex2i(100+(w/2)-((97-health)*2), WH-h+10);
     glEnd();
     glPopMatrix();
+
+    // render outline of health bar
     glPushMatrix();
     glBegin(GL_QUADS);
-    glTexCoord2f(0, 0.0); glVertex2i(WHW-(w/2), WH-h-10);
-    glTexCoord2f(0, 0.5); glVertex2i(WHW-(w/2), WH-10);
-    glTexCoord2f(1, 0.5); glVertex2i(WHW+(w/2), WH-10);
-    glTexCoord2f(1, 0.0); glVertex2i(WHW+(w/2), WH-h-10);
+    glTexCoord2f(0, 0.0); glVertex2i(100-(w/2), WH-h+10);
+    glTexCoord2f(0, 0.5); glVertex2i(100-(w/2), WH-20);
+    glTexCoord2f(1, 0.5); glVertex2i(100+(w/2), WH-20);
+    glTexCoord2f(1, 0.0); glVertex2i(100+(w/2), WH-h+10);
     glEnd();
     glPopMatrix();
 

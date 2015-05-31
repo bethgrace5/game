@@ -14,6 +14,8 @@
 using namespace std;
 
 
+
+extern int creeperScore;
 Enemy::Enemy() : Sprite(), Object(0, 0, 0, 0) {
 
 }
@@ -548,6 +550,7 @@ void Enemy::enemyAI (Object *hero) {
             }
             else{
                 Object::isDead=1;
+                creeperScore++;
             }
             gettimeofday(&fStart, NULL);
         }
