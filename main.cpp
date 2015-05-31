@@ -78,7 +78,10 @@ int roomY=WINDOW_HALF_HEIGHT;
 //timer
 timeval gameStart, gameEnd;
 int minutes = 0;
+int seconds = 0;
 int updated = 1;
+int saveMinutes;
+int saveSeconds;
 
 //score tally
 int creeperScore = 0;
@@ -191,7 +194,7 @@ int main(void) {
             movement();
             render();
             moveWindow();
-            gameTimer ();
+            gameTimer();
         }
         glXSwapBuffers(dpy, win);
     }
@@ -659,13 +662,11 @@ int check_keys (XEvent *e) {
                 if (menuSelection < 2) {
                     menuSelection++;
                 }
-                cout<<menuSelection<<endl;
             }
             if ( key == XK_Up){
                 if (menuSelection > 0) {
                     menuSelection--;
                 }
-                cout<<menuSelection<<endl;
             }
         }
     }
@@ -1258,8 +1259,6 @@ void renderLives () {
 void gameTimer () {
     gettimeofday(&gameEnd, NULL);
     double currentTime = diff_ms(gameEnd, gameStart);
-    long unsigned int seconds = 0;
-
     seconds = ((int)currentTime/1000)%60;
  
     if (seconds==0 && !updated) {
@@ -1271,7 +1270,6 @@ void gameTimer () {
     if (seconds==30) {
         updated=0;
     }
-
     string s = itos(seconds);
     string m = itos(minutes);
 
