@@ -4,6 +4,9 @@
 
 #include "Object.h"
 
+Object::Object() {
+}
+
 Object::Object( double w, double h, double x, double y ) {
   init(w,h,x,y);
 }

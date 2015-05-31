@@ -114,7 +114,6 @@ void Player::cycleAnimations(){
           if (lives < 0) {
               //reset lives
               lives = 3;
-
               //kick user back to menu
               level = 0;
           }

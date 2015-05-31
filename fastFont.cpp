@@ -117,10 +117,20 @@ void drawFont(int atSet){
     float w = alphabetWidth/32;
     float h = alphabetHeight/32;
 
-    glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
-    glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
-    glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
-    glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
+    // clip dash to get dot
+    if (atSet == 39) {
+        glTexCoord2f(atX*0.15        , (atY*clipY)+clipY-0.1) ; glVertex2i(-w,-h);
+        glTexCoord2f(atX*0.15        ,  atY*clipY)        ; glVertex2i(-w,h);
+        glTexCoord2f((atX*0.15)+0.15,  atY*clipY)        ; glVertex2i(w,h);
+        glTexCoord2f((atX*0.15)+0.15, (atY*clipY)+clipY-0.1) ; glVertex2i(w,-h);
+
+    }
+    else {
+        glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
+        glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
+        glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
+        glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
+    }
     /*
        glTexCoord2f(0*clipX, 1.0f)        ; glVertex2i(-w,-h);
        glTexCoord2f(0*clipX, 0.0f)        ; glVertex2i(-w,h);
@@ -211,7 +221,7 @@ void getFont(char letter){
         case '9': drawFont(36); break;
         case '0': drawFont(37); break;
         case '+': drawFont(38); break;
-        case '-': drawFont(39); break;
+        case '.': drawFont(39); break;
         case 'x': drawFont(40); break;
         case '/': drawFont(41); break; 
         default: break;

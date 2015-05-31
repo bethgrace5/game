@@ -104,6 +104,9 @@ void Attack::referenceTo(Sprite take, int id){
   spriteID = id;
 }
 
+//void Attack::attatchTo(Player player) {
+//}
+
 //==============================================
 //Stats Functions
 //==============================================
@@ -125,9 +128,15 @@ bool Attack::checkStop(){
 
 void Attack::causeEffect(Enemy *singleEnemy){
   if(timer == 0) return;
+
   std::cout << "Enemy Got Hit\n";
 }
+//==============================================
+//
+//==============================================
+void autoState(){
 
+}
 //===============================================
 //Drawing Functions
 //===============================================/
@@ -151,7 +160,7 @@ void Attack::cycleAnimations(){
 
     once = 0; start = 1;
   }
-  std::cout << "indexp " << indexp << "\n";
+  //std::cout << "indexp " << indexp << "\n";
 
   if(cycleBase){
     if(indexp == 0 && start) stop = 1; 

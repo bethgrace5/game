@@ -37,23 +37,6 @@
 ======================+
 */
 #define EDITOR_MODE
-/*
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <cstdio>
-#include <cstdlib>
-#include <string.h>
-#include <GL/glx.h>
-#include <fstream>
-#include "fastFont.cpp" //#include "fastFont.h"
-#include "Player.h"
-#include "Attack2.cpp"
-#include "definitions.h"
-#include "functions.h"
-#include "Platform.h"
-#include "ppm.h"
-#include <cmath>*/
 
 #include <algorithm>
 #include <cmath>
@@ -98,7 +81,7 @@ GLXContext glc;
 Player *hero;
 Sprite currentTile;
 Sprite ruler;
-//Enemy *enemies[MAX_ENEMIES];
+Enemy *enemies[MAX_ENEMIES];
 Platform *grounds[MAX_GROUNDS];
 int grounds_length = 0;
 int enemies_length = 0;
@@ -112,6 +95,8 @@ int quit=0;
 
 bool saving;
 bool loading;
+
+bool enemyEditor = 1;
 
 bool create = 0;
 bool tileMode = 0;
@@ -131,6 +116,11 @@ void moveWindow(void);
 
 void save();
 void load();
+#ifdef BACKUP
+void copyToNew();
+void convertSave();
+void convertLoad();
+#endif
 
 void check_mouse(XEvent *e);
 int  check_keys (XEvent *e);
@@ -145,6 +135,8 @@ void pickTile(int x, int y);
 void renderHero(int x, int y);
 
 void makeEnemy(int w, int h, Object *ground, int type); 
+void makeEnemy(int w, int h, int x, int y, int type);
+
 Object createAI( int w, int h, Object *ground);
 void deleteEnemy(int ind);
 
@@ -235,6 +227,7 @@ void makePlatform(int x, int y) {
   grounds[grounds_length]->setBackground(1);
   grounds_length++;
 }
+
 
 void setRow(int size){
   if(saveID < 0)
@@ -345,33 +338,43 @@ void deletePlatform(){
 //=====================================================================
 //  Enemy Editor
 //=====================================================================
-void makeEnemy(int w, int h, Object *ground, int type) {
-  /*if (enemies_length<MAX_ENEMIES){
-    switch (type){
-      case 1:
-        enemies[enemies_length] = new Enemy(w, h, ground); 
-        enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
-        enemies[enemies_length]->setBottom(-44);
-        enemies[enemies_length]->setLeft(-24);
-        enemies[enemies_length]->setRight(24);
-        enemies[enemies_length]->setTop(24);
-        enemies[enemies_length]->setHeight(25);
-        break;
+void makeEnemy(int w, int h, int x, int y, int type) {
+    if (enemies_length<MAX_ENEMIES){
+        enemies[enemies_length] = new Enemy(w, h, x, y, type); 
+        switch (type){
+            case 1:
+                enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
+                enemies[enemies_length]->setBottom(-44);
+                enemies[enemies_length]->setLeft(-24);
+                enemies[enemies_length]->setRight(24);
+                enemies[enemies_length]->setTop(24);
+                enemies[enemies_length]->setHeight(25);
+                break;
+            case 2:
+                enemies[enemies_length]->insert("./images/enemy2_1.ppm", 26, 1);
+                /*enemies[enemies_length]->setBottom(-44);
+                  enemies[enemies_length]->setLeft(-24);
+                  enemies[enemies_length]->setRight(24);
+                  enemies[enemies_length]->setTop(24);
+                  enemies[enemies_length]->setHeight(25);
+                  */
+                break;
+            case 3:
+                enemies[enemies_length]->insert("./images/boss.ppm", 1, 1);
+                break;
+        }
+        enemies_length++;
     }
-    enemies_length++;
-  }
-  else{
-    cout << "Enemies array full!!!!" << endl;
-  }*/
+    else{
+        cout << "Enemies array full!" << endl;
+    }
 }
 
 void deleteEnemy(int ind){
-  /*
   enemies_length--;
   delete enemies[i];
   enemies[i] = enemies[enemies_length];
   enemies[enemies_length]=NULL;
-  */
 }
 
 //Object createAI (int w, int h, Object *ground) {
@@ -394,12 +397,15 @@ void check_mouse (XEvent *e) {
   int take;
   if (e->type == ButtonPress) {
     if (e->xbutton.button==1) { //Left button was pressed
-      if(create == 1){
+      if(enemyEditor){
+        makeEnemy(100, 100, savex, savey, 3);  
+      }
+      else if(create == 1){
         cout << " x " << savex << ", y " << savey << "\n";
         makePlatform(savex, savey);
         return;
       }
-      if(selecter == 1){
+      else if(selecter == 1){
         take = clickObject(savex, savey); 
         cout << "The Id is: " << take << "\n";
         saveID = holdID = take;
@@ -485,6 +491,21 @@ int check_keys (XEvent *e) {
     if(key == XK_n){
       deletePlatform();
     } 
+    #ifdef BACKUP
+    if(key == XK_p){
+      copyToNew(); 
+    }
+    if(key == XK_o){
+      convertSave();
+    }
+    if(key == XK_i){
+      convertLoad();
+    }
+    #endif
+    if(key == XK_f ){
+      enemyEditor = !enemyEditor; 
+    }
+
     if(key == XK_a){
       roomX -= 50;
     }
@@ -554,10 +575,12 @@ bool detectCollide (Object *obj, Object *ground) {
 //  Drawing
 //=====================================================================
 void renderOptions(){
-  if(create == 1) 
-    writeWords("Create Mode", 25, 25);
-  if(selecter == 1)
-    writeWords("Select Mode", 25, 25);
+  if(enemyEditor == 1) writeWords("Enemy Editor Mode", 25, 55);
+  else writeWords("Platform Editor Mode", 25, 55);
+
+  if(create == 1) writeWords("Create Mode", 25, 25);
+
+  if(selecter == 1) writeWords("Select Mode", 25, 25);
 
   if(tileMode == 1){
     glPushMatrix(); glTranslatef(WINDOW_HALF_WIDTH/2, WINDOW_HALF_HEIGHT, 0);
@@ -611,16 +634,13 @@ void renderGrounds (int x, int y) {
 }
 
 void renderEnemies (int x, int y) {
-  /*
   for (int i=0;i<enemies_length;i++) {
-    if (inWindow(*(enemies[i]))){
+    //if (inWindow(*(enemies[i]))){
       glPushMatrix();
       glTranslatef(- x, - y, 0);
       enemies[i]->draw();
       glEnd(); glPopMatrix();
     }
-  }
-  */
 }
 
 void renderHero (int x, int y) {
@@ -638,7 +658,7 @@ void render () {
   // Draw Background Falling Bits
   renderRuler();
   renderGrounds(x, y);
-  renderEnemies(0, 0);
+  renderEnemies(x, y);
   renderHero(x, y);
   renderOptions();
 }
@@ -646,14 +666,48 @@ void render () {
 //=====================================================================
 //  Storage Editor
 //=====================================================================
+#ifdef BACKUP
+void convertSave(){
+  copyToNew();
+  cout << "Convert Saving \n";
+  ofstream dfs("backup.ros", ios::binary); 
+  dfs.write((char *)&futureBox, sizeof(futureBox));
+}
+
+void convertLoad(){
+  ifstream dfs("backup.ros", ios::binary);
+  dfs.read((char *)&futureBox, sizeof(futureBox));
+
+  cout << "Convert Loading \n";
+  for(int i = 0; i < futureBox.grounds_length; i++){
+    grounds[i] = &futureBox.grounds[i];
+    grounds[i]->reInitSprite();
+    grounds_length++;
+  }
+}
+void copyToNew(){
+  futureBox.grounds_length = grounds_length;
+  for(int i = 0; i < grounds_length; i++){
+    futureBox.grounds[i] = *grounds[i];  
+  }
+}
+#endif
+
 void save(){
   for(int i = 0; i < grounds_length; i++){
     storeIn.grounds[i] = *grounds[i];  
   }
+  for(int i =0; i < enemies_length; i++){
+    storeIn.enemies[i] = *enemies[i];  
+  }
   storeIn.grounds_length = grounds_length;
+  storeIn.enemies_length = enemies_length;
+
   cout << "Saving \n";
   ofstream dfs("test.ros", ios::binary); 
   dfs.write((char *)&storeIn, sizeof(storeIn));
+
+  //convertSave();
 
   if(OPTIONAL_STORAGE != 1) return;
   renderSave();
@@ -676,38 +730,38 @@ void quickSave(){
 }
 
 void load(){
-      renderLoad();
-      string fileName;
-      cout << "Load in: ";  
-      cin >> fileName;
-      string folder = "./data/"; folder.append(fileName);
+  renderLoad();
+  string fileName;
+  cout << "Load in: ";  
+  cin >> fileName;
+  string folder = "./data/"; folder.append(fileName);
 
-      if (folder.find(".ros") != string::npos) {
-        cout << "File Exist, Will Load\n";
-      }else{
-        cout << "! Will Only take .ros files !\n"; return;
-      }
-      char charFileName[50];
-      strcpy(charFileName, folder.c_str());
+  if (folder.find(".ros") != string::npos) {
+    cout << "File Exist, Will Load\n";
+  }else{
+    cout << "! Will Only take .ros files !\n"; return;
+  }
+  char charFileName[50];
+  strcpy(charFileName, folder.c_str());
 
-      ifstream dfs(charFileName, ios::binary);
-      cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
-      dfs.read((char *)&storeIn, sizeof(storeIn));
+  ifstream dfs(charFileName, ios::binary);
+  cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
+  dfs.read((char *)&storeIn, sizeof(storeIn));
 
-      cout << "Loading \n";
-      for(int i = 0; i < storeIn.grounds_length; i++){
-        grounds[i] = &storeIn.grounds[i];
-        grounds[i]->reInitSprite();
-        grounds_length++;
-      } 
-      cout << "Loading Finished \n";
+  cout << "Loading \n";
+  for(int i = 0; i < storeIn.grounds_length; i++){
+    grounds[i] = &storeIn.grounds[i];
+    grounds[i]->reInitSprite();
+    grounds_length++;
+  } 
+  cout << "Loading Finished \n";
 }
 
 void quickLoad(){
-      cout << "Load in \n";  
-      ifstream dfs("test.ros", ios::binary);
-      cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
-      dfs.read((char *)&storeIn, sizeof(storeIn));
+  cout << "Load in \n";  
+  ifstream dfs("test.ros", ios::binary);
+  cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
+  dfs.read((char *)&storeIn, sizeof(storeIn));
 }
 
 //=====================================================================

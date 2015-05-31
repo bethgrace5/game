@@ -31,8 +31,7 @@
 #include "AttackList.cpp"
 #include "fastFont.cpp"
 
-using namespace std;
-//typedef double Vec[3];
+using namespace std; //typedef double Vec[3];
 
 // background bits
 struct bgBit {
@@ -54,7 +53,7 @@ int animateOn = 0;
 Display *dpy; Window win; GLXContext glc;
 
 //Hero Globals
-int didJump=0, lastFacing=0;
+int didJump=0;
 double h_right, h_left, h_top, h_bottom;
 timeval seqStart, seqEnd; // hero's sprite index
 timeval fireStart, fireEnd; // hero's fire rate timer
@@ -72,18 +71,22 @@ Item *items;
 Item *itemsHold[10];
 int items_length = 0;
 double g_left, g_right, g_top, g_bottom;
-int bg, bullets, grounds_length, enemies_length, i, j, level=0, fail=0, quit=0;
+int bg, bullets, grounds_length, enemies_length, i, j, level=0, quit=0;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 timeval gameStart, gameEnd;
+int minutes = 0;
+int updated = 1;
 
 // menu rendering and selection Globals
 int showInvalid=0, frameIndex=0, menuSelection = 0;
 timeval frameStart, frameEnd;
 
 //Images and Textures
-Ppmimage *initImages[32], *computerScreenImages[32], *healthBarImage[1], *lifeImage[1];
-GLuint initTextures[65], computerScreenTextures[32], healthBarTexture[1], lifeTexture[1];
+Ppmimage *initImages[32], *computerScreenImages[32], *healthBarImage[1], *lifeImage[1],
+         *backgroundImage[1];
+GLuint initTextures[65], computerScreenTextures[32], healthBarTexture[1], lifeTexture[1],
+       backgroundTexture[1];
 
 //Function prototypes
 //Object createAI( int w, int h, Object *ground);
@@ -293,7 +296,6 @@ void init_opengl (void) {
         }
         initTextures[31] = initTextures[30];
 
-
         // load blinking computer screens
         unsigned char *computerData;
         glGenTextures(26, computerScreenTextures);
@@ -328,6 +330,18 @@ void init_opengl (void) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, lifeData);
     delete [] lifeData;
 
+    //background image
+    glGenTextures(1, backgroundTexture);
+    backgroundImage[0] = ppm6GetImage("./images/background.ppm");
+    glBindTexture(GL_TEXTURE_2D, backgroundTexture[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    unsigned char *backgroundData = buildAlphaData(backgroundImage[0]);
+    w = backgroundImage[0]->width;
+    h = backgroundImage[0]->height;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, backgroundData);
+    delete [] backgroundData;
+
     // load health bar image
     glGenTextures(1, healthBarTexture);
     healthBarImage[0] = ppm6GetImage("./images/healthBar.ppm");
@@ -352,6 +366,11 @@ void init_opengl (void) {
             grounds[i] = &storeIn.grounds[i];
             grounds[i]->reInitSprite();
             grounds_length++;
+        }
+        for(int i = 0; i < storeIn.enemies_length; i++){
+            enemies[i] = &storeIn.enemies[i];
+            enemies[i]->reInitSprite();
+            enemies_length++;
         }
     }
     else {
@@ -412,8 +431,11 @@ int check_keys (XEvent *e) {
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
         if (level==1) {
-            if (key == XK_Escape or key == XK_q) {
+            if (key == XK_Escape) {
                 return 1;
+            }
+            if (key == XK_q) {
+                hero->setVelocityY(10);
             }
             // Jump
             if ((key == XK_w || key == XK_Up)) {
@@ -480,7 +502,7 @@ int check_keys (XEvent *e) {
 #endif
                     // make sure hero is not shooting immediately
                     level=-1;
-                    lastFacing = 0;
+                    hero->setMirror(0);
                     frameIndex=0;
                 }
                 if(menuSelection==1 or menuSelection==2 or menuSelection==2 or menuSelection==4) {
@@ -750,7 +772,7 @@ void groundCollide (Object *obj, Object *ground) {
             obj->setVelocityY(-0.51);
             obj->setCenter(obj->getCenterX(), g_bottom-(h_top-obj->getCenterY()));
         }
-        //If moving object is at the l-eft side of static object
+        //If moving object is at the left side of static object
         if (!(obj->getOldRight() > g_left ) && !(h_right <= g_left)) {
             obj->setVelocityX(-0.51); obj->setCenter(g_left-(h_right-obj->getCenterX()), obj->getCenterY()
                     );
@@ -782,21 +804,12 @@ void movement() {
 
     // Cycle through hero index sequences
 
-    // remove a life when the hero falls off cliff
-    if (hero->getCenterY() < 0){
-        hero->setHealth(0);
-        if(!hero->isDying){
-            //hero->decrementLives();
-        }
-    }
-
-    if (hero->getHealth()<=0) {//Going to try to Mimic The Death Function. Heres a tmp fix though
-        hero->setHealth(0);
+    if (hero->getHealth()<=0 or hero->getCenterY() <0) {//Going to try to Mimic The Death Function. Heres a tmp fix though
         hero->stop();
         if (!(hero->isDying)) {
-            hero->decrementLives();
             hero->isDying=1;
             gettimeofday(&seqStart, NULL);
+            hero->decrementLives();
 #ifdef USE_SOUND
             fmod_playsound(dunDunDun);
 #endif
@@ -815,13 +828,7 @@ void movement() {
     for (j=0; j < items_length; j++) {
         detectItem(hero, itemsHold[j]);
     }
-
-    //Detect Item
-    for (j=0; j < items_length; j++) {
-        detectItem(hero, itemsHold[j]);
-    }
     //Attack Collisions
-    //Animates
     for(i = 0; i < boxA.currents_length; i++){
         detectAttack(hero, boxA.currents[i]); 
     }
@@ -829,6 +836,14 @@ void movement() {
     for(i = 0; i < boxA.currents_length; i++){
         if(boxA.currents[i]->checkStop())
             boxA.deleteAttack(boxA.currents[i]->getID());
+    }
+
+    for(i = 0; i < boxA.currents_length; i++){
+      for(j = 0; j < enemies_length; j++){
+        if(detectAttack(enemies[j], boxA.currents[i])){
+                enemies[j]->life-=100;
+        }
+      } 
     }
 
     //Bullet creation
@@ -977,11 +992,10 @@ void render () {
     renderAttacks(x,y);
     renderLives();
     renderHealthBar();
-    renderDebugInfo();
+    //renderDebugInfo();
 
-    if (fail>0) {
+    if (hero->getHealth()<0) {
         writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 200, WINDOW_HEIGHT/2);
-        fail--;
     }
 }
 
@@ -1008,8 +1022,6 @@ void renderItems(int x, int y){
         }
     }
 }
-
-
 
 void renderGrounds (int x, int y) {
     // render grounds
@@ -1160,9 +1172,35 @@ void renderLives () {
 void gameTimer () {
     gettimeofday(&gameEnd, NULL);
     double currentTime = diff_ms(gameEnd, gameStart);
+    long unsigned int seconds = 0;
 
-    long unsigned int seconds = ((int)currentTime/1000)%60;
+    seconds = ((int)currentTime/1000)%60;
+ 
+    if (seconds==0 && !updated) {
+        seconds = 0;
+        minutes++;
+        cout<<"minutes: " << minutes <<endl;
+        updated = 1;
+    }
 
+    if (seconds==30) {
+        updated=0;
+    }
+
+    string s = itos(seconds);
+    string m = itos(minutes);
+
+    if (seconds<10) {
+        s="0"+s;
+    }
+    if (minutes<10) {
+        m="0"+m;
+    }
+
+    writeWords(".", 37, WINDOW_HEIGHT-10);
+    writeWords(".", 37, WINDOW_HEIGHT-24);
+    writeWords(s, 60, WINDOW_HEIGHT-20);
+    writeWords(m, 10, WINDOW_HEIGHT-20);
 }
 
 void renderHealthBar () {
@@ -1172,6 +1210,10 @@ void renderHealthBar () {
     int w = 200;
     int health = hero->getHealth();
     //float row_size = 0.5;
+
+    if (health<=0) {
+        health = 0;
+    }
 
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_ALPHA_TEST);
@@ -1203,8 +1245,8 @@ void renderHealthBar () {
 void renderDebugInfo () {
     int WH = WINDOW_HEIGHT;
 
-    writeWords("FPS", 0, WH-20);
-    writeWords("BULLETS", 0, WH-50);
+    writeWords("FPS", 0, WH-50);
+    writeWords("BULLETS", 0, WH-80);
     fps_counter++;
     gettimeofday(&fpsEnd, NULL);
     if (((diff_ms(fpsEnd, fpsStart)) > 1000)) {
@@ -1212,8 +1254,8 @@ void renderDebugInfo () {
         fps=fps_counter;
         fps_counter=0;
     }
-    writeWords(itos(fps), 88, WH-20);
-    writeWords(itos(bullets), 176, WH-50);
+    writeWords(itos(fps), 88, WH-50);
+    writeWords(itos(bullets), 176, WH-80);
 }
 
 void renderComputerScreenMenu () {
@@ -1339,6 +1381,43 @@ void renderComputerScreenMenu () {
 }
 
 void renderBackground () {
+
+    int x = roomX - WINDOW_HALF_WIDTH;
+    int y = roomY - WINDOW_HALF_HEIGHT;
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, backgroundTexture[0]);
+
+    glPushMatrix();
+    glTranslatef(-x, -y, 0);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0); glVertex2i(0/*(roomX-WINDOW_HALF_WIDTH)*/, 2400);
+    glTexCoord2f(0, 1); glVertex2i(0/*(roomX-WINDOW_HALF_WIDTH)*/, 0);
+    glTexCoord2f(1, 1); glVertex2i(4500/*(roomX-WINDOW_HALF_WIDTH+4500)*/, 0);
+    glTexCoord2f(1, 0); glVertex2i(4500/*(roomX-WINDOW_HALF_WIDTH+4500)*/, 2400);
+    glEnd();
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(-x, -y, 0);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0); glVertex2i(4500/*(roomX-WINDOW_HALF_WIDTH)*/, 2400);
+    glTexCoord2f(0, 1); glVertex2i(4500/*(roomX-WINDOW_HALF_WIDTH)*/, 0);
+    glTexCoord2f(1, 1); glVertex2i(9000/*(roomX-WINDOW_HALF_WIDTH+4500)*/, 0);
+    glTexCoord2f(1, 0); glVertex2i(9000/*(roomX-WINDOW_HALF_WIDTH+4500)*/, 2400);
+    glEnd();
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(-x, -y, 0);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0); glVertex2i(9000/*(roomX-WINDOW_HALF_WIDTH)*/, 2400);
+    glTexCoord2f(0, 1); glVertex2i(9000/*(roomX-WINDOW_HALF_WIDTH)*/, 0);
+    glTexCoord2f(1, 1); glVertex2i(13500/*(roomX-WINDOW_HALF_WIDTH+4500)*/, 0);
+    glTexCoord2f(1, 0); glVertex2i(13500/*(roomX-WINDOW_HALF_WIDTH+4500)*/, 2400);
+    glEnd();
+    glPopMatrix();
+
+    glDisable(GL_TEXTURE_2D);
+
+
     if (bg < 1){ 
         for (i=0;i<=MAX_BACKGROUND_BITS/4;i++){
             // Fill screen (init)

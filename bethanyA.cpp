@@ -167,10 +167,17 @@ void Sprite::drawTile(int row, int column, int w, int h){
   glColor4ub(255,255,255,255);
   glBegin(GL_QUADS);
 
-  glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
-  glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
-  glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
-  glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
+  if(!checkMirror()){
+    glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(-w,-h);
+    glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(-w,h);
+    glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(w,h);
+    glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(w,-h);
+  }else{
+    glTexCoord2f((atX*clipX)+clipX, (atY*clipY)+clipY) ; glVertex2i(-w,-h);
+    glTexCoord2f((atX*clipX)+clipX,  atY*clipY)        ; glVertex2i(-w,h);
+    glTexCoord2f(atX*clipX        ,  atY*clipY)        ; glVertex2i(w,h);
+    glTexCoord2f(atX*clipX        , (atY*clipY)+clipY) ; glVertex2i(w,-h);
+  }
 
   glEnd(); glPopMatrix();
   glDisable(GL_TEXTURE_2D);
