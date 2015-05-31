@@ -430,6 +430,8 @@ void Enemy::enemyAI (Object *hero) {
             case 0:
                 // patrol
                 Object::setAggro(false);
+		if (Object::getBottom()<e_ft+10)
+			Object::setVelocityY(rnd()*2);
                 if (e_vx==0) {
                     Object::setVelocityX((rnd()>.5)?(-0.6):(0.6));//Patrol ground object
                     if (type==3)
