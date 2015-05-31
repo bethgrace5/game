@@ -90,14 +90,15 @@ Attack::Attack() : Object(0, 0, 0, 0){
   timer = 1;
   indexp = 0;
   damage = 5;
-  frameRate = 55;
+  frameRate = 0;
   hurtOnce = 0;
   duration = 1000;
   cycleBase = 1;
   timeBase = 0;
   stop = 0; 
   start = 0;
-  stickOn = 1;
+  stickOn = 0;
+  moveWith = 1;
 }
 
 void Attack::referenceTo(Sprite take, int id){
@@ -133,15 +134,27 @@ void Attack::autoState(){
   if(timeBase) checkDuration();
   if(cycleBase) if(indexp == 0 && start) stop = 1; 
   if(stickOn) stickOnHero();
+  if(moveWith) moveWithHero();
 
   //Follow Player Movement
   //Affect By Gravity
   //Directional Shots
-
 }
 
 void Attack::stickOnHero(){
-  setCenter(hero->getCenterX(), hero->getCenterY());
+
+}
+
+void Attack::moveWithHero(){
+  //hero->setCenter(Object::getCenterX(), Object::getCenterY());
+  if(hero->getVelocityX() > 0){
+    hero->setVelocityX(Object::getVelocityX());
+    hero->setVelocityY(Object::getVelocityY());
+  }
+  else{
+    hero->setVelocityX(-(Object::getVelocityX()));
+    hero->setVelocityY(-(Object::getVelocityY()));
+  }
 }
 
 void Attack::checkDuration(){
@@ -163,7 +176,8 @@ void Attack::cycleAnimations(){
 
   if(diff_ms(seqEndA, seqStartA) > frameRate){
     indexp++;
-    if(indexp > rowAt * columnAt) indexp = 0;
+    //if(indexp > rowAt * columnAt) indexp = 0;
+    if(indexp > 3) indexp = 0;
     once = 0; start = 1;
   }
 }

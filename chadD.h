@@ -76,6 +76,7 @@ class Attack: public Object {
     bool hurtOnce;
     
     bool stickOn;
+    bool moveWith;
 
     timeval seqStartA, seqEndA;
     timeval timeIn, timeOut;
@@ -95,6 +96,7 @@ class Attack: public Object {
 
     void autoState();
     void stickOnHero();
+    void moveWithHero();
 
     void causeEffect(Player *hero);
     void causeEffect(Enemy *Enemy);
