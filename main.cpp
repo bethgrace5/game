@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <typeinfo>
 #include <string>
 #include <sys/time.h>
 #include <unistd.h>
@@ -736,6 +737,7 @@ void deleteItem(int id) {
 void makeEnemy(int w, int h, Object *ground, int type) {
     if (enemies_length<MAX_ENEMIES){
         enemies[enemies_length] = new Enemy(w, h, ground, type); 
+        printf ("%s\n",typeid(enemies[enemies_length]).name());
         switch (type){
             case 1:
                 enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
