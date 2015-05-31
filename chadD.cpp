@@ -132,6 +132,10 @@ void Attack::causeEffect(Enemy *singleEnemy){
 //
 //==============================================
 void autoState(){
+  
+  //Follow Player Movement
+  //Affect By Gravity
+  //Directional Shots
 
 }
 //===============================================
@@ -139,9 +143,6 @@ void autoState(){
 //===============================================/
 //    Note: This is a Prototype -
 //          -Right now its specific number depedant.
-//          -
-//
-//       Right Now There Are 13 sprites in 1 sheet
 void Attack::cycleAnimations(){
   if(once == 0){ gettimeofday(&seqStartA, NULL); once = 1;}
   gettimeofday(&seqEndA, NULL);
