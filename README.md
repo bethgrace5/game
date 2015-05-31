@@ -22,6 +22,7 @@
     *  `x` - access to click tile mode. Press the middle mouse button 
     *  `n` - delete holding or last hold object.
     *  `b` - delete last object put
+    *  `f` - change modes: Platform Editor, Enemy Editor
 *  Notes:
     *  There must be at least 7 objects, or segmentation fault is thrown
     *  Theres A bug on the click y axis while in click tile mode. Y position may

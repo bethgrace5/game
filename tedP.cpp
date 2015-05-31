@@ -25,15 +25,15 @@
 ======================+
     Tool Editor       |
 ======================+
-  Main Center         |
-  Platform Editor     |
-  Enemy Editor        |
-  Mouse Check         |
-  Key Check           |
+  Main_Center         |
+  Platform_Editor     |
+  Enemy_Editor        |
+  Mouse_Check         |
+  Key_Check           |
   Physics             |
   Drawing             |
-  Storage Editor      |
-  Window Setup        |
+  Storage_Editor      |
+  Window_Setup        |
 ======================+
 */
 #define EDITOR_MODE
@@ -103,10 +103,15 @@ bool tileMode = 0;
 bool selecter = 0;
 int  holdID = -1;
 int saveID = -1;
+int enemyType = 0;
+
+
+int creeperScore;
 //------------------------------
 //Function Prototype
 //------------------------------
 int clickObject(int x, int y);
+int clickEnemy(int x, int y);
 void draging(int x, int y);
 
 void initXWindows(void);
@@ -157,8 +162,9 @@ bool inWindow(Object &obj) {
       (obj.getRight() > (roomX-(WINDOW_HALF_WIDTH)) and
        obj.getRight() < (roomX+(WINDOW_HALF_WIDTH))));
 }
+
 //====================================================================
-//    Main Center
+//    Main_Center
 //====================================================================
 int main(void) {
   initXWindows(); init_opengl();
@@ -207,7 +213,7 @@ void init_opengl (void) {
   initFastFont();
 }
 //=====================================================================
-//  Platform Editor
+//  Platform_Editor
 //=====================================================================
 void makePlatform(int x, int y) {
   cout << "Make Ground \n";
@@ -336,7 +342,7 @@ void deletePlatform(){
 }
 
 //=====================================================================
-//  Enemy Editor
+//  Enemy_Editor
 //=====================================================================
 void makeEnemy(int w, int h, int x, int y, int type) {
     if (enemies_length<MAX_ENEMIES){
@@ -377,13 +383,17 @@ void deleteEnemy(int ind){
   enemies[enemies_length]=NULL;
 }
 
-//Object createAI (int w, int h, Object *ground) {
-  //Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
-  //return newEnemy;
-  //return 0;
-//}
+void enemySetWidth(){
+
+
+}
+
+void enemySetHeight(){
+
+
+}
 //=====================================================================
-//  Mouse Check
+//  Mouse_Check
 //=====================================================================
 static int savex = 0, savey = 0;
 void check_mouse (XEvent *e) {
@@ -396,10 +406,23 @@ void check_mouse (XEvent *e) {
 
   int take;
   if (e->type == ButtonPress) {
-    if (e->xbutton.button==1) { //Left button was pressed
+  //Left button was pressed
+    if (e->xbutton.button==1) {
+      //Enemy Editor Stuff
       if(enemyEditor){
-        makeEnemy(100, 100, savex, savey, 3);  
+        if(selecter == 1){
+          take = clickEnemy(savex, savey);
+          cout << "The id is: " << take << "\n";
+          saveID = holdID = take;
+        }
+        else 
+          switch(enemyType){ 
+            case 0: makeEnemy(37, 80, savex, savey, 1); break;
+            case 1: makeEnemy(38, 37, savex, savey, 2); break;
+            case 2: makeEnemy(100, 100, savex, savey, 3); break;
+          }
       }
+      //Platform Editor Stuff
       else if(create == 1){
         cout << " x " << savex << ", y " << savey << "\n";
         makePlatform(savex, savey);
@@ -411,6 +434,7 @@ void check_mouse (XEvent *e) {
         saveID = holdID = take;
       }
     }
+  //Right Button was Pressed
     if (e->xbutton.button==2) {
       pickTile(e->xbutton.x, WINDOW_HEIGHT - e->xbutton.y);
       return;
@@ -446,13 +470,27 @@ int clickObject(int x, int y){
   return -1;
 }
 
+int clickEnemy(int x, int y){
+  for(int i =0; i < enemies_length; i++){
+    if(enemies[i]->getRight()  > x &&
+        enemies[i]->getLeft()   < x &&
+        enemies[i]->getBottom() < y &&
+        enemies[i]->getTop()    > y){
+      return i;
+    } 
+  }
+  return -1;
+}
+
+
 void draging(int x, int y){
   if(holdID < 0)
     return;
-  grounds[holdID]->setCenter(x, y);
+  if(enemyEditor) enemies[holdID]->setCenter(x, y);
+  else grounds[holdID]->setCenter(x, y);
 }
 //=====================================================================
-//  Key Check
+//  Key_Check
 //=====================================================================
 int check_keys (XEvent *e) {
   //handle input from the keyboard
@@ -468,7 +506,11 @@ int check_keys (XEvent *e) {
       load(); 
     }
     if(key == XK_r){
-      setRow(1);  
+      if(enemyEditor){
+        enemyType++; 
+        if(enemyType > 3) enemyType = 0; 
+      }
+      else setRow(1);  
     }
     if(key == XK_t){
       setColumn(1); 
@@ -575,7 +617,12 @@ bool detectCollide (Object *obj, Object *ground) {
 //  Drawing
 //=====================================================================
 void renderOptions(){
-  if(enemyEditor == 1) writeWords("Enemy Editor Mode", 25, 55);
+  if(enemyEditor == 1){
+    writeWords("Enemy Editor Mode", 25, 55);
+    if(enemyType == 0) writeWords("Enemy 0", 40, 80);
+    if(enemyType == 1) writeWords("Enemy 1", 40, 80);
+    if(enemyType == 2) writeWords("Enemy 2", 40, 80); 
+  }
   else writeWords("Platform Editor Mode", 25, 55);
 
   if(create == 1) writeWords("Create Mode", 25, 25);
