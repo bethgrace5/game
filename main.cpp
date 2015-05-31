@@ -76,7 +76,7 @@ int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 timeval gameStart, gameEnd;
 int minutes = 0;
-int updated = 0;
+int updated = 1;
 
 // menu rendering and selection Globals
 int showInvalid=0, frameIndex=0, menuSelection = 0;
@@ -772,7 +772,7 @@ void groundCollide (Object *obj, Object *ground) {
             obj->setVelocityY(-0.51);
             obj->setCenter(obj->getCenterX(), g_bottom-(h_top-obj->getCenterY()));
         }
-        //If moving object is at the l-eft side of static object
+        //If moving object is at the left side of static object
         if (!(obj->getOldRight() > g_left ) && !(h_right <= g_left)) {
             obj->setVelocityX(-0.51); obj->setCenter(g_left-(h_right-obj->getCenterX()), obj->getCenterY()
                     );
@@ -1175,27 +1175,31 @@ void gameTimer () {
     double currentTime = diff_ms(gameEnd, gameStart);
     long unsigned int seconds = 0;
 
-
     seconds = ((int)currentTime/1000)%60;
  
-    if (seconds>59 && !updated) {
+    if (seconds==0 && !updated) {
         seconds = 0;
         minutes++;
         cout<<"minutes: " << minutes <<endl;
         updated = 1;
     }
-    else {
-        if(seconds==0) {
-            updated = 0;
-        }
-    }
 
+    if (seconds==30) {
+        updated=0;
+    }
 
     string s = itos(seconds);
     string m = itos(minutes);
 
+    if (seconds<10) {
+        s="0"+s;
+    }
+    if (minutes<10) {
+        m="0"+m;
+    }
 
-    writeWords(s, 45, WINDOW_HEIGHT-100);
+
+    writeWords(s, 55, WINDOW_HEIGHT-100);
     writeWords(m, 10, WINDOW_HEIGHT-100);
 }
 
