@@ -5,7 +5,7 @@
 //====================================================================
 extern Player *hero;
 #define MAX_ATTACKS 25
-#define MAX_CURRENTS 5
+#define MAX_CURRENTS 15
 
 struct attack_list{
   Sprite  sprite_sheet[MAX_ATTACKS];
@@ -90,8 +90,10 @@ bool detectAttack (Object *obj, Attack *targetAttack) {
 
 void renderAttacks(int x, int y){
   for (int i=0;i<boxA.currents_length;i++) {
+    boxA.currents[i]->autoState();
     boxA.currents[i]->autoSet();
     boxA.currents[i]->cycleAnimations();
+
     glPushMatrix();
     glTranslatef(- x, - y, 0);
     boxA.currents[i]->drawBox(boxA.sprite_sheet[0]);

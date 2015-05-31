@@ -31,7 +31,11 @@
 #include "Sprite.h"
 #include "Object.h"
 #include "Enemy.h"
+#include "Player.h"
 #include <iostream>
+
+extern Player *hero;
+extern Enemy *Enemies[MAX_ENEMIES];
 
 class Platform : public Sprite, public Object {
 
@@ -70,6 +74,8 @@ class Attack: public Object {
 
     int damage;
     bool hurtOnce;
+    
+    bool stickOn;
 
     timeval seqStartA, seqEndA;
     timeval timeIn, timeOut;
@@ -88,6 +94,7 @@ class Attack: public Object {
     bool checkStop();
 
     void autoState();
+    void stickOnHero();
 
     void causeEffect(Player *hero);
     void causeEffect(Enemy *Enemy);
