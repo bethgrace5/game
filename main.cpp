@@ -105,35 +105,38 @@ bool detectCollide(Object *obj, Object *ground);
 bool detectItem (Object *obj, Item *targetItem);
 int  check_keys (XEvent *e);
 void check_mouse(XEvent *e);
+void cleanupItems();
 void cleanupXWindows(void);
 void cleanup_background(void);
 void deleteBullet(Bullet *node);
 void deleteEnemy(int ind);
+void deleteItem(int id);
 void gameTimer ();
 void groundCollide(Object *obj, Object *ground);
 void initXWindows(void);
 void init_opengl(void);
 void makeEnemy(int w, int h, Object *ground, int type); 
 void makeEnemy(int w, int h, int x, int y, int type); 
-void makePlatform(int w, int h, int x, int y);
 void makeItems(int w, int h, int x, int y);
+void makePlatform(int w, int h, int x, int y);
 void moveWindow(void);
 void movement(void);
 void render(void);
+void renderAnimations(int x, int y);
 void renderBackground(void);
 void renderBullets(int x, int y);
 void renderComputerScreenMenu();
+void renderDebugInfo();
 void renderEnemies(int x, int y);
 void renderGrounds(int x, int y);
-void renderHero(int x, int y);
-void renderAnimations(int x, int y);
-void renderItems(int x, int y);
-void renderInitMenu();
 void renderHealthBar();
-void renderDebugInfo();
+void renderHero(int x, int y);
+void renderInitMenu();
+void renderItems(int x, int y);
 void renderLives();
 void renderPauseMenu();
 void resetLevel();
+void setupItems();
 void writeScore();
 
 int main(void) {
@@ -433,8 +436,7 @@ void init_opengl (void) {
         makePlatform(200, 16, 300, 200);
         makePlatform(20, 1000, -16, 600);
 
-        makeItems(16, 20, 375, 232);
-        makeItems(16, 20, 975, 232);
+        setupItems();
 
         makeEnemy(37, 80, grounds[2], 1);
         makeEnemy(37, 80, grounds[2], 1);
@@ -445,6 +447,7 @@ void init_opengl (void) {
         makeEnemy(37, 80, grounds[4], 1);
     }
 }
+
 
 void check_mouse (XEvent *e) {
     static int savex = 0, savey = 0;
@@ -713,7 +716,11 @@ void resetLevel() {
     updated = 1;
     gettimeofday(&gameEnd, NULL);
     gettimeofday(&gameStart, NULL);
+    
+    cleanupItems();
+    setupItems();
 }
+
 
 void makePlatform(int w, int h, int x, int y) {
     grounds[grounds_length] = new Platform();
@@ -723,7 +730,17 @@ void makePlatform(int w, int h, int x, int y) {
     grounds_length++;
 }
 
+void setupItems() {
+    makeItems(16, 20, 375, 232);
+    makeItems(16, 20, 975, 232);
+}
+void cleanupItems() {
+    for(int i=0; i<items_length; i++) {
+        deleteItem(itemsHold[i]->getID());
+    }
+}
 void makeItems(int w, int h, int x, int y) {
+    cout<<"make item"<<endl;
     itemsHold[items_length] = new Item();
     itemsHold[items_length]->setID(items_length);
     itemsHold[items_length]->insert("./images/firemon.ppm", 1, 1);
@@ -733,6 +750,7 @@ void makeItems(int w, int h, int x, int y) {
 }
 
 void deleteItem(int id) {
+    cout<<"delete item"<<endl;
     if (items_length <= 0) return;
     if (id < 0) return;
     items_length--;
@@ -823,9 +841,11 @@ bool detectItem (Object *obj, Item *targetItem) {
             obj->getLeft()   < targetItem->getRight() &&
             obj->getBottom() < targetItem->getTop()  &&
             obj->getTop()    > targetItem->getBottom()) {
-        cout << "Item touched\n";
+        cout << "Item touched before effect\n";
         targetItem->causeEffect(hero);
+        cout << "Item touched before deleteCalled\n";
         deleteItem(obj->getID());
+        cout << "Item end of detect function\n";
         return true;
     }
     return false;
