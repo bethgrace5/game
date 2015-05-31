@@ -104,6 +104,9 @@ bool selecter = 0;
 int  holdID = -1;
 int saveID = -1;
 int enemyType = 0;
+
+
+int creeperScore;
 //------------------------------
 //Function Prototype
 //------------------------------
@@ -476,6 +479,7 @@ int clickEnemy(int x, int y){
       return i;
     } 
   }
+  return -1;
 }
 
 
