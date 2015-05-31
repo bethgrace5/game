@@ -14,7 +14,9 @@
 using namespace std;
 
 
-Enemy::Enemy() : Sprite(), Object(0,0,0,0) {
+
+extern int creeperScore;
+Enemy::Enemy() : Sprite(), Object(0, 0, 0, 0) {
 
 }
 
@@ -430,6 +432,8 @@ void Enemy::enemyAI (Object *hero) {
             case 0:
                 // patrol
                 Object::setAggro(false);
+		if (Object::getBottom()<e_ft+10)
+			Object::setVelocityY(rnd()*2);
                 if (e_vx==0) {
                     Object::setVelocityX((rnd()>.5)?(-0.6):(0.6));//Patrol ground object
                     if (type==3)
@@ -546,6 +550,7 @@ void Enemy::enemyAI (Object *hero) {
             }
             else{
                 Object::isDead=1;
+                creeperScore++;
             }
             gettimeofday(&fStart, NULL);
         }

@@ -63,6 +63,7 @@ class Object{
         
         int isJumping, isFalling, isDying, isWalking, isShooting, isDead;
 
+        Object();
         Object( double w, double h, double x, double y);
         void init(double w, double h, double x, double y);
         void init(double w, double h);

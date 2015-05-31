@@ -104,6 +104,9 @@ void Attack::referenceTo(Sprite take, int id){
   spriteID = id;
 }
 
+//void Attack::attatchTo(Player player) {
+//}
+
 //==============================================
 //Stats Functions
 //==============================================
