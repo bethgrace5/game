@@ -132,7 +132,6 @@ void writeScore();
 
 
 int main(void) {
-    gettimeofday(&gameStart, NULL);
     initXWindows(); init_opengl(); 
 #ifdef USE_SOUND
     init_sounds();
@@ -165,6 +164,8 @@ int main(void) {
     //end test
 
     if(QUICK_LOAD_TIME) {
+        // start timer now, because no option was selected in the menu
+        gettimeofday(&gameStart, NULL);
         level = 1;
     }
 
@@ -175,6 +176,8 @@ int main(void) {
         }
         if (level == -1) {
             renderInitMenu();
+            //begin game timer upon level select
+            gettimeofday(&gameStart, NULL);
         }
         else if (level == 0) {
             renderComputerScreenMenu();
