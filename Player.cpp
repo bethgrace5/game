@@ -20,6 +20,7 @@ Player::Player() : Object(26, 44, 250, 250), Sprite(){
   isShooting=0;
   jumps = 0; jumpLimit = 2; jumpPower = 7;
   speed = 0; maxSpeed  = 7;
+  isShooting=0;
   Sprite::setMirror(false);
   indexp = 0; once = 0;
 }
@@ -87,6 +88,19 @@ void Player::decrementLives(){
         health =0;
     }
 }
+void Player::reset(){ 
+  health =  maxHealth = 100;
+  isShooting=0;
+  lives = 3;
+  health = 100;
+  isShooting=0;
+  Sprite::setMirror(false);
+  setVelocityX(0);
+  setVelocityY(0);
+  setCenter(200, 400);
+  lives = 3; 
+
+}
 
 //===============================================
 //Drawing Functions
@@ -144,7 +158,7 @@ void Player::cycleAnimations(){
     }
   }
   //Standing
-  else indexp = 6; 
+  else indexp = 6;
   //std::cout << "Index: " << indexp << endl;
   Sprite::setIndexAt(indexp);
 }

@@ -49,6 +49,7 @@ class Player: public Object, public Sprite{
     int getLives();
     void incrementLives();
     void decrementLives();
+    void reset();
 
     void drawBox();
     void cycleAnimations();
