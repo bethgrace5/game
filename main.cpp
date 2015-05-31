@@ -71,7 +71,7 @@ Item *items;
 Item *itemsHold[10];
 int items_length = 0;
 double g_left, g_right, g_top, g_bottom;
-int bg, bullets, grounds_length, enemies_length, i, j, level=0, fail=0, quit=0;
+int bg, bullets, grounds_length, enemies_length, i, j, level=0, quit=0;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 timeval gameStart, gameEnd;
@@ -992,11 +992,10 @@ void render () {
     renderAttacks(x,y);
     renderLives();
     renderHealthBar();
-    renderDebugInfo();
+    //renderDebugInfo();
 
-    if (fail>0) {
+    if (hero->getHealth()<0) {
         writeWords("CRITICAL FAILURE", WINDOW_WIDTH/2- 200, WINDOW_HEIGHT/2);
-        fail--;
     }
 }
 
@@ -1198,9 +1197,10 @@ void gameTimer () {
         m="0"+m;
     }
 
-
-    writeWords(s, 55, WINDOW_HEIGHT-100);
-    writeWords(m, 10, WINDOW_HEIGHT-100);
+    writeWords(".", 37, WINDOW_HEIGHT-10);
+    writeWords(".", 37, WINDOW_HEIGHT-24);
+    writeWords(s, 60, WINDOW_HEIGHT-20);
+    writeWords(m, 10, WINDOW_HEIGHT-20);
 }
 
 void renderHealthBar () {
@@ -1245,8 +1245,8 @@ void renderHealthBar () {
 void renderDebugInfo () {
     int WH = WINDOW_HEIGHT;
 
-    writeWords("FPS", 0, WH-20);
-    writeWords("BULLETS", 0, WH-50);
+    writeWords("FPS", 0, WH-50);
+    writeWords("BULLETS", 0, WH-80);
     fps_counter++;
     gettimeofday(&fpsEnd, NULL);
     if (((diff_ms(fpsEnd, fpsStart)) > 1000)) {
@@ -1254,8 +1254,8 @@ void renderDebugInfo () {
         fps=fps_counter;
         fps_counter=0;
     }
-    writeWords(itos(fps), 88, WH-20);
-    writeWords(itos(bullets), 176, WH-50);
+    writeWords(itos(fps), 88, WH-50);
+    writeWords(itos(bullets), 176, WH-80);
 }
 
 void renderComputerScreenMenu () {
