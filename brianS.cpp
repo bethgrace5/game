@@ -14,8 +14,8 @@
 using namespace std;
 
 
-
 extern int creeperScore;
+
 Enemy::Enemy() : Sprite(), Object(0, 0, 0, 0) {
 
 }
