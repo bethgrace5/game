@@ -57,7 +57,7 @@
 #include "Enemy.h"
 #include "Item.h"
 #include "Player.h"
-#include "Platform.h"
+#include "chadD.h" //#include "Platform.h"
 #include "definitions.h"
 #include "Object.h"
 #include "sounds.cpp"
