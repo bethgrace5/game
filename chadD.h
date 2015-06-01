@@ -73,6 +73,8 @@ class Attack: public Object {
     int indexp;  
 
     int damage;
+    int charges;
+    bool constantEffect;
     bool effectEnemy;
     bool effectPlayer;
 
@@ -104,7 +106,9 @@ class Attack: public Object {
     void setMoveWith(bool take);
     void setEffectEnemy(bool take);
     void setEffectPlayer(bool take);
-    void changeDamage(int take);
+    void setConstantEffect(bool take);
+    void setCharges(int take);
+    void setDamage(int take);
     void returnVelocity();
     
     bool checkStop();

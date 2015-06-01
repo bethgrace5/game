@@ -100,6 +100,9 @@ Attack::Attack() : Object(0, 0, 0, 0){
   moveWith = 0;
   effectEnemy = 0;
   effectPlayer = 0;
+  charges = 1;
+  constantEffect = 0;
+  
   attackSound = 1;
   soundCollide = 1;
 }
@@ -141,13 +144,16 @@ bool Attack::checkStop(){
 
 void Attack::causeEffect(Enemy *enemy){
   if(!effectEnemy) return;
+  if(charges <= 0) return;
   enemy->life-=damage;
+  charges--;
 }
 
 void Attack::causeEffect(Player *hero){
   if(!effectPlayer) return;  
-  std::cout << "Is this working\n";
+  if(charges <= 0) return;
   hero->reduceHealth(damage);
+  charges--;
 }
 //=============================================
 //Setup Behavior
@@ -170,8 +176,14 @@ void Attack::setEffectEnemy(bool take){
 void Attack::setEffectPlayer(bool take){
   effectPlayer = take;
 }
-void Attack::changeDamage(int take){
+void Attack::setDamage(int take){
   damage = take;
+}
+void Attack::setConstantEffect(bool take){
+  constantEffect = take;
+}
+void Attack::setCharges(int take){
+  charges = take;
 }
 //==============================================
 // Behavior_Functions
@@ -179,13 +191,12 @@ void Attack::changeDamage(int take){
 void Attack::targetAt(Object *caster){
   target = caster;
 }
-void Attack::direction(){
-
-}
 
 void Attack::autoState(){
   if(timeBase) checkDuration();
   if(cycleBase) if(indexp == 0 && start) stop = 1; 
+  if(charges == 0) stop = 1;
+
   if(stickOn) stickOnHero();
   if(moveWith) moveWithHero();
 
@@ -214,6 +225,7 @@ void Attack::checkDuration(){
     stop = 1;
   }
 }
+
 //===============================================
 //Drawing Functions
 //===============================================/

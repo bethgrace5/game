@@ -32,25 +32,29 @@ struct attack_list{
 //  Attack_Editor
 //=====================================================================
 void attack_list::makeAttacks(){
+  int id = 0;
+  int width, height;
+  //Aura Effect And Movment
   boxA.sprite_sheet[0].insert("./images/fireball.ppm", 5, 5);
-  boxA.sprite_sheet[0].setSize(50,50);
+  boxA.sprite_sheet[0].setSize(75,75);
   boxA.sprite_sheet[0].setBackground(1);
   attacks[0].referenceTo(boxA.sprite_sheet[0], 0);
-  attacks[0].init(50,50,0,0);
-  attacks[0].changeRate(35);
+  attacks[0].init(75,75,0,0);
+  attacks[0].changeRate(15);
   attacks[0].setTimeBase(true);
   attacks[0].setCycleBase(false);
-  attacks[0].setDuration(100);
-  attacks[0].changeDamage(2000);
+  attacks[0].setDuration(300);
+  attacks[0].setDamage(1);
   //attacks[0].setStickOn(true);
   attacks[0].setMoveWith(true);
+  attacks[0].setCharges(20);
   attacks[0].setVelocityX(10); attacks[0].setVelocityY(5);
   #ifdef USE_SOUND
   attacks[0].setAttackSound(beep);
   attacks[0].setSoundCollide(0);
   #endif
 
-  //Duration Base
+  //Projectile Attack
   boxA.sprite_sheet[1].insert("./images/fireball.ppm", 5, 5);
   boxA.sprite_sheet[1].setSize(25,25);
   boxA.sprite_sheet[1].setBackground(1);
@@ -59,7 +63,35 @@ void attack_list::makeAttacks(){
   attacks[1].setVelocityX(10);
   attacks[1].setTimeBase(true);
   attacks[1].setCycleBase(false);
-  attacks[1].changeDamage(3);
+  attacks[1].setCharges(10);
+  attacks[1].setDamage(25);
+  #ifdef USE_SOUND
+  attacks[1].setAttackSound(beep);
+  attacks[1].setSoundCollide(0);
+  #endif
+
+
+  //Template
+  id = 2; width = 50; height = 50;
+  boxA.sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
+  boxA.sprite_sheet[id].setSize(width,height);
+  boxA.sprite_sheet[id].setBackground(id);
+  attacks[id].referenceTo(boxA.sprite_sheet[id], id);
+  attacks[id].init(width,height,0,0);
+  attacks[id].setVelocityX(0);
+  attacks[id].setVelocityY(0);
+  attacks[id].setTimeBase(true);
+  attacks[id].setDuration(5000);
+  attacks[id].setCycleBase(false);
+  attacks[id].setStickOn(true);
+  //attacks[id].setMoveWith(true);
+  //attacks[id].setConstantEffect(true);
+  attacks[id].setCharges(100);
+  attacks[id].setDamage(25);
+  #ifdef USE_SOUND
+  attacks[id].setAttackSound(beep);
+  attacks[id].setSoundCollide(0);
+  #endif
 }
 //=====================================================================
 //  Attack_Copy
