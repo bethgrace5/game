@@ -1,3 +1,4 @@
+#ifdef USE_SOUND
 
 #ifndef FMOD_H
 #define FMOD_H
@@ -16,4 +17,5 @@ extern int fmod_getchannelsplaying(int *channelsplaying);
 #endif
 
 #endif //FMOD_H
+#endif
 

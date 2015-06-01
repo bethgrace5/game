@@ -45,7 +45,9 @@ void attack_list::copyAttack(Object *caster, int tId){
   currents[currents_length]->targetAt(caster);
    currents[currents_length]->setCenter(caster->getCenterX(),
       caster->getCenterY());
-
+#ifdef USE_SOUND
+   fmod_playsound(currents[currents_length]->getAttackSound());
+#endif
   currents_length++;
 }
 
@@ -93,7 +95,8 @@ void attack_list::makeAttacks(){
   attacks[0].setMoveWith(true);
   attacks[0].setVelocityX(10); attacks[0].setVelocityY(0);
 #ifdef USE_SOUND
-  attacks[0].sound(beep);
+  attacks[0].setAttackSound(beep);
+  attacks[0].setSoundCollide(0);
 #endif
 
   //Duration Base
@@ -114,6 +117,9 @@ bool detectAttack (Object *obj, Attack *targetAttack) {
       obj->getLeft()   < targetAttack->getRight() &&
       obj->getBottom() < targetAttack->getTop()  &&
       obj->getTop()    > targetAttack->getBottom()) {
+#ifdef USE_SOUND
+       fmod_playsound(currents[currents_length]->getSoundCollide());
+#endif
     return true;
   }
   return false;

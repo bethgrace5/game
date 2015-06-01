@@ -100,13 +100,20 @@ Attack::Attack() : Object(0, 0, 0, 0){
   moveWith = 1;
   effectEnemy = 0;
   effectPlayer = 0;
-  sound = NULL;
+  attackSound = 1;
+  soundCollide = 1;
 }
-void Attack::setSound(int take){
-  sound = take;
+void Attack::setAttackSound(int take){
+  attackSound = take;
 }
-int Attack::getSound(){
-    return sound;
+int Attack::getAttackSound(){
+    return attackSound;
+}
+void Attack::setSoundCollide(int take){
+  soundCollide = take;
+}
+int Attack::getSoundCollide(){
+    return soundCollide;
 }
 
 void Attack::referenceTo(Sprite take, int id){
