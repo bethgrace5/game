@@ -24,8 +24,8 @@
 #include "Object.h"
 
 #ifdef USE_SOUND
-//#include "sounds.h"
-//#include "fmod.h"
+#include "sounds.cpp"
+#include "fmod.h"
 #endif
 
 #include "Storage.cpp"
