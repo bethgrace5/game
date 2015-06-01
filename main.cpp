@@ -24,8 +24,10 @@
 #include "Object.h"
 
 #ifdef USE_SOUND
-//#include "sounds.h"
-//#include "fmod.h"
+#include "./include/FMOD/fmod.h"
+#include "./include/FMOD/wincompat.h"
+#include "sounds.cpp"
+#include "fmod.h"
 #endif
 
 #include "Storage.cpp"
@@ -84,6 +86,9 @@ int updated = 1;
 int savedMinutes = 0;
 int savedSeconds = 0;
 
+//music
+int bossMusicIsPlaying=0;
+
 //score tally
 int creeperScore = 0;
 
@@ -120,6 +125,7 @@ void makeItems(int w, int h, int x, int y);
 void makePlatform(int w, int h, int x, int y);
 void moveWindow(void);
 void movement(void);
+void playBossMusic();
 void render(void);
 void renderAnimations(int x, int y);
 void renderBackground(void);
@@ -201,6 +207,7 @@ int main(void) {
             render();
             moveWindow();
             gameTimer();
+            playBossMusic();
         }
         glXSwapBuffers(dpy, win);
     }
@@ -465,6 +472,12 @@ int check_keys (XEvent *e) {
             if (key == XK_r) {
                 resetLevel();
             }
+            if (key == XK_e) {
+                cout<< fmod_getchannelsplaying(0)<<endl;
+                cout<< hero->getCenterX()<<endl;
+                fmod_stopAll();
+                cout<< fmod_getchannelsplaying(0)<<endl;
+            }
             if (key == XK_Escape) {
                 return 1;
             }
@@ -548,13 +561,13 @@ int check_keys (XEvent *e) {
                 }
                 if(menuSelection==1 or menuSelection==2 or menuSelection==2 or menuSelection==4) {
 #ifdef USE_SOUND
-                    fmod_playsound(bleep);
+                    fmod_playsound(accessDeny);
 #endif
                     showInvalid = 1;
                 }
                 if(menuSelection==3) {
 #ifdef USE_SOUND
-                    fmod_playsound(bleep);
+                    fmod_playsound(accessDeny);
 #endif
                     showInvalid = 0;
                     return 1;
@@ -839,6 +852,7 @@ bool detectItem (Object *obj, Item *targetItem) {
             obj->getBottom() < targetItem->getTop()  &&
             obj->getTop()    > targetItem->getBottom()) {
         targetItem->causeEffect(hero);
+        fmod_playsound(button4);
         deleteItem(obj->getID());
         return true;
     }
@@ -1392,6 +1406,17 @@ void renderDebugInfo () {
     }
     writeWords(itos(fps), 88, WH-50);
     writeWords(itos(bullets), 176, WH-80);
+}
+
+void playBossMusic() {
+    if(!bossMusicIsPlaying and hero->getCenterX() > 11472) {
+    //if(!bossMusicIsPlaying and hero->getCenterX() > 1900) {
+        bossMusicIsPlaying = 1;
+        cout<< fmod_getchannelsplaying(0)<<endl;
+        fmod_stopAll();
+        fmod_setmode(bossMusic, FMOD_LOOP_NORMAL);
+        fmod_playsound(bossMusic);
+    }
 }
 
 void renderComputerScreenMenu () {

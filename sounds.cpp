@@ -31,8 +31,8 @@ void init_sounds() {
         std::cout << "ERROR - fmod_createsound() - beep\n" << std::endl;
         return;
     }
-    if (fmod_createsound((char *)"./sounds/bleep.wav", 4)) {
-        std::cout << "ERROR - fmod_createsound() - bleep\n" << std::endl;
+    if (fmod_createsound((char *)"./sounds/accessDeny.wav", 4)) {
+        std::cout << "ERROR - fmod_createsound() - accessDeny\n" << std::endl;
         return;
     }
     if (fmod_createsound((char *)"./sounds/button3.wav", 5)) {
@@ -59,8 +59,8 @@ void init_sounds() {
         std::cout << "ERROR - fmod_createsound() - flyby\n" << std::endl;
         return;
     }
-    if (fmod_createsound((char *)"./sounds/hockeyStickSlap.wav", 11)) {
-        std::cout << "ERROR - fmod_createsound() - hockeyStickSlap\n" << std::endl;
+    if (fmod_createsound((char *)"./sounds/bossMusic.wav", 11)) {
+        std::cout << "ERROR - fmod_createsound() - bossMusic\n" << std::endl;
         return;
     }
     if (fmod_createsound((char *)"./sounds/musicCensor.wav", 12)) {
@@ -123,8 +123,8 @@ void init_sounds() {
         std::cout << "ERROR - fmod_createsound() - dunDunDun\n" << std::endl;
         return;
     }
-    if (fmod_createsound((char *)"./sounds/marioJump.wav", 27)) {
-        std::cout << "ERROR - fmod_createsound() - marioJump\n" << std::endl;
+    if (fmod_createsound((char *)"./sounds/jump1.wav", 27)) {
+        std::cout << "ERROR - fmod_createsound() - jump\n" << std::endl;
         return;
     }
     if (fmod_createsound((char *)"./sounds/alienMachineGun.wav", 28)) {
@@ -147,5 +147,7 @@ void init_sounds() {
         std::cout << "ERROR - fmod_createsound() - laser\n" << std::endl;
         return;
     }
+
 }
+
 #endif

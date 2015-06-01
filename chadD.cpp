@@ -15,6 +15,13 @@
 #include "chadD.h"
 #include "Item.h"
 
+#ifdef USE_SOUND
+#include "./include/FMOD/fmod.h"
+#include "./include/FMOD/wincompat.h"
+#include "fmod.h"
+#include "sounds.h"
+#endif
+
 using namespace std;
 //=====================================================================
 //  Platform_Functions
@@ -116,6 +123,9 @@ void Attack::changeDuration(int take){
   duration = take;
 }
 void Attack::causeEffect(Player *hero){
+#ifdef USE_SOUND
+  //fmod_playsound(strangeAlien);
+#endif
   hero->reduceHealth(damage);
 }
 bool Attack::checkStop(){
@@ -123,6 +133,9 @@ bool Attack::checkStop(){
 }
 
 void Attack::causeEffect(Enemy *singleEnemy){
+#ifdef USE_SOUND
+  //fmod_playsound(strangeAlien);
+#endif
   if(timer == 0) return;
 
   std::cout << "Enemy Got Hit\n";

@@ -39,7 +39,7 @@ void Player::jump(){
   if(jumps < jumpLimit){ 
       Object::setVelocityY(jumpPower); 
       #ifdef USE_SOUND
-      fmod_playsound(marioJump);
+      fmod_playsound(jumpSound);
       #endif
       jumps++;
   }
