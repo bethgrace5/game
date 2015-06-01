@@ -46,7 +46,7 @@ void attack_list::copyAttack(Object *caster, int tId){
    currents[currents_length]->setCenter(caster->getCenterX(),
       caster->getCenterY());
 
-  currents_length++;
+   currents_length++;
 }
 
 void attack_list::copyAttack(Object *caster, int tId, bool mirror){
@@ -88,17 +88,21 @@ void attack_list::makeAttacks(){
   attacks[0].setTimeBase(true);
   attacks[0].setCycleBase(false);
   attacks[0].setDuration(100);
-  attacks[0].changeDamage(200);
+  attacks[0].changeDamage(2000);
   //attacks[0].setStickOn(true);
   attacks[0].setMoveWith(true);
-  attacks[0].setVelocityX(10); attacks[0].setVelocityY(0);
+  attacks[0].setVelocityX(10); attacks[0].setVelocityY(10);
 
   //Duration Base
   boxA.sprite_sheet[1].insert("./images/fireball.ppm", 5, 5);
-  boxA.sprite_sheet[1].setSize(100,100);
+  boxA.sprite_sheet[1].setSize(25,25);
   boxA.sprite_sheet[1].setBackground(1);
-  attacks[1].init(50,50,0,0);
+  attacks[1].referenceTo(boxA.sprite_sheet[1], 1);
+  attacks[1].init(25,25,0,0);
   attacks[1].setVelocityX(10);
+  attacks[1].setTimeBase(true);
+  attacks[1].setCycleBase(false);
+  attacks[1].changeDamage(3);
 }
 
 //=====================================================================
@@ -124,7 +128,9 @@ void renderAttacks(int x, int y){
 
     glPushMatrix();
     glTranslatef(- x, - y, 0);
-    boxA.currents[i]->drawBox(boxA.sprite_sheet[0]);
+    boxA.currents[i]->drawBox(
+        boxA.sprite_sheet[boxA.currents[i]->checkSpriteID()]);
+
     glEnd(); glPopMatrix(); 
   }
 }

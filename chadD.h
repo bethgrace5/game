@@ -89,6 +89,7 @@ class Attack: public Object {
 
     void targetAt(Object *target);
     void referenceTo(Sprite take, int id);
+    int  checkSpriteID();
     void fakeCopy(Attack * other);
 
     void changeRate(int take);

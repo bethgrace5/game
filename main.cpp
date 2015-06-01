@@ -494,11 +494,11 @@ int check_keys (XEvent *e) {
                 hero->setShooting(true);
             }
             if( key == XK_f){
-                boxA.copyAttack(hero, 0, hero->checkMirror());
+                boxA.copyAttack(hero, 1, hero->checkMirror());
             }
             if(key == XK_g){
-                if(enemies_length <= 0) return 0;
-                boxA.copyAttack(enemies[0], 0); 
+                //boxA.copyAttack(hero, 0, hero->checkMirror());
+                boxA.copyAttack(enemies[0], 0, 0);
             }
             // debug death
             if (key == XK_y) {
@@ -958,7 +958,7 @@ void movement() {
         }
       }
         if(detectAttack(hero, boxA.currents[i])){
-        boxA.currents[i]->causeEffect(hero); 
+          boxA.currents[i]->causeEffect(hero); 
         }
     }
 
@@ -1123,7 +1123,6 @@ void renderAnimations(int x, int y){
     glTranslatef(- x + 350, - y + 350, 0);
     //explode.cycleAnimations();
     //explode.drawBox();
-
 
     glEnd(); glPopMatrix(); 
 }

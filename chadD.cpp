@@ -107,6 +107,9 @@ void Attack::referenceTo(Sprite take, int id){
   columnAt = take.getColumn();
   spriteID = id;
 }
+int Attack::checkSpriteID(){
+  return spriteID;
+}
 //==============================================
 //Rates Functions
 //==============================================
@@ -128,6 +131,7 @@ void Attack::causeEffect(Enemy *enemy){
 
 void Attack::causeEffect(Player *hero){
   if(!effectPlayer) return;  
+  std::cout << "Is this working\n";
   hero->reduceHealth(damage);
 }
 //=============================================
