@@ -24,8 +24,8 @@
 #include "Object.h"
 
 #ifdef USE_SOUND
-//#include "sounds.h"
-//#include "fmod.h"
+#include "sounds.cpp"
+#include "fmod.h"
 #endif
 
 #include "Storage.cpp"
@@ -494,7 +494,7 @@ int check_keys (XEvent *e) {
                 hero->setShooting(true);
             }
             if( key == XK_f){
-                boxA.copyAttack(hero, 1, hero->checkMirror());
+                boxA.copyAttack(hero, 0, hero->checkMirror());
             }
             if(key == XK_g){
                 //boxA.copyAttack(hero, 0, hero->checkMirror());

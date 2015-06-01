@@ -1,8 +1,13 @@
-//Storage
-
 //====================================================================
 //  Attack Storage
 //====================================================================
+/*
+-------------------
+ Attack_Editor
+ Attack_Usage
+ Outside_Influence
+-----------------
+*/
 extern Player *hero;
 #define MAX_ATTACKS 25
 #define MAX_CURRENTS 15
@@ -20,22 +25,45 @@ struct attack_list{
   void copyAttack(Object *caster, int tId, bool mirror);
   void copyAttack(Player *caster, int tId, bool mirror);
   void copyAttack(Enemy *caster, int tId, bool mirror);
-
   void deleteAttack(int id);
+
 } boxA;
-
 //=====================================================================
-//  Attack Storage Functions
+//  Attack_Editor
 //=====================================================================
-void attack_list::deleteAttack(int id){
-  if (currents_length <= 0) return;
+void attack_list::makeAttacks(){
+  boxA.sprite_sheet[0].insert("./images/fireball.ppm", 5, 5);
+  boxA.sprite_sheet[0].setSize(50,50);
+  boxA.sprite_sheet[0].setBackground(1);
+  attacks[0].referenceTo(boxA.sprite_sheet[0], 0);
+  attacks[0].init(50,50,0,0);
+  attacks[0].changeRate(35);
+  attacks[0].setTimeBase(true);
+  attacks[0].setCycleBase(false);
+  attacks[0].setDuration(100);
+  attacks[0].changeDamage(2000);
+  //attacks[0].setStickOn(true);
+  attacks[0].setMoveWith(true);
+  attacks[0].setVelocityX(10); attacks[0].setVelocityY(5);
+  #ifdef USE_SOUND
+  attacks[0].setAttackSound(beep);
+  attacks[0].setSoundCollide(0);
+  #endif
 
-  currents_length--;
-  delete currents[id];
-  currents[id] = (currents[currents_length]);
-  currents[currents_length]=NULL;
+  //Duration Base
+  boxA.sprite_sheet[1].insert("./images/fireball.ppm", 5, 5);
+  boxA.sprite_sheet[1].setSize(25,25);
+  boxA.sprite_sheet[1].setBackground(1);
+  attacks[1].referenceTo(boxA.sprite_sheet[1], 1);
+  attacks[1].init(25,25,0,0);
+  attacks[1].setVelocityX(10);
+  attacks[1].setTimeBase(true);
+  attacks[1].setCycleBase(false);
+  attacks[1].changeDamage(3);
 }
-
+//=====================================================================
+//  Attack_Copy
+//=====================================================================
 void attack_list::copyAttack(Object *caster, int tId){
   if(currents_length >= MAX_CURRENTS) return;
 
@@ -45,8 +73,10 @@ void attack_list::copyAttack(Object *caster, int tId){
   currents[currents_length]->targetAt(caster);
    currents[currents_length]->setCenter(caster->getCenterX(),
       caster->getCenterY());
-
-   currents_length++;
+  #ifdef USE_SOUND
+  fmod_playsound(currents[currents_length]->getAttackSound());
+  #endif
+  currents_length++;
 }
 
 void attack_list::copyAttack(Object *caster, int tId, bool mirror){
@@ -78,31 +108,13 @@ void attack_list::copyAttack(Enemy *caster, int tId, bool mirror){
   }
 }
 
-void attack_list::makeAttacks(){
-  boxA.sprite_sheet[0].insert("./images/fireball.ppm", 5, 5);
-  boxA.sprite_sheet[0].setSize(50,50);
-  boxA.sprite_sheet[0].setBackground(1);
-  attacks[0].referenceTo(boxA.sprite_sheet[0], 0);
-  attacks[0].init(50,50,0,0);
-  attacks[0].changeRate(35);
-  attacks[0].setTimeBase(true);
-  attacks[0].setCycleBase(false);
-  attacks[0].setDuration(100);
-  attacks[0].changeDamage(2000);
-  //attacks[0].setStickOn(true);
-  attacks[0].setMoveWith(true);
-  attacks[0].setVelocityX(10); attacks[0].setVelocityY(10);
+void attack_list::deleteAttack(int id){
+  if (currents_length <= 0) return;
 
-  //Duration Base
-  boxA.sprite_sheet[1].insert("./images/fireball.ppm", 5, 5);
-  boxA.sprite_sheet[1].setSize(25,25);
-  boxA.sprite_sheet[1].setBackground(1);
-  attacks[1].referenceTo(boxA.sprite_sheet[1], 1);
-  attacks[1].init(25,25,0,0);
-  attacks[1].setVelocityX(10);
-  attacks[1].setTimeBase(true);
-  attacks[1].setCycleBase(false);
-  attacks[1].changeDamage(3);
+  currents_length--;
+  delete currents[id];
+  currents[id] = (currents[currents_length]);
+  currents[currents_length]=NULL;
 }
 
 //=====================================================================
@@ -115,6 +127,9 @@ bool detectAttack (Object *obj, Attack *targetAttack) {
       obj->getLeft()   < targetAttack->getRight() &&
       obj->getBottom() < targetAttack->getTop()  &&
       obj->getTop()    > targetAttack->getBottom()) {
+#ifdef USE_SOUND
+       fmod_playsound(currents[currents_length]->getSoundCollide());
+#endif
     return true;
   }
   return false;
