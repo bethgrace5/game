@@ -16,8 +16,11 @@ struct attack_list{
   int currents_length;
 
   void makeAttacks();
-  void copyAttack(int tId);
-  void copyAttack(int tId, bool mirror);
+  void copyAttack(Object *caster, int tId);
+  void copyAttack(Object *caster, int tId, bool mirror);
+  void copyAttack(Player *caster, int tId, bool mirror);
+  void copyAttack(Enemy *caster, int tId, bool mirror);
+
   void deleteAttack(int id);
 } boxA;
 
@@ -27,42 +30,53 @@ struct attack_list{
 void attack_list::deleteAttack(int id){
   if (currents_length <= 0) return;
 
-  std::cout << " What is current Attack_length " << currents_length<< std::endl;
-  if (id < 0) return;
-  std::cout << " what is id" << id << std::endl;
-
-  currents[id] = new Attack();
-  //delete currents[id];
-
-  for (int i = id; i < currents_length-1; i++) {
-    currents[i] = currents[i + 1];
-    currents[i]->setID(currents[i]->getID()-1);
-  }
-
-  currents[currents_length-1] = new Attack();
-  //delete currents[currents_length-1];
   currents_length--;
+  delete currents[id];
+  currents[id] = (currents[currents_length]);
+  currents[currents_length]=NULL;
 }
 
-void attack_list::copyAttack(int tId){
+void attack_list::copyAttack(Object *caster, int tId){
   if(currents_length >= MAX_CURRENTS) return;
 
   currents[currents_length] = new Attack(attacks[tId]);
-  currents[currents_length]->setCenter(hero->getCenterX(),
-      hero->getCenterY());
   currents[currents_length]->setID(currents_length);
+
+  currents[currents_length]->targetAt(caster);
+   currents[currents_length]->setCenter(caster->getCenterX(),
+      caster->getCenterY());
 
   currents_length++;
 }
-void attack_list::copyAttack(int tId, bool mirror){
+
+void attack_list::copyAttack(Object *caster, int tId, bool mirror){
   if(currents_length >= MAX_CURRENTS) return;
-  attack_list::copyAttack(tId);
+  attack_list::copyAttack(caster, tId);
   if(mirror){
     currents[currents_length-1]->setVelocityX(
       -currents[currents_length-1]->getVelocityX());
   }
 }
 
+void attack_list::copyAttack(Player *caster, int tId, bool mirror){
+  if(currents_length >= MAX_CURRENTS) return;
+  attack_list::copyAttack(caster, tId);
+  currents[currents_length-1]->setEffectEnemy(true);
+  if(mirror){
+    currents[currents_length-1]->setVelocityX(
+      -(currents[currents_length-1]->getVelocityX()));
+  }
+}
+
+void attack_list::copyAttack(Enemy *caster, int tId, bool mirror){
+  if(currents_length >= MAX_CURRENTS) return;
+  attack_list::copyAttack(caster, tId);
+  currents[currents_length-1]->setEffectPlayer(true);
+  if(mirror){
+    currents[currents_length-1]->setVelocityX(
+      -currents[currents_length-1]->getVelocityX());
+  }
+}
 
 void attack_list::makeAttacks(){
   boxA.sprite_sheet[0].insert("./images/fireball.ppm", 5, 5);
@@ -71,6 +85,12 @@ void attack_list::makeAttacks(){
   attacks[0].referenceTo(boxA.sprite_sheet[0], 0);
   attacks[0].init(50,50,0,0);
   attacks[0].changeRate(35);
+  attacks[0].setTimeBase(true);
+  attacks[0].setCycleBase(false);
+  attacks[0].setDuration(100);
+  attacks[0].changeDamage(200);
+  //attacks[0].setStickOn(true);
+  attacks[0].setMoveWith(true);
   attacks[0].setVelocityX(10); attacks[0].setVelocityY(0);
 
   //Duration Base
@@ -91,8 +111,6 @@ bool detectAttack (Object *obj, Attack *targetAttack) {
       obj->getLeft()   < targetAttack->getRight() &&
       obj->getBottom() < targetAttack->getTop()  &&
       obj->getTop()    > targetAttack->getBottom()) {
-    //targetAttack->causeEffect(hero);
-    //deleteAttack(obj->getID());
     return true;
   }
   return false;

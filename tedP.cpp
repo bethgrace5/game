@@ -3,11 +3,6 @@
 //Purpose: To Make it Easy to add any types of objects inside the game
 //      Run Executive ./tool
 //
-//    !IMPORTANT!
-//        In Definition.h USE_TOOLS Must be Set to 1 in order to USE THIS
-//        You Need to At Least Make 7 Objects Because in main.cpp, 
-//        Enemy Constructor are currently platform depedant.
-//
 //    //Instructions
 //        To Use Please, Enter Create Mode( press C and make blocks)
 //
@@ -18,7 +13,6 @@
 //        Read the README.md for more instructions
 //
 //    //Future Updates
-//        Easily Place Enemies
 //        Easily Place Items
 
 /*
@@ -104,7 +98,6 @@ bool selecter = 0;
 int  holdID = -1;
 int saveID = -1;
 int enemyType = 0;
-
 
 int creeperScore;
 //------------------------------
