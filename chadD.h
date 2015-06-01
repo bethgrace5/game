@@ -95,6 +95,7 @@ class Attack: public Object {
     bool checkStop();
 
     void autoState();
+    void direction();
     void stickOnHero();
     void moveWithHero();
 

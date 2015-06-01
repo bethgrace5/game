@@ -130,6 +130,9 @@ void Attack::causeEffect(Enemy *singleEnemy){
 //==============================================
 // Movement Functions
 //==============================================
+void Attack::direction(){
+
+}
 void Attack::autoState(){
   if(timeBase) checkDuration();
   if(cycleBase) if(indexp == 0 && start) stop = 1; 
@@ -142,12 +145,12 @@ void Attack::autoState(){
 }
 
 void Attack::stickOnHero(){
-
+  Object::setCenter(hero->getCenterX(), hero->getCenterY());
 }
 
 void Attack::moveWithHero(){
   //hero->setCenter(Object::getCenterX(), Object::getCenterY());
-  if(hero->getVelocityX() > 0){
+  if(hero->checkMirror()){
     hero->setVelocityX(Object::getVelocityX());
     hero->setVelocityY(Object::getVelocityY());
   }

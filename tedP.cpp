@@ -369,6 +369,7 @@ void makeEnemy(int w, int h, int x, int y, int type) {
                 enemies[enemies_length]->insert("./images/boss.ppm", 1, 1);
                 break;
         }
+        enemies[enemies_length]->setID(enemies_length);
         enemies_length++;
     }
     else{
@@ -376,12 +377,24 @@ void makeEnemy(int w, int h, int x, int y, int type) {
     }
 }
 
-void deleteEnemy(int ind){
+void deleteEnemy(){
+  if(enemies_length <= 0) return;
+  if(saveID < 0) return; 
+
+  enemies[saveID] = new Enemy();
+  delete enemies[saveID];
+
+  for(int i = saveID; i < enemies_length-1; i++){
+    enemies[i] = enemies[i + 1];
+    enemies[i]->setID(enemies[i]->getID()-1); 
+  }
+
+  enemies[enemies_length-1] = new Enemy();
+  delete enemies[enemies_length-1];
   enemies_length--;
-  delete enemies[i];
-  enemies[i] = enemies[enemies_length];
-  enemies[enemies_length]=NULL;
+  cout << "What is Enemies Length" << enemies_length << endl;
 }
+
 
 void enemySetWidth(){
 
@@ -392,6 +405,7 @@ void enemySetHeight(){
 
 
 }
+
 //=====================================================================
 //  Mouse_Check
 //=====================================================================
@@ -531,7 +545,8 @@ int check_keys (XEvent *e) {
       deleteLastPlatform();
     }
     if(key == XK_n){
-      deletePlatform();
+      if(enemyEditor) deleteEnemy();
+      else deletePlatform();
     } 
     #ifdef BACKUP
     if(key == XK_p){
@@ -545,6 +560,7 @@ int check_keys (XEvent *e) {
     }
     #endif
     if(key == XK_f ){
+      saveID = 0;
       enemyEditor = !enemyEditor; 
     }
 

@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <typeinfo>
 #include <string>
 #include <sys/time.h>
 #include <unistd.h>
@@ -103,36 +104,40 @@ bool detectCollide(Object *obj, Object *ground);
 bool detectItem (Object *obj, Item *targetItem);
 int  check_keys (XEvent *e);
 void check_mouse(XEvent *e);
+void cleanupItems();
 void cleanupXWindows(void);
 void cleanup_background(void);
 void deleteBullet(Bullet *node);
 void deleteEnemy(int ind);
+void deleteItem(int id);
 void gameTimer ();
 void groundCollide(Object *obj, Object *ground);
 void initXWindows(void);
 void init_opengl(void);
 void makeEnemy(int w, int h, Object *ground, int type); 
 void makeEnemy(int w, int h, int x, int y, int type); 
-void makePlatform(int w, int h, int x, int y);
 void makeItems(int w, int h, int x, int y);
+void makePlatform(int w, int h, int x, int y);
 void moveWindow(void);
 void movement(void);
 void render(void);
+void renderAnimations(int x, int y);
 void renderBackground(void);
 void renderBullets(int x, int y);
 void renderComputerScreenMenu();
+void renderDebugInfo();
 void renderEnemies(int x, int y);
 void renderGrounds(int x, int y);
-void renderHero(int x, int y);
-void renderAnimations(int x, int y);
-void renderItems(int x, int y);
-void renderInitMenu();
 void renderHealthBar();
-void renderDebugInfo();
+void renderHero(int x, int y);
+void renderInitMenu();
+void renderItems(int x, int y);
 void renderLives();
 void renderPauseMenu();
 void resetLevel();
+void setupItems();
 void writeScore();
+void setupEnemies();
 
 int main(void) {
     initXWindows(); init_opengl(); 
@@ -425,18 +430,12 @@ void init_opengl (void) {
         makePlatform(200, 16, 300, 200);
         makePlatform(20, 1000, -16, 600);
 
-        makeItems(16, 20, 375, 232);
-        makeItems(16, 20, 975, 232);
+        setupItems();
+        setupEnemies();
 
-        makeEnemy(37, 80, grounds[2], 1);
-        makeEnemy(37, 80, grounds[2], 1);
-        makeEnemy(38, 37, grounds[1], 2);
-        makeEnemy(37, 80, grounds[4], 1);
-        makeEnemy(100, 100, 300, 500, 3);
-        makeEnemy(38, 37, grounds[1], 2);
-        makeEnemy(37, 80, grounds[4], 1);
     }
 }
+
 
 void check_mouse (XEvent *e) {
     static int savex = 0, savey = 0;
@@ -704,7 +703,13 @@ void resetLevel() {
     updated = 1;
     gettimeofday(&gameEnd, NULL);
     gettimeofday(&gameStart, NULL);
+    
+    cleanupItems();
+    setupItems();
+
+    setupEnemies();
 }
+
 
 void makePlatform(int w, int h, int x, int y) {
     grounds[grounds_length] = new Platform();
@@ -714,6 +719,15 @@ void makePlatform(int w, int h, int x, int y) {
     grounds_length++;
 }
 
+void setupItems() {
+    makeItems(16, 20, 375, 232);
+    makeItems(16, 20, 975, 232);
+}
+void cleanupItems() {
+    for(int i=0; i<items_length; i++) {
+        deleteItem(itemsHold[i]->getID());
+    }
+}
 void makeItems(int w, int h, int x, int y) {
     itemsHold[items_length] = new Item();
     itemsHold[items_length]->setID(items_length);
@@ -736,6 +750,7 @@ void deleteItem(int id) {
 void makeEnemy(int w, int h, Object *ground, int type) {
     if (enemies_length<MAX_ENEMIES){
         enemies[enemies_length] = new Enemy(w, h, ground, type); 
+        //printf ("%s\n",typeid(enemies[enemies_length]).name());
         switch (type){
             case 1:
                 enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
@@ -763,6 +778,15 @@ void makeEnemy(int w, int h, Object *ground, int type) {
     else{
         cout << "Enemies array full!" << endl;
     }
+}
+void setupEnemies() {
+        makeEnemy(37, 80, grounds[2], 1);
+        makeEnemy(37, 80, grounds[2], 1);
+        makeEnemy(38, 37, grounds[1], 2);
+        makeEnemy(37, 80, grounds[4], 1);
+        makeEnemy(100, 100, 300, 500, 3);
+        makeEnemy(38, 37, grounds[1], 2);
+        makeEnemy(37, 80, grounds[4], 1);
 }
 
 void makeEnemy(int w, int h, int x, int y, int type) {
@@ -813,7 +837,6 @@ bool detectItem (Object *obj, Item *targetItem) {
             obj->getLeft()   < targetItem->getRight() &&
             obj->getBottom() < targetItem->getTop()  &&
             obj->getTop()    > targetItem->getBottom()) {
-        cout << "Item touched\n";
         targetItem->causeEffect(hero);
         deleteItem(obj->getID());
         return true;
@@ -863,8 +886,10 @@ void groundCollide (Object *obj, Object *ground) {
         }
         //If moving object is at the right side of static object
         if (!(obj->getOldLeft() < g_right ) && !(h_left >= g_right)) {
-            obj->setVelocityX(0.51);
-            obj->setCenter(g_right+(obj->getCenterX()-h_left), obj->getCenterY());
+            if ((obj->getOldBottom() < g_top)) {
+                obj->setVelocityX(0.51);
+                obj->setCenter(g_right+(obj->getCenterX()-h_left), obj->getCenterY());
+            }
         }
     }
 }
@@ -1183,11 +1208,11 @@ void renderPauseMenu() {
 
     glPushMatrix();
     //glClear(GL_COLOR_BUFFER_BIT);
-    //glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
     glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, pauseMenuTexture[0]);
-    //glColor4ub(255,255,255,255);
+    glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
 
     glTexCoord2f(0, (menuSelection%3)*tileSz + tileSz) ; glVertex2i(-WINDOW_HALF_WIDTH/2,-WINDOW_HALF_HEIGHT/2);
