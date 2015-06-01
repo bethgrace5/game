@@ -6,7 +6,6 @@
 #include <sys/time.h>
 #include <iostream>
 #include "ppm.h"
-#include "sounds.h"
 #include "Object.h"
 #include "Sprite.h"
 #include "definitions.h"

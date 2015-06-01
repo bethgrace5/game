@@ -1,62 +1,14 @@
-
 #ifdef USE_SOUND
 
 #include "definitions.h"
-#include "sounds.h"
 
 #include "./include/FMOD/fmod.h"
 #include "./include/FMOD/wincompat.h"
+#include "sounds.h"
 #include "fmod.h"
 #include <iostream>
 
-#ifndef SOUNDS_CPP
-#define SOUNDS_CPP
 
-//void init_sounds(void);
-/*
-enum sound_t {
-    // theme song
-    megamanTheme = 0,
-
-    // small beeps and clicks
-    tick,
-    click,
-    beep,
-    bleep,
-    button3,
-    button4,
-    censorBeep,
-    groceryScanning,
-    endFx,
-    flyby,
-    hockeyStickSlap,
-    musicCensor,
-    modem,
-    pling,
-    powerup,
-    robotBlip1,
-    robotBlip2,
-    shortBeep,
-    spaceshipTakeoff,
-    splitSplat,
-    strangeAlien,
-
-    // static
-    electronicNoise,
-    introWind,
-    policeScanner,
-    scaryAmbience,
-    // actions
-    dunDunDun,
-    marioJump,
-
-    // weapon shots
-    alienMachineGun,
-    dryFiregun,
-    gunShotMarvin,
-    mvalSingle,
-};
-*/
 void init_sounds() {
     //FMOD_RESULT result;
     if (fmod_init()) {
@@ -196,5 +148,4 @@ void init_sounds() {
         return;
     }
 }
-#endif
 #endif
