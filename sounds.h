@@ -1,13 +1,16 @@
 
 #ifdef USE_SOUND
-#ifndef SOUNDS_H
-#define SOUNDS_H
 #include "definitions.h"
 
 #include "./include/FMOD/fmod.h"
 #include "./include/FMOD/wincompat.h"
 #include "fmod.h"
 #include <iostream>
+
+
+#ifndef SOUNDS_H
+#define SOUNDS_H
+void init_sounds();
 enum sound_t {
     // theme song
     megamanTheme = 0,
@@ -51,8 +54,6 @@ enum sound_t {
     mvalSingle,
     laser
 };
-
-void init_sounds(void);
 
 #endif
 #endif

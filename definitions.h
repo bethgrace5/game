@@ -7,7 +7,7 @@
 //#define USE_SOUND 1
 
 // 1 for quick load, 0 for slow load with menu images
-#define QUICK_LOAD_TIME 1
+#define QUICK_LOAD_TIME 0
 
 // 1 to use tool editor, 0 to use pre-defined objects
 #define USE_TOOLS 1
