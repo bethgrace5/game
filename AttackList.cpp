@@ -72,6 +72,9 @@ void attack_list::makeAttacks(){
   attacks[0].init(50,50,0,0);
   attacks[0].changeRate(35);
   attacks[0].setVelocityX(10); attacks[0].setVelocityY(0);
+#ifdef USE_SOUND
+  attacks[0].sound(beep);
+#endif
 
   //Duration Base
   boxA.sprite_sheet[1].insert("./images/fireball.ppm", 5, 5);

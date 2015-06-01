@@ -63,6 +63,7 @@ class Attack: public Object {
     int once;
     int cycle;
     int onceOnly;
+    int sound;
 
     bool stop;
     bool start; 
@@ -92,6 +93,8 @@ class Attack: public Object {
     void changeDuration(int take);
     void checkDuration();
     bool checkStop();
+    void setSound(int take);
+    int getSound();
 
     void autoState();
     void direction();

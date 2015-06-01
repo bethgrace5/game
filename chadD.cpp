@@ -99,6 +99,13 @@ Attack::Attack() : Object(0, 0, 0, 0){
   start = 0;
   stickOn = 0;
   moveWith = 1;
+  sound = NULL;
+}
+void Attack::setSound(int take){
+  sound = take;
+}
+int Attack::getSound(){
+    return sound;
 }
 
 void Attack::referenceTo(Sprite take, int id){
