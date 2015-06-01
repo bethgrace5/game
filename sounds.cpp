@@ -1,3 +1,4 @@
+#ifdef USE_SOUND
 
 #include "definitions.h"
 
@@ -147,3 +148,4 @@ void init_sounds() {
         return;
     }
 }
+#endif
