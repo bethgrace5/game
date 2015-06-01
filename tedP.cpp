@@ -817,6 +817,7 @@ void load(){
     grounds[i]->reInitSprite();
     grounds_length++;
   } 
+  enemies_length = 0;
   for(int i = 0; i < storeIn.enemies_length; i++){
     enemies[i] = &storeIn.enemies[i];
     enemies[i]->reInitSprite();
