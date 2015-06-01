@@ -69,7 +69,6 @@ class Attack: public Object {
     bool timeBase; //If This Is On | Attack Will Last on its Duration
     bool cycleBase;//If This is On | Attack Will Last until the 
                    // end of the sprite sheet
-                   //
     int indexp;  
 
     int damage;

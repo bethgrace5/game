@@ -494,7 +494,8 @@ int check_keys (XEvent *e) {
                 hero->setShooting(true);
             }
             if( key == XK_f){
-                boxA.copyAttack(0);  
+                boxA.copyAttack(0, 0);  
+                //boxA.copyAttack(0, 1);
             }
             // debug death
             if (key == XK_y) {

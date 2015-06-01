@@ -817,6 +817,11 @@ void load(){
     grounds[i]->reInitSprite();
     grounds_length++;
   } 
+  for(int i = 0; i < storeIn.enemies_length; i++){
+    enemies[i] = &storeIn.enemies[i];
+    enemies[i]->reInitSprite();
+    enemies_length++; 
+  }
   cout << "Loading Finished \n";
 }
 

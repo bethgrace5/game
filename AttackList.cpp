@@ -17,6 +17,7 @@ struct attack_list{
 
   void makeAttacks();
   void copyAttack(int tId);
+  void copyAttack(int tId, bool mirror);
   void deleteAttack(int id);
 } boxA;
 
@@ -53,6 +54,15 @@ void attack_list::copyAttack(int tId){
 
   currents_length++;
 }
+void attack_list::copyAttack(int tId, bool mirror){
+  if(currents_length >= MAX_CURRENTS) return;
+  attack_list::copyAttack(tId);
+  if(mirror){
+    currents[currents_length-1]->setVelocityX(
+      -currents[currents_length-1]->getVelocityX());
+  }
+}
+
 
 void attack_list::makeAttacks(){
   boxA.sprite_sheet[0].insert("./images/fireball.ppm", 5, 5);
