@@ -97,12 +97,13 @@ Attack::Attack() : Object(0, 0, 0, 0){
   stop = 0; 
   start = 0;
   stickOn = 0;
-  moveWith = 1;
+  moveWith = 0;
   effectEnemy = 0;
   effectPlayer = 0;
   attackSound = 1;
   soundCollide = 1;
 }
+
 void Attack::setAttackSound(int take){
   attackSound = take;
 }

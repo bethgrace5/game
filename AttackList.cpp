@@ -127,9 +127,9 @@ bool detectAttack (Object *obj, Attack *targetAttack) {
       obj->getLeft()   < targetAttack->getRight() &&
       obj->getBottom() < targetAttack->getTop()  &&
       obj->getTop()    > targetAttack->getBottom()) {
-#ifdef USE_SOUND
+      #ifdef USE_SOUND
        fmod_playsound(currents[currents_length]->getSoundCollide());
-#endif
+      #endif
     return true;
   }
   return false;

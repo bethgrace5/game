@@ -726,12 +726,19 @@ void makePlatform(int w, int h, int x, int y) {
 void setupItems() {
     makeItems(16, 20, 375, 232);
     makeItems(16, 20, 975, 232);
+    makeItems(16, 20, 1100, 232);
+    makeItems(16, 20, 1300, 232);
+    makeItems(16, 20, 1500, 232);
 }
+
 void cleanupItems() {
     for(int i=0; i<items_length; i++) {
-        deleteItem(itemsHold[i]->getID());
+      delete itemsHold[i];
+      itemsHold[i] = NULL;
     }
+    items_length = 0;
 }
+
 void makeItems(int w, int h, int x, int y) {
     itemsHold[items_length] = new Item();
     itemsHold[items_length]->setID(items_length);
@@ -743,11 +750,10 @@ void makeItems(int w, int h, int x, int y) {
 
 void deleteItem(int id) {
     if (items_length <= 0) return;
-    if (id < 0) return;
+
     items_length--;
     delete itemsHold[id];
     itemsHold[id] = itemsHold[items_length];
-    itemsHold[id]->setID(itemsHold[id]->getID()+(items_length-id));
     itemsHold[items_length]=NULL;
 }
 
@@ -841,8 +847,6 @@ bool detectItem (Object *obj, Item *targetItem) {
             obj->getLeft()   < targetItem->getRight() &&
             obj->getBottom() < targetItem->getTop()  &&
             obj->getTop()    > targetItem->getBottom()) {
-        targetItem->causeEffect(hero);
-        deleteItem(obj->getID());
         return true;
     }
     return false;
@@ -939,7 +943,10 @@ void movement() {
 
     //Detect Item
     for (j=0; j < items_length; j++) {
-        detectItem(hero, itemsHold[j]);
+        if (detectItem(hero, itemsHold[j])){
+          itemsHold[j]->causeEffect(hero);
+          deleteItem(j); 
+        }
     }
     //Attack Collisions
     //for(i = 0; i < boxA.currents_length; i++){
