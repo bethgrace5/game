@@ -87,7 +87,6 @@ void Platform::drawRow(int x, int y) {
 //=====================================================================
 Attack::Attack() : Object(0, 0, 0, 0){
   once = onceOnly = 0;
-  timer = 1;
   indexp = 0;
   damage = 5;
   frameRate = 0;
@@ -99,6 +98,8 @@ Attack::Attack() : Object(0, 0, 0, 0){
   start = 0;
   stickOn = 0;
   moveWith = 1;
+  effectEnemy = 0;
+  effectPlayer = 0;
   sound = NULL;
 }
 void Attack::setSound(int take){
@@ -119,27 +120,57 @@ void Attack::referenceTo(Sprite take, int id){
 void Attack::changeRate(int take){
   frameRate = take;
 }
-void Attack::changeDuration(int take){
+void Attack::setDuration(int take){
   duration = take;
 }
-void Attack::causeEffect(Player *hero){
-  hero->reduceHealth(damage);
-}
+
 bool Attack::checkStop(){
   return stop;
 }
 
-void Attack::causeEffect(Enemy *singleEnemy){
-  if(timer == 0) return;
+void Attack::causeEffect(Enemy *enemy){
+  if(!effectEnemy) return;
+  enemy->life-=damage;
+}
 
-  std::cout << "Enemy Got Hit\n";
+void Attack::causeEffect(Player *hero){
+  if(!effectPlayer) return;  
+  hero->reduceHealth(damage);
+}
+//=============================================
+//Setup Behavior
+//=============================================
+void Attack::setTimeBase(bool take){
+  timeBase = take; 
+}
+void Attack::setCycleBase(bool take){
+  cycleBase = take;
+}
+void Attack::setStickOn(bool take){
+  stickOn = take;
+}
+void Attack::setMoveWith(bool take){
+  moveWith = take;
+}
+void Attack::setEffectEnemy(bool take){
+  effectEnemy = take;
+}
+void Attack::setEffectPlayer(bool take){
+  effectPlayer = take;
+}
+void Attack::changeDamage(int take){
+  damage = take;
 }
 //==============================================
-// Movement Functions
+// Behavior_Functions
 //==============================================
+void Attack::targetAt(Object *caster){
+  target = caster;
+}
 void Attack::direction(){
 
 }
+
 void Attack::autoState(){
   if(timeBase) checkDuration();
   if(cycleBase) if(indexp == 0 && start) stop = 1; 
@@ -149,22 +180,18 @@ void Attack::autoState(){
   //Follow Player Movement
   //Affect By Gravity
   //Directional Shots
+  if(stop && moveWith){
+    //target->setVelocityX(0);
+  }
 }
 
 void Attack::stickOnHero(){
-  Object::setCenter(hero->getCenterX(), hero->getCenterY());
+  Object::setCenter(target->getCenterX(), target->getCenterY());
 }
 
 void Attack::moveWithHero(){
-  //hero->setCenter(Object::getCenterX(), Object::getCenterY());
-  if(hero->checkMirror()){
-    hero->setVelocityX(Object::getVelocityX());
-    hero->setVelocityY(Object::getVelocityY());
-  }
-  else{
-    hero->setVelocityX(-(Object::getVelocityX()));
-    hero->setVelocityY(-(Object::getVelocityY()));
-  }
+    target->setVelocityX(Object::getVelocityX());
+    target->setVelocityY(Object::getVelocityY());
 }
 
 void Attack::checkDuration(){
@@ -186,8 +213,7 @@ void Attack::cycleAnimations(){
 
   if(diff_ms(seqEndA, seqStartA) > frameRate){
     indexp++;
-    //if(indexp > rowAt * columnAt) indexp = 0;
-    if(indexp > 3) indexp = 0;
+    if(indexp > rowAt * columnAt) indexp = 0;
     once = 0; start = 1;
   }
 }

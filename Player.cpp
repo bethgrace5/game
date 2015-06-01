@@ -99,7 +99,6 @@ void Player::reset(){
   setVelocityY(0);
   setCenter(200, 400);
   lives = 3; 
-
 }
 
 //===============================================

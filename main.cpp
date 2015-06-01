@@ -24,8 +24,8 @@
 #include "Object.h"
 
 #ifdef USE_SOUND
-//#include "sounds.h"
-//#include "fmod.h"
+#include "sounds.cpp"
+#include "fmod.h"
 #endif
 
 #include "Storage.cpp"
@@ -494,8 +494,11 @@ int check_keys (XEvent *e) {
                 hero->setShooting(true);
             }
             if( key == XK_f){
-                boxA.copyAttack(0, 0);  
-                //boxA.copyAttack(0, 1);
+                boxA.copyAttack(hero, 0, hero->checkMirror());
+            }
+            if(key == XK_g){
+                if(enemies_length <= 0) return 0;
+                boxA.copyAttack(enemies[0], 0); 
             }
             // debug death
             if (key == XK_y) {
@@ -939,21 +942,24 @@ void movement() {
         detectItem(hero, itemsHold[j]);
     }
     //Attack Collisions
-    for(i = 0; i < boxA.currents_length; i++){
-        detectAttack(hero, boxA.currents[i]); 
-    }
-    //Check if Time or Index reach 0 then deletes itself
+    //for(i = 0; i < boxA.currents_length; i++){
+    //    detectAttack(hero, boxA.currents[i]); 
+    //}
+        //Check if Time or Index reach 0 then deletes itself
     for(i = 0; i < boxA.currents_length; i++){
         if(boxA.currents[i]->checkStop())
-            boxA.deleteAttack(boxA.currents[i]->getID());
+            boxA.deleteAttack(i);
     }
 
     for(i = 0; i < boxA.currents_length; i++){
       for(j = 0; j < enemies_length; j++){
         if(detectAttack(enemies[j], boxA.currents[i])){
-                enemies[j]->life-=100;
+          boxA.currents[i]->causeEffect(enemies[j]);
         }
-      } 
+      }
+        if(detectAttack(hero, boxA.currents[i])){
+        boxA.currents[i]->causeEffect(hero); 
+        }
     }
 
     //Bullet creation
