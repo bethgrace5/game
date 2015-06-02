@@ -166,7 +166,7 @@ bool Attack::checkStop(){
 void Attack::causeEffect(Enemy *enemy){
   if(!effectEnemy) return;
   if(charges <= 0) return;
-  pushAwayForce(enemy);
+  if(pushAway) pushAwayForce(enemy);
   enemy->life-=damage;
   charges--;
 }
@@ -174,7 +174,7 @@ void Attack::causeEffect(Enemy *enemy){
 void Attack::causeEffect(Player *hero){
   if(!effectPlayer) return;  
   if(charges <= 0) return;
-  pushAwayForce(hero);
+  if(pushAway) pushAwayForce(hero);
   hero->reduceHealth(damage);
   charges--;
 }
@@ -231,9 +231,10 @@ void Attack::autoState(){
 
   if(stickOn) stickOnHero();
   if(moveWith) moveWithHero();
+  if(invincible) hero->setInvincible(true);
+
   if(singleUse == 0){ 
     if(pushBack) pushBackSelf();
-    if(invincible) hero->setInvincible(true);
     singleUse = 1;
   }
 

@@ -25,7 +25,7 @@ void attack_list::makeAttacks(){
   attacks[id].setCycleBase(false);
   attacks[id].setDuration(300);
   attacks[id].setDamage(1);
-  //attacks[id].setStickOn(true);
+  attacks[id].setStickOn(true);
   attacks[id].setMoveWith(true);
   attacks[id].setCharges(200);
   attacks[id].setVelocityX(10); attacks[id].setVelocityY(5);
@@ -36,9 +36,9 @@ void attack_list::makeAttacks(){
 
   //Projectile Attack
   id = 1; width = 50; height = 50;
-  sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
+  sprite_sheet[id].insert("./images/bullets.ppm", 4, 1);
   sprite_sheet[id].setSize(width,height);
-  sprite_sheet[id].setBackground(1);
+  sprite_sheet[id].setBackground(0);
   attacks[id].referenceTo(sprite_sheet[id], id);
   attacks[id].init(width,height,0,0);
   attacks[id].setVelocityX(10);
@@ -91,7 +91,7 @@ sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
   attacks[id].setCycleBase(false);
   attacks[id].setDuration(300);
   attacks[id].setDamage(1);
-  //attacks[id].setStickOn(true);
+  attacks[id].setStickOn(true);
   attacks[id].setMoveWith(true);
   attacks[id].setCharges(200);
   attacks[id].setVelocityX(10); attacks[id].setVelocityY(-5);

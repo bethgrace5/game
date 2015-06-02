@@ -518,7 +518,7 @@ int check_keys (XEvent *e) {
                 //boxA.copyAttack(hero, 1, hero->checkMirror());
                 //boxA.copyAttack(enemies[0], 0, 0);
             }
-            if( key == XK_v){
+            if( key ==XK_v){
                 boxA.copyAttack(hero, 1, hero->checkMirror()); 
             }
             if( key == XK_c){
