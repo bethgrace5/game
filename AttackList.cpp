@@ -169,8 +169,8 @@ bool attack_list::detectAttack (Object *obj, Attack *targetAttack) {
       obj->getBottom() < targetAttack->getTop()  &&
       obj->getTop()    > targetAttack->getBottom()) {
       #ifdef USE_SOUND
-  cout << currents[currents_length]->getSoundCollide()<<endl;
-       fmod_playsound(currents[currents_length]->getSoundCollide());
+      //cout << targetAttack->getSoundCollide()<<endl;
+      fmod_playsound(targetAttack->getSoundCollide());
       #endif
     return true;
   }
