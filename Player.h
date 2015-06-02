@@ -8,10 +8,6 @@
 #include "Sprite.h"
 #include "Object.h"
 
-#ifdef USE_SOUND
-#include "sounds.h"
-#endif
-
 //=====================================================================
 //Player
 //=====================================================================
@@ -26,6 +22,7 @@ class Player: public Object, public Sprite{
     int once;
 
     //bool triggerShooting;
+    bool invincible;
 
     timeval seqStartA, seqEndA;
 
@@ -43,12 +40,14 @@ class Player: public Object, public Sprite{
     void setHealth(int take);
     void reduceHealth(int take);
     void repairHealth(int take);
-
+    void setInvincible(bool take);
+    
     bool checkShooting();
     void setShooting(bool take);
     int getLives();
     void incrementLives();
     void decrementLives();
+    void reset();
 
     void drawBox();
     void cycleAnimations();

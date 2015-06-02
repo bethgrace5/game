@@ -1,100 +1,166 @@
-//Storage
+#include "AttackList.h"
 
-//====================================================================
-//  Attack Storage
-//====================================================================
-extern Player *hero;
-#define MAX_ATTACKS 25
-#define MAX_CURRENTS 5
-
-struct attack_list{
-  Sprite  sprite_sheet[MAX_ATTACKS];
-  Attack attacks[MAX_ATTACKS];
-  int attacks_length;
-
-  Attack *currents[MAX_CURRENTS];
-  int currents_length;
-
-  void makeAttacks();
-  void copyAttack(int tId);
-  void deleteAttack(int id);
-} boxA;
-
+#include "Object.h"
+#include "Sprite.h"
+#include "chadD.h"
+#include "Enemy.h"
+#include "Player.h"
+#include "sounds.h"
 //=====================================================================
-//  Attack Storage Functions
+//  Attack_Editor
 //=====================================================================
-void attack_list::deleteAttack(int id){
-  if (currents_length <= 0) return;
+void attack_list::makeAttacks(){
+  int id = 0;
+  int width, height;
 
-  std::cout << " What is current Attack_length " << currents_length<< std::endl;
-  if (id < 0) return;
-  std::cout << " what is id" << id << std::endl;
+  id = 0; width = 75; height = 75;
+  //Aura Effect And Movment
+  sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
+  sprite_sheet[id].setSize(75,75);
+  sprite_sheet[id].setBackground(1);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(75,75,0,0);
+  attacks[id].changeRate(15);
+  attacks[id].setTimeBase(true);
+  attacks[id].setCycleBase(false);
+  attacks[id].setDuration(300);
+  attacks[id].setDamage(1);
+  //attacks[id].setStickOn(true);
+  attacks[id].setMoveWith(true);
+  attacks[id].setCharges(20);
+  attacks[id].setVelocityX(10); attacks[id].setVelocityY(5);
+  #ifdef USE_SOUND
+  attacks[id].setAttackSound(beep);
+  attacks[id].setSoundCollide(censorBeep);
+  #endif
 
-  currents[id] = new Attack();
-  //delete currents[id];
+  //Projectile Attack
+  id = 1; width = 25; height = 25;
+  sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(1);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(25,25,0,0);
+  attacks[id].setVelocityX(10);
+  attacks[id].setTimeBase(true);
+  attacks[id].setCycleBase(false);
+  attacks[id].setCharges(10);
+  attacks[id].setDamage(25);
+  #ifdef USE_SOUND
+  attacks[id].setAttackSound(robotBlip1);
+  attacks[id].setSoundCollide(robotBlip2);
+  #endif
 
-  for (int i = id; i < currents_length-1; i++) {
-    currents[i] = currents[i + 1];
-    currents[i]->setID(currents[i]->getID()-1);
-  }
-
-  currents[currents_length-1] = new Attack();
-  //delete currents[currents_length-1];
-  currents_length--;
+  //Template
+  id = 2; width = 50; height = 50;
+  sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(id);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(width,height,0,0);
+  attacks[id].setVelocityX(0);
+  attacks[id].setVelocityY(0);
+  attacks[id].setTimeBase(true);
+  attacks[id].setDuration(5000);
+  attacks[id].setCycleBase(false);
+  attacks[id].setStickOn(true);
+  //attacks[id].setMoveWith(true);
+  //attacks[id].setConstantEffect(true);
+  attacks[id].setCharges(100);
+  attacks[id].setDamage(25);
+  #ifdef USE_SOUND
+  attacks[id].setAttackSound(tick);
+  attacks[id].setSoundCollide(click);
+  #endif
 }
-
-void attack_list::copyAttack(int tId){
+//=====================================================================
+//  Attack_Copy
+//=====================================================================
+void attack_list::copyAttack(Object *caster, int tId){
   if(currents_length >= MAX_CURRENTS) return;
 
   currents[currents_length] = new Attack(attacks[tId]);
-  currents[currents_length]->setCenter(hero->getCenterX(),
-      hero->getCenterY());
   currents[currents_length]->setID(currents_length);
 
+  currents[currents_length]->targetAt(caster);
+   currents[currents_length]->setCenter(caster->getCenterX(),
+      caster->getCenterY());
+  #ifdef USE_SOUND
+  //cout << currents[currents_length]->getAttackSound()<<endl;
+  fmod_playsound(currents[currents_length]->getAttackSound());
+  #endif
   currents_length++;
 }
 
-void attack_list::makeAttacks(){
-  boxA.sprite_sheet[0].insert("./images/fireball.ppm", 5, 5);
-  boxA.sprite_sheet[0].setSize(50,50);
-  boxA.sprite_sheet[0].setBackground(1);
-  attacks[0].referenceTo(boxA.sprite_sheet[0], 0);
-  attacks[0].init(50,50,0,0);
-  attacks[0].changeRate(35);
-  attacks[0].setVelocityX(4);
-
-  //Duration Base
-  boxA.sprite_sheet[1].insert("./images/fireball.ppm", 5, 5);
-  boxA.sprite_sheet[1].setSize(100,100);
-  boxA.sprite_sheet[1].setBackground(1);
-  attacks[1].init(50,50,0,0);
-  attacks[1].setVelocityX(10);
+void attack_list::copyAttack(Object *caster, int tId, bool mirror){
+  if(currents_length >= MAX_CURRENTS) return;
+  attack_list::copyAttack(caster, tId);
+  if(mirror){
+    currents[currents_length-1]->setVelocityX(
+      -currents[currents_length-1]->getVelocityX());
+  }
 }
+
+void attack_list::copyAttack(Player *caster, int tId, bool mirror){
+  if(currents_length >= MAX_CURRENTS) return;
+  attack_list::copyAttack(caster, tId);
+  currents[currents_length-1]->setEffectEnemy(true);
+  if(mirror){
+    currents[currents_length-1]->setVelocityX(
+      -(currents[currents_length-1]->getVelocityX()));
+  }
+}
+
+void attack_list::copyAttack(Enemy *caster, int tId, bool mirror){
+  if(currents_length >= MAX_CURRENTS) return;
+  attack_list::copyAttack(caster, tId);
+  currents[currents_length-1]->setEffectPlayer(true);
+  if(mirror){
+    currents[currents_length-1]->setVelocityX(
+      -currents[currents_length-1]->getVelocityX());
+  }
+}
+
+void attack_list::deleteAttack(int id){
+  if (currents_length <= 0) return;
+
+  currents_length--;
+  delete currents[id];
+  currents[id] = (currents[currents_length]);
+  currents[currents_length]=NULL;
+}
+
 //=====================================================================
 //  Attack Outside Influence
 //=====================================================================
-bool detectAttack (Object *obj, Attack *targetAttack) {
+
+bool attack_list::detectAttack (Object *obj, Attack *targetAttack) {
   //Gets (Moving Object, Static Object)
   //Reture True if Moving Object Collides with Static Object
   if (obj->getRight() > targetAttack->getLeft() &&
       obj->getLeft()   < targetAttack->getRight() &&
       obj->getBottom() < targetAttack->getTop()  &&
       obj->getTop()    > targetAttack->getBottom()) {
-    //targetAttack->causeEffect(hero);
-    //deleteAttack(obj->getID());
+      #ifdef USE_SOUND
+  cout << currents[currents_length]->getSoundCollide()<<endl;
+       fmod_playsound(currents[currents_length]->getSoundCollide());
+      #endif
     return true;
   }
   return false;
 }
 
-void renderAttacks(int x, int y){
-  for (int i=0;i<boxA.currents_length;i++) {
-    boxA.currents[i]->autoSet();
-    boxA.currents[i]->cycleAnimations();
+void attack_list::renderAttacks(int x, int y){
+  for (int i=0;i<currents_length;i++) {
+    currents[i]->autoState();
+    currents[i]->autoSet();
+    currents[i]->cycleAnimations();
+
     glPushMatrix();
     glTranslatef(- x, - y, 0);
-    boxA.currents[i]->drawBox(boxA.sprite_sheet[0]);
+    currents[i]->drawBox(
+        sprite_sheet[currents[i]->checkSpriteID()]);
+
     glEnd(); glPopMatrix(); 
   }
 }
-

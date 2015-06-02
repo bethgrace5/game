@@ -1,13 +1,16 @@
 
 #ifdef USE_SOUND
-#ifndef SOUNDS_H
-#define SOUNDS_H
 #include "definitions.h"
 
 #include "./include/FMOD/fmod.h"
 #include "./include/FMOD/wincompat.h"
 #include "fmod.h"
 #include <iostream>
+
+
+#ifndef SOUNDS_H
+#define SOUNDS_H
+void init_sounds();
 enum sound_t {
     // theme song
     megamanTheme = 0,
@@ -16,14 +19,14 @@ enum sound_t {
     tick,
     click,
     beep,
-    bleep,
+    accessDeny,
     button3,
     button4,
     censorBeep,
     groceryScanning,
     endFx,
     flyby,
-    hockeyStickSlap,
+    bossMusic,
     musicCensor,
     modem,
     pling,
@@ -42,7 +45,7 @@ enum sound_t {
     scaryAmbience,
     // actions
     dunDunDun,
-    marioJump,
+    jumpSound,
 
     // weapon shots
     alienMachineGun,
@@ -51,8 +54,6 @@ enum sound_t {
     mvalSingle,
     laser
 };
-
-void init_sounds(void);
 
 #endif
 #endif

@@ -1,3 +1,4 @@
+#ifdef USE_SOUND
 /*===============================================================================================
 These functions were derived from the FMOD library.
 It is copyrighted material, but free for personal use.
@@ -16,7 +17,6 @@ See other sample programs in the fmod /examples directory
 
 #include "definitions.h"
 
-#ifdef USE_SOUND
 #include "./include/FMOD/fmod.h"
 #include "./include/FMOD/fmod_errors.h"
 #include "./include/FMOD/fmod_errors.h"
@@ -135,6 +135,10 @@ int fmod_cleanup(void)
 	result = FMOD_System_Release(xsystem);
 	if (ERRCHECK(result)) return 1;
 	return 0;
+}
+int fmod_stopAll(void) {
+    FMOD_Channel_Stop(channel);
+    return 0;
 }
 
 #endif

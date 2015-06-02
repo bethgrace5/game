@@ -20,6 +20,8 @@ Player::Player() : Object(26, 44, 250, 250), Sprite(){
   isShooting=0;
   jumps = 0; jumpLimit = 2; jumpPower = 7;
   speed = 0; maxSpeed  = 7;
+  invincible = 0;
+  isShooting=0;
   Sprite::setMirror(false);
   indexp = 0; once = 0;
 }
@@ -38,7 +40,7 @@ void Player::jump(){
   if(jumps < jumpLimit){ 
       Object::setVelocityY(jumpPower); 
       #ifdef USE_SOUND
-      fmod_playsound(marioJump);
+      fmod_playsound(jumpSound);
       #endif
       jumps++;
   }
@@ -59,11 +61,15 @@ int Player::getHealth(){
   return health;
 }
 void Player::reduceHealth(int take){
+  if(invincible == 1) return;
   health -= take;
 }
 void Player::repairHealth(int take){
   health += take;
   if(health > maxHealth) health = 100;
+}
+void Player::setInvincible(bool take){
+  invincible = 1;
 }
 
 bool Player::checkShooting(){
@@ -86,6 +92,18 @@ void Player::decrementLives(){
     if(lives < 0) {
         health =0;
     }
+}
+void Player::reset(){ 
+  health =  maxHealth = 100;
+  isShooting=0;
+  lives = 3;
+  health = 100;
+  isShooting=0;
+  Sprite::setMirror(false);
+  setVelocityX(0);
+  setVelocityY(0);
+  setCenter(200, 400);
+  lives = 3; 
 }
 
 //===============================================
@@ -144,7 +162,7 @@ void Player::cycleAnimations(){
     }
   }
   //Standing
-  else indexp = 6; 
+  else indexp = 6;
   //std::cout << "Index: " << indexp << endl;
   Sprite::setIndexAt(indexp);
 }

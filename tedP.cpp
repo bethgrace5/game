@@ -3,11 +3,6 @@
 //Purpose: To Make it Easy to add any types of objects inside the game
 //      Run Executive ./tool
 //
-//    !IMPORTANT!
-//        In Definition.h USE_TOOLS Must be Set to 1 in order to USE THIS
-//        You Need to At Least Make 7 Objects Because in main.cpp, 
-//        Enemy Constructor are currently platform depedant.
-//
 //    //Instructions
 //        To Use Please, Enter Create Mode( press C and make blocks)
 //
@@ -18,22 +13,21 @@
 //        Read the README.md for more instructions
 //
 //    //Future Updates
-//        Easily Place Enemies
 //        Easily Place Items
 
 /*
 ======================+
     Tool Editor       |
 ======================+
-  Main Center         |
-  Platform Editor     |
-  Enemy Editor        |
-  Mouse Check         |
-  Key Check           |
+  Main_Center         |
+  Platform_Editor     |
+  Enemy_Editor        |
+  Mouse_Check         |
+  Key_Check           |
   Physics             |
   Drawing             |
-  Storage Editor      |
-  Window Setup        |
+  Storage_Editor      |
+  Window_Setup        |
 ======================+
 */
 #define EDITOR_MODE
@@ -57,13 +51,14 @@
 #include "Enemy.h"
 #include "Item.h"
 #include "Player.h"
-#include "Platform.h"
+#include "chadD.h" //#include "Platform.h"
 #include "definitions.h"
 #include "Object.h"
 #include "sounds.cpp"
 //#include "Attack.cpp"
 #include "Storage.cpp"
-#include "AttackList.cpp"
+#include "fmod.c"
+//#include "AttackList.cpp"
 #include "fastFont.cpp"
 
 //#include "Storage.cpp"
@@ -83,6 +78,7 @@ Sprite currentTile;
 Sprite ruler;
 Enemy *enemies[MAX_ENEMIES];
 Platform *grounds[MAX_GROUNDS];
+attack_list boxA;
 int grounds_length = 0;
 int enemies_length = 0;
 int level = 0;
@@ -103,10 +99,14 @@ bool tileMode = 0;
 bool selecter = 0;
 int  holdID = -1;
 int saveID = -1;
+int enemyType = 0;
+
+int creeperScore;
 //------------------------------
 //Function Prototype
 //------------------------------
 int clickObject(int x, int y);
+int clickEnemy(int x, int y);
 void draging(int x, int y);
 
 void initXWindows(void);
@@ -157,8 +157,9 @@ bool inWindow(Object &obj) {
       (obj.getRight() > (roomX-(WINDOW_HALF_WIDTH)) and
        obj.getRight() < (roomX+(WINDOW_HALF_WIDTH))));
 }
+
 //====================================================================
-//    Main Center
+//    Main_Center
 //====================================================================
 int main(void) {
   initXWindows(); init_opengl();
@@ -207,7 +208,7 @@ void init_opengl (void) {
   initFastFont();
 }
 //=====================================================================
-//  Platform Editor
+//  Platform_Editor
 //=====================================================================
 void makePlatform(int x, int y) {
   cout << "Make Ground \n";
@@ -336,7 +337,7 @@ void deletePlatform(){
 }
 
 //=====================================================================
-//  Enemy Editor
+//  Enemy_Editor
 //=====================================================================
 void makeEnemy(int w, int h, int x, int y, int type) {
     if (enemies_length<MAX_ENEMIES){
@@ -363,6 +364,7 @@ void makeEnemy(int w, int h, int x, int y, int type) {
                 enemies[enemies_length]->insert("./images/boss.ppm", 1, 1);
                 break;
         }
+        enemies[enemies_length]->setID(enemies_length);
         enemies_length++;
     }
     else{
@@ -370,20 +372,37 @@ void makeEnemy(int w, int h, int x, int y, int type) {
     }
 }
 
-void deleteEnemy(int ind){
+void deleteEnemy(){
+  if(enemies_length <= 0) return;
+  if(saveID < 0) return; 
+
+  enemies[saveID] = new Enemy();
+  delete enemies[saveID];
+
+  for(int i = saveID; i < enemies_length-1; i++){
+    enemies[i] = enemies[i + 1];
+    enemies[i]->setID(enemies[i]->getID()-1); 
+  }
+
+  enemies[enemies_length-1] = new Enemy();
+  delete enemies[enemies_length-1];
   enemies_length--;
-  delete enemies[i];
-  enemies[i] = enemies[enemies_length];
-  enemies[enemies_length]=NULL;
+  cout << "What is Enemies Length" << enemies_length << endl;
 }
 
-//Object createAI (int w, int h, Object *ground) {
-  //Object newEnemy(w, h, ground->getCenterX(), ground->getCenterY() + ground->getHeight() + h);
-  //return newEnemy;
-  //return 0;
-//}
+
+void enemySetWidth(){
+
+
+}
+
+void enemySetHeight(){
+
+
+}
+
 //=====================================================================
-//  Mouse Check
+//  Mouse_Check
 //=====================================================================
 static int savex = 0, savey = 0;
 void check_mouse (XEvent *e) {
@@ -396,10 +415,23 @@ void check_mouse (XEvent *e) {
 
   int take;
   if (e->type == ButtonPress) {
-    if (e->xbutton.button==1) { //Left button was pressed
+  //Left button was pressed
+    if (e->xbutton.button==1) {
+      //Enemy Editor Stuff
       if(enemyEditor){
-        makeEnemy(100, 100, savex, savey, 3);  
+        if(selecter == 1){
+          take = clickEnemy(savex, savey);
+          cout << "The id is: " << take << "\n";
+          saveID = holdID = take;
+        }
+        else 
+          switch(enemyType){ 
+            case 0: makeEnemy(37, 80, savex, savey, 1); break;
+            case 1: makeEnemy(38, 37, savex, savey, 2); break;
+            case 2: makeEnemy(100, 100, savex, savey, 3); break;
+          }
       }
+      //Platform Editor Stuff
       else if(create == 1){
         cout << " x " << savex << ", y " << savey << "\n";
         makePlatform(savex, savey);
@@ -411,6 +443,7 @@ void check_mouse (XEvent *e) {
         saveID = holdID = take;
       }
     }
+  //Right Button was Pressed
     if (e->xbutton.button==2) {
       pickTile(e->xbutton.x, WINDOW_HEIGHT - e->xbutton.y);
       return;
@@ -446,13 +479,27 @@ int clickObject(int x, int y){
   return -1;
 }
 
+int clickEnemy(int x, int y){
+  for(int i =0; i < enemies_length; i++){
+    if(enemies[i]->getRight()  > x &&
+        enemies[i]->getLeft()   < x &&
+        enemies[i]->getBottom() < y &&
+        enemies[i]->getTop()    > y){
+      return i;
+    } 
+  }
+  return -1;
+}
+
+
 void draging(int x, int y){
   if(holdID < 0)
     return;
-  grounds[holdID]->setCenter(x, y);
+  if(enemyEditor) enemies[holdID]->setCenter(x, y);
+  else grounds[holdID]->setCenter(x, y);
 }
 //=====================================================================
-//  Key Check
+//  Key_Check
 //=====================================================================
 int check_keys (XEvent *e) {
   //handle input from the keyboard
@@ -468,7 +515,11 @@ int check_keys (XEvent *e) {
       load(); 
     }
     if(key == XK_r){
-      setRow(1);  
+      if(enemyEditor){
+        enemyType++; 
+        if(enemyType > 3) enemyType = 0; 
+      }
+      else setRow(1);  
     }
     if(key == XK_t){
       setColumn(1); 
@@ -489,7 +540,8 @@ int check_keys (XEvent *e) {
       deleteLastPlatform();
     }
     if(key == XK_n){
-      deletePlatform();
+      if(enemyEditor) deleteEnemy();
+      else deletePlatform();
     } 
     #ifdef BACKUP
     if(key == XK_p){
@@ -503,6 +555,7 @@ int check_keys (XEvent *e) {
     }
     #endif
     if(key == XK_f ){
+      saveID = 0;
       enemyEditor = !enemyEditor; 
     }
 
@@ -575,7 +628,12 @@ bool detectCollide (Object *obj, Object *ground) {
 //  Drawing
 //=====================================================================
 void renderOptions(){
-  if(enemyEditor == 1) writeWords("Enemy Editor Mode", 25, 55);
+  if(enemyEditor == 1){
+    writeWords("Enemy Editor Mode", 25, 55);
+    if(enemyType == 0) writeWords("Enemy 0", 40, 80);
+    if(enemyType == 1) writeWords("Enemy 1", 40, 80);
+    if(enemyType == 2) writeWords("Enemy 2", 40, 80); 
+  }
   else writeWords("Platform Editor Mode", 25, 55);
 
   if(create == 1) writeWords("Create Mode", 25, 25);
@@ -754,6 +812,12 @@ void load(){
     grounds[i]->reInitSprite();
     grounds_length++;
   } 
+  enemies_length = 0;
+  for(int i = 0; i < storeIn.enemies_length; i++){
+    enemies[i] = &storeIn.enemies[i];
+    enemies[i]->reInitSprite();
+    enemies_length++; 
+  }
   cout << "Loading Finished \n";
 }
 

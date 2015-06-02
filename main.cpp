@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <typeinfo>
 #include <string>
 #include <sys/time.h>
 #include <unistd.h>
@@ -17,21 +18,25 @@
 #include "Enemy.h"
 #include "Item.h"
 #include "Player.h"
-#include "Platform.h"
+#include "chadD.h"
 #include "definitions.h"
 #include "functions.h"
 #include "Object.h"
+#include "AttackList.h"
 
 #ifdef USE_SOUND
-#include "sounds.h"
-#include "fmod.h"
+#include "fmod.c"
+#include "./include/FMOD/fmod.h"
+#include "./include/FMOD/wincompat.h"
+#include "sounds.cpp"
 #endif
 
 #include "Storage.cpp"
-#include "AttackList.cpp"
+#include "AttackList.h"
 #include "fastFont.cpp"
 
 using namespace std; //typedef double Vec[3];
+attack_list boxA;
 
 // background bits
 struct bgBit {
@@ -71,12 +76,23 @@ Item *items;
 Item *itemsHold[10];
 int items_length = 0;
 double g_left, g_right, g_top, g_bottom;
-int bg, bullets, grounds_length, enemies_length, i, j, level=0, quit=0;
+int bg, bullets, grounds_length, enemies_length = 0, i, j, level=0, quit=0;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
+
+//timer
 timeval gameStart, gameEnd;
 int minutes = 0;
+int seconds = 0;
 int updated = 1;
+int savedMinutes = 0;
+int savedSeconds = 0;
+
+//music
+int bossMusicIsPlaying=0;
+
+//score tally
+int creeperScore = 0;
 
 // menu rendering and selection Globals
 int showInvalid=0, frameIndex=0, menuSelection = 0;
@@ -84,9 +100,9 @@ timeval frameStart, frameEnd;
 
 //Images and Textures
 Ppmimage *initImages[32], *computerScreenImages[32], *healthBarImage[1], *lifeImage[1],
-         *backgroundImage[1];
+         *backgroundImage[1], *pauseMenuImage[1];
 GLuint initTextures[65], computerScreenTextures[32], healthBarTexture[1], lifeTexture[1],
-       backgroundTexture[1];
+       backgroundTexture[1], pauseMenuTexture[1];
 
 //Function prototypes
 //Object createAI( int w, int h, Object *ground);
@@ -95,38 +111,43 @@ bool detectCollide(Object *obj, Object *ground);
 bool detectItem (Object *obj, Item *targetItem);
 int  check_keys (XEvent *e);
 void check_mouse(XEvent *e);
+void cleanupItems();
 void cleanupXWindows(void);
 void cleanup_background(void);
 void deleteBullet(Bullet *node);
 void deleteEnemy(int ind);
+void deleteItem(int id);
 void gameTimer ();
 void groundCollide(Object *obj, Object *ground);
 void initXWindows(void);
 void init_opengl(void);
 void makeEnemy(int w, int h, Object *ground, int type); 
 void makeEnemy(int w, int h, int x, int y, int type); 
-void makePlatform(int w, int h, int x, int y);
 void makeItems(int w, int h, int x, int y);
+void makePlatform(int w, int h, int x, int y);
 void moveWindow(void);
 void movement(void);
+void playBossMusic();
 void render(void);
+void renderAnimations(int x, int y);
 void renderBackground(void);
 void renderBullets(int x, int y);
 void renderComputerScreenMenu();
+void renderDebugInfo();
 void renderEnemies(int x, int y);
 void renderGrounds(int x, int y);
-void renderHero(int x, int y);
-void renderAnimations(int x, int y);
-void renderItems(int x, int y);
-void renderInitMenu();
 void renderHealthBar();
-void renderDebugInfo();
+void renderHero(int x, int y);
+void renderInitMenu();
+void renderItems(int x, int y);
 void renderLives();
-
-
+void renderPauseMenu();
+void resetLevel();
+void setupItems();
+void writeScore();
+void setupEnemies();
 
 int main(void) {
-    gettimeofday(&gameStart, NULL);
     initXWindows(); init_opengl(); 
 #ifdef USE_SOUND
     init_sounds();
@@ -159,6 +180,8 @@ int main(void) {
     //end test
 
     if(QUICK_LOAD_TIME) {
+        // start timer now, because no option was selected in the menu
+        gettimeofday(&gameStart, NULL);
         level = 1;
     }
 
@@ -167,17 +190,26 @@ int main(void) {
             XEvent e; XNextEvent(dpy, &e);
             quit = check_keys(&e);
         }
+        // render "initializing sequence scene"
         if (level == -1) {
             renderInitMenu();
+            //begin game timer upon level select
+            gettimeofday(&gameStart, NULL);
         }
+        // render "selection menu"
         else if (level == 0) {
             renderComputerScreenMenu();
+        }
+        // render "pause menu"
+        else if (level == 2) {
+            renderPauseMenu();
         }
         else {
             movement();
             render();
             moveWindow();
-            gameTimer ();
+            gameTimer();
+            playBossMusic();
         }
         glXSwapBuffers(dpy, win);
     }
@@ -342,6 +374,18 @@ void init_opengl (void) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, backgroundData);
     delete [] backgroundData;
 
+    //load pause menu image
+    glGenTextures(1, pauseMenuTexture);
+    pauseMenuImage[0] = ppm6GetImage("./images/pauseMenu.ppm");
+    glBindTexture(GL_TEXTURE_2D, pauseMenuTexture[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    unsigned char *pauseMenuData = buildAlphaData(pauseMenuImage[0]);
+    w = pauseMenuImage[0]->width;
+    h = pauseMenuImage[0]->height;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pauseMenuData);
+    delete [] pauseMenuData;
+
     // load health bar image
     glGenTextures(1, healthBarTexture);
     healthBarImage[0] = ppm6GetImage("./images/healthBar.ppm");
@@ -367,8 +411,9 @@ void init_opengl (void) {
             grounds[i]->reInitSprite();
             grounds_length++;
         }
+        enemies_length = 0;
         for(int i = 0; i < storeIn.enemies_length; i++){
-            enemies[i] = &storeIn.enemies[i];
+            enemies[i] = new Enemy(storeIn.enemies[i]);
             enemies[i]->reInitSprite();
             enemies_length++;
         }
@@ -394,18 +439,12 @@ void init_opengl (void) {
         makePlatform(200, 16, 300, 200);
         makePlatform(20, 1000, -16, 600);
 
-        makeItems(16, 20, 375, 232);
-        makeItems(16, 20, 975, 232);
+        setupItems();
+        setupEnemies();
 
-        makeEnemy(37, 80, grounds[2], 1);
-        makeEnemy(37, 80, grounds[2], 1);
-        makeEnemy(38, 37, grounds[1], 2);
-        makeEnemy(37, 80, grounds[4], 1);
-        makeEnemy(100, 100, 300, 500, 3);
-        makeEnemy(38, 37, grounds[1], 2);
-        makeEnemy(37, 80, grounds[4], 1);
     }
 }
+
 
 void check_mouse (XEvent *e) {
     static int savex = 0, savey = 0;
@@ -430,7 +469,19 @@ int check_keys (XEvent *e) {
     //handle input from the keyboard
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
+        // level 1
         if (level==1) {
+            if (key == XK_r) {
+                resetLevel();
+            }
+            if (key == XK_e) {
+#ifdef USE_SOUND
+                cout<< fmod_getchannelsplaying(0)<<endl;
+                cout<< hero->getCenterX()<<endl;
+                fmod_stopAll();
+                cout<< fmod_getchannelsplaying(0)<<endl;
+#endif
+            }
             if (key == XK_Escape) {
                 return 1;
             }
@@ -460,7 +511,12 @@ int check_keys (XEvent *e) {
                 hero->setShooting(true);
             }
             if( key == XK_f){
-                boxA.copyAttack(0);  
+                boxA.copyAttack(hero, 0, hero->checkMirror());
+            }
+            if(key == XK_g){
+                boxA.copyAttack(hero, 2, hero->checkMirror());
+                //boxA.copyAttack(hero, 1, hero->checkMirror());
+                //boxA.copyAttack(enemies[0], 0, 0);
             }
             // debug death
             if (key == XK_y) {
@@ -471,8 +527,13 @@ int check_keys (XEvent *e) {
                 fmod_playsound(dunDunDun);
 #endif
             }
-            if (key == XK_h) {
-                //healthIndex--;
+            // pause
+            if (key == XK_p) {
+                //save current seconds and minutes
+                savedSeconds = seconds;
+                savedMinutes = minutes;
+                menuSelection=0;
+                level = 2;
             }
             // toggle start menu
             if (key == XK_m) {
@@ -485,6 +546,7 @@ int check_keys (XEvent *e) {
             }
             // play sounds for debugging
             if (key == XK_t) {
+                creeperScore++;
             }
             if (key == XK_u){
                 animateOn = 1;
@@ -507,13 +569,13 @@ int check_keys (XEvent *e) {
                 }
                 if(menuSelection==1 or menuSelection==2 or menuSelection==2 or menuSelection==4) {
 #ifdef USE_SOUND
-                    fmod_playsound(bleep);
+                    fmod_playsound(accessDeny);
 #endif
                     showInvalid = 1;
                 }
                 if(menuSelection==3) {
 #ifdef USE_SOUND
-                    fmod_playsound(bleep);
+                    fmod_playsound(accessDeny);
 #endif
                     showInvalid = 0;
                     return 1;
@@ -606,6 +668,36 @@ int check_keys (XEvent *e) {
                     menuSelection=0;
             }
         }
+        // pause menu
+        if(level ==2) {
+            if (key == XK_Return) {
+                // continue
+                // restart game timer
+                gettimeofday(&gameStart, NULL);
+                if(menuSelection==0) {
+                    level = 1;
+                }
+                // return to menu
+                if(menuSelection==1) {
+                    resetLevel();
+                    level = 0;
+                }
+                // exit game
+                if(menuSelection==2) {
+                    return 1;
+                }
+            }
+            if ( key == XK_Down){
+                if (menuSelection < 2) {
+                    menuSelection++;
+                }
+            }
+            if ( key == XK_Up){
+                if (menuSelection > 0) {
+                    menuSelection--;
+                }
+            }
+        }
     }
     else if (e->type == KeyRelease) {
         if ((key == XK_a || key == XK_Left)) {
@@ -622,12 +714,47 @@ int check_keys (XEvent *e) {
     return 0;
 }
 
+void resetLevel() {
+    hero->reset();
+    menuSelection = 0;
+    savedSeconds = 0;
+    savedMinutes = 0;
+    seconds = 0;
+    minutes = 0;
+    creeperScore = 0;
+    updated = 1;
+    gettimeofday(&gameEnd, NULL);
+    gettimeofday(&gameStart, NULL);
+    
+    cleanupItems();
+    setupItems();
+
+    setupEnemies();
+}
+
+
 void makePlatform(int w, int h, int x, int y) {
     grounds[grounds_length] = new Platform();
     grounds[grounds_length]->insert("./images/level.ppm", 1, 1);
     grounds[grounds_length]->init(w, h, x, y);
     grounds[grounds_length]->setupTile();
     grounds_length++;
+}
+
+void setupItems() {
+    makeItems(16, 20, 375, 232);
+    makeItems(16, 20, 975, 232);
+    makeItems(16, 20, 1100, 232);
+    makeItems(16, 20, 1300, 232);
+    makeItems(16, 20, 1500, 232);
+}
+
+void cleanupItems() {
+    for(int i=0; i<items_length; i++) {
+      delete itemsHold[i];
+      itemsHold[i] = NULL;
+    }
+    items_length = 0;
 }
 
 void makeItems(int w, int h, int x, int y) {
@@ -641,17 +768,17 @@ void makeItems(int w, int h, int x, int y) {
 
 void deleteItem(int id) {
     if (items_length <= 0) return;
-    if (id < 0) return;
+
     items_length--;
     delete itemsHold[id];
     itemsHold[id] = itemsHold[items_length];
-    itemsHold[id]->setID(itemsHold[id]->getID()+(items_length-id));
     itemsHold[items_length]=NULL;
 }
 
 void makeEnemy(int w, int h, Object *ground, int type) {
     if (enemies_length<MAX_ENEMIES){
         enemies[enemies_length] = new Enemy(w, h, ground, type); 
+        //printf ("%s\n",typeid(enemies[enemies_length]).name());
         switch (type){
             case 1:
                 enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
@@ -679,6 +806,15 @@ void makeEnemy(int w, int h, Object *ground, int type) {
     else{
         cout << "Enemies array full!" << endl;
     }
+}
+void setupEnemies() {
+        makeEnemy(37, 80, grounds[2], 1);
+        makeEnemy(37, 80, grounds[2], 1);
+        makeEnemy(38, 37, grounds[1], 2);
+        makeEnemy(37, 80, grounds[4], 1);
+        makeEnemy(100, 100, 300, 500, 3);
+        makeEnemy(38, 37, grounds[1], 2);
+        makeEnemy(37, 80, grounds[4], 1);
 }
 
 void makeEnemy(int w, int h, int x, int y, int type) {
@@ -729,9 +865,6 @@ bool detectItem (Object *obj, Item *targetItem) {
             obj->getLeft()   < targetItem->getRight() &&
             obj->getBottom() < targetItem->getTop()  &&
             obj->getTop()    > targetItem->getBottom()) {
-        cout << "Item touched\n";
-        targetItem->causeEffect(hero);
-        deleteItem(obj->getID());
         return true;
     }
     return false;
@@ -779,8 +912,10 @@ void groundCollide (Object *obj, Object *ground) {
         }
         //If moving object is at the right side of static object
         if (!(obj->getOldLeft() < g_right ) && !(h_left >= g_right)) {
-            obj->setVelocityX(0.51);
-            obj->setCenter(g_right+(obj->getCenterX()-h_left), obj->getCenterY());
+            if ((obj->getOldBottom() < g_top)) {
+                obj->setVelocityX(0.51);
+                obj->setCenter(g_right+(obj->getCenterX()-h_left), obj->getCenterY());
+            }
         }
     }
 }
@@ -826,24 +961,30 @@ void movement() {
 
     //Detect Item
     for (j=0; j < items_length; j++) {
-        detectItem(hero, itemsHold[j]);
+        if (detectItem(hero, itemsHold[j])){
+          itemsHold[j]->causeEffect(hero);
+          deleteItem(j); 
+        }
     }
     //Attack Collisions
     for(i = 0; i < boxA.currents_length; i++){
-        detectAttack(hero, boxA.currents[i]); 
+      boxA.detectAttack(hero, boxA.currents[i]); 
     }
-    //Check if Time or Index reach 0 then deletes itself
+        //Check if Time or Index reach 0 then deletes itself
     for(i = 0; i < boxA.currents_length; i++){
         if(boxA.currents[i]->checkStop())
-            boxA.deleteAttack(boxA.currents[i]->getID());
+            boxA.deleteAttack(i);
     }
 
     for(i = 0; i < boxA.currents_length; i++){
       for(j = 0; j < enemies_length; j++){
-        if(detectAttack(enemies[j], boxA.currents[i])){
-                enemies[j]->life-=100;
+        if(boxA.detectAttack(enemies[j], boxA.currents[i])){
+          boxA.currents[i]->causeEffect(enemies[j]);
         }
-      } 
+      }
+        if(boxA.detectAttack(hero, boxA.currents[i])){
+          boxA.currents[i]->causeEffect(hero); 
+        }
     }
 
     //Bullet creation
@@ -989,9 +1130,10 @@ void render () {
     renderHero(x, y);
     renderAnimations(x, y);
     renderItems(x, y);
-    renderAttacks(x,y);
+    boxA.renderAttacks(x,y);
     renderLives();
     renderHealthBar();
+    writeScore();
     //renderDebugInfo();
 
     if (hero->getHealth()<0) {
@@ -1006,7 +1148,6 @@ void renderAnimations(int x, int y){
     glTranslatef(- x + 350, - y + 350, 0);
     //explode.cycleAnimations();
     //explode.drawBox();
-
 
     glEnd(); glPopMatrix(); 
 }
@@ -1093,6 +1234,28 @@ void renderBullets (int x, int y) {
     }
     //cout << " . render finished " << endl;
 }
+void renderPauseMenu() {
+    float tileSz = 0.3333333;
+
+    glPushMatrix();
+    //glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, pauseMenuTexture[0]);
+    glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+
+    glTexCoord2f(0, (menuSelection%3)*tileSz + tileSz) ; glVertex2i(-WINDOW_HALF_WIDTH/2,-WINDOW_HALF_HEIGHT/2);
+    glTexCoord2f(0, (menuSelection%3)*tileSz         ) ; glVertex2i(-WINDOW_HALF_WIDTH/2, WINDOW_HALF_HEIGHT/2);
+    glTexCoord2f(1, (menuSelection%3)*tileSz         ) ; glVertex2i( WINDOW_HALF_WIDTH/2, WINDOW_HALF_HEIGHT/2);
+    glTexCoord2f(1, (menuSelection%3)*tileSz + tileSz) ; glVertex2i( WINDOW_HALF_WIDTH/2,-WINDOW_HALF_HEIGHT/2);
+
+    glEnd(); glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
+
+}
 
 void renderInitMenu () {
     int frameTime = 70;
@@ -1134,6 +1297,7 @@ void renderInitMenu () {
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
 }
+
 void renderLives () {
     int w = 50;
     int h = 50;
@@ -1172,39 +1336,38 @@ void renderLives () {
 void gameTimer () {
     gettimeofday(&gameEnd, NULL);
     double currentTime = diff_ms(gameEnd, gameStart);
-    long unsigned int seconds = 0;
+    seconds = ((int)currentTime/1000)%60 + savedSeconds;
 
-    seconds = ((int)currentTime/1000)%60;
- 
-    if (seconds==0 && !updated) {
-        seconds = 0;
+    if (seconds%60==0 &&!updated) { 
         minutes++;
-        cout<<"minutes: " << minutes <<endl;
         updated = 1;
     }
-
-    if (seconds==30) {
-        updated=0;
+    if (seconds%60==30) { 
+        updated = 0;
     }
-
-    string s = itos(seconds);
+ 
+    string s = itos(seconds%60);
     string m = itos(minutes);
 
-    if (seconds<10) {
+    if (seconds%60<10) {
         s="0"+s;
     }
     if (minutes<10) {
         m="0"+m;
     }
 
-    writeWords(".", 37, WINDOW_HEIGHT-10);
-    writeWords(".", 37, WINDOW_HEIGHT-24);
-    writeWords(s, 60, WINDOW_HEIGHT-20);
-    writeWords(m, 10, WINDOW_HEIGHT-20);
+    writeWords(".", 47, WINDOW_HEIGHT-60);
+    writeWords(".", 47, WINDOW_HEIGHT-73);
+    writeWords(s, 70, WINDOW_HEIGHT-70);
+    writeWords(m, 20, WINDOW_HEIGHT-70);
+}
+
+void writeScore() {
+    writeWords("+"+itos(creeperScore), 800, WINDOW_HEIGHT-30);
 }
 
 void renderHealthBar () {
-    int WHW = WINDOW_HALF_WIDTH;
+    //int WHW = WINDOW_HALF_WIDTH;
     int WH = WINDOW_HEIGHT;
     int h = 56;
     int w = 200;
@@ -1221,20 +1384,23 @@ void renderHealthBar () {
     glAlphaFunc(GL_GREATER, 0.0f);
     glBindTexture(GL_TEXTURE_2D, healthBarTexture[0]);
 
+    // render health level
     glPushMatrix();
     glBegin(GL_QUADS);
-    glTexCoord2f(0, 0.5); glVertex2i(WHW-(w/2)+((100-health)/10), WH-h-10);
-    glTexCoord2f(0, 1.0); glVertex2i(WHW-(w/2)+((100-health)/10), WH-10);
-    glTexCoord2f(1, 1.0); glVertex2i(WHW+(w/2)-((97-health)*2), WH-10);
-    glTexCoord2f(1, 0.5); glVertex2i(WHW+(w/2)-((97-health)*2), WH-h-10);
+    glTexCoord2f(0, 0.5); glVertex2i(100-(w/2)+((100-health)/10), WH-h+10);
+    glTexCoord2f(0, 1.0); glVertex2i(100-(w/2)+((100-health)/10), WH-20);
+    glTexCoord2f(1, 1.0); glVertex2i(100+(w/2)-((97-health)*2), WH-20);
+    glTexCoord2f(1, 0.5); glVertex2i(100+(w/2)-((97-health)*2), WH-h+10);
     glEnd();
     glPopMatrix();
+
+    // render outline of health bar
     glPushMatrix();
     glBegin(GL_QUADS);
-    glTexCoord2f(0, 0.0); glVertex2i(WHW-(w/2), WH-h-10);
-    glTexCoord2f(0, 0.5); glVertex2i(WHW-(w/2), WH-10);
-    glTexCoord2f(1, 0.5); glVertex2i(WHW+(w/2), WH-10);
-    glTexCoord2f(1, 0.0); glVertex2i(WHW+(w/2), WH-h-10);
+    glTexCoord2f(0, 0.0); glVertex2i(100-(w/2), WH-h+10);
+    glTexCoord2f(0, 0.5); glVertex2i(100-(w/2), WH-20);
+    glTexCoord2f(1, 0.5); glVertex2i(100+(w/2), WH-20);
+    glTexCoord2f(1, 0.0); glVertex2i(100+(w/2), WH-h+10);
     glEnd();
     glPopMatrix();
 
@@ -1256,6 +1422,19 @@ void renderDebugInfo () {
     }
     writeWords(itos(fps), 88, WH-50);
     writeWords(itos(bullets), 176, WH-80);
+}
+
+void playBossMusic() {
+    if(!bossMusicIsPlaying and hero->getCenterX() > 11472) {
+    //if(!bossMusicIsPlaying and hero->getCenterX() > 1900) {
+#ifdef USE_SOUND
+        bossMusicIsPlaying = 1;
+        cout<< fmod_getchannelsplaying(0)<<endl;
+        fmod_stopAll();
+        fmod_setmode(bossMusic, FMOD_LOOP_NORMAL);
+        fmod_playsound(bossMusic);
+#endif
+    }
 }
 
 void renderComputerScreenMenu () {
