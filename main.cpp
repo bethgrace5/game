@@ -24,10 +24,10 @@
 #include "Object.h"
 
 #ifdef USE_SOUND
+#include "fmod.c"
 #include "./include/FMOD/fmod.h"
 #include "./include/FMOD/wincompat.h"
 #include "sounds.cpp"
-#include "fmod.h"
 #endif
 
 #include "Storage.cpp"
@@ -507,8 +507,12 @@ int check_keys (XEvent *e) {
                 hero->setShooting(true);
             }
             if( key == XK_f){
-                boxA.copyAttack(0, 0);  
-                //boxA.copyAttack(0, 1);
+                boxA.copyAttack(hero, 0, hero->checkMirror());
+            }
+            if(key == XK_g){
+                boxA.copyAttack(hero, 2, hero->checkMirror());
+                //boxA.copyAttack(hero, 1, hero->checkMirror());
+                //boxA.copyAttack(enemies[0], 0, 0);
             }
             // debug death
             if (key == XK_y) {
@@ -736,12 +740,19 @@ void makePlatform(int w, int h, int x, int y) {
 void setupItems() {
     makeItems(16, 20, 375, 232);
     makeItems(16, 20, 975, 232);
+    makeItems(16, 20, 1100, 232);
+    makeItems(16, 20, 1300, 232);
+    makeItems(16, 20, 1500, 232);
 }
+
 void cleanupItems() {
     for(int i=0; i<items_length; i++) {
-        deleteItem(itemsHold[i]->getID());
+      delete itemsHold[i];
+      itemsHold[i] = NULL;
     }
+    items_length = 0;
 }
+
 void makeItems(int w, int h, int x, int y) {
     itemsHold[items_length] = new Item();
     itemsHold[items_length]->setID(items_length);
@@ -753,11 +764,10 @@ void makeItems(int w, int h, int x, int y) {
 
 void deleteItem(int id) {
     if (items_length <= 0) return;
-    if (id < 0) return;
+
     items_length--;
     delete itemsHold[id];
     itemsHold[id] = itemsHold[items_length];
-    itemsHold[id]->setID(itemsHold[id]->getID()+(items_length-id));
     itemsHold[items_length]=NULL;
 }
 
@@ -851,9 +861,6 @@ bool detectItem (Object *obj, Item *targetItem) {
             obj->getLeft()   < targetItem->getRight() &&
             obj->getBottom() < targetItem->getTop()  &&
             obj->getTop()    > targetItem->getBottom()) {
-        targetItem->causeEffect(hero);
-        fmod_playsound(button4);
-        deleteItem(obj->getID());
         return true;
     }
     return false;
@@ -950,24 +957,30 @@ void movement() {
 
     //Detect Item
     for (j=0; j < items_length; j++) {
-        detectItem(hero, itemsHold[j]);
+        if (detectItem(hero, itemsHold[j])){
+          itemsHold[j]->causeEffect(hero);
+          deleteItem(j); 
+        }
     }
     //Attack Collisions
-    for(i = 0; i < boxA.currents_length; i++){
-        detectAttack(hero, boxA.currents[i]); 
-    }
-    //Check if Time or Index reach 0 then deletes itself
+    //for(i = 0; i < boxA.currents_length; i++){
+    //    detectAttack(hero, boxA.currents[i]); 
+    //}
+        //Check if Time or Index reach 0 then deletes itself
     for(i = 0; i < boxA.currents_length; i++){
         if(boxA.currents[i]->checkStop())
-            boxA.deleteAttack(boxA.currents[i]->getID());
+            boxA.deleteAttack(i);
     }
 
     for(i = 0; i < boxA.currents_length; i++){
       for(j = 0; j < enemies_length; j++){
         if(detectAttack(enemies[j], boxA.currents[i])){
-                enemies[j]->life-=100;
+          boxA.currents[i]->causeEffect(enemies[j]);
         }
-      } 
+      }
+        if(detectAttack(hero, boxA.currents[i])){
+          boxA.currents[i]->causeEffect(hero); 
+        }
     }
 
     //Bullet creation
@@ -1131,7 +1144,6 @@ void renderAnimations(int x, int y){
     glTranslatef(- x + 350, - y + 350, 0);
     //explode.cycleAnimations();
     //explode.drawBox();
-
 
     glEnd(); glPopMatrix(); 
 }

@@ -34,9 +34,6 @@
 #include "Player.h"
 #include <iostream>
 
-extern Player *hero;
-extern Enemy *Enemies[MAX_ENEMIES];
-
 class Platform : public Sprite, public Object {
 
   private:
@@ -53,6 +50,8 @@ class Platform : public Sprite, public Object {
 
 class Attack: public Object {
   private:
+    Object *target;
+
     int spriteID;
     int rowAt;
     int columnAt;
@@ -63,6 +62,8 @@ class Attack: public Object {
     int once;
     int cycle;
     int onceOnly;
+    int attackSound;
+    int soundCollide;
 
     bool stop;
     bool start; 
@@ -72,6 +73,11 @@ class Attack: public Object {
     int indexp;  
 
     int damage;
+    int charges;
+    bool constantEffect;
+    bool effectEnemy;
+    bool effectPlayer;
+
     bool hurtOnce;
     
     bool stickOn;
@@ -85,13 +91,33 @@ class Attack: public Object {
 
     Object *Clone(){ return new Attack(*this); }
 
+    void targetAt(Object *target);
     void referenceTo(Sprite take, int id);
+    int  checkSpriteID();
     void fakeCopy(Attack * other);
 
     void changeRate(int take);
-    void changeDuration(int take);
+    void setDuration(int take);
     void checkDuration();
+
+    void setTimeBase(bool take);
+    void setCycleBase(bool take);
+    void setStickOn(bool take);
+    void setMoveWith(bool take);
+    void setEffectEnemy(bool take);
+    void setEffectPlayer(bool take);
+    void setConstantEffect(bool take);
+    void setCharges(int take);
+    void setDamage(int take);
+    void returnVelocity();
+    
     bool checkStop();
+    void setSound(int take);
+    int getSound();
+    void setAttackSound(int take);
+    int getAttackSound();
+    void setSoundCollide(int take);
+    int getSoundCollide();
 
     void autoState();
     void direction();
@@ -99,7 +125,7 @@ class Attack: public Object {
     void moveWithHero();
 
     void causeEffect(Player *hero);
-    void causeEffect(Enemy *Enemy);
+    void causeEffect(Enemy *enemy);
 
     void cycleAnimations();
 

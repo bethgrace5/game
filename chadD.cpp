@@ -94,7 +94,6 @@ void Platform::drawRow(int x, int y) {
 //=====================================================================
 Attack::Attack() : Object(0, 0, 0, 0){
   once = onceOnly = 0;
-  timer = 1;
   indexp = 0;
   damage = 5;
   frameRate = 0;
@@ -105,7 +104,27 @@ Attack::Attack() : Object(0, 0, 0, 0){
   stop = 0; 
   start = 0;
   stickOn = 0;
-  moveWith = 1;
+  moveWith = 0;
+  effectEnemy = 0;
+  effectPlayer = 0;
+  charges = 1;
+  constantEffect = 0;
+  
+  attackSound = 1;
+  soundCollide = 1;
+}
+
+void Attack::setAttackSound(int take){
+  attackSound = take;
+}
+int Attack::getAttackSound(){
+    return attackSound;
+}
+void Attack::setSoundCollide(int take){
+  soundCollide = take;
+}
+int Attack::getSoundCollide(){
+    return soundCollide;
 }
 
 void Attack::referenceTo(Sprite take, int id){
@@ -113,64 +132,94 @@ void Attack::referenceTo(Sprite take, int id){
   columnAt = take.getColumn();
   spriteID = id;
 }
+int Attack::checkSpriteID(){
+  return spriteID;
+}
 //==============================================
 //Rates Functions
 //==============================================
 void Attack::changeRate(int take){
   frameRate = take;
 }
-void Attack::changeDuration(int take){
+void Attack::setDuration(int take){
   duration = take;
-}
-void Attack::causeEffect(Player *hero){
-#ifdef USE_SOUND
-  //fmod_playsound(strangeAlien);
-#endif
-  hero->reduceHealth(damage);
 }
 bool Attack::checkStop(){
   return stop;
 }
+void Attack::causeEffect(Enemy *enemy){
+  if(!effectEnemy) return;
+  if(charges <= 0) return;
+  enemy->life-=damage;
+  charges--;
+}
 
-void Attack::causeEffect(Enemy *singleEnemy){
-#ifdef USE_SOUND
-  //fmod_playsound(strangeAlien);
-#endif
-  if(timer == 0) return;
-
-  std::cout << "Enemy Got Hit\n";
+void Attack::causeEffect(Player *hero){
+  if(!effectPlayer) return;  
+  if(charges <= 0) return;
+  hero->reduceHealth(damage);
+  charges--;
+}
+//=============================================
+//Setup Behavior
+//=============================================
+void Attack::setTimeBase(bool take){
+  timeBase = take; 
+}
+void Attack::setCycleBase(bool take){
+  cycleBase = take;
+}
+void Attack::setStickOn(bool take){
+  stickOn = take;
+}
+void Attack::setMoveWith(bool take){
+  moveWith = take;
+}
+void Attack::setEffectEnemy(bool take){
+  effectEnemy = take;
+}
+void Attack::setEffectPlayer(bool take){
+  effectPlayer = take;
+}
+void Attack::setDamage(int take){
+  damage = take;
+}
+void Attack::setConstantEffect(bool take){
+  constantEffect = take;
+}
+void Attack::setCharges(int take){
+  charges = take;
 }
 //==============================================
-// Movement Functions
+// Behavior_Functions
 //==============================================
-void Attack::direction(){
-
+void Attack::targetAt(Object *caster){
+  target = caster;
 }
+
 void Attack::autoState(){
   if(timeBase) checkDuration();
   if(cycleBase) if(indexp == 0 && start) stop = 1; 
+  if(charges == 0) stop = 1;
+
   if(stickOn) stickOnHero();
   if(moveWith) moveWithHero();
 
   //Follow Player Movement
   //Affect By Gravity
   //Directional Shots
+  if(stop && moveWith){
+    //target->setVelocityX(0);
+  }
 }
 
 void Attack::stickOnHero(){
-  Object::setCenter(hero->getCenterX(), hero->getCenterY());
+  Object::setCenter(target->getCenterX(), target->getCenterY());
 }
 
 void Attack::moveWithHero(){
-  //hero->setCenter(Object::getCenterX(), Object::getCenterY());
-  if(hero->checkMirror()){
-    hero->setVelocityX(Object::getVelocityX());
-    hero->setVelocityY(Object::getVelocityY());
-  }
-  else{
-    hero->setVelocityX(-(Object::getVelocityX()));
-    hero->setVelocityY(-(Object::getVelocityY()));
-  }
+    target->setVelocityX(Object::getVelocityX());
+    target->setVelocityY(Object::getVelocityY());
 }
 
 void Attack::checkDuration(){
@@ -181,6 +230,7 @@ void Attack::checkDuration(){
     stop = 1;
   }
 }
+
 //===============================================
 //Drawing Functions
 //===============================================/
@@ -192,8 +242,7 @@ void Attack::cycleAnimations(){
 
   if(diff_ms(seqEndA, seqStartA) > frameRate){
     indexp++;
-    //if(indexp > rowAt * columnAt) indexp = 0;
-    if(indexp > 3) indexp = 0;
+    if(indexp > rowAt * columnAt) indexp = 0;
     once = 0; start = 1;
   }
 }
