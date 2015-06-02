@@ -22,6 +22,7 @@ class Player: public Object, public Sprite{
     int once;
 
     //bool triggerShooting;
+    bool invincible;
 
     timeval seqStartA, seqEndA;
 
@@ -39,7 +40,8 @@ class Player: public Object, public Sprite{
     void setHealth(int take);
     void reduceHealth(int take);
     void repairHealth(int take);
-
+    void setInvincible(bool take);
+    
     bool checkShooting();
     void setShooting(bool take);
     int getLives();

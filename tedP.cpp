@@ -57,7 +57,7 @@
 #include "sounds.cpp"
 //#include "Attack.cpp"
 #include "Storage.cpp"
-#include "AttackList.cpp"
+//#include "AttackList.cpp"
 #include "fastFont.cpp"
 
 //#include "Storage.cpp"
@@ -77,6 +77,7 @@ Sprite currentTile;
 Sprite ruler;
 Enemy *enemies[MAX_ENEMIES];
 Platform *grounds[MAX_GROUNDS];
+attack_list boxA;
 int grounds_length = 0;
 int enemies_length = 0;
 int level = 0;

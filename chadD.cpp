@@ -219,7 +219,6 @@ void Attack::moveWithHero(){
 
 void Attack::checkDuration(){
   if(onceOnly == 0){ gettimeofday(&timeOut, NULL); onceOnly = 1;}
-  std::cout << "test\n";
   gettimeofday(&timeIn, NULL);
   if(diff_ms(timeIn, timeOut) > duration){
     stop = 1;
