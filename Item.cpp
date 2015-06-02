@@ -6,7 +6,7 @@
 #include "Enemy.h"
 #include "chadD.h"
   #ifdef USE_SOUND
-  #include "sound.h"
+  #include "sounds.h"
   #endif
 #include "AttackList.h"
 

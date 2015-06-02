@@ -5,12 +5,12 @@
 #include <GL/glx.h>
 #include <sys/time.h>
 #include <iostream>
-#include "fmod.h"
 #include "ppm.h"
 #include "Object.h"
 #include "Sprite.h"
 #include "definitions.h"
 #include "Enemy.h"
+#include "sounds.h"
 using namespace std;
 
 
