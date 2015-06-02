@@ -5,6 +5,9 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "chadD.h"
+  #ifdef USE_SOUND
+  #include "sound.h"
+  #endif
 #include "AttackList.h"
 
 extern attack_list boxA;
@@ -20,8 +23,12 @@ void Item::causeEffect(Player *hero) {
       hero->setHealth(0);
       break;
     case 2:
-      boxA.copyAttack(hero, 2, hero->checkMirror());
+      //boxA.copyAttack(hero, 2, hero->checkMirror());
       break;
+    case 3:
+
+      break;
+
     default:
       hero->repairHealth(20);
       break;
@@ -33,7 +40,12 @@ void Item::drawBox() {
   glTranslatef(Object::getCenterX(), Object::getCenterY(), 0);
   Sprite::drawTile(0,0);
   glPopMatrix();
+}
 
+Item::~Item(){
+#ifdef USE_SOUND
+  //fmod_playsound(powerup);
+#endif
 }
 
 

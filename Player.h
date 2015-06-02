@@ -16,7 +16,7 @@ class Player: public Object, public Sprite{
   private:
     int lives, health, maxHealth;
     int jumps, jumpLimit, jumpPower;
-    int maxSpeed, speed;
+    int maxSpeed, speed, speedRate;
 
     int indexp;
     int once;

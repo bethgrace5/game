@@ -465,7 +465,7 @@ int check_keys (XEvent *e) {
         // level 1
         if (level==1) {
             if (key == XK_r) {
-                resetLevel();
+                //resetLevel();
             }
             if (key == XK_Escape) {
                 return 1;
@@ -502,6 +502,12 @@ int check_keys (XEvent *e) {
                 boxA.copyAttack(hero, 2, hero->checkMirror());
                 //boxA.copyAttack(hero, 1, hero->checkMirror());
                 //boxA.copyAttack(enemies[0], 0, 0);
+            }
+            if( key == XK_v){
+                boxA.copyAttack(hero, 1, hero->checkMirror()); 
+            }
+            if( key == XK_c){
+                boxA.copyAttack(hero, 3, hero->checkMirror()); 
             }
             // debug death
             if (key == XK_y) {

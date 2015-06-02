@@ -13,13 +13,13 @@ void attack_list::makeAttacks(){
   int id = 0;
   int width, height;
 
-  id = 0; width = 75; height = 75;
+  id = 0; width = 125; height = 125;
   //Aura Effect And Movment
   sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
-  sprite_sheet[id].setSize(75,75);
+  sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(1);
   attacks[id].referenceTo(sprite_sheet[id], id);
-  attacks[id].init(75,75,0,0);
+  attacks[id].init(width,height,0,0);
   attacks[id].changeRate(15);
   attacks[id].setTimeBase(true);
   attacks[id].setCycleBase(false);
@@ -27,7 +27,7 @@ void attack_list::makeAttacks(){
   attacks[id].setDamage(1);
   //attacks[id].setStickOn(true);
   attacks[id].setMoveWith(true);
-  attacks[id].setCharges(20);
+  attacks[id].setCharges(200);
   attacks[id].setVelocityX(10); attacks[id].setVelocityY(5);
   #ifdef USE_SOUND
   attacks[id].setAttackSound(beep);
@@ -35,17 +35,20 @@ void attack_list::makeAttacks(){
   #endif
 
   //Projectile Attack
-  id = 1; width = 25; height = 25;
+  id = 1; width = 50; height = 50;
   sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(1);
   attacks[id].referenceTo(sprite_sheet[id], id);
-  attacks[id].init(25,25,0,0);
+  attacks[id].init(width,height,0,0);
   attacks[id].setVelocityX(10);
+  attacks[id].setPushBack(true);
+  attacks[id].setPushAway(true);
   attacks[id].setTimeBase(true);
+  attacks[id].setDuration(1000);
   attacks[id].setCycleBase(false);
-  attacks[id].setCharges(10);
-  attacks[id].setDamage(25);
+  attacks[id].setCharges(30);
+  attacks[id].setDamage(3);
   #ifdef USE_SOUND
   attacks[id].setAttackSound(beep);
   attacks[id].setSoundCollide(0);
@@ -61,13 +64,37 @@ void attack_list::makeAttacks(){
   attacks[id].setVelocityX(0);
   attacks[id].setVelocityY(0);
   attacks[id].setTimeBase(true);
-  attacks[id].setDuration(5000);
+  attacks[id].setDuration(15000);
   attacks[id].setCycleBase(false);
   attacks[id].setStickOn(true);
+  attacks[id].setInvincible(true);//NOTE <- !THIS WILL ONLY EFFECT HERO!
+  attacks[id].setPushAway(false);
+  attacks[id].setPushBack(false);
+  //attacks[id].set
   //attacks[id].setMoveWith(true);
   //attacks[id].setConstantEffect(true);
-  attacks[id].setCharges(100);
+  attacks[id].setCharges(200);
   attacks[id].setDamage(25);
+  #ifdef USE_SOUND
+  attacks[id].setAttackSound(beep);
+  attacks[id].setSoundCollide(0);
+  #endif
+
+id = 3; width = 125; height = 125;
+sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
+  sprite_sheet[id].setSize(75,75);
+  sprite_sheet[id].setBackground(1);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(75,75,0,0);
+  attacks[id].changeRate(15);
+  attacks[id].setTimeBase(true);
+  attacks[id].setCycleBase(false);
+  attacks[id].setDuration(300);
+  attacks[id].setDamage(1);
+  //attacks[id].setStickOn(true);
+  attacks[id].setMoveWith(true);
+  attacks[id].setCharges(200);
+  attacks[id].setVelocityX(10); attacks[id].setVelocityY(-5);
   #ifdef USE_SOUND
   attacks[id].setAttackSound(beep);
   attacks[id].setSoundCollide(0);

@@ -5,6 +5,7 @@
 #include "Sprite.h"
 #include "Object.h"
 #include "Player.h"
+#include <iostream>
 
 #ifdef USE_SOUND
 #include "sounds.h"
@@ -19,7 +20,7 @@ Player::Player() : Object(26, 44, 250, 250), Sprite(){
   health =  maxHealth = 100;
   isShooting=0;
   jumps = 0; jumpLimit = 2; jumpPower = 7;
-  speed = 0; maxSpeed  = 7;
+  speed = 0; maxSpeed  = 7; speedRate = 1;
   invincible = 0;
   isShooting=0;
   Sprite::setMirror(false);
@@ -30,10 +31,12 @@ Player::Player() : Object(26, 44, 250, 250), Sprite(){
 //===============================================
 void Player::moveRight(){ 
   Sprite::setMirror(false);
+  isWalking = 1;
   Object::setVelocityX(maxSpeed);
 }
 void Player::moveLeft(){
   Sprite::setMirror(true);
+  isWalking = 1;
   Object::setVelocityX(-maxSpeed);
 }
 void Player::jump(){
@@ -46,7 +49,8 @@ void Player::jump(){
   }
 }
 void Player::stop(){
-  Object::setVelocityX(0);
+  isWalking = 0;
+  //Object::setVelocityX(0);
 }
 void Player::jumpRefresh(){ 
   if(Player::getVelocityY() == 0) jumps = 0; 
@@ -61,7 +65,10 @@ int Player::getHealth(){
   return health;
 }
 void Player::reduceHealth(int take){
-  if(invincible == 1) return;
+  if(invincible){ 
+    std::cout << "test\n"; 
+    return;
+  }
   health -= take;
 }
 void Player::repairHealth(int take){
@@ -69,7 +76,7 @@ void Player::repairHealth(int take){
   if(health > maxHealth) health = 100;
 }
 void Player::setInvincible(bool take){
-  invincible = 1;
+  invincible = take;
 }
 
 bool Player::checkShooting(){
@@ -172,8 +179,15 @@ void Player::autoState(){
   if(getVelocityY() < 0) Object::isJumping = 1;
   else Object::isJumping = 0;
 
-  if(getVelocityX() < 0) Object::isWalking = 1;
-  else Object::isWalking = 0;
+  //if(getVelocityX() < 0) Object::isWalking = 1;
+  //else Object::isWalking = 0;
+  if(!isWalking){
+    std::cout << "walking\n";
+    if(getVelocityX() < 0) setVelocityX(getVelocityX()+1);
+    else if(getVelocityX() > 0) setVelocityX(getVelocityX()-1);
+    else setVelocityX(0);
+  }
+  
 
   if(getVelocityY() > 0) Object::isFalling = 1;
   else Object::isFalling = 0;
