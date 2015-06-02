@@ -475,10 +475,12 @@ int check_keys (XEvent *e) {
                 resetLevel();
             }
             if (key == XK_e) {
+#ifdef USE_SOUND
                 cout<< fmod_getchannelsplaying(0)<<endl;
                 cout<< hero->getCenterX()<<endl;
                 fmod_stopAll();
                 cout<< fmod_getchannelsplaying(0)<<endl;
+#endif
             }
             if (key == XK_Escape) {
                 return 1;
@@ -1425,11 +1427,13 @@ void renderDebugInfo () {
 void playBossMusic() {
     if(!bossMusicIsPlaying and hero->getCenterX() > 11472) {
     //if(!bossMusicIsPlaying and hero->getCenterX() > 1900) {
+#ifdef USE_SOUND
         bossMusicIsPlaying = 1;
         cout<< fmod_getchannelsplaying(0)<<endl;
         fmod_stopAll();
         fmod_setmode(bossMusic, FMOD_LOOP_NORMAL);
         fmod_playsound(bossMusic);
+#endif
     }
 }
 
