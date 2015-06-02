@@ -305,8 +305,13 @@ void Attack::drawBox(Sprite targetSprite){
   glVertex2i( w, -h);
   glEnd();
   */
+  bool past = targetSprite.checkMirror();
+  if(getVelocityX() >= 0) targetSprite.setMirror(false); 
+  else targetSprite.setMirror(true);
 
   targetSprite.drawTile(indexp);
+
+  targetSprite.setMirror(past);
 
   glPopMatrix();
 }
