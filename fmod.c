@@ -136,5 +136,9 @@ int fmod_cleanup(void)
 	if (ERRCHECK(result)) return 1;
 	return 0;
 }
+int fmod_stopAll(void) {
+    FMOD_Channel_Stop(channel);
+    return 0;
+}
 
 #endif

@@ -57,6 +57,7 @@
 #include "sounds.cpp"
 //#include "Attack.cpp"
 #include "Storage.cpp"
+#include "fmod.c"
 //#include "AttackList.cpp"
 #include "fastFont.cpp"
 

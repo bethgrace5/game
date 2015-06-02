@@ -1,5 +1,3 @@
-#ifdef USE_SOUND
-
 #ifndef FMOD_H
 #define FMOD_H
 
@@ -14,8 +12,8 @@ extern int fmod_setmode(int i, int mode);
 extern int fmod_getlength(int i, unsigned int *lenms);
 extern int fmod_systemupdate(void);
 extern int fmod_getchannelsplaying(int *channelsplaying);
+extern int fmod_stopAll(void);
 #endif
 
-#endif //FMOD_H
 #endif
 

@@ -19,14 +19,14 @@ enum sound_t {
     tick,
     click,
     beep,
-    bleep,
+    accessDeny,
     button3,
     button4,
     censorBeep,
     groceryScanning,
     endFx,
     flyby,
-    hockeyStickSlap,
+    bossMusic,
     musicCensor,
     modem,
     pling,
@@ -45,7 +45,7 @@ enum sound_t {
     scaryAmbience,
     // actions
     dunDunDun,
-    marioJump,
+    jumpSound,
 
     // weapon shots
     alienMachineGun,

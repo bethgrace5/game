@@ -43,14 +43,14 @@ void Player::jump(){
   if(jumps < jumpLimit){ 
       Object::setVelocityY(jumpPower); 
       #ifdef USE_SOUND
-      fmod_playsound(marioJump);
+      fmod_playsound(jumpSound);
       #endif
       jumps++;
   }
 }
 void Player::stop(){
   isWalking = 0;
-  //Object::setVelocityX(0);
+  Object::setVelocityX(0);
 }
 void Player::jumpRefresh(){ 
   if(Player::getVelocityY() == 0) jumps = 0; 
@@ -179,14 +179,15 @@ void Player::autoState(){
   if(getVelocityY() < 0) Object::isJumping = 1;
   else Object::isJumping = 0;
 
-  //if(getVelocityX() < 0) Object::isWalking = 1;
-  //else Object::isWalking = 0;
+  if(getVelocityX() < 0) Object::isWalking = 1;
+  else Object::isWalking = 0;
+  /*
   if(!isWalking){
     std::cout << "walking\n";
     if(getVelocityX() < 0) setVelocityX(getVelocityX()+1);
     else if(getVelocityX() > 0) setVelocityX(getVelocityX()-1);
     else setVelocityX(0);
-  }
+  }*/
   
 
   if(getVelocityY() > 0) Object::isFalling = 1;

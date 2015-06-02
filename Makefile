@@ -9,7 +9,7 @@ game: main.cpp ppm.cpp fmod.c functions.cpp bethanyA.cpp brianS.cpp Object.cpp c
 	g++ $(CFLAGS) main.cpp ppm.cpp fmod.c functions.cpp bethanyA.cpp brianS.cpp Object.cpp sounds.cpp chadD.cpp Item.cpp Player.cpp AttackList.cpp -Wall -o game -lX11 -lGL -lm -I/usr/X11R6/include -L/usr/X11R6/lib -lX11 $(LIB)
 
 
-tool: tedP.cpp ppm.cpp fmod.c functions.cpp bethanyA.cpp brianS.cpp Object.cpp chadD.cpp Item.cpp Player.cpp AttackList.cpp
+tool: tedP.cpp ppm.cpp fmod.c functions.cpp bethanyA.cpp brianS.cpp Object.cpp chadD.cpp Item.cpp Player.cpp AttackList.cpp sounds.cpp
 	g++ $(CFLAGS) tedP.cpp ppm.cpp fmod.c functions.cpp bethanyA.cpp brianS.cpp Object.cpp chadD.cpp Item.cpp Player.cpp AttackList.cpp -Wall -o tool -lX11 -lGL -lm -I/usr/X11R6/include -L/usr/X11R6/lib -lX11 $(LIB)
 
 clean:

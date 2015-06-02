@@ -17,6 +17,13 @@
 
 extern Player *hero;
 
+#ifdef USE_SOUND
+#include "./include/FMOD/fmod.h"
+#include "./include/FMOD/wincompat.h"
+#include "fmod.h"
+#include "sounds.h"
+#endif
+
 using namespace std;
 //=====================================================================
 //  Platform_Functions
@@ -153,11 +160,9 @@ void Attack::changeRate(int take){
 void Attack::setDuration(int take){
   duration = take;
 }
-
 bool Attack::checkStop(){
   return stop;
 }
-
 void Attack::causeEffect(Enemy *enemy){
   if(!effectEnemy) return;
   if(charges <= 0) return;
