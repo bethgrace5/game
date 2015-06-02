@@ -31,7 +31,7 @@ void attack_list::makeAttacks(){
   attacks[id].setVelocityX(10); attacks[id].setVelocityY(5);
   #ifdef USE_SOUND
   attacks[id].setAttackSound(beep);
-  attacks[id].setSoundCollide(0);
+  attacks[id].setSoundCollide(censorBeep);
   #endif
 
   //Projectile Attack
@@ -47,8 +47,8 @@ void attack_list::makeAttacks(){
   attacks[id].setCharges(10);
   attacks[id].setDamage(25);
   #ifdef USE_SOUND
-  attacks[id].setAttackSound(beep);
-  attacks[id].setSoundCollide(0);
+  attacks[id].setAttackSound(robotBlip1);
+  attacks[id].setSoundCollide(robotBlip2);
   #endif
 
   //Template
@@ -69,8 +69,8 @@ void attack_list::makeAttacks(){
   attacks[id].setCharges(100);
   attacks[id].setDamage(25);
   #ifdef USE_SOUND
-  attacks[id].setAttackSound(beep);
-  attacks[id].setSoundCollide(0);
+  attacks[id].setAttackSound(tick);
+  attacks[id].setSoundCollide(click);
   #endif
 }
 //=====================================================================
@@ -86,7 +86,8 @@ void attack_list::copyAttack(Object *caster, int tId){
    currents[currents_length]->setCenter(caster->getCenterX(),
       caster->getCenterY());
   #ifdef USE_SOUND
-  //fmod_playsound(currents[currents_length]->getAttackSound());
+  //cout << currents[currents_length]->getAttackSound()<<endl;
+  fmod_playsound(currents[currents_length]->getAttackSound());
   #endif
   currents_length++;
 }
@@ -141,7 +142,8 @@ bool attack_list::detectAttack (Object *obj, Attack *targetAttack) {
       obj->getBottom() < targetAttack->getTop()  &&
       obj->getTop()    > targetAttack->getBottom()) {
       #ifdef USE_SOUND
-       //fmod_playsound(currents[currents_length]->getSoundCollide());
+  cout << currents[currents_length]->getSoundCollide()<<endl;
+       fmod_playsound(currents[currents_length]->getSoundCollide());
       #endif
     return true;
   }
