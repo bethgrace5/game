@@ -22,6 +22,7 @@
 #include "definitions.h"
 #include "functions.h"
 #include "Object.h"
+#include "AttackList.h"
 
 #ifdef USE_SOUND
 #include "fmod.c"
@@ -31,10 +32,11 @@
 #endif
 
 #include "Storage.cpp"
-#include "AttackList.cpp"
+#include "AttackList.h"
 #include "fastFont.cpp"
 
 using namespace std; //typedef double Vec[3];
+attack_list boxA;
 
 // background bits
 struct bgBit {
@@ -963,9 +965,9 @@ void movement() {
         }
     }
     //Attack Collisions
-    //for(i = 0; i < boxA.currents_length; i++){
-    //    detectAttack(hero, boxA.currents[i]); 
-    //}
+    for(i = 0; i < boxA.currents_length; i++){
+      boxA.detectAttack(hero, boxA.currents[i]); 
+    }
         //Check if Time or Index reach 0 then deletes itself
     for(i = 0; i < boxA.currents_length; i++){
         if(boxA.currents[i]->checkStop())
@@ -974,11 +976,11 @@ void movement() {
 
     for(i = 0; i < boxA.currents_length; i++){
       for(j = 0; j < enemies_length; j++){
-        if(detectAttack(enemies[j], boxA.currents[i])){
+        if(boxA.detectAttack(enemies[j], boxA.currents[i])){
           boxA.currents[i]->causeEffect(enemies[j]);
         }
       }
-        if(detectAttack(hero, boxA.currents[i])){
+        if(boxA.detectAttack(hero, boxA.currents[i])){
           boxA.currents[i]->causeEffect(hero); 
         }
     }
@@ -1126,7 +1128,7 @@ void render () {
     renderHero(x, y);
     renderAnimations(x, y);
     renderItems(x, y);
-    renderAttacks(x,y);
+    boxA.renderAttacks(x,y);
     renderLives();
     renderHealthBar();
     writeScore();

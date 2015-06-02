@@ -1,82 +1,62 @@
-//====================================================================
-//  Attack Storage
-//====================================================================
-/*
--------------------
- Attack_Editor
- Attack_Usage
- Outside_Influence
------------------
-*/
-extern Player *hero;
-#define MAX_ATTACKS 25
-#define MAX_CURRENTS 15
+#include "AttackList.h"
 
-struct attack_list{
-  Sprite  sprite_sheet[MAX_ATTACKS];
-  Attack attacks[MAX_ATTACKS];
-  int attacks_length;
-
-  Attack *currents[MAX_CURRENTS];
-  int currents_length;
-
-  void makeAttacks();
-  void copyAttack(Object *caster, int tId);
-  void copyAttack(Object *caster, int tId, bool mirror);
-  void copyAttack(Player *caster, int tId, bool mirror);
-  void copyAttack(Enemy *caster, int tId, bool mirror);
-  void deleteAttack(int id);
-
-} boxA;
+#include "Object.h"
+#include "Sprite.h"
+#include "chadD.h"
+#include "Enemy.h"
+#include "Player.h"
+#include "sounds.h"
 //=====================================================================
 //  Attack_Editor
 //=====================================================================
 void attack_list::makeAttacks(){
   int id = 0;
   int width, height;
+
+  id = 0; width = 75; height = 75;
   //Aura Effect And Movment
-  boxA.sprite_sheet[0].insert("./images/fireball.ppm", 5, 5);
-  boxA.sprite_sheet[0].setSize(75,75);
-  boxA.sprite_sheet[0].setBackground(1);
-  attacks[0].referenceTo(boxA.sprite_sheet[0], 0);
-  attacks[0].init(75,75,0,0);
-  attacks[0].changeRate(15);
-  attacks[0].setTimeBase(true);
-  attacks[0].setCycleBase(false);
-  attacks[0].setDuration(300);
-  attacks[0].setDamage(1);
-  //attacks[0].setStickOn(true);
-  attacks[0].setMoveWith(true);
-  attacks[0].setCharges(20);
-  attacks[0].setVelocityX(10); attacks[0].setVelocityY(5);
+  sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
+  sprite_sheet[id].setSize(75,75);
+  sprite_sheet[id].setBackground(1);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(75,75,0,0);
+  attacks[id].changeRate(15);
+  attacks[id].setTimeBase(true);
+  attacks[id].setCycleBase(false);
+  attacks[id].setDuration(300);
+  attacks[id].setDamage(1);
+  //attacks[id].setStickOn(true);
+  attacks[id].setMoveWith(true);
+  attacks[id].setCharges(20);
+  attacks[id].setVelocityX(10); attacks[id].setVelocityY(5);
   #ifdef USE_SOUND
-  attacks[0].setAttackSound(beep);
-  attacks[0].setSoundCollide(0);
+  attacks[id].setAttackSound(beep);
+  attacks[id].setSoundCollide(0);
   #endif
 
   //Projectile Attack
-  boxA.sprite_sheet[1].insert("./images/fireball.ppm", 5, 5);
-  boxA.sprite_sheet[1].setSize(25,25);
-  boxA.sprite_sheet[1].setBackground(1);
-  attacks[1].referenceTo(boxA.sprite_sheet[1], 1);
-  attacks[1].init(25,25,0,0);
-  attacks[1].setVelocityX(10);
-  attacks[1].setTimeBase(true);
-  attacks[1].setCycleBase(false);
-  attacks[1].setCharges(10);
-  attacks[1].setDamage(25);
+  id = 1; width = 25; height = 25;
+  sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(1);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(25,25,0,0);
+  attacks[id].setVelocityX(10);
+  attacks[id].setTimeBase(true);
+  attacks[id].setCycleBase(false);
+  attacks[id].setCharges(10);
+  attacks[id].setDamage(25);
   #ifdef USE_SOUND
-  attacks[1].setAttackSound(beep);
-  attacks[1].setSoundCollide(0);
+  attacks[id].setAttackSound(beep);
+  attacks[id].setSoundCollide(0);
   #endif
-
 
   //Template
   id = 2; width = 50; height = 50;
-  boxA.sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
-  boxA.sprite_sheet[id].setSize(width,height);
-  boxA.sprite_sheet[id].setBackground(id);
-  attacks[id].referenceTo(boxA.sprite_sheet[id], id);
+  sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(id);
+  attacks[id].referenceTo(sprite_sheet[id], id);
   attacks[id].init(width,height,0,0);
   attacks[id].setVelocityX(0);
   attacks[id].setVelocityY(0);
@@ -152,7 +132,8 @@ void attack_list::deleteAttack(int id){
 //=====================================================================
 //  Attack Outside Influence
 //=====================================================================
-bool detectAttack (Object *obj, Attack *targetAttack) {
+
+bool attack_list::detectAttack (Object *obj, Attack *targetAttack) {
   //Gets (Moving Object, Static Object)
   //Reture True if Moving Object Collides with Static Object
   if (obj->getRight() > targetAttack->getLeft() &&
@@ -167,18 +148,17 @@ bool detectAttack (Object *obj, Attack *targetAttack) {
   return false;
 }
 
-void renderAttacks(int x, int y){
-  for (int i=0;i<boxA.currents_length;i++) {
-    boxA.currents[i]->autoState();
-    boxA.currents[i]->autoSet();
-    boxA.currents[i]->cycleAnimations();
+void attack_list::renderAttacks(int x, int y){
+  for (int i=0;i<currents_length;i++) {
+    currents[i]->autoState();
+    currents[i]->autoSet();
+    currents[i]->cycleAnimations();
 
     glPushMatrix();
     glTranslatef(- x, - y, 0);
-    boxA.currents[i]->drawBox(
-        boxA.sprite_sheet[boxA.currents[i]->checkSpriteID()]);
+    currents[i]->drawBox(
+        sprite_sheet[currents[i]->checkSpriteID()]);
 
     glEnd(); glPopMatrix(); 
   }
 }
-
