@@ -15,6 +15,8 @@
 //If 1, you can write the name of the save file
 #define OPTIONAL_STORAGE 1
 
+#define EXTREME_MODE 0
+
 #define GRAVITY 0.2
 #define HERO_START_X 150
 #define HERO_START_Y 350
@@ -24,7 +26,7 @@
 #define MAX_GROUNDS 500
 #define MAX_ITEMS 50
 #define MAX_ATTACKS 25
-#define MAX_CURRENTS 50
+#define MAX_CURRENTS 200
 #define MAX_HEIGHT 2400
 #define WINDOW_HALF_HEIGHT WINDOW_HEIGHT/2
 #define WINDOW_HALF_WIDTH  WINDOW_WIDTH/2

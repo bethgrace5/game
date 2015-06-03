@@ -18,6 +18,7 @@ class Player: public Object, public Sprite{
     int jumps, jumpLimit, jumpPower;
     int maxSpeed, speed, speedRate;
 
+    int ammo;
     int indexp;
     int once;
 
@@ -25,8 +26,12 @@ class Player: public Object, public Sprite{
     int gunType;
     bool invincible;
     bool invisible;
+    
 
+    bool coolDownTimer;
+    int coolDownLength;
     timeval seqStartA, seqEndA;
+    timeval refreshStart, refreshEnd;
 
   public:
     Player();
@@ -37,6 +42,7 @@ class Player: public Object, public Sprite{
     void jump();
     void stop();
     void jumpRefresh();
+    bool coolDowns();
 
     int getHealth();
     void setHealth(int take);
@@ -46,8 +52,12 @@ class Player: public Object, public Sprite{
     void setInvisible(bool take);
     
     bool checkShooting();
-    void setGunType(int take);
     void setShooting(bool take);
+    void setGunType(int take);
+    int  checkGunType();
+    void setAmmo(int take);
+    int checkAmmo();
+    void decreaseAmmo(int ammount);
     int getLives();
     void incrementLives();
     void decrementLives();
@@ -59,6 +69,5 @@ class Player: public Object, public Sprite{
     void autoState();
 
     //int diff_ms (timeval t1, timeval t2);
-
 };
 #endif

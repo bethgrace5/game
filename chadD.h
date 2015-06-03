@@ -62,6 +62,8 @@ class Attack: public Object {
     int once;
     int cycle;
     int onceOnly;
+    int direction;
+    int byo;
     int attackSound;
     int soundCollide;
 
@@ -71,9 +73,12 @@ class Attack: public Object {
     bool cycleBase;//If This is On | Attack Will Last until the 
                    // end of the sprite sheet
     int indexp;  
-
+ 
     int damage;
     int charges;
+    int pushForce;
+    int backForce;
+    bool pulling;
     bool infiniteCharges;
     bool singleUse;
     bool constantEffect;
@@ -113,6 +118,11 @@ class Attack: public Object {
     void setMoveWith(bool take);
     void setPushAway(bool take);
     void setPushBack(bool take);
+
+    void setForwardForce(int take);
+    void setBackForce(int take);
+    void setPulling(bool take);
+
     void setEffectEnemy(bool take);
     void setEffectPlayer(bool take);
     void setConstantEffect(bool take);
@@ -132,11 +142,11 @@ class Attack: public Object {
     int getSoundCollide();
 
     void autoState();
-    void direction();
     void stickOnHero();
     void moveWithHero();
     void pushAwayForce(Object *obj);
     void pushBackSelf();
+    void pullingIn(Enemy *enemy);
 
     void causeEffect(Player *hero);
     void causeEffect(Enemy *enemy);

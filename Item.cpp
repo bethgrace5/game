@@ -8,28 +8,53 @@
   #include "sounds.h"
   #endif
 #include "AttackList.h"
+#include <stdlib.h>
 
 extern attack_list boxA;
 extern Player *hero;
 
 Item::Item() : Sprite(), Object(20, 20, 350, 350) {
-  effect=3;
+  //effect=3;
+  effect = rand() % 10 + 1;
+  end = 0;
+}
+
+Item::Item(int take): Sprite(), Object(20,20,0,0){
+  effect = take;
   end = 0;
 }
 
 void Item::causeEffect(Player *hero) {
+  hero->setAmmo(10);
   switch (effect) {
     case 1: 
       hero->repairHealth(25);
       break;
     case 2:
-      boxA.copyAttack(hero, 2, hero->checkMirror());
+      hero->repairHealth(50);
+      boxA.copyAttack(hero, 2, 0);
+      //boxA.copyAttack(hero, 2, hero->checkMirror());
       break;
     case 3:
-      hero->setGunType(5);
+      hero->repairHealth(30);
+      //hero->setGunType(0);
+      break;
+    case 4:
+      hero->repairHealth(30);
+      //hero->setGunType(1);
+      break;
+    case 5:
+      hero->repairHealth(35);
+      boxA.copyAttack(hero, 2, 0);
+      //hero->setGunType(2);
+      break;
+    case 6:
+      hero->repairHealth(100);
+      boxA.copyAttack(hero, 2, 0);
+      //hero->setGunType(3);
       break;
     default:
-      hero->repairHealth(20);
+      hero->repairHealth(10);
       break;
   }
 }
