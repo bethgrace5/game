@@ -49,6 +49,7 @@ enum attacks_t{
  a_explode,
  a_speedArrow,
  a_shield,
- a_simpleBlast
+ a_simpleBlast,
+ a_pullingBlast
 };
 #endif

@@ -124,6 +124,9 @@ Attack::Attack() : Object(0, 0, 0, 0){
   invincible = 0; 
   attackSound = 1;
   soundCollide = 1;
+  pushForce = 0;
+  backForce = 0; 
+  pulling = 0;
 }
 
 Attack::~Attack() {
@@ -175,6 +178,8 @@ void Attack::causeEffect(Enemy *enemy){
   if(!effectEnemy) return;
   if(charges <= 0 && !infiniteCharges) return;
   if(pushAway) pushAwayForce(enemy);
+  if(pulling) pullingIn(enemy);
+
   enemy->life-=damage;
   charges--;
 }
@@ -206,6 +211,15 @@ void Attack::setPushAway(bool take){
 }
 void Attack::setPushBack(bool take){
   pushBack = take;
+}
+void Attack::setForwardForce(int take){
+  pushForce = take;
+}
+void Attack::setBackForce(int take){
+  backForce = take;
+}
+void Attack::setPulling(bool take){
+  pulling = take;
 }
 void Attack::setEffectEnemy(bool take){
   effectEnemy = take;
@@ -279,14 +293,30 @@ void Attack::checkDuration(){
 }
 
 void Attack::pushAwayForce(Object *obj){
-  obj->setVelocityX(getVelocityX());
-  obj->setVelocityY(getVelocityY());
- // obj->setCenter(obj->getCenterX() + getVelocityX(), obj->getCenterY());
+  if(getVelocityX() > 0) direction = -1;
+  else direction = 1;
 
+  obj->setVelocityX(getVelocityX());// + (pushForce*direction));
+  //obj->setVelocityY(getVelocityY());
+  //obj->setCenter(obj->getCenterX() + getVelocityX(), obj->getCenterY());
 }
 void Attack::pushBackSelf(){
-  target->setVelocityX(-(getVelocityX())*2);
+  if(getVelocityX() > 0) direction = -1;
+  else direction = 1;
+
+  target->setVelocityX(direction * backForce);
   target->setVelocityY(2);
+}
+
+void Attack::pullingIn(Enemy *enemy){
+  if(enemy->getCenterX() > getCenterX()) direction = -1;
+  else direction = 1;
+
+  if(enemy->getCenterY() > getCenterY()) byo = -1;
+  else byo = 1;
+
+  enemy->setVelocityX(enemy->getVelocityX() + (direction * backForce));
+  enemy->setVelocityY(enemy->getVelocityY() + (byo * backForce));
 }
 
 //===============================================

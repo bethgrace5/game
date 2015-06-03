@@ -14,14 +14,14 @@ void attack_list::makeAttacks(){
   int width, height;
 
   //Fire Aura Effect And Movment
-  id = 0; width = 50; height = 50;
+  id = a_fireUp; width = 50; height = 50;
   sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(1);
   attacks[id].referenceTo(sprite_sheet[id], id);
   attacks[id].init(width,height,0,0);
   attacks[id].changeRate(15);
-  attacks[id].setTimeBase(true);
+  attacks[id].setTimeBase(false);
   attacks[id].setCycleBase(false);
   attacks[id].setDuration(300);
   attacks[id].setDamage(1);
@@ -35,16 +35,17 @@ void attack_list::makeAttacks(){
   #endif
 
   //Big Laser Projectile Attack
-  id = 1; width = 25; height = 25;
+  id = a_pushingLaser; width = 25; height = 25;
   sprite_sheet[id].insert("./images/arrow.ppm", 4, 1);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(0);
   attacks[id].referenceTo(sprite_sheet[id], id);
   attacks[id].init(width,height,0,0);
   attacks[id].changeRate(15);
-  attacks[id].setVelocityX(7);
+  attacks[id].setVelocityX(14);
   attacks[id].setPushBack(true);
   attacks[id].setPushAway(true);
+  attacks[id].setBackForce(5); 
   attacks[id].setTimeBase(true);
   attacks[id].setDuration(1000);
   attacks[id].setCycleBase(false);
@@ -56,7 +57,7 @@ void attack_list::makeAttacks(){
   #endif
 
   //Fire Aura
-  id = 2; width = 50; height = 50;
+  id = a_fireShield; width = 50; height = 50;
   sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(1);
@@ -83,7 +84,7 @@ void attack_list::makeAttacks(){
   #endif
 
   //Fire Aura With Movement Downwards
-  id = 3; width = 125; height = 125;
+  id = a_fireDown; width = 125; height = 125;
   sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
   sprite_sheet[id].setSize(75,75);
   sprite_sheet[id].setBackground(1);
@@ -104,7 +105,7 @@ void attack_list::makeAttacks(){
 #endif
 
   //Hero Skiping Forward
-  id = 4; width = 44; height = 48;
+  id = a_skiping; width = 44; height = 48;
   sprite_sheet[id].insert("./images/hero.ppm", 13, 1);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(0);
@@ -126,7 +127,7 @@ void attack_list::makeAttacks(){
 #endif
 
   //EXPLODE
-  id = 5; width = 150; height = 150;
+  id = a_explode; width = 150; height = 150;
   sprite_sheet[id].insert("./images/bossExplode.ppm", 5, 3);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(0);
@@ -153,7 +154,7 @@ void attack_list::makeAttacks(){
   #endif
 
   //Speeding Arrow with Hero Movement
-  id = 6; width = 100; height = 100;
+  id = a_speedArrow; width = 100; height = 100;
   sprite_sheet[id].insert("./images/arrow2.ppm", 4, 1);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(0);
@@ -174,7 +175,7 @@ void attack_list::makeAttacks(){
   #endif
 
   //Shielded
-   id = 7; width = 35; height = 35;
+   id = a_shield; width = 35; height = 35;
   sprite_sheet[id].insert("./images/shield.ppm", 5, 3);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(1);
@@ -205,18 +206,41 @@ void attack_list::makeAttacks(){
   attacks[id].init(width,height,0,0);
   attacks[id].changeRate(15);
   attacks[id].setVelocityX(7);
-  //attacks[id].setPushBack(true);
-  attacks[id].setPushAway(true);
+  attacks[id].setPushBack(false);
+  attacks[id].setPushAway(false);
   attacks[id].setTimeBase(true);
-  attacks[id].setDuration(2000);
+  attacks[id].setDuration(3000);
   attacks[id].setCycleBase(false);
-  attacks[id].setCharges(30);
+  attacks[id].setCharges(5);
   attacks[id].setDamage(6);
   #ifdef USE_SOUND
   attacks[id].setAttackSound(laser);
   attacks[id].setSoundCollide(robotBlip2);
   #endif
 
+  //Gravity Fire Ball
+  id = a_pullingBlast; width = 50; height = 50;
+  sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(1);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(width+100,height+100,0,0);
+  attacks[id].changeRate(15);
+  attacks[id].setVelocityX(2);
+  //attacks[id].setPushBack(true);
+  //attacks[id].setPushAway(true);
+  attacks[id].setPulling(true);
+  attacks[id].setBackForce(5); 
+  attacks[id].setTimeBase(true);
+  attacks[id].setDuration(5000);
+  attacks[id].setCycleBase(false);
+  attacks[id].setInfiniteCharges(true);
+  //attacks[id].setCharges(30);
+  attacks[id].setDamage(0);
+  #ifdef USE_SOUND
+  attacks[id].setAttackSound(mvalSingle);
+  attacks[id].setSoundCollide(robotBlip2);
+  #endif
 }
 //=====================================================================
 //  Attack_Copy
