@@ -26,8 +26,12 @@ class Player: public Object, public Sprite{
     int gunType;
     bool invincible;
     bool invisible;
+    
 
+    bool coolDownTimer;
+    int coolDownLength;
     timeval seqStartA, seqEndA;
+    timeval refreshStart, refreshEnd;
 
   public:
     Player();
@@ -38,6 +42,7 @@ class Player: public Object, public Sprite{
     void jump();
     void stop();
     void jumpRefresh();
+    bool coolDowns();
 
     int getHealth();
     void setHealth(int take);

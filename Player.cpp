@@ -27,6 +27,8 @@ Player::Player() : Object(26, 44, 250, 250), Sprite(){
   isShooting=0;
   Sprite::setMirror(false);
   indexp = 0; once = 0;
+  coolDownTimer = 0;
+  coolDownLength = 500;
 }
 //===============================================
 //Movement Functions
@@ -59,6 +61,19 @@ void Player::stop(){
 }
 void Player::jumpRefresh(){ 
   if(Player::getVelocityY() == 0) jumps = 0; 
+}
+bool Player::coolDowns(){
+  if(coolDownTimer == 0) { 
+      coolDownTimer = 1;
+      gettimeofday(&refreshStart, NULL); 
+  }
+  gettimeofday(&refreshEnd, NULL);
+  if(diff_ms(refreshEnd, refreshStart) > coolDownLength) {
+    indexp = 0;
+    coolDownTimer = 0;
+    return true;
+  }
+  return false;
 }
 //==============================================
 //Stats Functions

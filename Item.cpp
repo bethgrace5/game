@@ -19,6 +19,11 @@ Item::Item() : Sprite(), Object(20, 20, 350, 350) {
   end = 0;
 }
 
+Item::Item(int take): Sprite(), Object(20,20,0,0){
+  effect = take;
+  end = 0;
+}
+
 void Item::causeEffect(Player *hero) {
   hero->setAmmo(10);
   switch (effect) {
