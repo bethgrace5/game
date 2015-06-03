@@ -519,8 +519,11 @@ int check_keys (XEvent *e) {
                 //boxA.copyAttack(hero, 1, hero->checkMirror());
                 //boxA.copyAttack(enemies[0], 0, 0);
             }
-            if( key ==XK_v){
+            if( key == XK_v){
                 boxA.copyAttack(hero, 1, hero->checkMirror()); 
+            }
+            if( key == XK_l){
+                boxA.copyAttack(hero, a_shield, hero->checkMirror());  
             }
             if( key == XK_j){
                 boxA.copyAttack(hero, 3, hero->checkMirror()); 
@@ -1003,7 +1006,7 @@ void movement() {
     //Bullet creation
     if (hero->checkShooting()){
         gettimeofday(&fireEnd, NULL);
-        if (((diff_ms(fireEnd, fireStart)) > 250)) { //Fire rate 250ms
+        if (((diff_ms(fireEnd, fireStart)) > 200)) { //Fire rate 250ms
           if(hero->checkGunType() == -1 || 
               hero->checkGunType() == a_fireShield){
             gettimeofday(&fireStart, NULL); //Reset firing rate timer
@@ -1066,11 +1069,22 @@ void movement() {
                 makeEnemy(37, 80, enemies[i]->getCenterX(), enemies[i]->getCenterY(), 1);
             enemies[i]->isShooting=false;
         }
+        if(enemies[i]->getAggro() && EXTREME_MODE){
+          if(rand() % 10 < 2 ){
+            bool backward, ladder;
+            if(enemies[i]->getCenterX() < hero->getCenterX()) backward = false;
+            else backward = true;
+            if(enemies[i]->getCenterY() < hero->getCenterY()) ladder = true;
+            else ladder = false;
+          if(ladder) boxA.copyAttack(enemies[i], 0, backward); 
+          else boxA.copyAttack(enemies[i], 3, backward);
+          }
+        }
         //bullets
         b = bulletHead;
         while (b) {
             if ((b->type==2) && (bulletCollide(b,enemies[i]))){
-                enemies[i]->life-=b->damage;
+                enemies[i]->life-=b->damage+5;
                 tmp=b->next;
                 deleteBullet(b);
                 b=tmp;

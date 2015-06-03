@@ -78,23 +78,28 @@ void Platform::drawRow(int x, int y) {
   glPushMatrix();
   glTranslatef(Object::getLeft(), Object::getTop(), 0);
   for(int j = 0; j < Object::getHeight()/lineSpaceY; j++) {
-    if (j == 0) glTranslatef(0, -lineSpaceY , 0); 
-    else        glTranslatef(0, -(lineSpaceY + lineSpaceY), 0); 
+    if (j == 0)
+        glTranslatef(0, -lineSpaceY, 0);
+    else
+        glTranslatef(0, -(lineSpaceY + lineSpaceY), 0);
 
     glPushMatrix();
     for (int i = 0; i < Object::getWidth()/lineSpaceX; i++) {
-      if (i == 0) glTranslatef(lineSpaceX,0 , 0); 
-      else        glTranslatef(lineSpaceX + lineSpaceX ,0 , 0); 
+      if (i == 0)
+          glTranslatef(lineSpaceX,0 , 0);
+      else
+          glTranslatef(lineSpaceX + lineSpaceX ,0 , 0);
       drawTile();
     }
     glPopMatrix();
-  } 
-  glPopMatrix(); 
+  }
+  glPopMatrix();
 }
 
 //=====================================================================
 //  Attack_Core_Setup
 //=====================================================================
+
 Attack::Attack() : Object(0, 0, 0, 0){
   once = onceOnly = singleUse = 0;
   indexp = 0;
@@ -121,31 +126,32 @@ Attack::Attack() : Object(0, 0, 0, 0){
   soundCollide = 1;
 }
 
-Attack::~Attack(){
-  if(invincible){
-    std::cout << "Invinciblity Gone\n"; 
-    hero->setInvincible(false); 
+Attack::~Attack() {
+  if (invincible) {
+    std::cout << "Invinciblity Gone\n";
+    hero->setInvincible(false);
   }
-  if(invisiblity) hero->setInvisible(false);
+  if (invisiblity) 
+    hero->setInvisible(false);
     
 }
 //=====================================================================
 //  Setup
 //=====================================================================
-void Attack::setAttackSound(int take){
+void Attack::setAttackSound(int take) {
   attackSound = take;
 }
-int Attack::getAttackSound(){
+int Attack::getAttackSound() {
     return attackSound;
 }
-void Attack::setSoundCollide(int take){
+void Attack::setSoundCollide(int take) {
   soundCollide = take;
 }
-int Attack::getSoundCollide(){
+int Attack::getSoundCollide() {
     return soundCollide;
 }
 
-void Attack::referenceTo(Sprite take, int id){
+void Attack::referenceTo(Sprite take, int id) {
   rowAt = take.getRow();
   columnAt = take.getColumn();
   spriteID = id;
@@ -156,10 +162,10 @@ int Attack::checkSpriteID(){
 //==============================================
 //Rates Functions
 //==============================================
-void Attack::changeRate(int take){
+void Attack::changeRate(int take) {
   frameRate = take;
 }
-void Attack::setDuration(int take){
+void Attack::setDuration(int take) {
   duration = take;
 }
 bool Attack::checkStop(){
@@ -173,7 +179,7 @@ void Attack::causeEffect(Enemy *enemy){
   charges--;
 }
 
-void Attack::causeEffect(Player *hero){
+void Attack::causeEffect(Player *hero) {
   if(!effectPlayer) return;  
   if(charges <= 0) return;
   if(pushAway) pushAwayForce(hero);
@@ -183,16 +189,16 @@ void Attack::causeEffect(Player *hero){
 //=============================================
 //Setup Behavior
 //=============================================
-void Attack::setTimeBase(bool take){
+void Attack::setTimeBase(bool take) {
   timeBase = take; 
 }
-void Attack::setCycleBase(bool take){
+void Attack::setCycleBase(bool take) {
   cycleBase = take;
 }
-void Attack::setStickOn(bool take){
+void Attack::setStickOn(bool take) {
   stickOn = take;
 }
-void Attack::setMoveWith(bool take){
+void Attack::setMoveWith(bool take) { 
   moveWith = take;
 }
 void Attack::setPushAway(bool take){
@@ -204,7 +210,7 @@ void Attack::setPushBack(bool take){
 void Attack::setEffectEnemy(bool take){
   effectEnemy = take;
 }
-void Attack::setEffectPlayer(bool take){
+void Attack::setEffectPlayer(bool take) {
   effectPlayer = take;
 }
 void Attack::setDamage(int take){
@@ -228,11 +234,10 @@ void Attack::setInvisiblity(bool take){
 //==============================================
 // Behavior_Functions
 //==============================================
-void Attack::targetAt(Object *caster){
+void Attack::targetAt(Object *caster) {
   target = caster;
 }
-
-void Attack::autoState(){
+void Attack::autoState() {
   if(timeBase) checkDuration();
   if(cycleBase) if(indexp == 0 && start) stop = 1; 
   if(charges == 0 && !infiniteCharges) stop = 1;
@@ -250,17 +255,17 @@ void Attack::autoState(){
   //Follow Player Movement
   //Affect By Gravity
   //Directional Shots
-  if(stop && moveWith){
 
+  if(stop && moveWith){
     //target->setVelocityX(0);
   }
 }
 
-void Attack::stickOnHero(){
+void Attack::stickOnHero() {
   Object::setCenter(target->getCenterX(), target->getCenterY());
 }
 
-void Attack::moveWithHero(){
+void Attack::moveWithHero() {
     target->setVelocityX(Object::getVelocityX());
     target->setVelocityY(Object::getVelocityY());
 }
@@ -268,7 +273,7 @@ void Attack::moveWithHero(){
 void Attack::checkDuration(){
   if(onceOnly == 0){ gettimeofday(&timeOut, NULL); onceOnly = 1;}
   gettimeofday(&timeIn, NULL);
-  if(diff_ms(timeIn, timeOut) > duration){
+  if(diff_ms(timeIn, timeOut) > duration) {
     stop = 1;
   }
 }
@@ -289,13 +294,17 @@ void Attack::pushBackSelf(){
 //===============================================/
 //    Note: This is a Prototype -
 //          -Right now its specific number depedant.
-void Attack::cycleAnimations(){
-  if(once == 0){ gettimeofday(&seqStartA, NULL); once = 1;}
+void Attack::cycleAnimations() {
+  if(once == 0) { 
+      gettimeofday(&seqStartA, NULL); 
+      once = 1;
+  }
   gettimeofday(&seqEndA, NULL);
 
-  if(diff_ms(seqEndA, seqStartA) > frameRate){
+  if(diff_ms(seqEndA, seqStartA) > frameRate) {
     indexp++;
-    if(indexp > rowAt * columnAt) indexp = 0;
+    if(indexp > rowAt * columnAt)
+       indexp = 0;
     once = 0; start = 1;
   }
 }

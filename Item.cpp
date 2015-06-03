@@ -14,7 +14,7 @@ extern Player *hero;
 
 Item::Item() : Sprite(), Object(20, 20, 350, 350) {
   //effect=3;
-  effect = rand() % 20 + 1;
+  effect = rand() % 10 + 1;
   end = 0;
 }
 
@@ -25,19 +25,27 @@ void Item::causeEffect(Player *hero) {
       hero->repairHealth(25);
       break;
     case 2:
-      boxA.copyAttack(hero, 2, hero->checkMirror());
+      hero->repairHealth(50);
+      boxA.copyAttack(hero, 2, 0);
+      //boxA.copyAttack(hero, 2, hero->checkMirror());
       break;
     case 3:
-      hero->setGunType(0);
+      hero->repairHealth(30);
+      //hero->setGunType(0);
       break;
     case 4:
-      hero->setGunType(1);
+      hero->repairHealth(30);
+      //hero->setGunType(1);
       break;
     case 5:
-      hero->setGunType(2);
+      hero->repairHealth(35);
+      boxA.copyAttack(hero, 2, 0);
+      //hero->setGunType(2);
       break;
     case 6:
-      hero->setGunType(3);
+      hero->repairHealth(100);
+      boxA.copyAttack(hero, 2, 0);
+      //hero->setGunType(3);
       break;
     default:
       hero->repairHealth(10);
