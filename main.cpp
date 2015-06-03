@@ -511,10 +511,10 @@ int check_keys (XEvent *e) {
             if (key == XK_space) {
                 hero->setShooting(true);
             }
-            if( key == XK_f){
+            if( key == XK_k){
                 boxA.copyAttack(hero, 0, hero->checkMirror());
             }
-            if(key == XK_g){
+            if(key == XK_o){
                 boxA.copyAttack(hero, 2, hero->checkMirror());
                 //boxA.copyAttack(hero, 1, hero->checkMirror());
                 //boxA.copyAttack(enemies[0], 0, 0);
@@ -522,11 +522,14 @@ int check_keys (XEvent *e) {
             if( key ==XK_v){
                 boxA.copyAttack(hero, 1, hero->checkMirror()); 
             }
-            if( key == XK_c){
+            if( key == XK_j){
                 boxA.copyAttack(hero, 3, hero->checkMirror()); 
             }
             if( key == XK_x){
                 boxA.copyAttack(hero, 4, hero->checkMirror()); 
+            }
+            if( key ==XK_e){
+                boxA.copyAttack(hero, a_simpleBlast, hero->checkMirror()); 
             }
             // debug death
             if (key == XK_y) {
@@ -955,9 +958,9 @@ void movement() {
             hero->isDying=1;
             gettimeofday(&seqStart, NULL);
             hero->decrementLives();
-#ifdef USE_SOUND
+        #ifdef USE_SOUND
             fmod_playsound(dunDunDun);
-#endif
+        #endif
         }
         else{
             gettimeofday(&seqEnd, NULL);
@@ -996,18 +999,26 @@ void movement() {
           boxA.currents[i]->causeEffect(hero); 
         }
     }
-
+    //Gun Type Creation
     //Bullet creation
     if (hero->checkShooting()){
         gettimeofday(&fireEnd, NULL);
         if (((diff_ms(fireEnd, fireStart)) > 250)) { //Fire rate 250ms
+          if(hero->checkGunType() == -1 || 
+              hero->checkGunType() == a_fireShield){
             gettimeofday(&fireStart, NULL); //Reset firing rate timer
             makeBullet(hero->getCenterX(), hero->getCenterY()+15, (hero->checkMirror()?-18:18), 38, 2);
-#ifdef USE_SOUND
+            #ifdef USE_SOUND
             fmod_playsound(mvalSingle);
-#endif
+            #endif
+          }
+          else{
+            gettimeofday(&fireStart, NULL); //Reset firing rate timer
+            boxA.copyAttack(hero, hero->checkGunType(), hero->checkMirror());
+            hero->decreaseAmmo(1);
+            if(hero->checkAmmo() <= 0) hero->setGunType(-1);
+          } 
         }
-
     }
 
     //bullet collisions against grounds
@@ -1075,6 +1086,9 @@ void movement() {
         if ((enemies[i]->isDead) or enemies[i]->getCenterY()<0){
             if(enemies[i]->type == 3){
               boxA.copyAttack(enemies[i], 5,enemies[i]->checkMirror());
+            }
+            if(rand() % 2 == 1){
+              makeItems(20, 20, enemies[i]->getCenterX(), enemies[i]->getCenterY());
             }
             deleteEnemy(i);
         }

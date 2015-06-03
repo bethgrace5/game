@@ -152,6 +152,7 @@ void attack_list::makeAttacks(){
   attacks[id].setSoundCollide(click);
   #endif
 
+  //Speeding Arrow with Hero Movement
   id = 6; width = 100; height = 100;
   sprite_sheet[id].insert("./images/arrow2.ppm", 4, 1);
   sprite_sheet[id].setSize(width,height);
@@ -170,6 +171,50 @@ void attack_list::makeAttacks(){
   #ifdef USE_SOUND
   attacks[id].setAttackSound(beep);
   attacks[id].setSoundCollide(censorBeep);
+  #endif
+
+  //Shielded
+   id = 7; width = 35; height = 35;
+  sprite_sheet[id].insert("./images/shield.ppm", 5, 3);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(1);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(width,height,0,0);
+  attacks[id].changeRate(15);
+  attacks[id].setTimeBase(false);
+  attacks[id].setCycleBase(true);
+  //attacks[id].setDuration(50);
+  attacks[id].setDamage(0);
+  attacks[id].setStickOn(true);
+  attacks[id].setInvincible(true);
+  //attacks[id].setMoveWith(true);
+  //attacks[id].setCharges(200);
+  attacks[id].setInfiniteCharges(true);
+  //attacks[id].setVelocityX(10); attacks[id].setVelocityY(0);
+  #ifdef USE_SOUND
+  attacks[id].setAttackSound(beep);
+  attacks[id].setSoundCollide(censorBeep);
+  #endif
+
+  //Simple Blast
+  id = a_simpleBlast; width = 20; height = 20;
+  sprite_sheet[id].insert("./images/arrow.ppm", 4, 1);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(0);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(width,height,0,0);
+  attacks[id].changeRate(15);
+  attacks[id].setVelocityX(7);
+  //attacks[id].setPushBack(true);
+  attacks[id].setPushAway(true);
+  attacks[id].setTimeBase(true);
+  attacks[id].setDuration(2000);
+  attacks[id].setCycleBase(false);
+  attacks[id].setCharges(30);
+  attacks[id].setDamage(6);
+  #ifdef USE_SOUND
+  attacks[id].setAttackSound(robotBlip1);
+  attacks[id].setSoundCollide(robotBlip2);
   #endif
 
 }

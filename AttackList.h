@@ -39,4 +39,16 @@ struct attack_list{
   void renderAttacks(int x, int y);
 
 };
+
+enum attacks_t{
+ a_fireUp = 0,
+ a_pushingLaser,
+ a_fireShield,
+ a_fireDown,
+ a_skiping,
+ a_explode,
+ a_speedArrow,
+ a_shield,
+ a_simpleBlast
+};
 #endif

@@ -23,6 +23,7 @@ Player::Player() : Object(26, 44, 250, 250), Sprite(){
   speed = 0; maxSpeed  = 7; speedRate = 1;
   gunType = -1;
   invincible = 0;
+  invisible = 0;
   isShooting=0;
   Sprite::setMirror(false);
   indexp = 0; once = 0;
@@ -90,7 +91,19 @@ void Player::setInvincible(bool take){
 void Player::setGunType(int take){
   gunType = take;
 }
-
+int Player::checkGunType(){
+  return gunType;
+}
+void Player::setAmmo(int take){
+  ammo = take;
+}
+int Player::checkAmmo(){
+  return ammo;
+}
+void Player::decreaseAmmo(int amount){
+  ammo -= amount;
+  if(ammo < 0) ammo = 0;
+}
 bool Player::checkShooting(){
   return Object::isShooting;
 }
@@ -207,6 +220,7 @@ void Player::autoState(){
 }
 
 void Player::drawBox(){
+  if(invisible) return;
   //int w = Object::getWidth();
   //int h = Object::getHeight();
   glPushMatrix();

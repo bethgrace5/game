@@ -13,11 +13,13 @@ extern attack_list boxA;
 extern Player *hero;
 
 Item::Item() : Sprite(), Object(20, 20, 350, 350) {
-  effect=3;
+  //effect=3;
+  effect = rand() % 20 + 1;
   end = 0;
 }
 
 void Item::causeEffect(Player *hero) {
+  hero->setAmmo(10);
   switch (effect) {
     case 1: 
       hero->repairHealth(25);
@@ -26,10 +28,19 @@ void Item::causeEffect(Player *hero) {
       boxA.copyAttack(hero, 2, hero->checkMirror());
       break;
     case 3:
-      hero->setGunType(5);
+      hero->setGunType(0);
+      break;
+    case 4:
+      hero->setGunType(1);
+      break;
+    case 5:
+      hero->setGunType(2);
+      break;
+    case 6:
+      hero->setGunType(3);
       break;
     default:
-      hero->repairHealth(20);
+      hero->repairHealth(10);
       break;
   }
 }
