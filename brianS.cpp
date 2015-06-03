@@ -436,8 +436,14 @@ void Enemy::enemyAI (Object *hero) {
 			Object::setVelocityY(rnd()*2);
                 if (e_vx==0) {
                     Object::setVelocityX((rnd()>.5)?(-0.6):(0.6));//Patrol ground object
-                    if (type==3)
-                        Object::setVelocityY(rnd()-0.5);//Boss floats around at random
+                    if (type==3){
+                        Object::setVelocityY(rnd()-0.7);//Boss floats around at random
+			//Object::getCenterY();
+			if (Object::getCenterX()>LEVEL_WIDTH)
+			    Object::setVelocityX(Object::getVelocityX()*-1);
+			cout << "x:" << Object::getCenterX() << endl;
+			cout << "y:" << Object::getCenterY() << endl;
+		    }
                     str += "start patrolling";
                 } else {
                     if (e_vx<0 && e_f!=NULL) {
