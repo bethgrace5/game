@@ -10,10 +10,12 @@
 #define QUICK_LOAD_TIME 1
 
 // 1 to use tool editor, 0 to use pre-defined objects
-#define USE_TOOLS 0
+#define USE_TOOLS 1
 
 //If 1, you can write the name of the save file
 #define OPTIONAL_STORAGE 1
+
+#define EXTREME_MODE 0
 
 #define GRAVITY 0.2
 #define HERO_START_X 150
