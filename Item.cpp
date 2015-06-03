@@ -8,6 +8,7 @@
   #include "sounds.h"
   #endif
 #include "AttackList.h"
+#include <stdlib.h>
 
 extern attack_list boxA;
 extern Player *hero;

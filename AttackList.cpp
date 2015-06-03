@@ -30,7 +30,7 @@ void attack_list::makeAttacks(){
   attacks[id].setCharges(200);
   attacks[id].setVelocityX(10); attacks[id].setVelocityY(5);
   #ifdef USE_SOUND
-  attacks[id].setAttackSound(beep);
+  attacks[id].setAttackSound(flyby);
   attacks[id].setSoundCollide(censorBeep);
   #endif
 
@@ -51,7 +51,7 @@ void attack_list::makeAttacks(){
   attacks[id].setCharges(30);
   attacks[id].setDamage(3);
   #ifdef USE_SOUND
-  attacks[id].setAttackSound(robotBlip1);
+  attacks[id].setAttackSound(mvalSingle);
   attacks[id].setSoundCollide(robotBlip2);
   #endif
 
@@ -78,7 +78,7 @@ void attack_list::makeAttacks(){
   //attacks[id].setCharges(200);
   attacks[id].setDamage(25);
   #ifdef USE_SOUND
-  attacks[id].setAttackSound(tick);
+  attacks[id].setAttackSound(electronicNoise);
   attacks[id].setSoundCollide(click);
   #endif
 
@@ -99,7 +99,7 @@ void attack_list::makeAttacks(){
   attacks[id].setCharges(200);
   attacks[id].setVelocityX(10); attacks[id].setVelocityY(-5);
 #ifdef USE_SOUND
-  attacks[id].setAttackSound(beep);
+  attacks[id].setAttackSound(flyby);
   attacks[id].setSoundCollide(0);
 #endif
 
@@ -121,7 +121,7 @@ void attack_list::makeAttacks(){
   attacks[id].setCharges(100);
   attacks[id].setVelocityX(14); attacks[id].setVelocityY(1);
 #ifdef USE_SOUND
-  attacks[id].setAttackSound(beep);
+  attacks[id].setAttackSound(flyby);
   attacks[id].setSoundCollide(0);
 #endif
 
@@ -148,7 +148,7 @@ void attack_list::makeAttacks(){
   attacks[id].setCharges(1000);
   attacks[id].setDamage(15);
   #ifdef USE_SOUND
-  attacks[id].setAttackSound(tick);
+  attacks[id].setAttackSound(spaceshipTakeoff);
   attacks[id].setSoundCollide(click);
   #endif
 
@@ -169,7 +169,7 @@ void attack_list::makeAttacks(){
   attacks[id].setCharges(200);
   attacks[id].setVelocityX(10); attacks[id].setVelocityY(0);
   #ifdef USE_SOUND
-  attacks[id].setAttackSound(beep);
+  attacks[id].setAttackSound(spaceshipTakeoff);
   attacks[id].setSoundCollide(censorBeep);
   #endif
 
@@ -192,7 +192,7 @@ void attack_list::makeAttacks(){
   attacks[id].setInfiniteCharges(true);
   //attacks[id].setVelocityX(10); attacks[id].setVelocityY(0);
   #ifdef USE_SOUND
-  attacks[id].setAttackSound(beep);
+  attacks[id].setAttackSound(strangeAlien);
   attacks[id].setSoundCollide(censorBeep);
   #endif
 
@@ -213,7 +213,7 @@ void attack_list::makeAttacks(){
   attacks[id].setCharges(30);
   attacks[id].setDamage(6);
   #ifdef USE_SOUND
-  attacks[id].setAttackSound(robotBlip1);
+  attacks[id].setAttackSound(laser);
   attacks[id].setSoundCollide(robotBlip2);
   #endif
 
@@ -288,7 +288,7 @@ bool attack_list::detectAttack (Object *obj, Attack *targetAttack) {
       obj->getTop()    > targetAttack->getBottom()) {
 #ifdef USE_SOUND
     //cout << targetAttack->getSoundCollide()<<endl;
-    fmod_playsound(targetAttack->getSoundCollide());
+    //fmod_playsound(targetAttack->getSoundCollide());
 #endif
     return true;
   }
