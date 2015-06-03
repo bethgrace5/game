@@ -13,6 +13,7 @@ class Item : public Sprite, public Object {
       int end;
     public:
       Item();
+      ~Item();
       void causeEffect(Player *hero);
       void drawBox();
 };

@@ -15,6 +15,8 @@
 #include "chadD.h"
 #include "Item.h"
 
+extern Player *hero;
+
 #ifdef USE_SOUND
 #include "./include/FMOD/fmod.h"
 #include "./include/FMOD/wincompat.h"
@@ -89,11 +91,12 @@ void Platform::drawRow(int x, int y) {
   } 
   glPopMatrix(); 
 }
+
 //=====================================================================
-//  Attack_Functions
+//  Attack_Core_Setup
 //=====================================================================
 Attack::Attack() : Object(0, 0, 0, 0){
-  once = onceOnly = 0;
+  once = onceOnly = singleUse = 0;
   indexp = 0;
   damage = 5;
   frameRate = 0;
@@ -105,15 +108,30 @@ Attack::Attack() : Object(0, 0, 0, 0){
   start = 0;
   stickOn = 0;
   moveWith = 0;
+  pushAway = 0;
+  pushBack = 0;
   effectEnemy = 0;
   effectPlayer = 0;
+  infiniteCharges = 0;
   charges = 1;
   constantEffect = 0;
-  
+  invisiblity = 0;
+  invincible = 0; 
   attackSound = 1;
   soundCollide = 1;
 }
 
+Attack::~Attack(){
+  if(invincible){
+    std::cout << "Invinciblity Gone\n"; 
+    hero->setInvincible(false); 
+  }
+  if(invisiblity) hero->setInvisible(false);
+    
+}
+//=====================================================================
+//  Setup
+//=====================================================================
 void Attack::setAttackSound(int take){
   attackSound = take;
 }
@@ -149,7 +167,8 @@ bool Attack::checkStop(){
 }
 void Attack::causeEffect(Enemy *enemy){
   if(!effectEnemy) return;
-  if(charges <= 0) return;
+  if(charges <= 0 && !infiniteCharges) return;
+  if(pushAway) pushAwayForce(enemy);
   enemy->life-=damage;
   charges--;
 }
@@ -157,6 +176,7 @@ void Attack::causeEffect(Enemy *enemy){
 void Attack::causeEffect(Player *hero){
   if(!effectPlayer) return;  
   if(charges <= 0) return;
+  if(pushAway) pushAwayForce(hero);
   hero->reduceHealth(damage);
   charges--;
 }
@@ -175,6 +195,12 @@ void Attack::setStickOn(bool take){
 void Attack::setMoveWith(bool take){
   moveWith = take;
 }
+void Attack::setPushAway(bool take){
+  pushAway = take;
+}
+void Attack::setPushBack(bool take){
+  pushBack = take;
+}
 void Attack::setEffectEnemy(bool take){
   effectEnemy = take;
 }
@@ -190,6 +216,15 @@ void Attack::setConstantEffect(bool take){
 void Attack::setCharges(int take){
   charges = take;
 }
+void Attack::setInfiniteCharges(bool take){
+  infiniteCharges = take;
+}
+void Attack::setInvincible(bool take){
+  invincible = take;
+}
+void Attack::setInvisiblity(bool take){ 
+  invisiblity = take;
+}
 //==============================================
 // Behavior_Functions
 //==============================================
@@ -200,15 +235,23 @@ void Attack::targetAt(Object *caster){
 void Attack::autoState(){
   if(timeBase) checkDuration();
   if(cycleBase) if(indexp == 0 && start) stop = 1; 
-  if(charges == 0) stop = 1;
+  if(charges == 0 && !infiniteCharges) stop = 1;
 
   if(stickOn) stickOnHero();
   if(moveWith) moveWithHero();
+  if(invincible) hero->setInvincible(true);
+  if(invisiblity) hero->setInvisible(true);
+
+  if(singleUse == 0){ 
+    if(pushBack) pushBackSelf();
+    singleUse = 1;
+  }
 
   //Follow Player Movement
   //Affect By Gravity
   //Directional Shots
   if(stop && moveWith){
+
     //target->setVelocityX(0);
   }
 }
@@ -228,6 +271,17 @@ void Attack::checkDuration(){
   if(diff_ms(timeIn, timeOut) > duration){
     stop = 1;
   }
+}
+
+void Attack::pushAwayForce(Object *obj){
+  obj->setVelocityX(getVelocityX());
+  obj->setVelocityY(getVelocityY());
+ // obj->setCenter(obj->getCenterX() + getVelocityX(), obj->getCenterY());
+
+}
+void Attack::pushBackSelf(){
+  target->setVelocityX(-(getVelocityX())*2);
+  target->setVelocityY(2);
 }
 
 //===============================================
@@ -261,8 +315,13 @@ void Attack::drawBox(Sprite targetSprite){
   glVertex2i( w, -h);
   glEnd();
   */
+  bool past = targetSprite.checkMirror();
+  if(getVelocityX() >= 0) targetSprite.setMirror(false); 
+  else targetSprite.setMirror(true);
 
   targetSprite.drawTile(indexp);
+
+  targetSprite.setMirror(past);
 
   glPopMatrix();
 }

@@ -7,7 +7,7 @@
 //#define USE_SOUND
 
 // 1 for quick load, 0 for slow load with menu images
-#define QUICK_LOAD_TIME 0
+#define QUICK_LOAD_TIME 1
 
 // 1 to use tool editor, 0 to use pre-defined objects
 #define USE_TOOLS 1
@@ -22,6 +22,7 @@
 #define MAX_BACKGROUND_BITS 1000
 #define MAX_ENEMIES 200
 #define MAX_GROUNDS 500
+#define MAX_ITEMS 50
 #define MAX_ATTACKS 25
 #define MAX_CURRENTS 50
 #define MAX_HEIGHT 2400
