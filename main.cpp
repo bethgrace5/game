@@ -79,6 +79,7 @@ double g_left, g_right, g_top, g_bottom;
 int bg, bullets, grounds_length, enemies_length = 0, i, j, level=0, quit=0;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
+int bossExplosionEnd = 0;
 
 //timer
 timeval gameStart, gameEnd;
@@ -95,14 +96,16 @@ int bossMusicIsPlaying=0;
 int creeperScore = 0;
 
 // menu rendering and selection Globals
-int showInvalid=0, frameIndex=0, menuSelection = 0;
+int showInvalid=0, frameIndex=0, menuSelection = 0, creditIndex=-1;
 timeval frameStart, frameEnd;
+timeval creditsStart, creditsEnd;
+timeval explosionStart, explosionEnd;
 
 //Images and Textures
 Ppmimage *initImages[32], *computerScreenImages[32], *healthBarImage[1], *lifeImage[1],
-         *backgroundImage[1], *pauseMenuImage[1];
+         *backgroundImage[1], *pauseMenuImage[1], *creditsImages[4];
 GLuint initTextures[65], computerScreenTextures[32], healthBarTexture[1], lifeTexture[1],
-       backgroundTexture[1], pauseMenuTexture[1];
+       backgroundTexture[1], pauseMenuTexture[1], creditsTextures[4];
 
 //Function prototypes
 //Object createAI( int w, int h, Object *ground);
@@ -133,6 +136,7 @@ void renderAnimations(int x, int y);
 void renderBackground(void);
 void renderBullets(int x, int y);
 void renderComputerScreenMenu();
+void renderCredits();
 void renderDebugInfo();
 void renderEnemies(int x, int y);
 void renderGrounds(int x, int y);
@@ -203,6 +207,17 @@ int main(void) {
         // render "pause menu"
         else if (level == 2) {
             renderPauseMenu();
+        }
+        else if (level == 3) {
+            //if (bossExplosionEnd) {
+                renderCredits();
+            //}
+            //else {
+                //gettimeofday(&explosionEnd, NULL);
+                //if (diff_ms(frameEnd, frameStart) > 100) { 
+                    //bossExplosionEnd = 1;
+                //}
+            //}
         }
         else {
             movement();
@@ -282,6 +297,7 @@ void init_opengl (void) {
 
     gettimeofday(&fireStart, NULL);
     gettimeofday(&frameStart, NULL);
+    gettimeofday(&creditsStart, NULL);
     gettimeofday(&fpsStart, NULL);
 
     string fileName;
@@ -349,6 +365,25 @@ void init_opengl (void) {
         }
         delete [] computerData;
     }
+    // load credits screens
+    unsigned char *creditsData;
+    glGenTextures(4, creditsTextures);
+    fileName = "";
+    for (int q=0; q<4; q++) {
+        fileName = "./images/credits/credits";
+        fileName += itos(q);
+        fileName += ".ppm";
+        cout << "loading file: " <<fileName <<endl;
+        creditsImages[q] = ppm6GetImage(fileName.c_str());
+        glBindTexture(GL_TEXTURE_2D, creditsTextures[q]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        creditsData = buildAlphaData(creditsImages[q]);
+        w = creditsImages[q]->width;
+        h = creditsImages[q]->height;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, creditsData);
+    }
+    delete [] creditsData;
 
     // load life image
     unsigned char *lifeData;
@@ -473,6 +508,7 @@ int check_keys (XEvent *e) {
         // level 1
         if (level==1) {
             if (key == XK_r) {
+                level = 3;
                 //resetLevel();
             }
             if (key == XK_e) {
@@ -1075,6 +1111,8 @@ void movement() {
         if ((enemies[i]->isDead) or enemies[i]->getCenterY()<0){
             if(enemies[i]->type == 3){
               boxA.copyAttack(enemies[i], 5,enemies[i]->checkMirror());
+              gettimeofday(&explosionStart, NULL);
+              level = 3;
             }
             deleteEnemy(i);
         }
@@ -1310,6 +1348,43 @@ void renderInitMenu () {
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_ALPHA_TEST);
 }
+void renderCredits () {
+
+    int frameTime = 5000;
+    gettimeofday(&creditsEnd, NULL);
+
+    // loop through frames
+    if (diff_ms(creditsEnd, creditsStart) > frameTime) { 
+        gettimeofday(&creditsStart, NULL);
+        creditIndex++;
+    }
+
+    // go back to menu
+    if (creditIndex == 4) {
+        level = 0;
+        frameIndex = 0;
+        return;
+    }
+
+    glPushMatrix();
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glTranslatef(WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT, 0);
+    //glEnable(GL_ALPHA_TEST);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, creditsTextures[creditIndex]);
+    glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+
+    glTexCoord2f(0, 1) ; glVertex2i(-WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+    glTexCoord2f(0, 0) ; glVertex2i(-WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(1, 0) ; glVertex2i( WINDOW_HALF_WIDTH, WINDOW_HALF_HEIGHT);
+    glTexCoord2f(1, 1) ; glVertex2i( WINDOW_HALF_WIDTH,-WINDOW_HALF_HEIGHT);
+
+    glEnd(); glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+    //glDisable(GL_ALPHA_TEST);
+}
 
 void renderLives () {
     int w = 50;
@@ -1531,7 +1606,8 @@ void renderComputerScreenMenu () {
     //highlighted box through
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_TEXTURE_2D);
-    glAlphaFunc(GL_LESS, 0.2f);
+    glBindTexture(GL_TEXTURE_2D, computerScreenTextures[frameIndex]);
+    glAlphaFunc(GL_LESS, 0.15f);
     glColor4ub(255,255,255,255);
     glBegin(GL_QUADS);
 
