@@ -74,6 +74,7 @@ class Attack: public Object {
 
     int damage;
     int charges;
+    bool infiniteCharges;
     bool singleUse;
     bool constantEffect;
     bool effectEnemy;
@@ -81,6 +82,7 @@ class Attack: public Object {
     bool pushAway;
     bool pushBack;
     bool invincible;
+    bool invisiblity;
 
     bool hurtOnce;
     
@@ -115,7 +117,9 @@ class Attack: public Object {
     void setEffectPlayer(bool take);
     void setConstantEffect(bool take);
     void setCharges(int take);
+    void setInfiniteCharges(bool take);
     void setInvincible(bool take);
+    void setInvisiblity(bool take);
     void setDamage(int take);
     void returnVelocity();
     

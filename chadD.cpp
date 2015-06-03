@@ -112,20 +112,22 @@ Attack::Attack() : Object(0, 0, 0, 0){
   pushBack = 0;
   effectEnemy = 0;
   effectPlayer = 0;
+  infiniteCharges = 0;
   charges = 1;
   constantEffect = 0;
- 
+  invisiblity = 0;
   invincible = 0; 
   attackSound = 1;
   soundCollide = 1;
 }
 
 Attack::~Attack(){
-  std::cout << "did this work\n"; 
   if(invincible){
     std::cout << "Invinciblity Gone\n"; 
     hero->setInvincible(false); 
   }
+  if(invisiblity) hero->setInvisible(false);
+    
 }
 //=====================================================================
 //  Setup
@@ -165,7 +167,7 @@ bool Attack::checkStop(){
 }
 void Attack::causeEffect(Enemy *enemy){
   if(!effectEnemy) return;
-  if(charges <= 0) return;
+  if(charges <= 0 && !infiniteCharges) return;
   if(pushAway) pushAwayForce(enemy);
   enemy->life-=damage;
   charges--;
@@ -214,8 +216,14 @@ void Attack::setConstantEffect(bool take){
 void Attack::setCharges(int take){
   charges = take;
 }
+void Attack::setInfiniteCharges(bool take){
+  infiniteCharges = take;
+}
 void Attack::setInvincible(bool take){
-  invincible = 1;
+  invincible = take;
+}
+void Attack::setInvisiblity(bool take){ 
+  invisiblity = take;
 }
 //==============================================
 // Behavior_Functions
@@ -227,11 +235,12 @@ void Attack::targetAt(Object *caster){
 void Attack::autoState(){
   if(timeBase) checkDuration();
   if(cycleBase) if(indexp == 0 && start) stop = 1; 
-  if(charges == 0) stop = 1;
+  if(charges == 0 && !infiniteCharges) stop = 1;
 
   if(stickOn) stickOnHero();
   if(moveWith) moveWithHero();
   if(invincible) hero->setInvincible(true);
+  if(invisiblity) hero->setInvisible(true);
 
   if(singleUse == 0){ 
     if(pushBack) pushBackSelf();
@@ -265,13 +274,14 @@ void Attack::checkDuration(){
 }
 
 void Attack::pushAwayForce(Object *obj){
-  //obj->setVelocityX(getVelocityX());
-  //obj->setVelocityY(getVelocityY());
-  obj->setCenter(obj->getCenterX() + getVelocityX(), obj->getCenterY());
+  obj->setVelocityX(getVelocityX());
+  obj->setVelocityY(getVelocityY());
+ // obj->setCenter(obj->getCenterX() + getVelocityX(), obj->getCenterY());
+
 }
 void Attack::pushBackSelf(){
-  target->setVelocityX(-(getVelocityX()));
-  target->setVelocityY(5);
+  target->setVelocityX(-(getVelocityX())*2);
+  target->setVelocityY(2);
 }
 
 //===============================================

@@ -73,7 +73,7 @@ Enemy *enemies[MAX_ENEMIES];
 Player *hero;
 Platform *grounds[MAX_GROUNDS];
 Item *items;
-Item *itemsHold[10];
+Item *itemsHold[MAX_ITEMS];
 int items_length = 0;
 double g_left, g_right, g_top, g_bottom;
 int bg, bullets, grounds_length, enemies_length = 0, i, j, level=0, quit=0;
@@ -255,6 +255,7 @@ void initXWindows (void) { //do not change
     set_title();
     glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
     glXMakeCurrent(dpy, win, glc);
+
 }
 
 void init_opengl (void) {
@@ -523,6 +524,9 @@ int check_keys (XEvent *e) {
             }
             if( key == XK_c){
                 boxA.copyAttack(hero, 3, hero->checkMirror()); 
+            }
+            if( key == XK_x){
+                boxA.copyAttack(hero, 4, hero->checkMirror()); 
             }
             // debug death
             if (key == XK_y) {
@@ -931,6 +935,7 @@ void movement() {
 
     hero->setOldCenter();
     hero->autoSet();
+    hero->autoState();//This set the isStuff like isWalking, tmp fix
     //if(hero->getHealth() <= 0) hero->stop();  //redundant
 
     //Detect Collisions
@@ -940,7 +945,6 @@ void movement() {
 
     hero->jumpRefresh();
     hero->cycleAnimations();
-    hero->autoState();//This set the isStuff like isWalking, tmp fix
     hero->setVelocityY( hero->getVelocityY() - GRAVITY);
 
     // Cycle through hero index sequences
@@ -960,7 +964,7 @@ void movement() {
             if (((diff_ms(seqEnd, seqStart)) > 1000)) {
                 hero->setCenter(HERO_START_X, HERO_START_Y);
                 hero->isDying=0;
-                hero->repairHealth(100); 
+                hero->setHealth(100); 
             }
         }
     }
@@ -1069,6 +1073,9 @@ void movement() {
             groundCollide(enemies[i], grounds[j]); 
         }
         if ((enemies[i]->isDead) or enemies[i]->getCenterY()<0){
+            if(enemies[i]->type == 3){
+              boxA.copyAttack(enemies[i], 5,enemies[i]->checkMirror());
+            }
             deleteEnemy(i);
         }
     }

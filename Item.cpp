@@ -1,4 +1,3 @@
-
 #include "Item.h"
 #include "Sprite.h"
 #include "Player.h"
@@ -14,21 +13,21 @@ extern attack_list boxA;
 extern Player *hero;
 
 Item::Item() : Sprite(), Object(20, 20, 350, 350) {
-  effect=2;
+  effect=3;
   end = 0;
 }
+
 void Item::causeEffect(Player *hero) {
   switch (effect) {
     case 1: 
-      hero->setHealth(0);
+      hero->repairHealth(25);
       break;
     case 2:
-      //boxA.copyAttack(hero, 2, hero->checkMirror());
+      boxA.copyAttack(hero, 2, hero->checkMirror());
       break;
     case 3:
-
+      hero->setGunType(5);
       break;
-
     default:
       hero->repairHealth(20);
       break;
@@ -47,5 +46,3 @@ Item::~Item(){
   //fmod_playsound(powerup);
 #endif
 }
-
-
