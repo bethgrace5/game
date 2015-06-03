@@ -21,7 +21,7 @@ void attack_list::makeAttacks(){
   attacks[id].referenceTo(sprite_sheet[id], id);
   attacks[id].init(width,height,0,0);
   attacks[id].changeRate(15);
-  attacks[id].setTimeBase(false);
+  attacks[id].setTimeBase(true);
   attacks[id].setCycleBase(false);
   attacks[id].setDuration(300);
   attacks[id].setDamage(1);
