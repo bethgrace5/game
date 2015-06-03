@@ -21,6 +21,7 @@ Player::Player() : Object(26, 44, 250, 250), Sprite(){
   isShooting=0;
   jumps = 0; jumpLimit = 2; jumpPower = 7;
   speed = 0; maxSpeed  = 7; speedRate = 1;
+  gunType = -1;
   invincible = 0;
   isShooting=0;
   Sprite::setMirror(false);
@@ -30,11 +31,14 @@ Player::Player() : Object(26, 44, 250, 250), Sprite(){
 //Movement Functions
 //===============================================
 void Player::moveRight(){ 
+//  if(getVelocityX() >= maxSpeed) return;
   Sprite::setMirror(false);
   isWalking = 1;
   Object::setVelocityX(maxSpeed);
 }
 void Player::moveLeft(){
+//  if(getVelocityX() <= -maxSpeed) return;
+
   Sprite::setMirror(true);
   isWalking = 1;
   Object::setVelocityX(-maxSpeed);
@@ -75,8 +79,16 @@ void Player::repairHealth(int take){
   health += take;
   if(health > maxHealth) health = 100;
 }
+
+void Player::setInvisible(bool take){
+  invisible = take;
+}
 void Player::setInvincible(bool take){
   invincible = take;
+}
+
+void Player::setGunType(int take){
+  gunType = take;
 }
 
 bool Player::checkShooting(){

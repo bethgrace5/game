@@ -22,7 +22,7 @@ class Player: public Object, public Sprite{
     int once;
 
     //bool triggerShooting;
-    bool gunType;
+    int gunType;
     bool invincible;
     bool invisible;
 
