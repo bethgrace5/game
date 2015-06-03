@@ -16,13 +16,16 @@ class Player: public Object, public Sprite{
   private:
     int lives, health, maxHealth;
     int jumps, jumpLimit, jumpPower;
-    int maxSpeed, speed;
+    int maxSpeed, speed, speedRate;
 
+    int ammo;
     int indexp;
     int once;
 
     //bool triggerShooting;
+    int gunType;
     bool invincible;
+    bool invisible;
 
     timeval seqStartA, seqEndA;
 
@@ -41,9 +44,15 @@ class Player: public Object, public Sprite{
     void reduceHealth(int take);
     void repairHealth(int take);
     void setInvincible(bool take);
+    void setInvisible(bool take);
     
     bool checkShooting();
     void setShooting(bool take);
+    void setGunType(int take);
+    int  checkGunType();
+    void setAmmo(int take);
+    int checkAmmo();
+    void decreaseAmmo(int ammount);
     int getLives();
     void incrementLives();
     void decrementLives();
@@ -55,6 +64,5 @@ class Player: public Object, public Sprite{
     void autoState();
 
     //int diff_ms (timeval t1, timeval t2);
-
 };
 #endif

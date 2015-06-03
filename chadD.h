@@ -74,9 +74,15 @@ class Attack: public Object {
 
     int damage;
     int charges;
+    bool infiniteCharges;
+    bool singleUse;
     bool constantEffect;
     bool effectEnemy;
     bool effectPlayer;
+    bool pushAway;
+    bool pushBack;
+    bool invincible;
+    bool invisiblity;
 
     bool hurtOnce;
     
@@ -88,6 +94,7 @@ class Attack: public Object {
 
   public:  
     Attack();
+    ~Attack();
 
     Object *Clone(){ return new Attack(*this); }
 
@@ -104,10 +111,15 @@ class Attack: public Object {
     void setCycleBase(bool take);
     void setStickOn(bool take);
     void setMoveWith(bool take);
+    void setPushAway(bool take);
+    void setPushBack(bool take);
     void setEffectEnemy(bool take);
     void setEffectPlayer(bool take);
     void setConstantEffect(bool take);
     void setCharges(int take);
+    void setInfiniteCharges(bool take);
+    void setInvincible(bool take);
+    void setInvisiblity(bool take);
     void setDamage(int take);
     void returnVelocity();
     
@@ -123,6 +135,8 @@ class Attack: public Object {
     void direction();
     void stickOnHero();
     void moveWithHero();
+    void pushAwayForce(Object *obj);
+    void pushBackSelf();
 
     void causeEffect(Player *hero);
     void causeEffect(Enemy *enemy);

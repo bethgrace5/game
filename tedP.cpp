@@ -22,6 +22,7 @@
   Main_Center         |
   Platform_Editor     |
   Enemy_Editor        |
+  Item_Editor         |
   Mouse_Check         |
   Key_Check           |
   Physics             |
@@ -77,8 +78,12 @@ Player *hero;
 Sprite currentTile;
 Sprite ruler;
 Enemy *enemies[MAX_ENEMIES];
+Item *itemsHold[MAX_ITEMS];
+int items_length = 0;
+
 Platform *grounds[MAX_GROUNDS];
 attack_list boxA;
+
 int grounds_length = 0;
 int enemies_length = 0;
 int level = 0;
@@ -93,6 +98,7 @@ bool saving;
 bool loading;
 
 bool enemyEditor = 1;
+bool itemEditor = 0;
 
 bool create = 0;
 bool tileMode = 0;
@@ -140,6 +146,9 @@ void makeEnemy(int w, int h, int x, int y, int type);
 Object createAI( int w, int h, Object *ground);
 void deleteEnemy(int ind);
 
+void makeItem(int w, int h, int x, int y);
+void deleteItem(int id);
+
 void render(void);
 void renderEnemies(int x, int y);
 void renderGrounds(int x, int y);
@@ -163,7 +172,7 @@ bool inWindow(Object &obj) {
 //====================================================================
 int main(void) {
   initXWindows(); init_opengl();
-  
+
   //declare hero object
   //testHero = new Player();
 
@@ -299,7 +308,7 @@ void pickTile(int x, int y){
   int tileX = int(ceil(x/tileWidth))  % 10 ;
   int tileY = int(ceil(y/tileHeight)) % 36;
   tileY = 36 - tileY;
- 
+
   cout << "What is TileX " << tileX << endl;
   cout << "What is TileY " << tileY << endl;
 
@@ -321,7 +330,7 @@ void deletePlatform(){
     return;
   if(saveID < 0)
     return;
- 
+
   grounds[saveID] = new Platform();
   delete grounds[saveID];
 
@@ -340,36 +349,36 @@ void deletePlatform(){
 //  Enemy_Editor
 //=====================================================================
 void makeEnemy(int w, int h, int x, int y, int type) {
-    if (enemies_length<MAX_ENEMIES){
-        enemies[enemies_length] = new Enemy(w, h, x, y, type); 
-        switch (type){
-            case 1:
-                enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
-                enemies[enemies_length]->setBottom(-44);
-                enemies[enemies_length]->setLeft(-24);
-                enemies[enemies_length]->setRight(24);
-                enemies[enemies_length]->setTop(24);
-                enemies[enemies_length]->setHeight(25);
-                break;
-            case 2:
-                enemies[enemies_length]->insert("./images/enemy2_1.ppm", 26, 1);
-                /*enemies[enemies_length]->setBottom(-44);
-                  enemies[enemies_length]->setLeft(-24);
-                  enemies[enemies_length]->setRight(24);
-                  enemies[enemies_length]->setTop(24);
-                  enemies[enemies_length]->setHeight(25);
-                  */
-                break;
-            case 3:
-                enemies[enemies_length]->insert("./images/boss.ppm", 1, 1);
-                break;
-        }
-        enemies[enemies_length]->setID(enemies_length);
-        enemies_length++;
+  if (enemies_length<MAX_ENEMIES){
+    enemies[enemies_length] = new Enemy(w, h, x, y, type); 
+    switch (type){
+      case 1:
+        enemies[enemies_length]->insert("./images/enemy1.ppm", 26, 1);
+        enemies[enemies_length]->setBottom(-44);
+        enemies[enemies_length]->setLeft(-24);
+        enemies[enemies_length]->setRight(24);
+        enemies[enemies_length]->setTop(24);
+        enemies[enemies_length]->setHeight(25);
+        break;
+      case 2:
+        enemies[enemies_length]->insert("./images/enemy2_1.ppm", 26, 1);
+        /*enemies[enemies_length]->setBottom(-44);
+          enemies[enemies_length]->setLeft(-24);
+          enemies[enemies_length]->setRight(24);
+          enemies[enemies_length]->setTop(24);
+          enemies[enemies_length]->setHeight(25);
+          */
+        break;
+      case 3:
+        enemies[enemies_length]->insert("./images/boss.ppm", 1, 1);
+        break;
     }
-    else{
-        cout << "Enemies array full!" << endl;
-    }
+    enemies[enemies_length]->setID(enemies_length);
+    enemies_length++;
+  }
+  else{
+    cout << "Enemies array full!" << endl;
+  }
 }
 
 void deleteEnemy(){
@@ -400,7 +409,25 @@ void enemySetHeight(){
 
 
 }
+//=====================================================================
+//  Items Editor
+//=====================================================================
+void makeItem(int w, int h, int x, int y){
+  itemsHold[items_length] = new Item();
+  itemsHold[items_length]->setID(items_length);
+  itemsHold[items_length]->insert("./images/firemon.ppm", 1, 1);
+  itemsHold[items_length]->init(16,20,x,y);
+  items_length++;
+}
 
+void deleteItem(int id){
+  if (items_length <= 0) return;
+  items_length--;
+
+  delete itemsHold[id];
+  itemsHold[id] = itemsHold[items_length];
+  itemsHold[items_length]=NULL;
+}
 //=====================================================================
 //  Mouse_Check
 //=====================================================================
@@ -415,7 +442,7 @@ void check_mouse (XEvent *e) {
 
   int take;
   if (e->type == ButtonPress) {
-  //Left button was pressed
+    //Left button was pressed
     if (e->xbutton.button==1) {
       //Enemy Editor Stuff
       if(enemyEditor){
@@ -443,7 +470,7 @@ void check_mouse (XEvent *e) {
         saveID = holdID = take;
       }
     }
-  //Right Button was Pressed
+    //Right Button was Pressed
     if (e->xbutton.button==2) {
       pickTile(e->xbutton.x, WINDOW_HEIGHT - e->xbutton.y);
       return;
@@ -543,7 +570,7 @@ int check_keys (XEvent *e) {
       if(enemyEditor) deleteEnemy();
       else deletePlatform();
     } 
-    #ifdef BACKUP
+#ifdef BACKUP
     if(key == XK_p){
       copyToNew(); 
     }
@@ -553,7 +580,7 @@ int check_keys (XEvent *e) {
     if(key == XK_i){
       convertLoad();
     }
-    #endif
+#endif
     if(key == XK_f ){
       saveID = 0;
       enemyEditor = !enemyEditor; 
@@ -604,8 +631,8 @@ int check_keys (XEvent *e) {
     }
   }
   else if (e->type == KeyRelease) {
-    
-  
+
+
   }
   return 0;
 }
@@ -694,175 +721,175 @@ void renderGrounds (int x, int y) {
 void renderEnemies (int x, int y) {
   for (int i=0;i<enemies_length;i++) {
     //if (inWindow(*(enemies[i]))){
-      glPushMatrix();
-      glTranslatef(- x, - y, 0);
-      enemies[i]->draw();
-      glEnd(); glPopMatrix();
-    }
-}
+    glPushMatrix();
+    glTranslatef(- x, - y, 0);
+    enemies[i]->draw();
+    glEnd(); glPopMatrix();
+  }
+  }
 
-void renderHero (int x, int y) {
-  //Easy Drawing
-  glPushMatrix();
-  glTranslatef(-x, -y, 0);
-  //testHero->drawBox();
-  glPopMatrix();
-}
+  void renderHero (int x, int y) {
+    //Easy Drawing
+    glPushMatrix();
+    glTranslatef(-x, -y, 0);
+    //testHero->drawBox();
+    glPopMatrix();
+  }
 
-void render () {
-  int x = roomX - WINDOW_HALF_WIDTH;
-  int y = roomY - WINDOW_HALF_HEIGHT;
-  glClear(GL_COLOR_BUFFER_BIT);
-  // Draw Background Falling Bits
-  renderRuler();
-  renderGrounds(x, y);
-  renderEnemies(x, y);
-  renderHero(x, y);
-  renderOptions();
-}
+  void render () {
+    int x = roomX - WINDOW_HALF_WIDTH;
+    int y = roomY - WINDOW_HALF_HEIGHT;
+    glClear(GL_COLOR_BUFFER_BIT);
+    // Draw Background Falling Bits
+    renderRuler();
+    renderGrounds(x, y);
+    renderEnemies(x, y);
+    renderHero(x, y);
+    renderOptions();
+  }
 
-//=====================================================================
-//  Storage Editor
-//=====================================================================
+  //=====================================================================
+  //  Storage Editor
+  //=====================================================================
 #ifdef BACKUP
-void convertSave(){
-  copyToNew();
-  cout << "Convert Saving \n";
-  ofstream dfs("backup.ros", ios::binary); 
-  dfs.write((char *)&futureBox, sizeof(futureBox));
-}
-
-void convertLoad(){
-  ifstream dfs("backup.ros", ios::binary);
-  dfs.read((char *)&futureBox, sizeof(futureBox));
-
-  cout << "Convert Loading \n";
-  for(int i = 0; i < futureBox.grounds_length; i++){
-    grounds[i] = &futureBox.grounds[i];
-    grounds[i]->reInitSprite();
-    grounds_length++;
+  void convertSave(){
+    copyToNew();
+    cout << "Convert Saving \n";
+    ofstream dfs("backup.ros", ios::binary); 
+    dfs.write((char *)&futureBox, sizeof(futureBox));
   }
-}
-void copyToNew(){
-  futureBox.grounds_length = grounds_length;
-  for(int i = 0; i < grounds_length; i++){
-    futureBox.grounds[i] = *grounds[i];  
+
+  void convertLoad(){
+    ifstream dfs("backup.ros", ios::binary);
+    dfs.read((char *)&futureBox, sizeof(futureBox));
+
+    cout << "Convert Loading \n";
+    for(int i = 0; i < futureBox.grounds_length; i++){
+      grounds[i] = &futureBox.grounds[i];
+      grounds[i]->reInitSprite();
+      grounds_length++;
+    }
   }
-}
+  void copyToNew(){
+    futureBox.grounds_length = grounds_length;
+    for(int i = 0; i < grounds_length; i++){
+      futureBox.grounds[i] = *grounds[i];  
+    }
+  }
 #endif
 
-void save(){
-  for(int i = 0; i < grounds_length; i++){
-    storeIn.grounds[i] = *grounds[i];  
+  void save(){
+    for(int i = 0; i < grounds_length; i++){
+      storeIn.grounds[i] = *grounds[i];  
+    }
+    for(int i =0; i < enemies_length; i++){
+      storeIn.enemies[i] = *enemies[i];  
+    }
+    storeIn.grounds_length = grounds_length;
+    storeIn.enemies_length = enemies_length;
+
+    cout << "Saving \n";
+    ofstream dfs("test.ros", ios::binary); 
+    dfs.write((char *)&storeIn, sizeof(storeIn));
+
+    //convertSave();
+
+    if(OPTIONAL_STORAGE != 1) return;
+    renderSave();
+    cout << "Save File As: ";
+    string fileName; cin >> fileName; fileName.append(".ros");
+
+    string folder = "./data/"; folder.append(fileName);
+
+    char charFileName[50]; strcpy(charFileName, folder.c_str());
+
+    ofstream saveFileAs(charFileName, ios::binary); 
+
+    saveFileAs.write((char *)&storeIn, sizeof(storeIn));
   }
-  for(int i =0; i < enemies_length; i++){
-    storeIn.enemies[i] = *enemies[i];  
+
+  void quickSave(){
+    cout << "Saving \n";
+    ofstream dfs("test.ros", ios::binary); 
+    dfs.write((char *)&storeIn, sizeof(storeIn));
   }
-  storeIn.grounds_length = grounds_length;
-  storeIn.enemies_length = enemies_length;
 
-  cout << "Saving \n";
-  ofstream dfs("test.ros", ios::binary); 
-  dfs.write((char *)&storeIn, sizeof(storeIn));
+  void load(){
+    renderLoad();
+    string fileName;
+    cout << "Load in: ";  
+    cin >> fileName;
+    string folder = "./data/"; folder.append(fileName);
 
-  //convertSave();
+    if (folder.find(".ros") != string::npos) {
+      cout << "File Exist, Will Load\n";
+    }else{
+      cout << "! Will Only take .ros files !\n"; return;
+    }
+    char charFileName[50];
+    strcpy(charFileName, folder.c_str());
 
-  if(OPTIONAL_STORAGE != 1) return;
-  renderSave();
-  cout << "Save File As: ";
-  string fileName; cin >> fileName; fileName.append(".ros");
+    ifstream dfs(charFileName, ios::binary);
+    cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
+    dfs.read((char *)&storeIn, sizeof(storeIn));
 
-  string folder = "./data/"; folder.append(fileName);
-
-  char charFileName[50]; strcpy(charFileName, folder.c_str());
-
-  ofstream saveFileAs(charFileName, ios::binary); 
-
-  saveFileAs.write((char *)&storeIn, sizeof(storeIn));
-}
-
-void quickSave(){
-  cout << "Saving \n";
-  ofstream dfs("test.ros", ios::binary); 
-  dfs.write((char *)&storeIn, sizeof(storeIn));
-}
-
-void load(){
-  renderLoad();
-  string fileName;
-  cout << "Load in: ";  
-  cin >> fileName;
-  string folder = "./data/"; folder.append(fileName);
-
-  if (folder.find(".ros") != string::npos) {
-    cout << "File Exist, Will Load\n";
-  }else{
-    cout << "! Will Only take .ros files !\n"; return;
+    cout << "Loading \n";
+    for(int i = 0; i < storeIn.grounds_length; i++){
+      grounds[i] = &storeIn.grounds[i];
+      grounds[i]->reInitSprite();
+      grounds_length++;
+    } 
+    enemies_length = 0;
+    for(int i = 0; i < storeIn.enemies_length; i++){
+      enemies[i] = &storeIn.enemies[i];
+      enemies[i]->reInitSprite();
+      enemies_length++; 
+    }
+    cout << "Loading Finished \n";
   }
-  char charFileName[50];
-  strcpy(charFileName, folder.c_str());
 
-  ifstream dfs(charFileName, ios::binary);
-  cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
-  dfs.read((char *)&storeIn, sizeof(storeIn));
-
-  cout << "Loading \n";
-  for(int i = 0; i < storeIn.grounds_length; i++){
-    grounds[i] = &storeIn.grounds[i];
-    grounds[i]->reInitSprite();
-    grounds_length++;
-  } 
-  enemies_length = 0;
-  for(int i = 0; i < storeIn.enemies_length; i++){
-    enemies[i] = &storeIn.enemies[i];
-    enemies[i]->reInitSprite();
-    enemies_length++; 
+  void quickLoad(){
+    cout << "Load in \n";  
+    ifstream dfs("test.ros", ios::binary);
+    cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
+    dfs.read((char *)&storeIn, sizeof(storeIn));
   }
-  cout << "Loading Finished \n";
-}
 
-void quickLoad(){
-  cout << "Load in \n";  
-  ifstream dfs("test.ros", ios::binary);
-  cout << "what is the sizeOf(storeIn)" << sizeof(storeIn) << "\n";
-  dfs.read((char *)&storeIn, sizeof(storeIn));
-}
-
-//=====================================================================
-//  Window Setup
-//=====================================================================
-void set_title (void) { //Set the window title bar.
-  XMapWindow(dpy, win); XStoreName(dpy, win, "Revenge of the Code");
-}
-
-void cleanupXWindows (void) { //do not change
-  XDestroyWindow(dpy, win); XCloseDisplay(dpy);
-}
-
-void initXWindows (void) { //do not change
-  GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-  int w=WINDOW_WIDTH, h=WINDOW_HEIGHT;
-  dpy = XOpenDisplay(NULL);
-  if (dpy == NULL) {
-    cout << "\n\tcannot connect to X server\n" << endl;
-    exit(EXIT_FAILURE);
+  //=====================================================================
+  //  Window Setup
+  //=====================================================================
+  void set_title (void) { //Set the window title bar.
+    XMapWindow(dpy, win); XStoreName(dpy, win, "Revenge of the Code");
   }
-  Window root = DefaultRootWindow(dpy);
-  XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
-  if (vi == NULL) {
-    cout << "\n\tno appropriate visual found\n" << endl;
-    exit(EXIT_FAILURE);
+
+  void cleanupXWindows (void) { //do not change
+    XDestroyWindow(dpy, win); XCloseDisplay(dpy);
   }
-  Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
-  XSetWindowAttributes swa;
-  swa.colormap = cmap;
-  swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
-    ButtonPress | ButtonReleaseMask |
-    PointerMotionMask |
-    StructureNotifyMask | SubstructureNotifyMask;
-  win = XCreateWindow(dpy, root, 0, 0, w, h, 0, vi->depth,
-      InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
-  set_title();
-  glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
-  glXMakeCurrent(dpy, win, glc);
-}
+
+  void initXWindows (void) { //do not change
+    GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
+    int w=WINDOW_WIDTH, h=WINDOW_HEIGHT;
+    dpy = XOpenDisplay(NULL);
+    if (dpy == NULL) {
+      cout << "\n\tcannot connect to X server\n" << endl;
+      exit(EXIT_FAILURE);
+    }
+    Window root = DefaultRootWindow(dpy);
+    XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
+    if (vi == NULL) {
+      cout << "\n\tno appropriate visual found\n" << endl;
+      exit(EXIT_FAILURE);
+    }
+    Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
+    XSetWindowAttributes swa;
+    swa.colormap = cmap;
+    swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
+      ButtonPress | ButtonReleaseMask |
+      PointerMotionMask |
+      StructureNotifyMask | SubstructureNotifyMask;
+    win = XCreateWindow(dpy, root, 0, 0, w, h, 0, vi->depth,
+        InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
+    set_title();
+    glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
+    glXMakeCurrent(dpy, win, glc);
+  }

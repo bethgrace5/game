@@ -13,8 +13,77 @@ void attack_list::makeAttacks(){
   int id = 0;
   int width, height;
 
-  id = 0; width = 75; height = 75;
-  //Aura Effect And Movment
+  //Fire Aura Effect And Movment
+  id = 0; width = 50; height = 50;
+  sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(1);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(width,height,0,0);
+  attacks[id].changeRate(15);
+  attacks[id].setTimeBase(true);
+  attacks[id].setCycleBase(false);
+  attacks[id].setDuration(300);
+  attacks[id].setDamage(1);
+  attacks[id].setStickOn(true);
+  attacks[id].setMoveWith(true);
+  attacks[id].setCharges(200);
+  attacks[id].setVelocityX(10); attacks[id].setVelocityY(5);
+  #ifdef USE_SOUND
+  attacks[id].setAttackSound(beep);
+  attacks[id].setSoundCollide(censorBeep);
+  #endif
+
+  //Big Laser Projectile Attack
+  id = 1; width = 25; height = 25;
+  sprite_sheet[id].insert("./images/arrow.ppm", 4, 1);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(0);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(width,height,0,0);
+  attacks[id].changeRate(15);
+  attacks[id].setVelocityX(7);
+  attacks[id].setPushBack(true);
+  attacks[id].setPushAway(true);
+  attacks[id].setTimeBase(true);
+  attacks[id].setDuration(1000);
+  attacks[id].setCycleBase(false);
+  attacks[id].setCharges(30);
+  attacks[id].setDamage(3);
+  #ifdef USE_SOUND
+  attacks[id].setAttackSound(robotBlip1);
+  attacks[id].setSoundCollide(robotBlip2);
+  #endif
+
+  //Fire Aura
+  id = 2; width = 50; height = 50;
+  sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(1);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(width,height,0,0);
+  attacks[id].setVelocityX(0);
+  attacks[id].setVelocityY(0);
+  attacks[id].setTimeBase(true);
+  attacks[id].setDuration(15000);
+  attacks[id].setCycleBase(false);
+  attacks[id].setStickOn(true);
+  attacks[id].setInvincible(true);//NOTE <- !THIS WILL ONLY EFFECT HERO!
+  //attacks[id].setInvisiblity(false);//works for hero only
+  attacks[id].setPushAway(false);
+  attacks[id].setPushBack(false);
+  //attacks[id].setMoveWith(true);
+  //attacks[id].setConstantEffect(true);
+  attacks[id].setInfiniteCharges(true);
+  //attacks[id].setCharges(200);
+  attacks[id].setDamage(25);
+  #ifdef USE_SOUND
+  attacks[id].setAttackSound(tick);
+  attacks[id].setSoundCollide(click);
+  #endif
+
+  //Fire Aura With Movement Downwards
+  id = 3; width = 125; height = 125;
   sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
   sprite_sheet[id].setSize(75,75);
   sprite_sheet[id].setBackground(1);
@@ -25,53 +94,129 @@ void attack_list::makeAttacks(){
   attacks[id].setCycleBase(false);
   attacks[id].setDuration(300);
   attacks[id].setDamage(1);
-  //attacks[id].setStickOn(true);
+  attacks[id].setStickOn(true);
   attacks[id].setMoveWith(true);
-  attacks[id].setCharges(20);
-  attacks[id].setVelocityX(10); attacks[id].setVelocityY(5);
+  attacks[id].setCharges(200);
+  attacks[id].setVelocityX(10); attacks[id].setVelocityY(-5);
+#ifdef USE_SOUND
+  attacks[id].setAttackSound(beep);
+  attacks[id].setSoundCollide(0);
+#endif
+
+  //Hero Skiping Forward
+  id = 4; width = 44; height = 48;
+  sprite_sheet[id].insert("./images/hero.ppm", 13, 1);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(0);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].setInvisiblity(true);
+  attacks[id].init(width,height,0,0);
+  attacks[id].changeRate(20);
+  attacks[id].setTimeBase(true);
+  attacks[id].setCycleBase(false);
+  attacks[id].setDuration(300);
+  attacks[id].setDamage(5);
+  attacks[id].setStickOn(true);
+  attacks[id].setMoveWith(true);
+  attacks[id].setCharges(100);
+  attacks[id].setVelocityX(14); attacks[id].setVelocityY(1);
+#ifdef USE_SOUND
+  attacks[id].setAttackSound(beep);
+  attacks[id].setSoundCollide(0);
+#endif
+
+  //EXPLODE
+  id = 5; width = 150; height = 150;
+  sprite_sheet[id].insert("./images/bossExplode.ppm", 5, 3);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(0);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(width,height,300,500);
+  attacks[id].setVelocityX(0);
+  attacks[id].setVelocityY(0);
+  attacks[id].setTimeBase(false);
+  attacks[id].setCycleBase(true);
+  //attacks[id].setDuration(15000);
+  attacks[id].changeRate(35);
+  //attacks[id].setStickOn(true);
+  //attacks[id].setInvincible(true);//NOTE <- !THIS WILL ONLY EFFECT HERO!
+  //attacks[id].setInvisiblity(false);//works for hero only
+  //attacks[id].setPushAway(false);
+  //attacks[id].setPushBack(false);
+  //attacks[id].setMoveWith(true);
+  //attacks[id].setConstantEffect(true);
+  attacks[id].setCharges(1000);
+  attacks[id].setDamage(15);
+  #ifdef USE_SOUND
+  attacks[id].setAttackSound(tick);
+  attacks[id].setSoundCollide(click);
+  #endif
+
+  //Speeding Arrow with Hero Movement
+  id = 6; width = 100; height = 100;
+  sprite_sheet[id].insert("./images/arrow2.ppm", 4, 1);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(0);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(width,height,0,0);
+  attacks[id].changeRate(15);
+  attacks[id].setTimeBase(true);
+  attacks[id].setCycleBase(false);
+  attacks[id].setDuration(300);
+  attacks[id].setDamage(1);
+  attacks[id].setStickOn(true);
+  attacks[id].setMoveWith(true);
+  attacks[id].setCharges(200);
+  attacks[id].setVelocityX(10); attacks[id].setVelocityY(0);
   #ifdef USE_SOUND
   attacks[id].setAttackSound(beep);
   attacks[id].setSoundCollide(censorBeep);
   #endif
 
-  //Projectile Attack
-  id = 1; width = 25; height = 25;
-  sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
+  //Shielded
+   id = 7; width = 35; height = 35;
+  sprite_sheet[id].insert("./images/shield.ppm", 5, 3);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(1);
   attacks[id].referenceTo(sprite_sheet[id], id);
-  attacks[id].init(25,25,0,0);
-  attacks[id].setVelocityX(10);
+  attacks[id].init(width,height,0,0);
+  attacks[id].changeRate(15);
+  attacks[id].setTimeBase(false);
+  attacks[id].setCycleBase(true);
+  //attacks[id].setDuration(50);
+  attacks[id].setDamage(0);
+  attacks[id].setStickOn(true);
+  attacks[id].setInvincible(true);
+  //attacks[id].setMoveWith(true);
+  //attacks[id].setCharges(200);
+  attacks[id].setInfiniteCharges(true);
+  //attacks[id].setVelocityX(10); attacks[id].setVelocityY(0);
+  #ifdef USE_SOUND
+  attacks[id].setAttackSound(beep);
+  attacks[id].setSoundCollide(censorBeep);
+  #endif
+
+  //Simple Blast
+  id = a_simpleBlast; width = 20; height = 20;
+  sprite_sheet[id].insert("./images/arrow.ppm", 4, 1);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(0);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(width,height,0,0);
+  attacks[id].changeRate(15);
+  attacks[id].setVelocityX(7);
+  //attacks[id].setPushBack(true);
+  attacks[id].setPushAway(true);
   attacks[id].setTimeBase(true);
+  attacks[id].setDuration(2000);
   attacks[id].setCycleBase(false);
-  attacks[id].setCharges(10);
-  attacks[id].setDamage(25);
+  attacks[id].setCharges(30);
+  attacks[id].setDamage(6);
   #ifdef USE_SOUND
   attacks[id].setAttackSound(robotBlip1);
   attacks[id].setSoundCollide(robotBlip2);
   #endif
 
-  //Template
-  id = 2; width = 50; height = 50;
-  sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
-  sprite_sheet[id].setSize(width,height);
-  sprite_sheet[id].setBackground(id);
-  attacks[id].referenceTo(sprite_sheet[id], id);
-  attacks[id].init(width,height,0,0);
-  attacks[id].setVelocityX(0);
-  attacks[id].setVelocityY(0);
-  attacks[id].setTimeBase(true);
-  attacks[id].setDuration(5000);
-  attacks[id].setCycleBase(false);
-  attacks[id].setStickOn(true);
-  //attacks[id].setMoveWith(true);
-  //attacks[id].setConstantEffect(true);
-  attacks[id].setCharges(100);
-  attacks[id].setDamage(25);
-  #ifdef USE_SOUND
-  attacks[id].setAttackSound(tick);
-  attacks[id].setSoundCollide(click);
-  #endif
 }
 //=====================================================================
 //  Attack_Copy
@@ -83,12 +228,12 @@ void attack_list::copyAttack(Object *caster, int tId){
   currents[currents_length]->setID(currents_length);
 
   currents[currents_length]->targetAt(caster);
-   currents[currents_length]->setCenter(caster->getCenterX(),
+  currents[currents_length]->setCenter(caster->getCenterX(),
       caster->getCenterY());
-  #ifdef USE_SOUND
+#ifdef USE_SOUND
   //cout << currents[currents_length]->getAttackSound()<<endl;
   fmod_playsound(currents[currents_length]->getAttackSound());
-  #endif
+#endif
   currents_length++;
 }
 
@@ -97,7 +242,7 @@ void attack_list::copyAttack(Object *caster, int tId, bool mirror){
   attack_list::copyAttack(caster, tId);
   if(mirror){
     currents[currents_length-1]->setVelocityX(
-      -currents[currents_length-1]->getVelocityX());
+        -currents[currents_length-1]->getVelocityX());
   }
 }
 
@@ -107,7 +252,7 @@ void attack_list::copyAttack(Player *caster, int tId, bool mirror){
   currents[currents_length-1]->setEffectEnemy(true);
   if(mirror){
     currents[currents_length-1]->setVelocityX(
-      -(currents[currents_length-1]->getVelocityX()));
+        -(currents[currents_length-1]->getVelocityX()));
   }
 }
 
@@ -117,7 +262,7 @@ void attack_list::copyAttack(Enemy *caster, int tId, bool mirror){
   currents[currents_length-1]->setEffectPlayer(true);
   if(mirror){
     currents[currents_length-1]->setVelocityX(
-      -currents[currents_length-1]->getVelocityX());
+        -currents[currents_length-1]->getVelocityX());
   }
 }
 
@@ -141,10 +286,10 @@ bool attack_list::detectAttack (Object *obj, Attack *targetAttack) {
       obj->getLeft()   < targetAttack->getRight() &&
       obj->getBottom() < targetAttack->getTop()  &&
       obj->getTop()    > targetAttack->getBottom()) {
-      #ifdef USE_SOUND
-  cout << currents[currents_length]->getSoundCollide()<<endl;
-       fmod_playsound(currents[currents_length]->getSoundCollide());
-      #endif
+#ifdef USE_SOUND
+    //cout << targetAttack->getSoundCollide()<<endl;
+    fmod_playsound(targetAttack->getSoundCollide());
+#endif
     return true;
   }
   return false;

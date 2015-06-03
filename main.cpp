@@ -73,7 +73,7 @@ Enemy *enemies[MAX_ENEMIES];
 Player *hero;
 Platform *grounds[MAX_GROUNDS];
 Item *items;
-Item *itemsHold[10];
+Item *itemsHold[MAX_ITEMS];
 int items_length = 0;
 double g_left, g_right, g_top, g_bottom;
 int bg, bullets, grounds_length, enemies_length = 0, i, j, level=0, quit=0;
@@ -255,6 +255,7 @@ void initXWindows (void) { //do not change
     set_title();
     glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
     glXMakeCurrent(dpy, win, glc);
+
 }
 
 void init_opengl (void) {
@@ -472,7 +473,7 @@ int check_keys (XEvent *e) {
         // level 1
         if (level==1) {
             if (key == XK_r) {
-                resetLevel();
+                //resetLevel();
             }
             if (key == XK_e) {
 #ifdef USE_SOUND
@@ -510,13 +511,28 @@ int check_keys (XEvent *e) {
             if (key == XK_space) {
                 hero->setShooting(true);
             }
-            if( key == XK_f){
+            if( key == XK_k){
                 boxA.copyAttack(hero, 0, hero->checkMirror());
             }
-            if(key == XK_g){
+            if(key == XK_o){
                 boxA.copyAttack(hero, 2, hero->checkMirror());
                 //boxA.copyAttack(hero, 1, hero->checkMirror());
                 //boxA.copyAttack(enemies[0], 0, 0);
+            }
+            if( key == XK_v){
+                boxA.copyAttack(hero, 1, hero->checkMirror()); 
+            }
+            if( key == XK_l){
+                boxA.copyAttack(hero, a_shield, hero->checkMirror());  
+            }
+            if( key == XK_j){
+                boxA.copyAttack(hero, 3, hero->checkMirror()); 
+            }
+            if( key == XK_x){
+                boxA.copyAttack(hero, 4, hero->checkMirror()); 
+            }
+            if( key ==XK_e){
+                boxA.copyAttack(hero, a_simpleBlast, hero->checkMirror()); 
             }
             // debug death
             if (key == XK_y) {
@@ -925,6 +941,7 @@ void movement() {
 
     hero->setOldCenter();
     hero->autoSet();
+    hero->autoState();//This set the isStuff like isWalking, tmp fix
     //if(hero->getHealth() <= 0) hero->stop();  //redundant
 
     //Detect Collisions
@@ -934,7 +951,6 @@ void movement() {
 
     hero->jumpRefresh();
     hero->cycleAnimations();
-    hero->autoState();//This set the isStuff like isWalking, tmp fix
     hero->setVelocityY( hero->getVelocityY() - GRAVITY);
 
     // Cycle through hero index sequences
@@ -945,16 +961,16 @@ void movement() {
             hero->isDying=1;
             gettimeofday(&seqStart, NULL);
             hero->decrementLives();
-#ifdef USE_SOUND
+        #ifdef USE_SOUND
             fmod_playsound(dunDunDun);
-#endif
+        #endif
         }
         else{
             gettimeofday(&seqEnd, NULL);
             if (((diff_ms(seqEnd, seqStart)) > 1000)) {
                 hero->setCenter(HERO_START_X, HERO_START_Y);
                 hero->isDying=0;
-                hero->repairHealth(100); 
+                hero->setHealth(100); 
             }
         }
     }
@@ -986,18 +1002,26 @@ void movement() {
           boxA.currents[i]->causeEffect(hero); 
         }
     }
-
+    //Gun Type Creation
     //Bullet creation
     if (hero->checkShooting()){
         gettimeofday(&fireEnd, NULL);
-        if (((diff_ms(fireEnd, fireStart)) > 250)) { //Fire rate 250ms
+        if (((diff_ms(fireEnd, fireStart)) > 200)) { //Fire rate 250ms
+          if(hero->checkGunType() == -1 || 
+              hero->checkGunType() == a_fireShield){
             gettimeofday(&fireStart, NULL); //Reset firing rate timer
             makeBullet(hero->getCenterX(), hero->getCenterY()+15, (hero->checkMirror()?-18:18), 38, 2);
-#ifdef USE_SOUND
+            #ifdef USE_SOUND
             fmod_playsound(mvalSingle);
-#endif
+            #endif
+          }
+          else{
+            gettimeofday(&fireStart, NULL); //Reset firing rate timer
+            boxA.copyAttack(hero, hero->checkGunType(), hero->checkMirror());
+            hero->decreaseAmmo(1);
+            if(hero->checkAmmo() <= 0) hero->setGunType(-1);
+          } 
         }
-
     }
 
     //bullet collisions against grounds
@@ -1045,11 +1069,22 @@ void movement() {
                 makeEnemy(37, 80, enemies[i]->getCenterX(), enemies[i]->getCenterY(), 1);
             enemies[i]->isShooting=false;
         }
+        if(enemies[i]->getAggro() && EXTREME_MODE){
+          if(rand() % 10 < 2 ){
+            bool backward, ladder;
+            if(enemies[i]->getCenterX() < hero->getCenterX()) backward = false;
+            else backward = true;
+            if(enemies[i]->getCenterY() < hero->getCenterY()) ladder = true;
+            else ladder = false;
+          if(ladder) boxA.copyAttack(enemies[i], 0, backward); 
+          else boxA.copyAttack(enemies[i], 3, backward);
+          }
+        }
         //bullets
         b = bulletHead;
         while (b) {
             if ((b->type==2) && (bulletCollide(b,enemies[i]))){
-                enemies[i]->life-=b->damage;
+                enemies[i]->life-=b->damage+5;
                 tmp=b->next;
                 deleteBullet(b);
                 b=tmp;
@@ -1063,6 +1098,12 @@ void movement() {
             groundCollide(enemies[i], grounds[j]); 
         }
         if ((enemies[i]->isDead) or enemies[i]->getCenterY()<0){
+            if(enemies[i]->type == 3){
+              boxA.copyAttack(enemies[i], 5,enemies[i]->checkMirror());
+            }
+            if(rand() % 2 == 1){
+              makeItems(20, 20, enemies[i]->getCenterX(), enemies[i]->getCenterY());
+            }
             deleteEnemy(i);
         }
     }
