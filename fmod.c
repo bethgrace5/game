@@ -28,7 +28,7 @@ See other sample programs in the fmod /examples directory
 FMOD_SYSTEM  *xsystem;
 FMOD_SOUND   *sound[MAX_SOUNDS];
 FMOD_CHANNEL *channel = 0;
-int nsounds=0;
+static int nsounds=0;
 
 int ERRCHECK(FMOD_RESULT result)
 {
