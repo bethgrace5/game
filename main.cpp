@@ -531,6 +531,9 @@ int check_keys (XEvent *e) {
             if( key == XK_x){
                 boxA.copyAttack(hero, a_pullingBlast, hero->checkMirror()); 
             }
+            if( key == XK_h){
+              hero->setCastingState(true);
+            }
             if( key ==XK_e){
                 boxA.copyAttack(hero, a_simpleBlast, hero->checkMirror()); 
             }
@@ -725,6 +728,9 @@ int check_keys (XEvent *e) {
         if (key == XK_space) {
             hero->setShooting(false);
         }
+        if( key == XK_h){
+          hero->setCastingState(false);
+        }
     }
 
     return 0;
@@ -780,6 +786,13 @@ void makeItems(int w, int h, int x, int y) {
     itemsHold[items_length]->setSize(16, 20);
     itemsHold[items_length]->init(16, 20, x, y);
     items_length++;
+}
+void makePureItem(int effect, int w, int h, int x, int y){
+    itemsHold[items_length] = new Item(effect);
+    itemsHold[items_length]->setID(items_length);
+    itemsHold[items_length]->insert("./images/firemon.ppm", 1, 1);
+    itemsHold[items_length]->setSize(16, 20);
+    itemsHold[items_length]->init(16, 20, x, y);
 }
 
 void deleteItem(int id) {
@@ -1007,21 +1020,22 @@ void movement() {
     if (hero->checkShooting()){
         gettimeofday(&fireEnd, NULL);
         if (((diff_ms(fireEnd, fireStart)) > 200)) { //Fire rate 250ms
-          if(hero->checkGunType() == -1 || 
-              hero->checkGunType() == a_fireShield){
             gettimeofday(&fireStart, NULL); //Reset firing rate timer
             makeBullet(hero->getCenterX(), hero->getCenterY()+15, (hero->checkMirror()?-18:18), 38, 2);
             #ifdef USE_SOUND
             fmod_playsound(mvalSingle);
             #endif
           }
-          else{
-            gettimeofday(&fireStart, NULL); //Reset firing rate timer
-            boxA.copyAttack(hero, hero->checkGunType(), hero->checkMirror());
-            hero->decreaseAmmo(1);
-            if(hero->checkAmmo() <= 0) hero->setGunType(-1);
-          } 
+     }
+    if(hero->checkCastingState()){
+      if(hero->coolDowns()){
+        boxA.copyAttack(hero, hero->checkGunType() ,hero->checkMirror()); 
+        hero->decreaseAmmo(1);
+        if(hero->checkAmmo() <= 0){
+          hero->setGunType(a_pushingLaser);
+          hero->setCoolDown(900);
         }
+      }  
     }
 
     //bullet collisions against grounds
