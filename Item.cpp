@@ -24,7 +24,7 @@ extern int gravityBlast;
 
 Item::Item() : Sprite(), Object(20, 20, 350, 350) {
   //effect=3;
-  effect = rand() % 10 + 1;
+  effect = rand() % 2 + 1;
   end = 0;
 }
 
@@ -42,50 +42,28 @@ void Item::causeEffect(Player *hero) {
       break;
     case 2:
       hero->repairHealth(50);
-      boxA.copyAttack(hero, 2, 0);
-      hero->setAmmo(20);
       //boxA.copyAttack(hero, 2, hero->checkMirror());
       break;
     case 3:
       hero->repairHealth(30);
-      hero->setGunType(0);
-      hero->setCoolDown(100);
-      hero->setAmmo(3);
       break;
     case 4:
-      hero->repairHealth(30);
-      hero->setGunType(1);
-      hero->setCoolDown(300);
-      hero->setAmmo(5);
+      fireShield += 1;
       break;
     case 5:
-      hero->repairHealth(35);
-      boxA.copyAttack(hero, 2, 0);
+      fireUp += 10;
       break;
     case 6:
-      hero->repairHealth(100);
-      hero->setCoolDown(100);
-      hero->setGunType(a_fireDown);
+      fireDown += 10;
       break;
     case 7:
-      hero->setGunType(a_simpleBlast);
-      hero->setCoolDown(50);
-      hero->setAmmo(100);
-      hero->setCoolDown(5);
+      simpleBlast += 10;
+      break;
     case 8:
-      hero->setGunType(a_pushingLaser);
-      if(rand() % 100 + 1 <= 5){
-        hero->setCoolDown(1);
-        hero->setAmmo(9001); 
-      }else{
-        hero->setCoolDown(100);
-        hero->setAmmo(3);  
-      }
+      pushingLaser += 10;
+      break;
     default:
-      hero->setGunType(a_simpleBlast);
-      hero->setAmmo(20);
-      hero->setCoolDown(50);
-      hero->repairHealth(10);
+      simpleBlast += 10;
       break;
   }
 }

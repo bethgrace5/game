@@ -139,7 +139,7 @@ void init_opengl(void);
 void makeEnemy(int w, int h, Object *ground, int type); 
 void makeEnemy(int w, int h, int x, int y, int type); 
 void makeItems(int w, int h, int x, int y);
-void makePureItem(int effect, int w, int h, int x, int y);
+void makePureItem(const char* imageName, int effect, int w, int h, int x, int y);
 void makePlatform(int w, int h, int x, int y);
 void moveWindow(void);
 void movement(void);
@@ -183,8 +183,17 @@ int main(void) {
     boxA.copyAttackPlatform(grounds[16], a_fireTrap, 0, 56);
     boxA.copyAttackPlatform(grounds[16], a_fireTrap, -60, 56);
 
-    makePureItem(1, 16, 20, 300, 200);
-    makePureItem(1, 16, 20, 400, 200);
+    makePureItem("./images/fireBallItem.ppm", 4, 16, 20, 2277, 1446);
+    makePureItem("./images/fireBallItem.ppm", 4, 16, 20, 3259, 775);
+    makePureItem("./images/fireBallItem.ppm", 4, 16, 20, 3095, 1810);
+    makePureItem("./images/fireBallItem.ppm", 4, 16, 20, 6183, 1218);
+
+    makePureItem("./images/dashItem.ppm", 5, 16, 20, 8838, 1900);
+    makePureItem("./images/dashItem.ppm", 6, 16, 20, 6347, 1961);
+    makePureItem("./images/laser1.ppm", 7, 16, 20, 80, 2125);
+    makePureItem("./images/laser1.ppm", 7, 16, 20, 9092, 1908);
+    makePureItem("./images/laser2.ppm", 8, 16, 20, 911, 541);
+
 
     boxA.copyAttackPlatform(grounds[16], a_fireTrap, -110, 56);
     //boxA.copyAttackPlatform(grounds[16], a_fireTrap, -180, 56);
@@ -961,16 +970,16 @@ void cleanupItems() {
 void makeItems(int w, int h, int x, int y) {
     itemsHold[items_length] = new Item();
     itemsHold[items_length]->setID(items_length);
-    itemsHold[items_length]->insert("./images/firemon.ppm", 1, 1);
+    itemsHold[items_length]->insert("./images/HealthItem.ppm", 1, 1);
     itemsHold[items_length]->setSize(16, 20);
     itemsHold[items_length]->init(16, 20, x, y);
     //itemsHold[items_length]->drawIndication(items_length);
     items_length++;
 }
-void makePureItem(int effect, int w, int h, int x, int y){
+void makePureItem(const char* imageName, int effect, int w, int h, int x, int y){
     itemsHold[items_length] = new Item(effect);
     itemsHold[items_length]->setID(items_length);
-    itemsHold[items_length]->insert("./images/firemon.ppm", 1, 1);
+    itemsHold[items_length]->insert(imageName, 1, 1);
     itemsHold[items_length]->setSize(16, 20);
     itemsHold[items_length]->init(16, 20, x, y);
     items_length++;
