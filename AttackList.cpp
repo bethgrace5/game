@@ -169,7 +169,7 @@ void attack_list::makeAttacks(){
   attacks[id].setTimeBase(false);
   attacks[id].setCycleBase(true);
   //attacks[id].setDuration(15000);
-  attacks[id].changeRate(35);
+  attacks[id].changeRate(60);
   //attacks[id].setStickOn(true);
   //attacks[id].setInvincible(true);//NOTE <- !THIS WILL ONLY EFFECT HERO!
   //attacks[id].setInvisiblity(false);//works for hero only
