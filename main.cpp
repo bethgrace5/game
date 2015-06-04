@@ -89,6 +89,7 @@ int speedArrow = 0;
 int shield = 10;
 int simpleBlast = 10;
 int gravityBlast = 0;//DiffrentName in AttackList.h
+int gameIsEnding = 0;
 
 void useAttack(int attackID);
 
@@ -235,6 +236,11 @@ int main(void) {
             render();
             moveWindow();
             gameTimer();
+            // this is so we can loop through other things
+            // while waiting for the final explosion to end
+            if (gameIsEnding) {
+                endGame();
+            }
             playBossMusic();
         }
         glXSwapBuffers(dpy, win);
@@ -521,8 +527,9 @@ int check_keys (XEvent *e) {
         if (level==1) {
             if (key == XK_r) {
                 // show credits screen on demand
-                gettimeofday(&explosionStart, NULL);
-                endGame();
+                //gettimeofday(&explosionStart, NULL);
+                //endGame();
+                makeEnemy(100, 100, 300, 500, 3);
             }
             if (key == XK_Escape) {
                 return 1;
@@ -785,7 +792,7 @@ void endGame() {
     gettimeofday(&explosionEnd, NULL);
 
     //wait for the boss to explode
-    if (diff_ms(explosionEnd, explosionStart) > 1500) { 
+    if (diff_ms(explosionEnd, explosionStart) > 2500) { 
         bossExplosionEnd = 1; 
         cout <<"boss explosion End"<<endl;
 
@@ -809,8 +816,8 @@ void endGame() {
     }
     else {
         // segmentation fault occurs if this isn't here
-        cout<<""<<endl;
-        endGame();
+        //cout<<""<<endl;
+        gameIsEnding = 1;
     }
 }
 void resetGame() {
@@ -820,6 +827,7 @@ void resetGame() {
     menuSelection = 0;
     savedSeconds = 0;
     savedMinutes = 0;
+    gameIsEnding = 0;
     seconds = 0;
     minutes = 0;
     creeperScore = 0;
@@ -973,9 +981,9 @@ void makeEnemy(int w, int h, Object *ground, int type) {
     }
 }
 void setupEnemies() {
-        makeEnemy(37, 80, grounds[2], 1);
-        makeEnemy(37, 80, grounds[2], 1);
-        makeEnemy(38, 37, grounds[1], 2);
+        makeEnemy(37, 80, grounds[2], 3);
+        makeEnemy(37, 80, grounds[2], 3);
+        makeEnemy(38, 37, grounds[1], 3);
         makeEnemy(37, 80, grounds[4], 1);
         makeEnemy(100, 100, 300, 500, 3);
         makeEnemy(38, 37, grounds[1], 2);
@@ -1669,25 +1677,18 @@ void renderDebugInfo () {
 }
 
 void playBossMusic() {
+    cout <<"play boss music"<<endl;
     if(!bossMusicIsPlaying and hero->getCenterX() > 11472
             and hero->getCenterY()<300) {
 #ifdef USE_SOUND
         fmod_releasesound(megamanTheme);
-        //fmod_releasesound(strangeAlien);
-        //if (fmod_createsound((char *)"./sounds/megamanTheme.wav", 0)) {
-            //std::cout << "ERROR - fmod_createsound() - megamanTheme\n" << std::endl;
-            //return;
-        //}
-        //if (fmod_createsound((char *)"./sounds/strangeAlien.wav", 21)) {
-            //std::cout << "ERROR - fmod_createsound() - strangeAlien\n" << std::endl;
-            //return;
-        //}
-        //fmod_cleanup();
-        //fmod_init();
-
+        fmod_releasesound(strangeAlien);
+        if (fmod_createsound((char *)"./sounds/megamanTheme.wav", 0)) {
+            std::cout << "ERROR - fmod_createsound() - megamanTheme\n" << std::endl;
+        }
         bossMusicIsPlaying = 1;
-        fmod_playsound(bossMusic);
         fmod_setmode(bossMusic, FMOD_LOOP_NORMAL);
+        fmod_playsound(bossMusic);
 #endif
     }
 }
