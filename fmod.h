@@ -2,7 +2,7 @@
 #define FMOD_H
 
 #ifdef USE_SOUND
-#define NSOUNDS 10
+#define NSOUNDS 100
 extern FMOD_CHANNEL *channel;
 extern int fmod_cleanup(void);
 extern int fmod_init(void);

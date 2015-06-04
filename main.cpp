@@ -331,7 +331,6 @@ int main(void) {
     cleanupXWindows(); return 0;
 
 #ifdef USE_SOUND
-    //fmod_cleanup();
     fmod_cleanup();
 #endif
 }
@@ -628,9 +627,6 @@ int check_keys (XEvent *e) {
         // level 1
         if (level==1) {
             if (key == XK_r) {
-                // show credits screen on demand
-                //gettimeofday(&explosionStart, NULL);
-                //endGame();
                 makeEnemy(100, 100, hero->getCenterX()+200, hero->getCenterY()+200, 3);
             }
             if (key == XK_Escape) {
@@ -638,6 +634,8 @@ int check_keys (XEvent *e) {
             }
             if (key == XK_q) {
                 hero->setVelocityY(10);
+            }
+            if (key == XK_i) {
             }
             // Jump
             if ((key == XK_w || key == XK_Up)) {
@@ -901,6 +899,16 @@ void endGame() {
         fmod_releasesound(megamanTheme);
         if (fmod_createsound((char *)"./sounds/megamanTheme.wav", 0)) {
             std::cout << "ERROR - fmod_createsound() - megamanTheme\n" << std::endl;
+        }
+        fmod_releasesound(strangeAlien);
+        if (fmod_createsound((char *)"./sounds/strangeAlien.wav", 21)) {
+            std::cout << "ERROR - fmod_createsound() - strangeAlien\n" << std::endl;
+            return;
+        }
+        fmod_releasesound(gunShotMarvin);
+        if (fmod_createsound((char *)"./sounds/gunShotMarvin.wav", 30)) {
+            std::cout << "ERROR - fmod_createsound() - gunShotMarvin\n" << std::endl;
+            return;
         }
 
         //ending credits music
@@ -1904,10 +1912,7 @@ void playBossMusic(int play) {
 }
 
 void renderInventoryBackground () {
-    int w = 100;
-    int h = 500;
     int WHW = WINDOW_HALF_WIDTH;
-    int WHH = WINDOW_HALF_HEIGHT;
 
     glPushMatrix();
     //glClear(GL_COLOR_BUFFER_BIT);
