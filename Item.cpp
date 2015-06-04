@@ -32,7 +32,7 @@ void Item::causeEffect(Player *hero) {
       break;
     case 2:
       hero->repairHealth(50);
-      boxA.copyAttack(hero, a_simpleBlast, 0);
+      boxA.copyAttack(hero, 2, 0);
       hero->setAmmo(20);
       //boxA.copyAttack(hero, 2, hero->checkMirror());
       break;
