@@ -84,7 +84,7 @@ void attack_list::makeAttacks(){
   #endif
 
   //fireTrap
-  id = a_fireTrap; width = 40; height = 66;
+  id = a_fireTrap; width = 65; height = 66;
   sprite_sheet[id].insert("./images/fireTrap.ppm", 4, 1);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(1);

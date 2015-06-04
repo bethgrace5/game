@@ -182,9 +182,92 @@ int main(void) {
     boxA.makeAttacks();
     boxA.copyAttackPlatform(grounds[16], a_fireTrap, 0, 56);
     boxA.copyAttackPlatform(grounds[16], a_fireTrap, -60, 56);
+
     makePureItem(1, 16, 20, 300, 200);
     makePureItem(1, 16, 20, 400, 200);
 
+    boxA.copyAttackPlatform(grounds[16], a_fireTrap, -110, 56);
+    //boxA.copyAttackPlatform(grounds[16], a_fireTrap, -180, 56);
+    boxA.copyAttackPlatform(grounds[16], a_fireTrap, 60, 56);
+    boxA.copyAttackPlatform(grounds[16], a_fireTrap, 110, 56);
+    //boxA.copyAttackPlatform(grounds[16], a_fireTrap, 180, 56);
+    
+    boxA.copyAttackPlatform(grounds[31], a_fireTrap, 0, 56);
+    boxA.copyAttackPlatform(grounds[31], a_fireTrap, -60, 56);
+    boxA.copyAttackPlatform(grounds[31], a_fireTrap, -125, 56);
+    //boxA.copyAttackPlatform(grounds[31], a_fireTrap, -180, 56);
+    boxA.copyAttackPlatform(grounds[31], a_fireTrap, 60, 56);
+    boxA.copyAttackPlatform(grounds[31], a_fireTrap, 125, 56);
+    //boxA.copyAttackPlatform(grounds[31], a_fireTrap, 180, 56);
+
+    boxA.copyAttackPlatform(grounds[66], a_fireTrap, 0, 56);
+    boxA.copyAttackPlatform(grounds[66], a_fireTrap, -60, 56);
+    boxA.copyAttackPlatform(grounds[66], a_fireTrap, -120, 56);
+    boxA.copyAttackPlatform(grounds[66], a_fireTrap, -185, 56);
+    boxA.copyAttackPlatform(grounds[66], a_fireTrap, 60, 56);
+    boxA.copyAttackPlatform(grounds[66], a_fireTrap, 120, 56);
+    boxA.copyAttackPlatform(grounds[66], a_fireTrap, 185, 56);
+
+    boxA.copyAttackPlatform(grounds[126], a_fireTrap, 0, 56);
+    boxA.copyAttackPlatform(grounds[126], a_fireTrap, -60, 56);
+    boxA.copyAttackPlatform(grounds[126], a_fireTrap, -130, 56);
+    boxA.copyAttackPlatform(grounds[126], a_fireTrap, -190, 56);
+    boxA.copyAttackPlatform(grounds[126], a_fireTrap, 60, 56);
+    boxA.copyAttackPlatform(grounds[126], a_fireTrap, 120, 56);
+    boxA.copyAttackPlatform(grounds[126], a_fireTrap, 180, 56);
+    boxA.copyAttackPlatform(grounds[126], a_fireTrap, -250, 56);
+    boxA.copyAttackPlatform(grounds[126], a_fireTrap, 2250, 56);
+    //boxA.copyAttackPlatform(grounds[126], a_fireTrap, -300, 56);
+    //boxA.copyAttackPlatform(grounds[126], a_fireTrap, 300, 56);
+
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, 0, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, -60, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, -120, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, -180, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, 60, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, 120, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, 180, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, -240, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, 240, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, -300, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, 300, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, 360, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, -360, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, -420, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, 420, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, -480, 56);
+    boxA.copyAttackPlatform(grounds[303], a_fireTrap, 480, 56);
+
+    boxA.copyAttackPlatform(grounds[277], a_fireTrap, 0, 56);
+    boxA.copyAttackPlatform(grounds[277], a_fireTrap, -60, 56);
+    boxA.copyAttackPlatform(grounds[277], a_fireTrap, -120, 56);
+    boxA.copyAttackPlatform(grounds[277], a_fireTrap, -180, 56);
+    boxA.copyAttackPlatform(grounds[277], a_fireTrap, 60, 56);
+    boxA.copyAttackPlatform(grounds[277], a_fireTrap, 120, 56);
+    boxA.copyAttackPlatform(grounds[277], a_fireTrap, 180, 56);
+    //boxA.copyAttackPlatform(grounds[277], a_fireTrap, -300, 56);
+    //boxA.copyAttackPlatform(grounds[277], a_fireTrap, 300, 56);
+    boxA.copyAttackPlatform(grounds[277], a_fireTrap, 240, 56);
+    boxA.copyAttackPlatform(grounds[277], a_fireTrap, -240, 56);
+
+
+    boxA.copyAttackPlatform(grounds[383], a_fireTrap, 0, 56);
+
+    boxA.copyAttackPlatform(grounds[394], a_fireTrap, 0, 56);
+    boxA.copyAttackPlatform(grounds[394], a_fireTrap, -60, 56);
+    boxA.copyAttackPlatform(grounds[394], a_fireTrap, -120, 56);
+    boxA.copyAttackPlatform(grounds[394], a_fireTrap, -180, 56);
+    boxA.copyAttackPlatform(grounds[394], a_fireTrap, 60, 56);
+    boxA.copyAttackPlatform(grounds[394], a_fireTrap, 120, 56);
+    boxA.copyAttackPlatform(grounds[394], a_fireTrap, 180, 56);
+    boxA.copyAttackPlatform(grounds[394], a_fireTrap, -300, 56);
+    boxA.copyAttackPlatform(grounds[394], a_fireTrap, 300, 56);
+    boxA.copyAttackPlatform(grounds[394], a_fireTrap, 240, 56);
+    boxA.copyAttackPlatform(grounds[394], a_fireTrap, -240, 56);
+    boxA.copyAttackPlatform(grounds[394], a_fireTrap, -420, 56);
+    boxA.copyAttackPlatform(grounds[394], a_fireTrap, 420, 56);
+    
+    boxA.copyAttackPlatform(grounds[459], a_fireTrap, 30, 56);
 
     //explode.insert("./images/hero.ppm", 4, 2);
     //explode.setSize(400,400);
