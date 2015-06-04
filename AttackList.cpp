@@ -192,9 +192,9 @@ void attack_list::makeAttacks(){
   attacks[id].referenceTo(sprite_sheet[id], id);
   attacks[id].init(width,height,0,0);
   attacks[id].changeRate(10);
-  attacks[id].setTimeBase(true);
-  attacks[id].setCycleBase(false);
-  attacks[id].setDuration(300);
+  attacks[id].setTimeBase(false);
+  attacks[id].setCycleBase(true);
+  //attacks[id].setDuration(300);
   attacks[id].setDamage(1);
   attacks[id].setStickOn(true);
   attacks[id].setMoveWith(true);

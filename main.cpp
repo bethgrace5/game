@@ -85,10 +85,10 @@ int fireUp = 0;
 //int fireDown = 1;
 int pushingLaser = 0;
 int fireShield = 0;
-int speedArrow = 0;
-int shield = 0;
+int speedArrow = 1;
+int shield = 10;
 int simpleBlast = 0;
-int gravityBlast = 0;//DiffrentName in AttackList.h
+int gravityBlast = 4;//DiffrentName in AttackList.h
 void useAttack(int attackID);
 
 int gameIsEnding = 0;
@@ -926,10 +926,10 @@ void resetGame() {
     //fireDown = 0;
     pushingLaser = 0;
     fireShield = 0;
-    speedArrow = 0;
-    shield = 0;
+    speedArrow = 1;
+    shield = 10;
     simpleBlast = 0;
-    gravityBlast = 0;//DiffrentName in AttackList.h
+    gravityBlast = 4;//DiffrentName in AttackList.h
     cout<<"reset: level="<<level<<endl;
     hero->reset();
     bossMusicIsPlaying=0;
