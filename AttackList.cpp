@@ -36,7 +36,7 @@ void attack_list::makeAttacks(){
 
   //Big Laser Projectile Attack
   id = a_pushingLaser; width = 25; height = 25;
-  sprite_sheet[id].insert("./images/arrow.ppm", 4, 1);
+  sprite_sheet[id].insert("./images/arrow2.ppm", 4, 1);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(0);
   attacks[id].referenceTo(sprite_sheet[id], id);
@@ -49,8 +49,8 @@ void attack_list::makeAttacks(){
   attacks[id].setTimeBase(true);
   attacks[id].setDuration(1000);
   attacks[id].setCycleBase(false);
-  attacks[id].setCharges(30);
-  attacks[id].setDamage(3);
+  attacks[id].setCharges(50);
+  attacks[id].setDamage(4);
   #ifdef USE_SOUND
   attacks[id].setAttackSound(mvalSingle);
   attacks[id].setSoundCollide(robotBlip2);
@@ -186,7 +186,7 @@ void attack_list::makeAttacks(){
 
   //Speeding Arrow with Hero Movement
   id = a_speedArrow; width = 100; height = 100;
-  sprite_sheet[id].insert("./images/arrow2.ppm", 4, 1);
+  sprite_sheet[id].insert("./images/arrow.ppm", 4, 1);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(0);
   attacks[id].referenceTo(sprite_sheet[id], id);
