@@ -1912,7 +1912,10 @@ void playBossMusic(int play) {
 }
 
 void renderInventoryBackground () {
+    //int w = 100;
+    //int h = 500;
     int WHW = WINDOW_HALF_WIDTH;
+    //int WHH = WINDOW_HALF_HEIGHT;
 
     glPushMatrix();
     //glClear(GL_COLOR_BUFFER_BIT);
