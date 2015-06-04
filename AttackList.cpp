@@ -83,6 +83,37 @@ void attack_list::makeAttacks(){
   attacks[id].setSoundCollide(click);
   #endif
 
+  //fireTrap
+  id = a_fireTrap; width = 40; height = 66;
+  sprite_sheet[id].insert("./images/fireTrap.ppm", 4, 1);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(1);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(width,height,0,0);
+  attacks[id].setVelocityX(0);
+  attacks[id].setVelocityY(0);
+  attacks[id].setTimeBase(false);
+  //attacks[id].setDuration(false);
+  attacks[id].setCycleBase(false);
+  //attacks[id].setStickOn(true);
+  //attacks[id].setInvincible(true);//NOTE <- !THIS WILL ONLY EFFECT HERO!
+  //attacks[id].setInvisiblity(false);//works for hero only
+  attacks[id].setPushAway(false);
+  attacks[id].setPushBack(false);
+  //attacks[id].setMoveWith(true);
+  //attacks[id].setConstantEffect(true);
+  attacks[id].setInfiniteCharges(true);
+  attacks[id].setCharges(100);
+  attacks[id].changeRate(5);
+  attacks[id].setDamage(3);
+  attacks[id].setEffectEnemy(true);
+  attacks[id].setEffectPlayer(true);
+
+  #ifdef USE_SOUND
+  //attacks[id].setAttackSound(electronicNoise);
+  //attacks[id].setSoundCollide(click);
+  #endif
+
   //Fire Aura With Movement Downwards
   id = a_fireDown; width = 125; height = 125;
   sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
@@ -149,7 +180,7 @@ void attack_list::makeAttacks(){
   attacks[id].setCharges(1000);
   attacks[id].setDamage(15);
   #ifdef USE_SOUND
-  attacks[id].setAttackSound(spaceshipTakeoff);
+  attacks[id].setAttackSound(bossDeath);
   attacks[id].setSoundCollide(click);
   #endif
 
@@ -261,14 +292,22 @@ void attack_list::copyAttack(Object *caster, int tId){
   currents_length++;
 }
 
-void attack_list::copyAttack(Object *caster, int tId, bool mirror){
+void attack_list::copyAttackPlatform(Object *caster, int tId, int x, int y){
   if(currents_length >= MAX_CURRENTS) return;
-  attack_list::copyAttack(caster, tId);
-  if(mirror){
-    currents[currents_length-1]->setVelocityX(
-        -currents[currents_length-1]->getVelocityX());
-  }
+
+  currents[currents_length] = new Attack(attacks[tId]);
+  currents[currents_length]->setID(currents_length);
+
+  currents[currents_length]->targetAt(caster);
+  currents[currents_length]->setCenter(caster->getCenterX()+x,
+      caster->getCenterY()+y);
+#ifdef USE_SOUND
+  //cout << currents[currents_length]->getAttackSound()<<endl;
+  fmod_playsound(currents[currents_length]->getAttackSound());
+#endif
+  currents_length++;
 }
+
 
 void attack_list::copyAttack(Player *caster, int tId, bool mirror){
   if(currents_length >= MAX_CURRENTS) return;
