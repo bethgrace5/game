@@ -120,6 +120,7 @@ void cleanup_background(void);
 void deleteBullet(Bullet *node);
 void deleteEnemy(int ind);
 void deleteItem(int id);
+void endGame();
 void gameTimer ();
 void groundCollide(Object *obj, Object *ground);
 void initXWindows(void);
@@ -146,7 +147,7 @@ void renderInitMenu();
 void renderItems(int x, int y);
 void renderLives();
 void renderPauseMenu();
-void resetLevel();
+void resetGame();
 void setupItems();
 void writeScore();
 void setupEnemies();
@@ -209,15 +210,7 @@ int main(void) {
             renderPauseMenu();
         }
         else if (level == 3) {
-            //if (bossExplosionEnd) {
                 renderCredits();
-            //}
-            //else {
-                //gettimeofday(&explosionEnd, NULL);
-                //if (diff_ms(frameEnd, frameStart) > 100) { 
-                    //bossExplosionEnd = 1;
-                //}
-            //}
         }
         else {
             movement();
@@ -231,6 +224,7 @@ int main(void) {
     cleanupXWindows(); return 0;
 
 #ifdef USE_SOUND
+    //fmod_cleanup();
     fmod_cleanup();
 #endif
 }
@@ -508,16 +502,9 @@ int check_keys (XEvent *e) {
         // level 1
         if (level==1) {
             if (key == XK_r) {
-                //level = 3;
-                //resetLevel();
-            }
-            if (key == XK_e) {
-#ifdef USE_SOUND
-                cout<< fmod_getchannelsplaying(0)<<endl;
-                cout<< hero->getCenterX()<<endl;
-                fmod_stopAll();
-                cout<< fmod_getchannelsplaying(0)<<endl;
-#endif
+                // show credits screen on demand
+                gettimeofday(&explosionStart, NULL);
+                endGame();
             }
             if (key == XK_Escape) {
                 return 1;
@@ -731,8 +718,7 @@ int check_keys (XEvent *e) {
                 }
                 // return to menu
                 if(menuSelection==1) {
-                    resetLevel();
-                    level = 0;
+                    resetGame();
                 }
                 // exit game
                 if(menuSelection==2) {
@@ -766,22 +752,65 @@ int check_keys (XEvent *e) {
     return 0;
 }
 
-void resetLevel() {
+void endGame() {
+    gettimeofday(&explosionEnd, NULL);
+
+    //wait for the boss to explode
+    if (diff_ms(explosionEnd, explosionStart) > 1500) { 
+        bossExplosionEnd = 1; 
+        cout <<"boss explosion End"<<endl;
+
+#ifdef USE_SOUND
+        // end boss music
+        fmod_releasesound(bossMusic);
+        if (fmod_createsound((char *)"./sounds/bossMusic.wav", 11)) {
+            std::cout << "ERROR - fmod_createsound() - bossMusic\n" << std::endl;
+        }
+
+        // end megaman theme, if playing
+        fmod_releasesound(megamanTheme);
+        if (fmod_createsound((char *)"./sounds/megamanTheme.wav", 0)) {
+            std::cout << "ERROR - fmod_createsound() - megamanTheme\n" << std::endl;
+        }
+
+        //ending credits music
+        fmod_playsound(megamanTheme);
+#endif
+        level=3;
+    }
+    else {
+        // segmentation fault occurs if this isn't here
+        cout<<""<<endl;
+        endGame();
+    }
+}
+void resetGame() {
     hero->reset();
+    bossMusicIsPlaying=0;
     menuSelection = 0;
     savedSeconds = 0;
     savedMinutes = 0;
     seconds = 0;
     minutes = 0;
     creeperScore = 0;
+    creditIndex=0;
     updated = 1;
     gettimeofday(&gameEnd, NULL);
     gettimeofday(&gameStart, NULL);
-    
-    cleanupItems();
-    setupItems();
-
-    setupEnemies();
+#ifdef USE_SOUND
+    fmod_releasesound(bossMusic);
+    fmod_releasesound(megamanTheme);
+    if (fmod_createsound((char *)"./sounds/bossMusic.wav", 11)) {
+        std::cout << "ERROR - fmod_createsound() - bossMusic\n" << std::endl;
+        return;
+    }
+    if (fmod_createsound((char *)"./sounds/megamanTheme.wav", 0)) {
+        std::cout << "ERROR - fmod_createsound() - megamanTheme\n" << std::endl;
+        return;
+    }
+    fmod_playsound(scaryAmbience);
+#endif
+    level = 0;
 }
 
 
@@ -973,6 +1002,10 @@ void groundCollide (Object *obj, Object *ground) {
 }
 
 void movement() {
+    if (hero->getLives()< 0) {
+        cout<<"hero lost last life"<<endl;
+        resetGame();
+    }
     // Hero Apply Velocity, Add Gravity
 
     hero->setOldCenter();
@@ -1137,7 +1170,7 @@ void movement() {
             if(enemies[i]->type == 3){
               boxA.copyAttack(enemies[i], 5,enemies[i]->checkMirror());
               gettimeofday(&explosionStart, NULL);
-              level = 3;
+              endGame();
             }
             if(rand() % 2 == 1){
               makeItems(20, 20, enemies[i]->getCenterX(), enemies[i]->getCenterY());
@@ -1348,7 +1381,10 @@ void renderInitMenu () {
     // transition to render level 1
     if (frameIndex == 65) {
 #ifdef USE_SOUND
+        clean_sounds();
+        init_sounds();
         fmod_playsound(megamanTheme);
+        fmod_setmode(megamanTheme, FMOD_LOOP_NORMAL);
 #endif
         frameIndex = 0;
         level = 1;
@@ -1386,11 +1422,9 @@ void renderCredits () {
         gettimeofday(&creditsStart, NULL);
         creditIndex++;
     }
-
     // go back to menu
     if (creditIndex == 4) {
-        level = 0;
-        frameIndex = 0;
+        resetGame();
         return;
     }
 
@@ -1541,12 +1575,24 @@ void renderDebugInfo () {
 }
 
 void playBossMusic() {
-    if(!bossMusicIsPlaying and hero->getCenterX() > 11472) {
+    if(!bossMusicIsPlaying and hero->getCenterX() > 11472
+            and hero->getCenterY()<300) {
     //if(!bossMusicIsPlaying and hero->getCenterX() > 1900) {
 #ifdef USE_SOUND
+        fmod_releasesound(megamanTheme);
+        fmod_releasesound(strangeAlien);
+        if (fmod_createsound((char *)"./sounds/megamanTheme.wav", 0)) {
+            std::cout << "ERROR - fmod_createsound() - megamanTheme\n" << std::endl;
+            return;
+        }
+        if (fmod_createsound((char *)"./sounds/strangeAlien.wav", 21)) {
+            std::cout << "ERROR - fmod_createsound() - strangeAlien\n" << std::endl;
+            return;
+        }
+        //fmod_cleanup();
+        //fmod_init();
+
         bossMusicIsPlaying = 1;
-        cout<< fmod_getchannelsplaying(0)<<endl;
-        fmod_stopAll();
         fmod_setmode(bossMusic, FMOD_LOOP_NORMAL);
         fmod_playsound(bossMusic);
 #endif

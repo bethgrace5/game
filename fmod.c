@@ -28,7 +28,7 @@ See other sample programs in the fmod /examples directory
 FMOD_SYSTEM  *xsystem;
 FMOD_SOUND   *sound[MAX_SOUNDS];
 FMOD_CHANNEL *channel = 0;
-static int nsounds=0;
+int nsounds=0;
 
 int ERRCHECK(FMOD_RESULT result)
 {
@@ -134,6 +134,11 @@ int fmod_cleanup(void)
 	if (ERRCHECK(result)) return 1;
 	result = FMOD_System_Release(xsystem);
 	if (ERRCHECK(result)) return 1;
+	return 0;
+}
+int fmod_releasesound(int s) {
+    FMOD_Sound_Release(sound[s]);
+    nsounds--;
 	return 0;
 }
 int fmod_stopAll(void) {

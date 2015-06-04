@@ -8,7 +8,14 @@
 #include "fmod.h"
 #include <iostream>
 
+extern int nsounds;
 
+void clean_sounds() {
+    for(int i=0; i<nsounds; i++) {
+        fmod_releasesound(i);
+    }
+
+}
 void init_sounds() {
     //FMOD_RESULT result;
     if (fmod_init()) {
