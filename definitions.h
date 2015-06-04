@@ -4,10 +4,10 @@
 //Development Controls
 
 // comment to ignore sound use
-//#define USE_SOUND
+#define USE_SOUND
 
 // 1 for quick load, 0 for slow load with menu images
-#define QUICK_LOAD_TIME 1
+#define QUICK_LOAD_TIME 0
 
 // 1 to use tool editor, 0 to use pre-defined objects
 #define USE_TOOLS 1
@@ -17,6 +17,9 @@
 
 //If 1, unlimated Attacks
 #define ULTIMATE_EXTREME_FOUNDATION_ATTACK_MODE 0
+
+//If 1, Placing Fire in Level 1
+#define LEVEL1_MODE 1
 
 #define EXTREME_MODE 0
 

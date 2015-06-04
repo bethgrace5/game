@@ -17,10 +17,10 @@ void attack_list::makeAttacks(){
   id = a_fireUp; width = 50; height = 50;
   sprite_sheet[id].insert("./images/dashShield.ppm", 5, 6);
   sprite_sheet[id].setSize(width,height);
-  sprite_sheet[id].setBackground(1);
+  sprite_sheet[id].setBackground(0);
   attacks[id].referenceTo(sprite_sheet[id], id);
   attacks[id].init(width,height,0,0);
-  attacks[id].changeRate(15);
+  attacks[id].changeRate(13);
   attacks[id].setTimeBase(true);
   attacks[id].setCycleBase(false);
   attacks[id].setDuration(300);
@@ -116,7 +116,7 @@ void attack_list::makeAttacks(){
 
   //Fire Aura With Movement Downwards
   id = a_fireDown; width = 125; height = 125;
-  sprite_sheet[id].insert("./images/dashShield.ppm", 5, 6);
+  sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
   sprite_sheet[id].setSize(75,75);
   sprite_sheet[id].setBackground(1);
   attacks[id].referenceTo(sprite_sheet[id], id);
@@ -191,14 +191,15 @@ void attack_list::makeAttacks(){
   sprite_sheet[id].setBackground(0);
   attacks[id].referenceTo(sprite_sheet[id], id);
   attacks[id].init(width,height,0,0);
-  attacks[id].changeRate(15);
-  attacks[id].setTimeBase(true);
-  attacks[id].setCycleBase(false);
-  attacks[id].setDuration(300);
-  attacks[id].setDamage(1);
+  attacks[id].changeRate(10);
+  attacks[id].setTimeBase(false);
+  attacks[id].setCycleBase(true);
+  //attacks[id].setDuration(300);
+  attacks[id].setDamage(15);
   attacks[id].setStickOn(true);
   attacks[id].setMoveWith(true);
-  attacks[id].setCharges(200);
+  //attacks[id].setCharges(200);
+  attacks[id].setInfiniteCharges(true);
   attacks[id].setVelocityX(10); attacks[id].setVelocityY(0);
   #ifdef USE_SOUND
   attacks[id].setAttackSound(spaceshipTakeoff);

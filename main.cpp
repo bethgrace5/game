@@ -81,14 +81,14 @@ int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 int bossExplosionEnd = 0;
 //Bullet Types
-int fireUp = 11;
+int fireUp = 0;
 //int fireDown = 1;
-int pushingLaser = 11;
-int fireShield = 11;
+int pushingLaser = 0;
+int fireShield = 0;
 int speedArrow = 1;
-int shield = 11;
-int simpleBlast = 11;
-int gravityBlast = 11;//DiffrentName in AttackList.h
+int shield = 10;
+int simpleBlast = 30;
+int gravityBlast = 10;//DiffrentName in AttackList.h
 void useAttack(int attackID);
 
 int gameIsEnding = 0;
@@ -181,6 +181,7 @@ int main(void) {
     hero->setSize(44,48);
 
     boxA.makeAttacks();
+    if(LEVEL1_MODE){
     boxA.copyAttackPlatform(grounds[16], a_fireTrap, 0, 56);
     boxA.copyAttackPlatform(grounds[16], a_fireTrap, -60, 56);
 
@@ -268,6 +269,7 @@ int main(void) {
     boxA.copyAttackPlatform(grounds[394], a_fireTrap, 420, 56);
     
     boxA.copyAttackPlatform(grounds[459], a_fireTrap, 30, 56);
+    }
 
     //explode.insert("./images/hero.ppm", 4, 2);
     //explode.setSize(400,400);
@@ -331,7 +333,6 @@ int main(void) {
     cleanupXWindows(); return 0;
 
 #ifdef USE_SOUND
-    //fmod_cleanup();
     fmod_cleanup();
 #endif
 }
@@ -628,16 +629,15 @@ int check_keys (XEvent *e) {
         // level 1
         if (level==1) {
             if (key == XK_r) {
-                // show credits screen on demand
-                //gettimeofday(&explosionStart, NULL);
-                //endGame();
-                makeEnemy(100, 100, 300, 500, 3);
+                makeEnemy(100, 100, hero->getCenterX()+200, hero->getCenterY()+200, 3);
             }
             if (key == XK_Escape) {
                 return 1;
             }
             if (key == XK_q) {
                 hero->setVelocityY(10);
+            }
+            if (key == XK_i) {
             }
             // Jump
             if ((key == XK_w || key == XK_Up)) {
@@ -687,7 +687,7 @@ int check_keys (XEvent *e) {
             if(key == XK_4) useAttack(a_shield);//shield
             if(key == XK_5) useAttack(a_fireShield);//shield
             if(key == XK_f) useAttack(a_speedArrow);//dash
-            //if(key == XK_c) useAttack(a_fireDown);//dash
+            if(key == XK_c) useAttack(a_fireDown);//dash
             if(key == XK_z) useAttack(a_fireUp);//dash 
             //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
             // pause
@@ -902,6 +902,16 @@ void endGame() {
         if (fmod_createsound((char *)"./sounds/megamanTheme.wav", 0)) {
             std::cout << "ERROR - fmod_createsound() - megamanTheme\n" << std::endl;
         }
+        fmod_releasesound(strangeAlien);
+        if (fmod_createsound((char *)"./sounds/strangeAlien.wav", 21)) {
+            std::cout << "ERROR - fmod_createsound() - strangeAlien\n" << std::endl;
+            return;
+        }
+        fmod_releasesound(gunShotMarvin);
+        if (fmod_createsound((char *)"./sounds/gunShotMarvin.wav", 30)) {
+            std::cout << "ERROR - fmod_createsound() - gunShotMarvin\n" << std::endl;
+            return;
+        }
 
         //ending credits music
         fmod_playsound(megamanTheme);
@@ -918,10 +928,10 @@ void resetGame() {
     //fireDown = 0;
     pushingLaser = 0;
     fireShield = 0;
-    speedArrow = 0;
-    shield = 0;
-    simpleBlast = 0;
-    gravityBlast = 0;//DiffrentName in AttackList.h
+    speedArrow = 1;
+    shield = 10;
+    simpleBlast = 30;
+    gravityBlast = 10;//DiffrentName in AttackList.h
     cout<<"reset: level="<<level<<endl;
     hero->reset();
     bossMusicIsPlaying=0;
@@ -1043,10 +1053,10 @@ void useAttack(int attackID){
       if(fireUp <= 0) return;
       else fireUp--;
       break;
-    //case a_fireDown:
-      //if(fireDown < 0) return;
-      //else fireDown--; 
-      //break;
+    case a_fireDown:
+      if(fireUp < 0) return;
+      else fireUp--; 
+      break;
     case a_shield:
       if(shield <= 0) return;
       else shield--;
@@ -1395,7 +1405,7 @@ void movement() {
               hero->setInvincible(1);
               boxA.copyAttack(enemies[i], 5,enemies[i]->checkMirror());
               gettimeofday(&explosionStart, NULL);
-              endGame();
+              if(LEVEL1_MODE) endGame();
             }
             if(rand() % 2 == 1){
               makeItems(20, 20, enemies[i]->getCenterX(), enemies[i]->getCenterY());
@@ -1720,7 +1730,7 @@ void renderInitMenu () {
 }
 void renderCredits () {
 
-    int frameTime = 5000;
+    int frameTime = 6000;
     gettimeofday(&creditsEnd, NULL);
 
     // loop through frames
@@ -1904,10 +1914,10 @@ void playBossMusic(int play) {
 }
 
 void renderInventoryBackground () {
-    int w = 100;
-    int h = 500;
+    //int w = 100;
+    //int h = 500;
     int WHW = WINDOW_HALF_WIDTH;
-    int WHH = WINDOW_HALF_HEIGHT;
+    //int WHH = WINDOW_HALF_HEIGHT;
 
     glPushMatrix();
     //glClear(GL_COLOR_BUFFER_BIT);
