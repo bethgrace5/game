@@ -187,12 +187,6 @@ void Player::cycleAnimations(){
 
     if(diff_ms(seqEndA, seqStartA) > 180){
       if(indexp == 12) {
-          if (lives < 0) {
-              //reset lives
-              lives = 3;
-              //kick user back to menu
-              level = 0;
-          }
           return;
       }
       if(indexp < 7) indexp = 7;

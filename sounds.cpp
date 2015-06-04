@@ -8,7 +8,6 @@
 #include "fmod.h"
 #include <iostream>
 
-
 void init_sounds() {
     //FMOD_RESULT result;
     if (fmod_init()) {

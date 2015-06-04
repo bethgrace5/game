@@ -136,6 +136,11 @@ int fmod_cleanup(void)
 	if (ERRCHECK(result)) return 1;
 	return 0;
 }
+int fmod_releasesound(int s) {
+    FMOD_Sound_Release(sound[s]);
+    nsounds--;
+	return 0;
+}
 int fmod_stopAll(void) {
     FMOD_Channel_Stop(channel);
     return 0;

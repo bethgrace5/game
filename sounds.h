@@ -10,6 +10,7 @@
 
 #ifndef SOUNDS_H
 #define SOUNDS_H
+void clean_sounds();
 void init_sounds();
 enum sound_t {
     // theme song
