@@ -467,6 +467,9 @@ void check_mouse (XEvent *e) {
       else if(selecter == 1){
         take = clickObject(savex, savey); 
         cout << "The Id is: " << take << "\n";
+        cout << "Platform ID X=" << grounds[take]->getCenterX() << "\n";
+        cout << "Platform ID Y=" << grounds[take]->getCenterY() << "\n";
+
         saveID = holdID = take;
       }
     }

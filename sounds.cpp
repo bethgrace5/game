@@ -147,6 +147,10 @@ void init_sounds() {
         std::cout << "ERROR - fmod_createsound() - laser\n" << std::endl;
         return;
     }
+    if (fmod_createsound((char *)"./sounds/bossDeath.wav", 33)) {
+        std::cout << "ERROR - fmod_createsound() - bossDeath\n" << std::endl;
+        return;
+    }
 
 }
 

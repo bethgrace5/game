@@ -52,7 +52,9 @@ enum sound_t {
     dryFiregun,
     gunShotMarvin,
     mvalSingle,
-    laser
+    laser,
+    //Death Boss
+    bossDeath
 };
 
 #endif

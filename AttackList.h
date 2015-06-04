@@ -29,10 +29,10 @@ struct attack_list{
   int currents_length;
 
   void makeAttacks();
-  void copyAttack(Object *caster, int tId);
-  void copyAttack(Object *caster, int tId, bool mirror);
+  void copyAttack(Object *caster, int tId); 
   void copyAttack(Player *caster, int tId, bool mirror);
   void copyAttack(Enemy *caster, int tId, bool mirror);
+  void copyAttackPlatform(Object *caster, int tId, int x, int y); 
   void deleteAttack(int id);
 
   bool detectAttack (Object *obj, Attack *targetAttack);
@@ -50,6 +50,7 @@ enum attacks_t{
  a_speedArrow,
  a_shield,
  a_simpleBlast,
- a_pullingBlast
+ a_pullingBlast,
+ a_fireTrap
 };
 #endif

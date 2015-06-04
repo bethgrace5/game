@@ -165,6 +165,9 @@ int main(void) {
     hero->setSize(44,48);
 
     boxA.makeAttacks();
+    boxA.copyAttackPlatform(grounds[16], a_fireTrap, 0, 56);
+    boxA.copyAttackPlatform(grounds[16], a_fireTrap, -60, 56);
+
 
     //explode.insert("./images/hero.ppm", 4, 2);
     //explode.setSize(400,400);
