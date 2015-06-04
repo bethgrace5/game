@@ -15,7 +15,7 @@ void attack_list::makeAttacks(){
 
   //Fire Aura Effect And Movment
   id = a_fireUp; width = 50; height = 50;
-  sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
+  sprite_sheet[id].insert("./images/dashShield.ppm", 5, 6);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(1);
   attacks[id].referenceTo(sprite_sheet[id], id);
@@ -116,7 +116,7 @@ void attack_list::makeAttacks(){
 
   //Fire Aura With Movement Downwards
   id = a_fireDown; width = 125; height = 125;
-  sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
+  sprite_sheet[id].insert("./images/dashShield.ppm", 5, 6);
   sprite_sheet[id].setSize(75,75);
   sprite_sheet[id].setBackground(1);
   attacks[id].referenceTo(sprite_sheet[id], id);
@@ -186,7 +186,7 @@ void attack_list::makeAttacks(){
 
   //Speeding Arrow with Hero Movement
   id = a_speedArrow; width = 100; height = 100;
-  sprite_sheet[id].insert("./images/arrow.ppm", 4, 1);
+  sprite_sheet[id].insert("./images/dashShield.ppm", 5, 6);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(0);
   attacks[id].referenceTo(sprite_sheet[id], id);
