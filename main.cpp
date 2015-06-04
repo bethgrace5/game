@@ -1186,7 +1186,6 @@ void movement() {
             if(enemies[i]->type == 3){
               boxA.copyAttack(enemies[i], 5,enemies[i]->checkMirror());
               gettimeofday(&explosionStart, NULL);
-              level = 3;
             }
             if(rand() % 2 == 1){
               makeItems(20, 20, enemies[i]->getCenterX(), enemies[i]->getCenterY());
@@ -1204,6 +1203,12 @@ void movement() {
         }
         if (b)
             b = b->next;
+    }
+    gettimeofday(&explosionEnd, NULL);
+
+    // loop through frames
+    if (diff_ms(explosionEnd, explosionStart) > 2200) { 
+        level = 3;
     }
 }
 
@@ -1386,7 +1391,7 @@ void renderPauseMenu() {
 }
 
 void renderInitMenu () {
-    int frameTime = 70;
+    int frameTime = 30;
     gettimeofday(&frameEnd, NULL);
 
     // loop through frames

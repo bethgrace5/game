@@ -81,7 +81,7 @@ void Enemy::enemyAI (Object *hero) {
     }
     str += "enemy " + itos(this) + " ";
     float h_cx=hero->getCenterX();
-    //float h_cy=hero->getCenterY();
+    float h_cy=hero->getCenterY();
     //float h_vx=hero->getVelocityX();
     float h_fl=h_f->getLeft();
     float h_ft=h_f->getTop();
@@ -112,28 +112,28 @@ void Enemy::enemyAI (Object *hero) {
     int h_right = (d_x<0)?1:0;
     int range=(Object::getAggro())?600:300;
     int rnd_tmp = (rnd()*100)+150;
-        if (type==2)
-            rnd_tmp=250;
-        else if (type==3)
-            rnd_tmp=500;
-        int h_close = (((d_x*d_x)+(d_y*d_y)<(range*range) && !hero->isDying)?(((d_x*d_x)+(d_y*d_y)<(rnd_tmp*rnd_tmp))?2:1):0);
-        // If enemy is within 200px & not dead: 2; within 400px: 1; else: 0
-        int h_dir = h_above+h_right;
-        if (!hero->isJumping and !hero->isFalling)
-            h_dir+=((h_f==e_f)?100:0);
-        str += "[DIR: " + itos(h_dir) + "] [" + itos(h_close) + "]";
-        str += "{" + itos(Object::getAggro()) + "}";
-        if ((type==1 or type==3) && h_close == 0 && Object::getAggro()){
-            Object::setAggro(false);//Un-Aggro
-            Object::setVelocityX(0);
-            str += "Un-Aggro";
+    if (type==2)
+        rnd_tmp=250;
+    else if (type==3)
+        rnd_tmp=500;
+    int h_close = (((d_x*d_x)+(d_y*d_y)<(range*range) && !hero->isDying)?(((d_x*d_x)+(d_y*d_y)<(rnd_tmp*rnd_tmp))?2:1):0);
+    // If enemy is within 200px & not dead: 2; within 400px: 1; else: 0
+    int h_dir = h_above+h_right;
+    if (!hero->isJumping and !hero->isFalling)
+        h_dir+=((h_f==e_f)?100:0);
+    str += "[DIR: " + itos(h_dir) + "] [" + itos(h_close) + "]";
+    str += "{" + itos(Object::getAggro()) + "}";
+    if ((type==1 or type==3) && h_close == 0 && Object::getAggro()){
+        Object::setAggro(false);//Un-Aggro
+        Object::setVelocityX(0);
+        str += "Un-Aggro";
+    }
+    if (type == 3){
+        if (h_close==2){
+            //warp animation in center of boss
+            //cout << "warming up..... . .. .. !!" << endl;
         }
-        if (type == 3){
-            if (h_close==2){
-                //warp animation in center of boss
-                //cout << "warming up..... . .. .. !!" << endl;
-            }
-        }
+    }
     if (e_f && h_f) { // If enemy is not mid jump
         float e_fl=e_f->getLeft();
         float e_ft=e_f->getTop();
@@ -170,10 +170,10 @@ void Enemy::enemyAI (Object *hero) {
                         fmod_playsound(gunShotMarvin);
 #endif
                         makeBullet(e_cx, e_cy+7, (h_right?7:-7), 20, 1);
-                            if (h_right)
-                                Sprite::setMirror(0);
-                            else
-                                Sprite::setMirror(1);
+                        if (h_right)
+                            Sprite::setMirror(0);
+                        else
+                            Sprite::setMirror(1);
                         Sprite::setIndex(6);
                         gettimeofday(&fStart, NULL);
                     } else if (type==3) {
@@ -182,8 +182,8 @@ void Enemy::enemyAI (Object *hero) {
                             Object::isShooting=true;
                             gettimeofday(&fStart, NULL);
                         }
-                        Object::setVelocityY(0);
-                        Object::setVelocityX(0);
+                        Object::setVelocityY((h_above?speed:-speed));
+                        Object::setVelocityX((h_right?speed:-speed));
                     }
                     gettimeofday(&sStart, NULL);
                 } else {
@@ -432,18 +432,15 @@ void Enemy::enemyAI (Object *hero) {
             case 0:
                 // patrol
                 Object::setAggro(false);
-		if (Object::getBottom()<e_ft+10)
-			Object::setVelocityY(rnd()*2);
+                if (Object::getBottom()<e_ft+10)
+                    Object::setVelocityY(rnd()*2);
                 if (e_vx==0) {
                     Object::setVelocityX((rnd()>.5)?(-0.6):(0.6));//Patrol ground object
                     if (type==3){
-                        Object::setVelocityY(rnd()-0.7);//Boss floats around at random
-			//Object::getCenterY();
-			if (Object::getCenterX()>LEVEL_WIDTH)
-			    Object::setVelocityX(Object::getVelocityX()*-1);
-			cout << "x:" << Object::getCenterX() << endl;
-			cout << "y:" << Object::getCenterY() << endl;
-		    }
+                        Object::setVelocityY((h_above?speed:-speed));
+                        if (Object::getCenterX()>LEVEL_WIDTH)
+                            Object::setVelocityX(-speed);
+                    }
                     str += "start patrolling";
                 } else {
                     if (e_vx<0 && e_f!=NULL) {
@@ -461,9 +458,13 @@ void Enemy::enemyAI (Object *hero) {
                         }
                     }
                     if (type==3){
-                        if (Object::getCenterY()>(h_cx+400)){
-                            Object::setVelocityX(0);
+                        if (Object::getCenterY()>(h_cy+100)){
+                            Object::setVelocityY(-speed);
                         }
+                        if (Object::getCenterX()>LEVEL_WIDTH)
+                            Object::setVelocityX(-speed);
+                        if (Object::getCenterX()<12500)
+                            Object::setVelocityX(speed);
                     }
                 }
                 break;
@@ -570,11 +571,11 @@ void Enemy::enemyAI (Object *hero) {
             }
         }
         else if (type==2){
-          if (Object::getVelocityX()<0){
-            Sprite::setMirror(true);
-          } else if (Object::getVelocityX()>0) {
-            Sprite::setMirror(false);
-          }
+            if (Object::getVelocityX()<0){
+                Sprite::setMirror(true);
+            } else if (Object::getVelocityX()>0) {
+                Sprite::setMirror(false);
+            }
         }
     }
 }
