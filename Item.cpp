@@ -13,6 +13,15 @@
 extern attack_list boxA;
 extern Player *hero;
 
+extern int fireUp;
+extern int fireDown;
+extern int pushingLaser;
+extern int fireShield;
+extern int speedArrow;
+extern int shield;
+extern int simpleBlast;
+extern int gravityBlast;
+
 Item::Item() : Sprite(), Object(20, 20, 350, 350) {
   //effect=3;
   effect = rand() % 10 + 1;
@@ -29,6 +38,7 @@ void Item::causeEffect(Player *hero) {
   switch (effect) {
     case 1: 
       hero->repairHealth(25);
+      //fireUp += 3;
       break;
     case 2:
       hero->repairHealth(50);

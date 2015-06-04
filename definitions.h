@@ -15,6 +15,9 @@
 //If 1, you can write the name of the save file
 #define OPTIONAL_STORAGE 1
 
+//If 1, unlimated Attacks
+#define ULTIMATE_EXTREME_FOUNDATION_ATTACK_MODE 0
+
 #define EXTREME_MODE 0
 
 #define GRAVITY 0.2

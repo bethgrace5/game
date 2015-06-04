@@ -250,7 +250,7 @@ void attack_list::makeAttacks(){
   #endif
 
   //Gravity Fire Ball
-  id = a_pullingBlast; width = 50; height = 50;
+  id = a_gravityBlast; width = 50; height = 50;
   sprite_sheet[id].insert("./images/fireball.ppm", 5, 5);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(1);

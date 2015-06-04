@@ -83,12 +83,12 @@ int bossExplosionEnd = 0;
 //Bullet Types
 int fireUp = 0;
 int fireDown = 0;
-int pushingLaser = 0;
+int pushingLaser = 1;
 int fireShield = 0;
 int speedArrow = 0;
-int shield = 0;
-int simpleBlast = 0;
-int gravityBlast = 0;
+int shield = 10;
+int simpleBlast = 10;
+int gravityBlast = 0;//DiffrentName in AttackList.h
 
 void useAttack(int attackID);
 
@@ -138,6 +138,7 @@ void init_opengl(void);
 void makeEnemy(int w, int h, Object *ground, int type); 
 void makeEnemy(int w, int h, int x, int y, int type); 
 void makeItems(int w, int h, int x, int y);
+void makePureItem(int effect, int w, int h, int x, int y);
 void makePlatform(int w, int h, int x, int y);
 void moveWindow(void);
 void movement(void);
@@ -178,6 +179,8 @@ int main(void) {
     boxA.makeAttacks();
     boxA.copyAttackPlatform(grounds[16], a_fireTrap, 0, 56);
     boxA.copyAttackPlatform(grounds[16], a_fireTrap, -60, 56);
+    makePureItem(1, 16, 20, 300, 200);
+    makePureItem(1, 16, 20, 400, 200);
 
 
     //explode.insert("./images/hero.ppm", 4, 2);
@@ -578,17 +581,18 @@ int check_keys (XEvent *e) {
             if( key == XK_j){
                 boxA.copyAttack(hero, 3, hero->checkMirror()); 
             }
-            if( key == XK_h){
-              hero->setCastingState(true);
-            }
-            if( key ==XK_e){
-                boxA.copyAttack(hero, a_simpleBlast, hero->checkMirror()); 
-            }
             //=-=-=-=-=-=-
             //Attacks    |
-            //-=-=---=-=-=
+            //-=-=--=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
             if(key == XK_1) useAttack(a_simpleBlast);
-
+            if(key == XK_2) useAttack(a_pushingLaser);
+            if(key == XK_3) useAttack(a_shield);
+            if(key == XK_4) useAttack(a_speedArrow);
+            if(key == XK_5) useAttack(a_fireShield);
+            if(key == XK_f) useAttack(a_fireUp);
+            if(key == XK_c) useAttack(a_fireDown);
+            if(key == XK_z) useAttack(a_gravityBlast);
+            //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
             // debug death
             if (key == XK_y) {
@@ -846,6 +850,7 @@ void makePureItem(int effect, int w, int h, int x, int y){
     itemsHold[items_length]->insert("./images/firemon.ppm", 1, 1);
     itemsHold[items_length]->setSize(16, 20);
     itemsHold[items_length]->init(16, 20, x, y);
+    items_length++;
 }
 
 void deleteItem(int id) {
@@ -858,20 +863,47 @@ void deleteItem(int id) {
 }
 
 void useAttack(int attackID){
-  bool dontUse = 0;
-  switch(attackID){
-    case a_fireUp  : fireUp--; break;
-    case a_fireDown: fireDown--; break;
-    case a_shield  : shield--; break;
-
-    case a_pushingLaser: pushingLaser--; break;
-    case a_fireShield  : fireShield--; break;
-    case a_speedArrow  : speedArrow--; break;
-    case a_simpleBlast : simpleBlast--; break;
-    case a_pullingBlast: gravityBlast--; break;//Diffrent Names Here
-    default: dontUse = 1; break;
+  if(ULTIMATE_EXTREME_FOUNDATION_ATTACK_MODE){
+    boxA.copyAttack(hero, attackID, hero->checkMirror());
+    return;
   }
-  if(dontUse) return;
+
+  switch(attackID){
+    case a_fireUp  :
+      if(fireUp < 0) return;
+      else fireUp--;
+      break;
+    case a_fireDown:
+      if(fireDown < 0) return;
+      else fireDown--; 
+      break;
+    case a_shield:
+      if(shield < 0) return;
+      else shield--;
+      break;
+    case a_pushingLaser: 
+      if(pushingLaser < 0) return;
+      else pushingLaser--;
+      break;
+    case a_fireShield  :
+      if(fireShield < 0) return;
+      fireShield--;
+      break;
+    case a_speedArrow  :
+      if(speedArrow < 0) return;
+      speedArrow--; 
+      break;
+    case a_simpleBlast :
+      if(simpleBlast < 0) return;
+      simpleBlast--; 
+      break;
+    case a_gravityBlast://THIS HAS A DIFFRENT NAME BECAREFULL
+      if(gravityBlast < 0) return;
+      gravityBlast--;
+      break;
+
+    default: return;
+  }
   boxA.copyAttack(hero, attackID, hero->checkMirror());
 }
 

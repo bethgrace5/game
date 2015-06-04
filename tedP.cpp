@@ -108,6 +108,16 @@ int saveID = -1;
 int enemyType = 0;
 
 int creeperScore;
+
+int fireUp = 0;
+int fireDown = 0;
+int pushingLaser = 0;
+int fireShield = 0;
+int speedArrow = 0;
+int shield = 0;
+int simpleBlast = 0;
+int gravityBlast = 0;
+
 //------------------------------
 //Function Prototype
 //------------------------------
