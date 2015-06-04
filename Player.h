@@ -26,8 +26,8 @@ class Player: public Object, public Sprite{
     int gunType;
     bool invincible;
     bool invisible;
-    
-
+   
+    bool castingState ;
     bool coolDownTimer;
     int coolDownLength;
     timeval seqStartA, seqEndA;
@@ -43,6 +43,8 @@ class Player: public Object, public Sprite{
     void stop();
     void jumpRefresh();
     bool coolDowns();
+    void setCastingState(bool take);
+    bool checkCastingState();
 
     int getHealth();
     void setHealth(int take);
@@ -56,8 +58,9 @@ class Player: public Object, public Sprite{
     void setGunType(int take);
     int  checkGunType();
     void setAmmo(int take);
-    int checkAmmo();
     void decreaseAmmo(int ammount);
+    int checkAmmo();
+    void setCoolDown(int take);
     int getLives();
     void incrementLives();
     void decrementLives();

@@ -36,7 +36,7 @@ void attack_list::makeAttacks(){
 
   //Big Laser Projectile Attack
   id = a_pushingLaser; width = 25; height = 25;
-  sprite_sheet[id].insert("./images/arrow.ppm", 4, 1);
+  sprite_sheet[id].insert("./images/arrow2.ppm", 4, 1);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(0);
   attacks[id].referenceTo(sprite_sheet[id], id);
@@ -49,8 +49,8 @@ void attack_list::makeAttacks(){
   attacks[id].setTimeBase(true);
   attacks[id].setDuration(1000);
   attacks[id].setCycleBase(false);
-  attacks[id].setCharges(30);
-  attacks[id].setDamage(3);
+  attacks[id].setCharges(50);
+  attacks[id].setDamage(4);
   #ifdef USE_SOUND
   attacks[id].setAttackSound(mvalSingle);
   attacks[id].setSoundCollide(robotBlip2);
@@ -81,6 +81,37 @@ void attack_list::makeAttacks(){
   #ifdef USE_SOUND
   attacks[id].setAttackSound(electronicNoise);
   attacks[id].setSoundCollide(click);
+  #endif
+
+  //fireTrap
+  id = a_fireTrap; width = 40; height = 66;
+  sprite_sheet[id].insert("./images/fireTrap.ppm", 4, 1);
+  sprite_sheet[id].setSize(width,height);
+  sprite_sheet[id].setBackground(1);
+  attacks[id].referenceTo(sprite_sheet[id], id);
+  attacks[id].init(width,height,0,0);
+  attacks[id].setVelocityX(0);
+  attacks[id].setVelocityY(0);
+  attacks[id].setTimeBase(false);
+  //attacks[id].setDuration(false);
+  attacks[id].setCycleBase(false);
+  //attacks[id].setStickOn(true);
+  //attacks[id].setInvincible(true);//NOTE <- !THIS WILL ONLY EFFECT HERO!
+  //attacks[id].setInvisiblity(false);//works for hero only
+  attacks[id].setPushAway(false);
+  attacks[id].setPushBack(false);
+  //attacks[id].setMoveWith(true);
+  //attacks[id].setConstantEffect(true);
+  attacks[id].setInfiniteCharges(true);
+  attacks[id].setCharges(100);
+  attacks[id].changeRate(5);
+  attacks[id].setDamage(3);
+  attacks[id].setEffectEnemy(true);
+  attacks[id].setEffectPlayer(true);
+
+  #ifdef USE_SOUND
+  //attacks[id].setAttackSound(electronicNoise);
+  //attacks[id].setSoundCollide(click);
   #endif
 
   //Fire Aura With Movement Downwards
@@ -149,13 +180,13 @@ void attack_list::makeAttacks(){
   attacks[id].setCharges(1000);
   attacks[id].setDamage(15);
   #ifdef USE_SOUND
-  attacks[id].setAttackSound(spaceshipTakeoff);
+  attacks[id].setAttackSound(bossDeath);
   attacks[id].setSoundCollide(click);
   #endif
 
   //Speeding Arrow with Hero Movement
   id = a_speedArrow; width = 100; height = 100;
-  sprite_sheet[id].insert("./images/arrow2.ppm", 4, 1);
+  sprite_sheet[id].insert("./images/arrow.ppm", 4, 1);
   sprite_sheet[id].setSize(width,height);
   sprite_sheet[id].setBackground(0);
   attacks[id].referenceTo(sprite_sheet[id], id);
@@ -254,6 +285,22 @@ void attack_list::copyAttack(Object *caster, int tId){
   currents[currents_length]->targetAt(caster);
   currents[currents_length]->setCenter(caster->getCenterX(),
       caster->getCenterY());
+  #ifdef USE_SOUND
+  //cout << currents[currents_length]->getAttackSound()<<endl;
+  fmod_playsound(currents[currents_length]->getAttackSound());
+  #endif
+  currents_length++;
+}
+
+void attack_list::copyAttackPlatform(Object *caster, int tId, int x, int y){
+  if(currents_length >= MAX_CURRENTS) return;
+
+  currents[currents_length] = new Attack(attacks[tId]);
+  currents[currents_length]->setID(currents_length);
+
+  currents[currents_length]->targetAt(caster);
+  currents[currents_length]->setCenter(caster->getCenterX()+x,
+      caster->getCenterY()+y);
 #ifdef USE_SOUND
   //cout << currents[currents_length]->getAttackSound()<<endl;
   fmod_playsound(currents[currents_length]->getAttackSound());
@@ -261,23 +308,19 @@ void attack_list::copyAttack(Object *caster, int tId){
   currents_length++;
 }
 
-void attack_list::copyAttack(Object *caster, int tId, bool mirror){
-  if(currents_length >= MAX_CURRENTS) return;
-  attack_list::copyAttack(caster, tId);
-  if(mirror){
-    currents[currents_length-1]->setVelocityX(
-        -currents[currents_length-1]->getVelocityX());
-  }
-}
 
 void attack_list::copyAttack(Player *caster, int tId, bool mirror){
   if(currents_length >= MAX_CURRENTS) return;
   attack_list::copyAttack(caster, tId);
   currents[currents_length-1]->setEffectEnemy(true);
+  int x = 24, y = 12;
   if(mirror){
     currents[currents_length-1]->setVelocityX(
         -(currents[currents_length-1]->getVelocityX()));
+    x *= -1;
   }
+  currents[currents_length-1]->setCenter(caster->getCenterX()+x,
+      caster->getCenterY()+y);
 }
 
 void attack_list::copyAttack(Enemy *caster, int tId, bool mirror){
@@ -288,6 +331,7 @@ void attack_list::copyAttack(Enemy *caster, int tId, bool mirror){
     currents[currents_length-1]->setVelocityX(
         -currents[currents_length-1]->getVelocityX());
   }
+
 }
 
 void attack_list::deleteAttack(int id){

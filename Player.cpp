@@ -27,8 +27,9 @@ Player::Player() : Object(26, 44, 250, 250), Sprite(){
   isShooting=0;
   Sprite::setMirror(false);
   indexp = 0; once = 0;
+  castingState = false;
   coolDownTimer = 0;
-  coolDownLength = 500;
+  coolDownLength = 10;
 }
 //===============================================
 //Movement Functions
@@ -75,6 +76,13 @@ bool Player::coolDowns(){
   }
   return false;
 }
+
+void Player::setCastingState(bool take){
+  castingState = take;
+}
+bool Player::checkCastingState(){
+  return castingState;
+}
 //==============================================
 //Stats Functions
 //==============================================
@@ -112,12 +120,15 @@ int Player::checkGunType(){
 void Player::setAmmo(int take){
   ammo = take;
 }
-int Player::checkAmmo(){
-  return ammo;
-}
 void Player::decreaseAmmo(int amount){
   ammo -= amount;
   if(ammo < 0) ammo = 0;
+}
+int Player::checkAmmo(){
+  return ammo;
+}
+void Player::setCoolDown(int take){
+  coolDownLength = take;
 }
 bool Player::checkShooting(){
   return Object::isShooting;

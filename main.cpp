@@ -80,6 +80,17 @@ int bg, bullets, grounds_length, enemies_length = 0, i, j, level=0, quit=0;
 int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 int bossExplosionEnd = 0;
+//Bullet Types
+int fireUp = 0;
+int fireDown = 0;
+int pushingLaser = 0;
+int fireShield = 0;
+int speedArrow = 0;
+int shield = 0;
+int simpleBlast = 0;
+int gravityBlast = 0;
+
+void useAttack(int attackID);
 
 //timer
 timeval gameStart, gameEnd;
@@ -166,6 +177,9 @@ int main(void) {
     hero->setSize(44,48);
 
     boxA.makeAttacks();
+    boxA.copyAttackPlatform(grounds[16], a_fireTrap, 0, 56);
+    boxA.copyAttackPlatform(grounds[16], a_fireTrap, -60, 56);
+
 
     //explode.insert("./images/hero.ppm", 4, 2);
     //explode.setSize(400,400);
@@ -541,9 +555,9 @@ int check_keys (XEvent *e) {
                 boxA.copyAttack(hero, 2, hero->checkMirror());
                 //boxA.copyAttack(hero, 1, hero->checkMirror());
                 //boxA.copyAttack(enemies[0], 0, 0);
-            }
+            } 
             if( key == XK_v){
-                boxA.copyAttack(hero, 1, hero->checkMirror()); 
+                boxA.copyAttack(hero, a_pushingLaser, hero->checkMirror()); 
             }
             if( key == XK_l){
                 boxA.copyAttack(hero, a_shield, hero->checkMirror());  
@@ -551,12 +565,18 @@ int check_keys (XEvent *e) {
             if( key == XK_j){
                 boxA.copyAttack(hero, 3, hero->checkMirror()); 
             }
-            if( key == XK_x){
-                boxA.copyAttack(hero, a_pullingBlast, hero->checkMirror()); 
+            if( key == XK_h){
+              hero->setCastingState(true);
             }
             if( key ==XK_e){
                 boxA.copyAttack(hero, a_simpleBlast, hero->checkMirror()); 
             }
+            //=-=-=-=-=-=-
+            //Attacks    |
+            //-=-=---=-=-=
+            if(key == XK_1) useAttack(a_simpleBlast);
+
+
             // debug death
             if (key == XK_y) {
                 // cycleAnimations() checks for 0 or less health
@@ -747,6 +767,9 @@ int check_keys (XEvent *e) {
         if (key == XK_space) {
             hero->setShooting(false);
         }
+        if( key == XK_h){
+          hero->setCastingState(false);
+        }
     }
 
     return 0;
@@ -785,6 +808,7 @@ void endGame() {
     }
 }
 void resetGame() {
+    cout<<"reset: level="<<level<<endl;
     hero->reset();
     bossMusicIsPlaying=0;
     menuSelection = 0;
@@ -793,7 +817,7 @@ void resetGame() {
     seconds = 0;
     minutes = 0;
     creeperScore = 0;
-    creditIndex=0;
+    creditIndex=-1;
     updated = 1;
     gettimeofday(&gameEnd, NULL);
     gettimeofday(&gameStart, NULL);
@@ -846,6 +870,13 @@ void makeItems(int w, int h, int x, int y) {
     itemsHold[items_length]->init(16, 20, x, y);
     items_length++;
 }
+void makePureItem(int effect, int w, int h, int x, int y){
+    itemsHold[items_length] = new Item(effect);
+    itemsHold[items_length]->setID(items_length);
+    itemsHold[items_length]->insert("./images/firemon.ppm", 1, 1);
+    itemsHold[items_length]->setSize(16, 20);
+    itemsHold[items_length]->init(16, 20, x, y);
+}
 
 void deleteItem(int id) {
     if (items_length <= 0) return;
@@ -854,6 +885,24 @@ void deleteItem(int id) {
     delete itemsHold[id];
     itemsHold[id] = itemsHold[items_length];
     itemsHold[items_length]=NULL;
+}
+
+void useAttack(int attackID){
+  bool dontUse = 0;
+  switch(attackID){
+    case a_fireUp  : fireUp--; break;
+    case a_fireDown: fireDown--; break;
+    case a_shield  : shield--; break;
+
+    case a_pushingLaser: pushingLaser--; break;
+    case a_fireShield  : fireShield--; break;
+    case a_speedArrow  : speedArrow--; break;
+    case a_simpleBlast : simpleBlast--; break;
+    case a_pullingBlast: gravityBlast--; break;//Diffrent Names Here
+    default: dontUse = 1; break;
+  }
+  if(dontUse) return;
+  boxA.copyAttack(hero, attackID, hero->checkMirror());
 }
 
 void makeEnemy(int w, int h, Object *ground, int type) {
@@ -1076,21 +1125,22 @@ void movement() {
     if (hero->checkShooting()){
         gettimeofday(&fireEnd, NULL);
         if (((diff_ms(fireEnd, fireStart)) > 200)) { //Fire rate 250ms
-          if(hero->checkGunType() == -1 || 
-              hero->checkGunType() == a_fireShield){
             gettimeofday(&fireStart, NULL); //Reset firing rate timer
             makeBullet(hero->getCenterX(), hero->getCenterY()+15, (hero->checkMirror()?-18:18), 38, 2);
             #ifdef USE_SOUND
             fmod_playsound(mvalSingle);
             #endif
           }
-          else{
-            gettimeofday(&fireStart, NULL); //Reset firing rate timer
-            boxA.copyAttack(hero, hero->checkGunType(), hero->checkMirror());
-            hero->decreaseAmmo(1);
-            if(hero->checkAmmo() <= 0) hero->setGunType(-1);
-          } 
+     }
+    if(hero->checkCastingState()){
+      if(hero->coolDowns()){
+        boxA.copyAttack(hero, hero->checkGunType() ,hero->checkMirror()); 
+        hero->decreaseAmmo(1);
+        if(hero->checkAmmo() <= 0){
+          hero->setGunType(a_pushingLaser);
+          hero->setCoolDown(2000);
         }
+      }  
     }
 
     //bullet collisions against grounds
@@ -1189,6 +1239,8 @@ void movement() {
         if (b)
             b = b->next;
     }
+    gettimeofday(&explosionEnd, NULL);
+
 }
 
 bool inWindow(Object &obj) {
@@ -1370,7 +1422,7 @@ void renderPauseMenu() {
 }
 
 void renderInitMenu () {
-    int frameTime = 70;
+    int frameTime = 30;
     gettimeofday(&frameEnd, NULL);
 
     // loop through frames
@@ -1425,7 +1477,6 @@ void renderCredits () {
     // go back to menu
     if (creditIndex == 4) {
         resetGame();
-        return;
     }
 
     glPushMatrix();
