@@ -81,14 +81,14 @@ int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 int bossExplosionEnd = 0;
 //Bullet Types
-int fireUp = 11;
+int fireUp = 0;
 //int fireDown = 1;
-int pushingLaser = 11;
-int fireShield = 11;
-int speedArrow = 1;
-int shield = 11;
-int simpleBlast = 11;
-int gravityBlast = 11;//DiffrentName in AttackList.h
+int pushingLaser = 0;
+int fireShield = 0;
+int speedArrow = 0;
+int shield = 0;
+int simpleBlast = 0;
+int gravityBlast = 0;//DiffrentName in AttackList.h
 void useAttack(int attackID);
 
 int gameIsEnding = 0;
@@ -631,7 +631,7 @@ int check_keys (XEvent *e) {
                 // show credits screen on demand
                 //gettimeofday(&explosionStart, NULL);
                 //endGame();
-                makeEnemy(100, 100, 300, 500, 3);
+                makeEnemy(100, 100, hero->getCenterX()+200, hero->getCenterY()+200, 3);
             }
             if (key == XK_Escape) {
                 return 1;
@@ -1720,7 +1720,7 @@ void renderInitMenu () {
 }
 void renderCredits () {
 
-    int frameTime = 5000;
+    int frameTime = 6000;
     gettimeofday(&creditsEnd, NULL);
 
     // loop through frames
