@@ -695,12 +695,14 @@ int check_keys (XEvent *e) {
             }
             // manually play megaman music
             if (key == XK_m) {
+#ifdef USE_SOUND
                 fmod_releasesound(bossMusic);
                 if (fmod_createsound((char *)"./sounds/bossMusic.wav", 11)) {
                     std::cout << "ERROR - fmod_createsound() - bossMusic\n" << std::endl;
                 }
                 fmod_setmode(megamanTheme, FMOD_LOOP_NORMAL);
                 fmod_playsound(megamanTheme);
+#endif
             }
             if (key == XK_u){
                 animateOn = 1;
@@ -1762,9 +1764,9 @@ void renderDebugInfo () {
 }
 
 void playBossMusic(int play) {
+#ifdef USE_SOUND
     if(!bossMusicIsPlaying and hero->getCenterX() > 11472
             and hero->getCenterY()<300) {
-#ifdef USE_SOUND
         fmod_releasesound(megamanTheme);
         if (fmod_createsound((char *)"./sounds/megamanTheme.wav", 0)) {
             std::cout << "ERROR - fmod_createsound() - megamanTheme\n" << std::endl;
@@ -1772,7 +1774,6 @@ void playBossMusic(int play) {
         bossMusicIsPlaying = 1;
         fmod_setmode(bossMusic, FMOD_LOOP_NORMAL);
         fmod_playsound(bossMusic);
-#endif
     }
     else if (play) {
         fmod_releasesound(megamanTheme);
@@ -1783,6 +1784,7 @@ void playBossMusic(int play) {
         fmod_playsound(bossMusic);
         bossMusicIsPlaying = 1;
     }
+#endif
 }
 
 void renderComputerScreenMenu () {
