@@ -87,8 +87,8 @@ int pushingLaser = 0;
 int fireShield = 0;
 int speedArrow = 1;
 int shield = 10;
-int simpleBlast = 0;
-int gravityBlast = 4;//DiffrentName in AttackList.h
+int simpleBlast = 30;
+int gravityBlast = 10;//DiffrentName in AttackList.h
 void useAttack(int attackID);
 
 int gameIsEnding = 0;
@@ -685,7 +685,7 @@ int check_keys (XEvent *e) {
             if(key == XK_4) useAttack(a_shield);//shield
             if(key == XK_5) useAttack(a_fireShield);//shield
             if(key == XK_f) useAttack(a_speedArrow);//dash
-            //if(key == XK_c) useAttack(a_fireDown);//dash
+            if(key == XK_c) useAttack(a_fireDown);//dash
             if(key == XK_z) useAttack(a_fireUp);//dash 
             //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
             // pause
@@ -928,8 +928,8 @@ void resetGame() {
     fireShield = 0;
     speedArrow = 1;
     shield = 10;
-    simpleBlast = 0;
-    gravityBlast = 4;//DiffrentName in AttackList.h
+    simpleBlast = 30;
+    gravityBlast = 10;//DiffrentName in AttackList.h
     cout<<"reset: level="<<level<<endl;
     hero->reset();
     bossMusicIsPlaying=0;
@@ -1051,10 +1051,10 @@ void useAttack(int attackID){
       if(fireUp <= 0) return;
       else fireUp--;
       break;
-    //case a_fireDown:
-      //if(fireDown < 0) return;
-      //else fireDown--; 
-      //break;
+    case a_fireDown:
+      if(fireUp < 0) return;
+      else fireUp--; 
+      break;
     case a_shield:
       if(shield <= 0) return;
       else shield--;

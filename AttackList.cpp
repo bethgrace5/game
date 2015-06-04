@@ -195,10 +195,11 @@ void attack_list::makeAttacks(){
   attacks[id].setTimeBase(false);
   attacks[id].setCycleBase(true);
   //attacks[id].setDuration(300);
-  attacks[id].setDamage(1);
+  attacks[id].setDamage(15);
   attacks[id].setStickOn(true);
   attacks[id].setMoveWith(true);
-  attacks[id].setCharges(200);
+  //attacks[id].setCharges(200);
+  attacks[id].setInfiniteCharges(true);
   attacks[id].setVelocityX(10); attacks[id].setVelocityY(0);
   #ifdef USE_SOUND
   attacks[id].setAttackSound(spaceshipTakeoff);
