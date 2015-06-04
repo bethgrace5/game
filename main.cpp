@@ -144,7 +144,7 @@ void makePureItem(int effect, int w, int h, int x, int y);
 void makePlatform(int w, int h, int x, int y);
 void moveWindow(void);
 void movement(void);
-void playBossMusic();
+void playBossMusic(int play);
 void render(void);
 void renderAnimations(int x, int y);
 void renderBackground(void);
@@ -169,8 +169,8 @@ int main(void) {
     initXWindows(); init_opengl(); 
 #ifdef USE_SOUND
     init_sounds();
-    fmod_playsound(scaryAmbience);
     fmod_setmode(scaryAmbience, FMOD_LOOP_NORMAL);
+    fmod_playsound(scaryAmbience);
 #endif
 
     //declare hero object
@@ -324,7 +324,7 @@ int main(void) {
             if (gameIsEnding) {
                 endGame();
             }
-            playBossMusic();
+            playBossMusic(0);
         }
         glXSwapBuffers(dpy, win);
     }
@@ -689,18 +689,18 @@ int check_keys (XEvent *e) {
                 menuSelection=0;
                 level = 2;
             }
-            // toggle start menu
-            if (key == XK_m) {
-                if (level) {
-                    level = 0;
-                }
-                else {
-                    level = 1;
-                }
+            // manually play boss music
+            if (key == XK_b) {
+                playBossMusic(1);
             }
-            // play sounds for debugging
-            if (key == XK_t) {
-                creeperScore++;
+            // manually play megaman music
+            if (key == XK_m) {
+                fmod_releasesound(bossMusic);
+                if (fmod_createsound((char *)"./sounds/bossMusic.wav", 11)) {
+                    std::cout << "ERROR - fmod_createsound() - bossMusic\n" << std::endl;
+                }
+                fmod_setmode(megamanTheme, FMOD_LOOP_NORMAL);
+                fmod_playsound(megamanTheme);
             }
             if (key == XK_u){
                 animateOn = 1;
@@ -714,8 +714,8 @@ int check_keys (XEvent *e) {
                     // play sound for menu selection then for init sequence
 #ifdef USE_SOUND
                     fmod_playsound(button3);
-                    fmod_playsound(electronicNoise);
                     fmod_setmode(electronicNoise, FMOD_LOOP_NORMAL);
+                    fmod_playsound(electronicNoise);
 #endif
                     // make sure hero is not shooting immediately
                     level=-1;
@@ -875,7 +875,7 @@ void endGame() {
     gettimeofday(&explosionEnd, NULL);
 
     //wait for the boss to explode
-    if (diff_ms(explosionEnd, explosionStart) > 2500) { 
+    if (diff_ms(explosionEnd, explosionStart) > 1900) { 
         bossExplosionEnd = 1; 
         cout <<"boss explosion End"<<endl;
 
@@ -929,8 +929,8 @@ void resetGame() {
         std::cout << "ERROR - fmod_createsound() - megamanTheme\n" << std::endl;
         return;
     }
-    fmod_playsound(scaryAmbience);
     fmod_setmode(scaryAmbience, FMOD_LOOP_NORMAL);
+    fmod_playsound(scaryAmbience);
 #endif
     level = 0;
 }
@@ -1569,8 +1569,8 @@ void renderInitMenu () {
             std::cout << "ERROR - fmod_createsound() - scaryAmbience\n" << std::endl;
             return;
         }
-        fmod_playsound(megamanTheme);
         fmod_setmode(megamanTheme, FMOD_LOOP_NORMAL);
+        fmod_playsound(megamanTheme);
 #endif
         frameIndex = 0;
         level = 1;
@@ -1759,13 +1759,11 @@ void renderDebugInfo () {
     writeWords(itos(bullets), 176, WH-80);
 }
 
-void playBossMusic() {
-    cout <<"play boss music"<<endl;
+void playBossMusic(int play) {
     if(!bossMusicIsPlaying and hero->getCenterX() > 11472
             and hero->getCenterY()<300) {
 #ifdef USE_SOUND
         fmod_releasesound(megamanTheme);
-        fmod_releasesound(strangeAlien);
         if (fmod_createsound((char *)"./sounds/megamanTheme.wav", 0)) {
             std::cout << "ERROR - fmod_createsound() - megamanTheme\n" << std::endl;
         }
@@ -1773,6 +1771,15 @@ void playBossMusic() {
         fmod_setmode(bossMusic, FMOD_LOOP_NORMAL);
         fmod_playsound(bossMusic);
 #endif
+    }
+    else if (play) {
+        fmod_releasesound(megamanTheme);
+        if (fmod_createsound((char *)"./sounds/megamanTheme.wav", 0)) {
+            std::cout << "ERROR - fmod_createsound() - megamanTheme\n" << std::endl;
+        }
+        fmod_setmode(bossMusic, FMOD_LOOP_NORMAL);
+        fmod_playsound(bossMusic);
+        bossMusicIsPlaying = 1;
     }
 }
 
