@@ -254,10 +254,10 @@ void attack_list::copyAttack(Object *caster, int tId){
   currents[currents_length]->targetAt(caster);
   currents[currents_length]->setCenter(caster->getCenterX(),
       caster->getCenterY());
-#ifdef USE_SOUND
+  #ifdef USE_SOUND
   //cout << currents[currents_length]->getAttackSound()<<endl;
   fmod_playsound(currents[currents_length]->getAttackSound());
-#endif
+  #endif
   currents_length++;
 }
 
@@ -274,10 +274,14 @@ void attack_list::copyAttack(Player *caster, int tId, bool mirror){
   if(currents_length >= MAX_CURRENTS) return;
   attack_list::copyAttack(caster, tId);
   currents[currents_length-1]->setEffectEnemy(true);
+  int x = 24, y = 12;
   if(mirror){
     currents[currents_length-1]->setVelocityX(
         -(currents[currents_length-1]->getVelocityX()));
+    x *= -1;
   }
+  currents[currents_length-1]->setCenter(caster->getCenterX()+x,
+      caster->getCenterY()+y);
 }
 
 void attack_list::copyAttack(Enemy *caster, int tId, bool mirror){
@@ -288,6 +292,7 @@ void attack_list::copyAttack(Enemy *caster, int tId, bool mirror){
     currents[currents_length-1]->setVelocityX(
         -currents[currents_length-1]->getVelocityX());
   }
+
 }
 
 void attack_list::deleteAttack(int id){

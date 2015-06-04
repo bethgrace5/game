@@ -32,7 +32,8 @@ void Item::causeEffect(Player *hero) {
       break;
     case 2:
       hero->repairHealth(50);
-      boxA.copyAttack(hero, 2, 0);
+      boxA.copyAttack(hero, a_simpleBlast, 0);
+      hero->setAmmo(20);
       //boxA.copyAttack(hero, 2, hero->checkMirror());
       break;
     case 3:
@@ -71,6 +72,9 @@ void Item::causeEffect(Player *hero) {
         hero->setAmmo(3);  
       }
     default:
+      hero->setGunType(a_simpleBlast);
+      hero->setAmmo(20);
+      hero->setCoolDown(50);
       hero->repairHealth(10);
       break;
   }

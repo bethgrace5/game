@@ -1033,7 +1033,7 @@ void movement() {
         hero->decreaseAmmo(1);
         if(hero->checkAmmo() <= 0){
           hero->setGunType(a_pushingLaser);
-          hero->setCoolDown(900);
+          hero->setCoolDown(2000);
         }
       }  
     }
