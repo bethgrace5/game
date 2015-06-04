@@ -54,7 +54,8 @@ void Item::causeEffect(Player *hero) {
       fireUp += 10;
       break;
     case 6:
-      fireDown += 10;
+      simpleBlast += 10;
+      //fireDown += 10;
       break;
     case 7:
       simpleBlast += 10;

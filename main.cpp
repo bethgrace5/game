@@ -81,14 +81,14 @@ int roomX=WINDOW_HALF_WIDTH;
 int roomY=WINDOW_HALF_HEIGHT;
 int bossExplosionEnd = 0;
 //Bullet Types
-int fireUp = 0;
-int fireDown = 0;
-int pushingLaser = 0;
-int fireShield = 0;
-int speedArrow = 0;
-int shield = 0;
-int simpleBlast = 0;
-int gravityBlast = 0;//DiffrentName in AttackList.h
+int fireUp = 11;
+//int fireDown = 1;
+int pushingLaser = 11;
+int fireShield = 11;
+int speedArrow = 1;
+int shield = 11;
+int simpleBlast = 11;
+int gravityBlast = 11;//DiffrentName in AttackList.h
 void useAttack(int attackID);
 
 int gameIsEnding = 0;
@@ -114,9 +114,9 @@ timeval explosionStart, explosionEnd;
 
 //Images and Textures
 Ppmimage *initImages[32], *computerScreenImages[32], *healthBarImage[1], *lifeImage[1],
-         *backgroundImage[1], *pauseMenuImage[1], *creditsImages[4];
+         *backgroundImage[1], *pauseMenuImage[1], *creditsImages[4], *inventoryImages[3];
 GLuint initTextures[65], computerScreenTextures[32], healthBarTexture[1], lifeTexture[1],
-       backgroundTexture[1], pauseMenuTexture[1], creditsTextures[4];
+       backgroundTexture[1], pauseMenuTexture[1], creditsTextures[4], inventoryTextures[3];
 
 //Function prototypes
 //Object createAI( int w, int h, Object *ground);
@@ -158,6 +158,7 @@ void renderHero(int x, int y);
 void renderInitMenu();
 void renderItems(int x, int y);
 void renderInventory();
+void renderInventoryBackground();
 void renderLives();
 void renderPauseMenu();
 void resetGame();
@@ -183,17 +184,7 @@ int main(void) {
     boxA.copyAttackPlatform(grounds[16], a_fireTrap, 0, 56);
     boxA.copyAttackPlatform(grounds[16], a_fireTrap, -60, 56);
 
-    makePureItem("./images/fireBallItem.ppm", 4, 16, 20, 2277, 1446);
-    makePureItem("./images/fireBallItem.ppm", 4, 16, 20, 3259, 775);
-    makePureItem("./images/fireBallItem.ppm", 4, 16, 20, 3095, 1810);
-    makePureItem("./images/fireBallItem.ppm", 4, 16, 20, 6183, 1218);
-
-    makePureItem("./images/dashItem.ppm", 5, 16, 20, 8838, 1900);
-    makePureItem("./images/dashItem.ppm", 6, 16, 20, 6347, 1961);
-    makePureItem("./images/laser1.ppm", 7, 16, 20, 80, 2125);
-    makePureItem("./images/laser1.ppm", 7, 16, 20, 9092, 1908);
-    makePureItem("./images/laser2.ppm", 8, 16, 20, 911, 541);
-
+    setupItems();
 
     boxA.copyAttackPlatform(grounds[16], a_fireTrap, -110, 56);
     //boxA.copyAttackPlatform(grounds[16], a_fireTrap, -180, 56);
@@ -475,6 +466,26 @@ void init_opengl (void) {
         }
         delete [] computerData;
     }
+    // load inventory background
+    unsigned char *invData;
+    glGenTextures(3, inventoryTextures);
+    fileName = "";
+    for (int q=0; q<3; q++) {
+        fileName = "./images/inventory";
+        fileName += itos(q);
+        fileName += ".ppm";
+        cout << "loading file: " <<fileName <<endl;
+        inventoryImages[q] = ppm6GetImage(fileName.c_str());
+        glBindTexture(GL_TEXTURE_2D, inventoryTextures[q]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        invData = buildAlphaData(inventoryImages[q]);
+        w = inventoryImages[q]->width;
+        h = inventoryImages[q]->height;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, invData);
+    }
+    delete [] invData;
+
     // load credits screens
     unsigned char *creditsData;
     glGenTextures(4, creditsTextures);
@@ -585,8 +596,7 @@ void init_opengl (void) {
         makePlatform(200, 16, 300, 200);
         makePlatform(20, 1000, -16, 600);
 
-        setupItems();
-        setupEnemies();
+        //setupEnemies();
 
     }
 }
@@ -677,7 +687,7 @@ int check_keys (XEvent *e) {
             if(key == XK_4) useAttack(a_shield);//shield
             if(key == XK_5) useAttack(a_fireShield);//shield
             if(key == XK_f) useAttack(a_speedArrow);//dash
-            if(key == XK_c) useAttack(a_fireDown);//dash
+            //if(key == XK_c) useAttack(a_fireDown);//dash
             if(key == XK_z) useAttack(a_fireUp);//dash 
             //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
             // pause
@@ -903,8 +913,9 @@ void endGame() {
     }
 }
 void resetGame() {
+    cleanupItems();
     fireUp = 0;
-    fireDown = 0;
+    //fireDown = 0;
     pushingLaser = 0;
     fireShield = 0;
     speedArrow = 0;
@@ -925,6 +936,7 @@ void resetGame() {
     updated = 1;
     gettimeofday(&gameEnd, NULL);
     gettimeofday(&gameStart, NULL);
+    setupItems();
 #ifdef USE_SOUND
     fmod_releasesound(bossMusic);
     fmod_releasesound(megamanTheme);
@@ -952,19 +964,22 @@ void makePlatform(int w, int h, int x, int y) {
 }
 
 void setupItems() {
-    makeItems(16, 20, 375, 232);
-    makeItems(16, 20, 975, 232);
-    makeItems(16, 20, 1100, 232);
-    makeItems(16, 20, 1300, 232);
-    makeItems(16, 20, 1500, 232);
+    makePureItem("./images/fireBallItem.ppm", 4, 16, 20, 2277, 1446);
+    makePureItem("./images/fireBallItem.ppm", 4, 16, 20, 3259, 775);
+    makePureItem("./images/fireBallItem.ppm", 4, 16, 20, 3095, 1810);
+    makePureItem("./images/fireBallItem.ppm", 4, 16, 20, 6183, 1218);
+
+    makePureItem("./images/dashItem.ppm", 5, 16, 20, 8838, 1900);
+    makePureItem("./images/dashItem.ppm", 6, 16, 20, 6347, 1961);
+    makePureItem("./images/laser1.ppm", 7, 16, 20, 80, 2125);
+    makePureItem("./images/laser1.ppm", 7, 16, 20, 9092, 1908);
+    makePureItem("./images/laser2.ppm", 8, 16, 20, 911, 541);
 }
 
 void cleanupItems() {
-    for(int i=0; i<items_length; i++) {
-      delete itemsHold[i];
-      itemsHold[i] = NULL;
+    for (int i=0; i<items_length; i++) {
+        deleteItem( itemsHold[0]->getID());
     }
-    items_length = 0;
 }
 
 void makeItems(int w, int h, int x, int y) {
@@ -983,6 +998,29 @@ void makePureItem(const char* imageName, int effect, int w, int h, int x, int y)
     itemsHold[items_length]->setSize(16, 20);
     itemsHold[items_length]->init(16, 20, x, y);
     items_length++;
+
+// increment item for inventory
+  switch (effect) {
+    case 4:
+      fireShield += 1;
+      break;
+    case 5:
+      fireUp += 10;
+      break;
+    case 6:
+      simpleBlast += 10;
+      //fireDown += 10;
+      break;
+    case 7:
+      simpleBlast += 10;
+      break;
+    case 8:
+      pushingLaser += 10;
+      break;
+    default:
+      simpleBlast += 10;
+      break;
+  }
 }
 
 void deleteItem(int id) {
@@ -1005,10 +1043,10 @@ void useAttack(int attackID){
       if(fireUp < 0) return;
       else fireUp--;
       break;
-    case a_fireDown:
-      if(fireDown < 0) return;
-      else fireDown--; 
-      break;
+    //case a_fireDown:
+      //if(fireDown < 0) return;
+      //else fireDown--; 
+      //break;
     case a_shield:
       if(shield < 0) return;
       else shield--;
@@ -1431,6 +1469,7 @@ void render () {
     renderHero(x, y);
     renderAnimations(x, y);
     renderItems(x, y);
+    renderInventoryBackground();
     renderInventory();
     boxA.renderAttacks(x,y);
     renderLives();
@@ -1457,70 +1496,70 @@ void renderAnimations(int x, int y){
 void renderInventory(){
     int i=0;
 
-        if (simpleBlast>0) {
+        //if (simpleBlast>0) {
             i=0;
             glPushMatrix();
-            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
+            glTranslatef(WINDOW_HALF_WIDTH-220+70*i, WINDOW_HEIGHT-30, 0);
             boxA.sprite_sheet[a_simpleBlast].drawTile(0,0, 20, 20);
             glPopMatrix();
-            writeWords(itos(simpleBlast), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
-        }
-        if (gravityBlast>0) {
+            writeWords(itos(simpleBlast), WINDOW_HALF_WIDTH-250, WINDOW_HEIGHT-60);
+        //}
+        //if (gravityBlast>0) {
             i=1;
             glPushMatrix();
-            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
-            boxA.sprite_sheet[a_gravityBlast].drawTile(1,1, 20, 20);
+            glTranslatef(WINDOW_HALF_WIDTH-220+70*i, WINDOW_HEIGHT-30, 0);
+            boxA.sprite_sheet[a_gravityBlast].drawTile(5,5, 20, 20);
             glPopMatrix();
-            writeWords(itos(gravityBlast), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
-        }
-        if (pushingLaser>0) {
+            writeWords(itos(gravityBlast), WINDOW_HALF_WIDTH-170, WINDOW_HEIGHT-60);
+        //}
+        //if (pushingLaser>0) {
             i=2;
             glPushMatrix();
-            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
-            boxA.sprite_sheet[a_pushingLaser].drawTile(0,0, 20, 20);
+            glTranslatef(WINDOW_HALF_WIDTH-220+70*i, WINDOW_HEIGHT-30, 0);
+            boxA.sprite_sheet[a_pushingLaser].drawTile(1,1, 20, 20);
             glPopMatrix();
-            writeWords(itos(pushingLaser), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
-        }
-        if (shield>0) {
+            writeWords(itos(pushingLaser), WINDOW_HALF_WIDTH-90, WINDOW_HEIGHT-60);
+        //}
+        //if (shield>0) {
             i=4;
             glPushMatrix();
-            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
-            boxA.sprite_sheet[a_shield].drawTile(0,0, 20, 20);
+            glTranslatef(WINDOW_HALF_WIDTH-220+70*i, WINDOW_HEIGHT-30, 0);
+            boxA.sprite_sheet[a_shield].drawTile(2,2, 20, 20);
             glPopMatrix();
-            writeWords(itos(shield), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
-        }
-        if (fireShield>0) {
+            writeWords(itos(shield), WINDOW_HALF_WIDTH+35, WINDOW_HEIGHT-60);
+        //}
+        //if (fireShield>0) {
             i=5;
             glPushMatrix();
-            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
-            boxA.sprite_sheet[a_fireShield].drawTile(1,1, 20, 20);
+            glTranslatef(WINDOW_HALF_WIDTH-220+70*i, WINDOW_HEIGHT-30, 0);
+            boxA.sprite_sheet[a_fireShield].drawTile(2,2, 20, 20);
             glPopMatrix();
-            writeWords(itos(fireShield), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
-        }
-        if (fireUp>0) {
+            writeWords(itos(fireShield), WINDOW_HALF_WIDTH+110, WINDOW_HEIGHT-60);
+        //}
+        //if (fireUp>0) {
             i=7;
             glPushMatrix();
-            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
-            boxA.sprite_sheet[a_fireUp].drawTile(2,2, 20, 20);
+            glTranslatef(WINDOW_HALF_WIDTH-220+70*i, WINDOW_HEIGHT-30, 0);
+            boxA.sprite_sheet[a_fireUp].drawTile(1,1, 20, 20);
             glPopMatrix();
-            writeWords(itos(fireUp), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
-        }
-        if (fireDown>0) {
+            writeWords(itos(fireUp), WINDOW_HALF_WIDTH+245, WINDOW_HEIGHT-60);
+        //}
+        //if (fireDown>0) {
+            //i=8;
+            //glPushMatrix();
+            //glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
+            //boxA.sprite_sheet[a_fireDown].drawTile(2,2, 20, 20);
+            //glPopMatrix();
+            //writeWords(itos(fireDown), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
+        //}
+        //if (speedArrow>0) {
             i=8;
             glPushMatrix();
-            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
-            boxA.sprite_sheet[a_fireDown].drawTile(0,0, 20, 20);
+            glTranslatef(WINDOW_HALF_WIDTH-220+70*i, WINDOW_HEIGHT-30, 0);
+            boxA.sprite_sheet[a_speedArrow].drawTile(2,2, 20, 20);
             glPopMatrix();
-            writeWords(itos(fireDown), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
-        }
-        if (speedArrow>0) {
-            i=9;
-            glPushMatrix();
-            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
-            boxA.sprite_sheet[a_speedArrow].drawTile(0,0, 20, 20);
-            glPopMatrix();
-            writeWords(itos(speedArrow), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
-        }
+            writeWords(itos(speedArrow), WINDOW_HALF_WIDTH+335, WINDOW_HEIGHT-60);
+        //}
 }
 
 void renderItems(int x, int y){
@@ -1779,7 +1818,7 @@ void gameTimer () {
 }
 
 void writeScore() {
-    writeWords("+"+itos(creeperScore), 800, WINDOW_HEIGHT-30);
+    writeWords("+"+itos(creeperScore), 800, 30);
 }
 
 void renderHealthBar () {
@@ -1864,6 +1903,62 @@ void playBossMusic(int play) {
 #endif
 }
 
+void renderInventoryBackground () {
+    int w = 100;
+    int h = 500;
+    int WHW = WINDOW_HALF_WIDTH;
+    int WHH = WINDOW_HALF_HEIGHT;
+
+    glPushMatrix();
+    //glClear(GL_COLOR_BUFFER_BIT);
+    //glClearColor(0.0, 0.0, 0.0, 1.0);
+    //glColor3ub(0,100,40);
+
+    // inventory z f
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, inventoryTextures[0]);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.9f);
+    //glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0) ; glVertex2i( WHW+230, WINDOW_HEIGHT-9);
+    glTexCoord2f(0, 1) ; glVertex2i( WHW+230, WINDOW_HEIGHT-80);
+    glTexCoord2f(1, 1) ; glVertex2i( WHW+380, WINDOW_HEIGHT-80);
+    glTexCoord2f(1, 0) ; glVertex2i( WHW+380, WINDOW_HEIGHT-9);
+    glEnd(); glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
+
+    // inventory 4 5
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, inventoryTextures[2]);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.9f);
+    //glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0) ; glVertex2i( WHW+10, WINDOW_HEIGHT-9);
+    glTexCoord2f(0, 1) ; glVertex2i( WHW+10, WINDOW_HEIGHT-80);
+    glTexCoord2f(1, 1) ; glVertex2i( WHW+160, WINDOW_HEIGHT-80);
+    glTexCoord2f(1, 0) ; glVertex2i( WHW+160, WINDOW_HEIGHT-9);
+    glEnd(); glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
+
+    // inventory 1 2 3
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, inventoryTextures[1]);
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.9f);
+    glColor4ub(255,255,255,255);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0) ; glVertex2i( WHW-260, WINDOW_HEIGHT-9);
+    glTexCoord2f(0, 1) ; glVertex2i( WHW-260, WINDOW_HEIGHT-80);
+    glTexCoord2f(1, 1) ; glVertex2i( WHW-40, WINDOW_HEIGHT-80);
+    glTexCoord2f(1, 0) ; glVertex2i( WHW-40, WINDOW_HEIGHT-9);
+    glEnd(); glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
+}
 void renderComputerScreenMenu () {
     gettimeofday(&frameEnd, NULL);
     int frameTime = 190;
