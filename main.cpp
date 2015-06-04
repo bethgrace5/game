@@ -1040,7 +1040,7 @@ void useAttack(int attackID){
 
   switch(attackID){
     case a_fireUp  :
-      if(fireUp < 0) return;
+      if(fireUp <= 0) return;
       else fireUp--;
       break;
     //case a_fireDown:
@@ -1048,27 +1048,27 @@ void useAttack(int attackID){
       //else fireDown--; 
       //break;
     case a_shield:
-      if(shield < 0) return;
+      if(shield <= 0) return;
       else shield--;
       break;
     case a_pushingLaser: 
-      if(pushingLaser < 0) return;
+      if(pushingLaser <= 0) return;
       else pushingLaser--;
       break;
     case a_fireShield  :
-      if(fireShield < 0) return;
+      if(fireShield <= 0) return;
       fireShield--;
       break;
     case a_speedArrow  :
-      if(speedArrow < 0) return;
+      if(speedArrow <= 0) return;
       speedArrow--; 
       break;
     case a_simpleBlast :
-      if(simpleBlast < 0) return;
+      if(simpleBlast <= 0) return;
       simpleBlast--; 
       break;
     case a_gravityBlast://THIS HAS A DIFFRENT NAME BECAREFULL
-      if(gravityBlast < 0) return;
+      if(gravityBlast <= 0) return;
       gravityBlast--;
       break;
 
