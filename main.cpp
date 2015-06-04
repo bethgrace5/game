@@ -1344,6 +1344,8 @@ void movement() {
         }
         if ((enemies[i]->isDead) or enemies[i]->getCenterY()<0){
             if(enemies[i]->type == 3){
+              // so the explosion doesn't kill the hero
+              hero->setInvincible(1);
               boxA.copyAttack(enemies[i], 5,enemies[i]->checkMirror());
               gettimeofday(&explosionStart, NULL);
               endGame();
