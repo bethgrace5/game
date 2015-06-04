@@ -97,6 +97,18 @@ void Item::drawBox() {
   glPopMatrix();
 }
 
+void Item::drawIndication(int i) {
+  glPushMatrix();
+  //Object::setCenter( 200, 200 );
+  glTranslatef(WINDOW_HALF_WIDTH-220 + 35*i, WINDOW_HEIGHT-30, 0);
+  Sprite::drawTile(0,0);
+  glPopMatrix();
+}
+
+int Item::getEffect() {
+    return effect;
+}
+
 Item::~Item(){
 #ifdef USE_SOUND
   //fmod_playsound(powerup);

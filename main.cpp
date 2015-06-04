@@ -83,16 +83,15 @@ int bossExplosionEnd = 0;
 //Bullet Types
 int fireUp = 0;
 int fireDown = 0;
-int pushingLaser = 1;
+int pushingLaser = 0;
 int fireShield = 0;
 int speedArrow = 0;
-int shield = 10;
-int simpleBlast = 10;
+int shield = 0;
+int simpleBlast = 0;
 int gravityBlast = 0;//DiffrentName in AttackList.h
-int gameIsEnding = 0;
-
 void useAttack(int attackID);
 
+int gameIsEnding = 0;
 //timer
 timeval gameStart, gameEnd;
 int minutes = 0;
@@ -158,6 +157,7 @@ void renderHealthBar();
 void renderHero(int x, int y);
 void renderInitMenu();
 void renderItems(int x, int y);
+void renderInventory();
 void renderLives();
 void renderPauseMenu();
 void resetGame();
@@ -662,25 +662,15 @@ int check_keys (XEvent *e) {
             //=-=-=-=-=-=-
             //Attacks    |
             //-=-=--=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-            if(key == XK_1) useAttack(a_simpleBlast);
-            if(key == XK_2) useAttack(a_pushingLaser);
-            if(key == XK_3) useAttack(a_shield);
-            if(key == XK_4) useAttack(a_speedArrow);
-            if(key == XK_5) useAttack(a_fireShield);
-            if(key == XK_f) useAttack(a_fireUp);
-            if(key == XK_c) useAttack(a_fireDown);
-            if(key == XK_z) useAttack(a_gravityBlast);
+            if(key == XK_1) useAttack(a_simpleBlast);//shoot
+            if(key == XK_2) useAttack(a_gravityBlast);//shoot
+            if(key == XK_3) useAttack(a_pushingLaser);//shoot/push
+            if(key == XK_4) useAttack(a_shield);//shield
+            if(key == XK_5) useAttack(a_fireShield);//shield
+            if(key == XK_f) useAttack(a_speedArrow);//dash
+            if(key == XK_c) useAttack(a_fireDown);//dash
+            if(key == XK_z) useAttack(a_fireUp);//dash 
             //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-            // debug death
-            if (key == XK_y) {
-                // cycleAnimations() checks for 0 or less health
-                // to show dying sequence
-                hero->decrementLives();
-#ifdef USE_SOUND
-                fmod_playsound(dunDunDun);
-#endif
-            }
             // pause
             if (key == XK_p) {
                 //save current seconds and minutes
@@ -900,12 +890,18 @@ void endGame() {
         level=3;
     }
     else {
-        // segmentation fault occurs if this isn't here
-        //cout<<""<<endl;
         gameIsEnding = 1;
     }
 }
 void resetGame() {
+    fireUp = 0;
+    fireDown = 0;
+    pushingLaser = 0;
+    fireShield = 0;
+    speedArrow = 0;
+    shield = 0;
+    simpleBlast = 0;
+    gravityBlast = 0;//DiffrentName in AttackList.h
     cout<<"reset: level="<<level<<endl;
     hero->reset();
     bossMusicIsPlaying=0;
@@ -968,6 +964,7 @@ void makeItems(int w, int h, int x, int y) {
     itemsHold[items_length]->insert("./images/firemon.ppm", 1, 1);
     itemsHold[items_length]->setSize(16, 20);
     itemsHold[items_length]->init(16, 20, x, y);
+    //itemsHold[items_length]->drawIndication(items_length);
     items_length++;
 }
 void makePureItem(int effect, int w, int h, int x, int y){
@@ -1225,6 +1222,7 @@ void movement() {
     for (j=0; j < items_length; j++) {
         if (detectItem(hero, itemsHold[j])){
           itemsHold[j]->causeEffect(hero);
+          //cout<< itemsHold[j]->getEffect()<<endl;
           deleteItem(j); 
         }
     }
@@ -1424,6 +1422,7 @@ void render () {
     renderHero(x, y);
     renderAnimations(x, y);
     renderItems(x, y);
+    renderInventory();
     boxA.renderAttacks(x,y);
     renderLives();
     renderHealthBar();
@@ -1444,6 +1443,75 @@ void renderAnimations(int x, int y){
     //explode.drawBox();
 
     glEnd(); glPopMatrix(); 
+}
+
+void renderInventory(){
+    int i=0;
+
+        if (simpleBlast>0) {
+            i=0;
+            glPushMatrix();
+            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
+            boxA.sprite_sheet[a_simpleBlast].drawTile(0,0, 20, 20);
+            glPopMatrix();
+            writeWords(itos(simpleBlast), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
+        }
+        if (gravityBlast>0) {
+            i=1;
+            glPushMatrix();
+            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
+            boxA.sprite_sheet[a_gravityBlast].drawTile(1,1, 20, 20);
+            glPopMatrix();
+            writeWords(itos(gravityBlast), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
+        }
+        if (pushingLaser>0) {
+            i=2;
+            glPushMatrix();
+            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
+            boxA.sprite_sheet[a_pushingLaser].drawTile(0,0, 20, 20);
+            glPopMatrix();
+            writeWords(itos(pushingLaser), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
+        }
+        if (shield>0) {
+            i=4;
+            glPushMatrix();
+            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
+            boxA.sprite_sheet[a_shield].drawTile(0,0, 20, 20);
+            glPopMatrix();
+            writeWords(itos(shield), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
+        }
+        if (fireShield>0) {
+            i=5;
+            glPushMatrix();
+            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
+            boxA.sprite_sheet[a_fireShield].drawTile(1,1, 20, 20);
+            glPopMatrix();
+            writeWords(itos(fireShield), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
+        }
+        if (fireUp>0) {
+            i=7;
+            glPushMatrix();
+            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
+            boxA.sprite_sheet[a_fireUp].drawTile(2,2, 20, 20);
+            glPopMatrix();
+            writeWords(itos(fireUp), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
+        }
+        if (fireDown>0) {
+            i=8;
+            glPushMatrix();
+            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
+            boxA.sprite_sheet[a_fireDown].drawTile(0,0, 20, 20);
+            glPopMatrix();
+            writeWords(itos(fireDown), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
+        }
+        if (speedArrow>0) {
+            i=9;
+            glPushMatrix();
+            glTranslatef(WINDOW_HALF_WIDTH-220+50*i, WINDOW_HEIGHT-30, 0);
+            boxA.sprite_sheet[a_speedArrow].drawTile(0,0, 20, 20);
+            glPopMatrix();
+            writeWords(itos(speedArrow), WINDOW_HALF_WIDTH-250+50*i, WINDOW_HEIGHT-70);
+        }
 }
 
 void renderItems(int x, int y){

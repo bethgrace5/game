@@ -17,6 +17,8 @@ class Item : public Sprite, public Object {
       ~Item();
       void causeEffect(Player *hero);
       void drawBox();
+      void drawIndication(int i);
+      int getEffect();
 };
 
 #endif 
