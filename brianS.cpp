@@ -11,8 +11,27 @@
 #include "definitions.h"
 #include "Enemy.h"
 #include "sounds.h"
-using namespace std;
 
+/* Enemy Class					      
+ * ----------------------------------------------------------------------------
+ * Author: Brian Singenstrew
+ * Date: 06/08/2015
+ * Class: CMPS 335 CSUB
+ * ---------------------------------------------------------------------------- 
+ * This class is for all of the enemies, and their behaviors (AI). 
+ * ----------------------------------------------------------------------------
+ *
+ * Enemy() : Default Constructor
+ * Enemy(w, h, *ground, t) : Constructor to place enemy with width w, height h, 
+ * on ground pointed to by *ground, and type t.
+ * Enemy(w, h, x, y, t) : Constructor to place enemy with width w, height h, 
+ * at x, y, with type t.
+ * enemyAI(*hero) : Calculate next move of enemy given hero pointed to by *hero 
+ * draw() : draw (render) enemy
+ *
+ */
+
+using namespace std;
 
 extern int creeperScore;
 
